@@ -55,7 +55,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // Khởi tạo sự kiện Sửa
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.addEventListener('click', function () {
                 modalTitle.innerHTML = '<i class="fa-solid fa-user-pen me-2"></i> Chỉnh Sửa Người Dùng';
