@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Khóa học - Learn Space</title>
+
+    <th:block th:replace="~{base :: styles}"></th:block>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="bg-light">
+
+
+<div class="container-fluid">
+    <div class="row">
+
+        <nav th:replace="~{base :: admin_sidebar('courses')}"></nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
+                <h1 class="h3 fw-bold text-dark">Danh sách Khóa học</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a th:href="@{/admin/courses/add}" class="btn btn-primary shadow-sm">
+                        <i class="fa-solid fa-plus me-1"></i> Thêm khóa học mới
+                    </a>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <div class="row mb-4 g-2">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i
+                                        class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" class="form-control" placeholder="Tìm tên khóa học...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select">
+                                <option value="">Tất cả danh mục</option>
+                                <option value="1">Lập trình Web</option>
+                                <option value="2">Khoa học dữ liệu</option>
+                                <option value="3">Thiết kế đồ họa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select">
+                                <option value="">Trạng thái</option>
+                                <option value="1">Đang mở</option>
+                                <option value="0">Đã đóng</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-secondary w-100">Lọc dữ liệu</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Thông tin Khóa học</th>
+                                <th>Danh mục</th>
+                                <th>Giá (VNĐ)</th>
+                                <th>Thời lượng</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="course : ${courses}">
+                                <td class="text-muted" th:text="${'#' + course.id}">#1</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="${course.image != null ? course.image : 'https://placehold.co/60x40?text=No+Image'}"
+                                             alt="Course Image" class="rounded me-3 border" width="60" height="40"
+                                             style="object-fit: cover;">
+                                        <div>
+                                            <div class="fw-bold text-dark" th:text="${course.name}">Lập trình Java
+                                                Spring Boot
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${course.category.name}">Công nghệ thông tin</td>
+                                <td class="fw-semibold text-success"
+                                    th:text="${#numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    1,500,000 đ
+                                </td>
+                                <td class="text-muted"><i class="fa-regular fa-clock me-1"></i> <span
+                                        th:text="${course.duration}">40</span> giờ
+                                </td>
+                                <td>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success"
+                                          th:if="${course.active}">Đang mở</span>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger"
+                                          th:unless="${course.active}">Đã đóng</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group shadow-sm">
+                                        <a th:href="@{'/admin/courses/view/' + ${course.id}}"
+                                           class="btn btn-sm btn-light text-primary" data-bs-toggle="tooltip"
+                                           title="Xem bài học">
+                                            <i class="fa-solid fa-list-ol"></i>
+                                        </a>
+                                        <a th:href="@{'/admin/courses/edit/' + ${course.id}}"
+                                           class="btn btn-sm btn-light text-warning" data-bs-toggle="tooltip"
+                                           title="Sửa">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        <a th:href="@{'/admin/courses/delete/' + ${course.id}}"
+                                           class="btn btn-sm btn-light text-danger"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này? Hành động này có thể ảnh hưởng đến dữ liệu đăng ký và thanh toán.');"
+                                           data-bs-toggle="tooltip" title="Xóa">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr th:if="${courses == null or courses.empty}">
+                                <td class="text-muted">#2</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://placehold.co/60x40/0D8ABC/FFFFFF?text=Python"
+                                             alt="Course Image" class="rounded me-3 border" width="60" height="40"
+                                             style="object-fit: cover;">
+                                        <div>
+                                            <div class="fw-bold text-dark">Lập trình Python từ Zero đến Hero</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Khoa học dữ liệu</td>
+                                <td class="fw-semibold text-success">850,000 đ</td>
+                                <td class="text-muted"><i class="fa-regular fa-clock me-1"></i> 25 giờ</td>
+                                <td><span class="badge bg-success bg-opacity-10 text-success border border-success">Đang mở</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group shadow-sm">
+                                        <button class="btn btn-sm btn-light text-primary"><i
+                                                class="fa-solid fa-list-ol"></i></button>
+                                        <button class="btn btn-sm btn-light text-warning"><i
+                                                class="fa-solid fa-pen-to-square"></i></button>
+                                        <button class="btn btn-sm btn-light text-danger"><i
+                                                class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="card-footer bg-white border-top-0 py-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-end mb-0">
+                            <li class="page-item disabled"><a class="page-link" href="#">Trang trước</a></li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Trang sau</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<footer th:replace="~{base :: footer}"></footer>
+
+</body>
+</html>

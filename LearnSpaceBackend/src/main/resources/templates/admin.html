@@ -1,10 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+    <title>Admin Dashboard - Learn Space</title>
+    <th:block th:replace="~{base :: styles}"></th:block>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
+    <style>
+        /* Chỉ giữ lại CSS cho các thẻ thống kê */
+        .card-stat {
+            border-left: 4px solid;
+        }
+
+        .card-stat.users {
+            border-left-color: #0d6efd;
+        }
+
+        .card-stat.courses {
+            border-left-color: #198754;
+        }
+
+        .card-stat.revenue {
+            border-left-color: #ffc107;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+
+<div class="container-fluid">
+    <div class="row">
+
+        <nav th:replace="~{base :: admin_sidebar('dashboard')}"></nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+                <h1 class="h2 text-dark">Tổng quan hệ thống</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button type="button" class="btn btn-sm btn-outline-secondary">
+                        <i class="fa-solid fa-download me-1"></i> Xuất báo cáo
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card card-stat users shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <h6 class="text-muted mb-2">Tổng Người Dùng</h6>
+                            <h3 class="mb-0 fw-bold text-primary"
+                                th:text="${totalUsers != null ? totalUsers : '1,250'}">1,250</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat courses shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <h6 class="text-muted mb-2">Khóa Học Active</h6>
+                            <h3 class="mb-0 fw-bold text-success"
+                                th:text="${totalCourses != null ? totalCourses : '45'}">45</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat revenue shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <h6 class="text-muted mb-2">Doanh Thu (VNĐ)</h6>
+                            <h3 class="mb-0 fw-bold text-warning"
+                                th:text="${totalRevenue != null ? #numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT') : '25,000,000'}">
+                                25,000,000</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mb-3 text-dark">Khóa học mới cập nhật</h4>
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên Khóa Học</th>
+                                <th>Giá</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="course : ${courses}">
+                                <td th:text="${course.id}">1</td>
+                                <td class="fw-bold" th:text="${course.name}">Lập trình Java Spring Boot</td>
+                                <td th:text="${#numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    1,500,000 đ
+                                </td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${course.active}">Đang mở</span>
+                                    <span class="badge bg-danger" th:unless="${course.active}">Đã đóng</span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="#" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-pen"></i>
+                                        Sửa</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${courses == null or courses.empty}">
+                                <td>2</td>
+                                <td class="fw-bold">Web Development với Bootstrap</td>
+                                <td>Miễn phí</td>
+                                <td><span class="badge bg-success">Đang mở</span></td>
+                                <td class="text-end"><a href="#" class="btn btn-sm btn-outline-primary"><i
+                                        class="fa-solid fa-pen"></i> Sửa</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<footer th:replace="~{base :: footer}"></footer>
 </body>
 </html>
