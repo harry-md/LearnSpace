@@ -71,27 +71,15 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        // ==========================================
-        // XỬ LÝ LƯU THÔNG TIN & GỌI TOAST
-        // ==========================================
         const btnSaveUser = document.getElementById('btnSaveUser');
         if (btnSaveUser) {
             btnSaveUser.addEventListener('click', function () {
-
-                // Ở đây thường bạn sẽ dùng fetch() hoặc AJAX để gửi data lên Spring Boot.
-                // Do chưa có backend API, mình mô phỏng logic bằng hàm setTimeout.
-
-                // 1. Ẩn modal ngay lập tức cho mượt
                 userModal.hide();
-
-                // 2. Chạy logic lưu (Mô phỏng 0.5s sau trả về kết quả)
                 setTimeout(() => {
-                    // Giả sử lưu thành công
                     let isSuccess = true;
 
                     if (isSuccess) {
                         showToast('Đã lưu thông tin người dùng thành công!', 'success');
-                        // Reload trang hoặc append row vào table ở đây
                     } else {
                         showToast('Có lỗi xảy ra khi lưu dữ liệu. Vui lòng thử lại!', 'error');
                     }
@@ -101,9 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // ==========================================
-    // 2. LOGIC CHO MODAL XÓA
-    // ==========================================
     const deleteModalEl = document.getElementById('deleteConfirmModal');
     if (deleteModalEl) {
         const deleteModal = new bootstrap.Modal(deleteModalEl);
