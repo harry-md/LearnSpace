@@ -16,8 +16,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ComponentScan(
         basePackages = {
             "com.learnspace.learnspacebackend.controllers",
-            "com.learnspace.learnspacebackend.services",
-            "com.learnspace.learnspacebackend.repositories"
+            "com.learnspace.learnspacebackend.repositories",
+            "com.learnspace.learnspacebackend.services"
         })
 @EnableWebMvc
 @EnableTransactionManagement
