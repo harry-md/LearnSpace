@@ -3,6 +3,7 @@ package com.learnspace.learnspacebackend.pojo;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
@@ -25,7 +26,8 @@ public class Course {
     private String description;
 
     @Size(max = 255)
-    @ColumnDefault("'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg'")
+    @ColumnDefault(
+            "'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg'")
     @Column(name = "image")
     private String image;
 
@@ -46,7 +48,7 @@ public class Course {
     private Integer duration;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
@@ -127,3 +129,4 @@ public class Course {
         this.active = active;
     }
 }
+
