@@ -27,4 +27,9 @@ public class CategoryServiceImpl implements CategoryService {
     public Category createOrUpdate(Category category) {
         return categoryRepository.createOrUpdate(category);
     }
+
+    @Override
+    public void deleteCate(int id) {
+        categoryRepository.deleteCate(id);
+    }
 }

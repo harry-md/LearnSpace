@@ -33,37 +33,37 @@
 
         <ul class="nav flex-column nav-pills px-2 mb-auto">
             <li class="nav-item mb-1">
-                <a th:href="@{/admin}"
+                <a th:href="@{/}"
                    th:class="${activeTab == 'dashboard' ? 'nav-link active' : 'nav-link text-dark'}">
                     <i class="fa-solid fa-gauge w-25 text-center"></i> Dashboard
                 </a>
             </li>
             <li class="nav-item mb-1">
-                <a th:href="@{/admin/users}"
+                <a th:href="@{/users}"
                    th:class="${activeTab == 'users' ? 'nav-link active' : 'nav-link text-dark'}">
                     <i class="fa-solid fa-users w-25 text-center"></i> QL Người dùng
                 </a>
             </li>
             <li class="nav-item mb-1">
-                <a th:href="@{/admin/courses}"
+                <a th:href="@{/courses}"
                    th:class="${activeTab == 'courses' ? 'nav-link active' : 'nav-link text-dark'}">
                     <i class="fa-solid fa-book w-25 text-center"></i> QL Khóa học
                 </a>
             </li>
             <li class="nav-item mb-1">
-                <a th:href="@{/admin/categories}"
+                <a th:href="@{/categories}"
                    th:class="${activeTab == 'categories' ? 'nav-link active' : 'nav-link text-dark'}">
                     <i class="fa-solid fa-list w-25 text-center"></i> QL Danh mục
                 </a>
             </li>
             <li class="nav-item mb-1">
-                <a th:href="@{/admin/enrollments}"
+                <a th:href="@{/enrollments}"
                    th:class="${activeTab == 'enrollments' ? 'nav-link active' : 'nav-link text-dark'}">
                     <i class="fa-solid fa-user-check w-25 text-center"></i> QL Đăng ký
                 </a>
             </li>
             <li class="nav-item mb-1">
-                <a th:href="@{/admin/payments}"
+                <a th:href="@{/payments}"
                    th:class="${activeTab == 'payments' ? 'nav-link active' : 'nav-link text-dark'}">
                     <i class="fa-solid fa-file-invoice-dollar w-25 text-center"></i> QL Thanh toán
                 </a>

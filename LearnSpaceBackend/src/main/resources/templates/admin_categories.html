@@ -48,8 +48,8 @@
                             </thead>
                             <tbody>
                             <tr th:each="cat : ${categories}">
-                                <td class="text-muted fw-bold" th:text="${'#' + cat.id}">#1</td>
-                                <td class="fw-semibold text-dark" th:text="${cat.name}">Lập trình Web</td>
+                                <td class="text-muted fw-bold" th:text="${'#' + cat.id}"></td>
+                                <td class="fw-semibold text-dark" th:text="${cat.name}"></td>
                                 <td class="text-end">
                                     <div class="btn-group shadow-sm">
                                         <button type="button"
@@ -58,13 +58,16 @@
                                                 th:data-name="${cat.name}">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
+                                        <form action="categories/">
+                                            <button type="button" class="btn btn-sm btn-light text-danger btn-delete"
+                                                    th:data-id="${cat.id}"
+                                                    th:data-name="${cat.name}"
+                                                    th:data-url="@{'/categories/' + ${cat.id}}"
+                                            >
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
 
-                                        <button type="button" class="btn btn-sm btn-light text-danger btn-delete"
-                                                th:data-id="${cat.id}"
-                                                th:data-name="${cat.name}"
-                                                th:data-url="@{'/admin/categories/delete/' + ${cat.id}}">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
                                     </div>
                                 </td>
                             </tr>
