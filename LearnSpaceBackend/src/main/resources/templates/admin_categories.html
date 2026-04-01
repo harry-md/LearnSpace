@@ -68,43 +68,6 @@
                                     </div>
                                 </td>
                             </tr>
-
-                            <tr th:if="${categories == null or categories.empty}">
-                                <td class="text-muted fw-bold">#1</td>
-                                <td class="fw-semibold text-dark">Lập trình Web</td>
-                                <td class="text-end">
-                                    <div class="btn-group shadow-sm">
-                                        <button type="button"
-                                                class="btn btn-sm btn-light text-warning btn-edit-category"
-                                                data-id="1" data-name="Lập trình Web">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-light text-danger btn-delete"
-                                                data-id="1" data-name="Lập trình Web"
-                                                data-url="/admin/categories/delete/1">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr th:if="${categories == null or categories.empty}">
-                                <td class="text-muted fw-bold">#2</td>
-                                <td class="fw-semibold text-dark">Cơ sở dữ liệu</td>
-                                <td class="text-end">
-                                    <div class="btn-group shadow-sm">
-                                        <button type="button"
-                                                class="btn btn-sm btn-light text-warning btn-edit-category"
-                                                data-id="2" data-name="Cơ sở dữ liệu">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-light text-danger btn-delete"
-                                                data-id="2" data-name="Cơ sở dữ liệu"
-                                                data-url="/admin/categories/delete/2">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
                             </tbody>
                         </table>
                     </div>
