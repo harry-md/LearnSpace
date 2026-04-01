@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Người dùng - Learn Space</title>
+    <th:block th:replace="~{base :: styles}"></th:block>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container-fluid">
+    <div class="row">
+
+        <nav th:replace="~{base :: admin_sidebar('users')}"></nav>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
+                <h1 class="h3 fw-bold text-dark">Danh sách Người dùng</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button id="btnAddUser" class="btn btn-primary shadow-sm">
+                        <i class="fa-solid fa-plus me-1"></i> Thêm người dùng
+                    </button>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <div class="row mb-4 g-2">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i
+                                        class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" class="form-control" placeholder="Tìm tên, email hoặc username...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select">
+                                <option value="">Tất cả vai trò</option>
+                                <option value="ADMIN">Admin</option>
+                                <option value="STUDENT">Học viên</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select">
+                                <option value="">Trạng thái</option>
+                                <option value="1">Đang hoạt động</option>
+                                <option value="0">Bị khóa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-secondary w-100">Lọc</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Người dùng</th>
+                                <th>Email</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${users}">
+                                <td class="text-muted" th:text="${'#' + user.id}">#1</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="${user.avatar != null ? user.avatar : 'https://ui-avatars.com/api/?name=' + user.firstName + '+' + user.lastName}"
+                                             alt="Avatar" class="rounded-circle me-3 border" width="40" height="40">
+                                        <div class="fw-bold" th:text="${user.username}">username123</div>
+                                    </div>
+                                </td>
+                                <td class="text-muted" th:text="${user.email}">user@example.com</td>
+                                <td>
+                                    <span class="badge rounded-pill bg-info text-dark"
+                                          th:text="${user.role}">STUDENT</span>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill bg-success" th:if="${user.active}">Hoạt động</span>
+                                    <span class="badge rounded-pill bg-danger" th:unless="${user.active}">Bị khóa</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group shadow-sm">
+                                        <button type="button" class="btn btn-sm btn-light text-warning btn-edit"
+                                                th:data-id="${user.id}"
+                                                th:data-username="${user.username}"
+                                                th:data-email="${user.email}"
+                                                th:data-firstname="${user.firstName}"
+                                                th:data-lastname="${user.lastName}"
+                                                th:data-role="${user.role}">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+
+                                        <button type="button" class="btn btn-sm btn-light text-danger btn-delete"
+                                                th:data-id="${user.id}"
+                                                th:data-name="${user.username}"
+                                                th:data-url="@{'/admin/users/delete/' + ${user.id}}">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr th:if="${users == null or users.empty}">
+                                <td class="text-muted">#2</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff"
+                                             alt="Avatar" class="rounded-circle me-3 border" width="40" height="40">
+                                        <div class="fw-bold">admin_super</div>
+                                    </div>
+                                </td>
+                                <td class="text-muted">admin@learnspace.com</td>
+                                <td><span class="badge rounded-pill bg-primary">ADMIN</span></td>
+                                <td><span class="badge rounded-pill bg-success">Hoạt động</span></td>
+                                <td class="text-end">
+                                    <div class="btn-group shadow-sm">
+                                        <button type="button" class="btn btn-sm btn-light text-warning btn-edit"
+                                                data-id="2" data-username="admin_super"
+                                                data-email="admin@learnspace.com"
+                                                data-firstname="Admin" data-lastname="Super" data-role="ADMIN">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-light text-danger btn-delete"
+                                                data-id="2" data-name="admin_super" data-url="/admin/users/delete/2">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<footer th:replace="~{base :: footer}"></footer>
+
+
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="userModalTitle">
+                    <i class="fa-solid fa-user-plus me-2"></i> Thêm Người Dùng
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Đóng"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <form id="userForm">
+                    <input type="hidden" id="userId" name="id">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tên đăng nhập *</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Họ</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tên</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" id="pwdLabel">Mật khẩu *</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Vai trò</label>
+                            <select class="form-select" id="role" name="role">
+                                <option value="STUDENT">Học viên</option>
+                                <option value="INSTRUCTOR">Giảng viên</option>
+                                <option value="ADMIN">Quản trị viên</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="btnSaveUser">Lưu thông tin</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{base :: generic_delete_modal}"></th:block>
+<th:block th:replace="~{base :: global_toast}"></th:block>
+
+<script th:src="@{/js/AdminUser.js}"></script>
+
+<th:block th:insert="~{:: page_scripts} ?: ~{}"></th:block>
+
+</body>
+</html>
