@@ -10,4 +10,6 @@ public interface CategoryService {
     Category getCategotyById(int id);
 
     Category createOrUpdate(Category category);
+
+    void deleteCate(int id);
 }

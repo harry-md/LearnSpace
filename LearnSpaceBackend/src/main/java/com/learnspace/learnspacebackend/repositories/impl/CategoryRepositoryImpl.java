@@ -42,4 +42,14 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         }
         return category;
     }
+
+    @Override
+    public void deleteCate(int id) {
+        Session s = factory.getObject().getCurrentSession();
+
+        Category c = s.get(Category.class, id);
+        if (c != null) {
+            s.remove(c);
+        }
+    }
 }

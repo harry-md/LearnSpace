@@ -10,4 +10,6 @@ public interface CategoryRepository {
     Category getCateById(int id);
 
     Category createOrUpdate(Category category);
+
+    void deleteCate(int id);
 }
