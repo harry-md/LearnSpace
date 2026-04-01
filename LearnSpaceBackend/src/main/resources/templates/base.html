@@ -51,6 +51,12 @@
                 </a>
             </li>
             <li class="nav-item mb-1">
+                <a th:href="@{/admin/categories}"
+                   th:class="${activeTab == 'categories' ? 'nav-link active' : 'nav-link text-dark'}">
+                    <i class="fa-solid fa-list w-25 text-center"></i> QL Danh mục
+                </a>
+            </li>
+            <li class="nav-item mb-1">
                 <a th:href="@{/admin/enrollments}"
                    th:class="${activeTab == 'enrollments' ? 'nav-link active' : 'nav-link text-dark'}">
                     <i class="fa-solid fa-user-check w-25 text-center"></i> QL Đăng ký
