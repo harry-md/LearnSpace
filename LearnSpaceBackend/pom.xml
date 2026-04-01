@@ -13,7 +13,7 @@
         <spring.version>6.5.7</spring.version>
         <java.version>25</java.version>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>jakarta.platform</groupId>
@@ -94,12 +94,6 @@
             <version>3.5.10</version>
         </dependency>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.42</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
             <version>3.0.2</version>
@@ -112,7 +106,7 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
