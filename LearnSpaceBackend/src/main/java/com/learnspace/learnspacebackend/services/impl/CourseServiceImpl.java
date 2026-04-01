@@ -26,8 +26,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public void createOrUpdate(Course course) {
-        courseRepository.createOrUpdate(course);
+    public Course createOrUpdate(Course course) {
+        return courseRepository.createOrUpdate(course);
     }
 
     @Override

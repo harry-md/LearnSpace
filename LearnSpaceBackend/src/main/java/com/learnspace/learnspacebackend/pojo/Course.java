@@ -26,8 +26,7 @@ public class Course {
     private String description;
 
     @Size(max = 255)
-    @ColumnDefault(
-            "'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg'")
+    @ColumnDefault("'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg'")
     @Column(name = "image")
     private String image;
 
@@ -129,4 +128,3 @@ public class Course {
         this.active = active;
     }
 }
-

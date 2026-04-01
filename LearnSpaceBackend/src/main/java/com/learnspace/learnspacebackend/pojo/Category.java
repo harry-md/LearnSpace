@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "category")
 public class Category {
@@ -16,6 +18,9 @@ public class Category {
     @NotNull
     @Column(name = "name", nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "category")
+    private Set<Course> courses;
 
     public Integer getId() {
         return id;
