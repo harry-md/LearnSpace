@@ -129,4 +129,3 @@ public class Course {
         this.active = active;
     }
 }
-
