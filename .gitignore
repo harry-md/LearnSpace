@@ -30,3 +30,4 @@ LearnSpace/nb-configuration.xml
 .project
 .settings
 **/target/**
+.vscode
