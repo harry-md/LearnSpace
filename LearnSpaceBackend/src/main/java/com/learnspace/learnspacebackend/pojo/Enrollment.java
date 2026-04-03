@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -25,14 +27,17 @@ public class Enrollment {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @NotNull
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @ColumnDefault("'ACTIVE'")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private EnrollmentStatus status;
+
     @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @NotNull
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     public Integer getId() {
@@ -49,6 +54,14 @@ public class Enrollment {
 
     public void setStudent(User student) {
         this.student = student;
+    }
+
+    public EnrollmentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EnrollmentStatus status) {
+        this.status = status;
     }
 
     public Course getCourse() {
