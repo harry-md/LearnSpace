@@ -36,7 +36,7 @@ public class Payment {
 
     @ColumnDefault("'PENDING'")
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status")
     private PaymentStatus status;
 
     @Size(max = 50)
@@ -44,10 +44,12 @@ public class Payment {
     @Column(name = "vnp_txn_ref", nullable = false, length = 50)
     private String vnpTxnRef;
 
+    @NotNull
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @NotNull
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
