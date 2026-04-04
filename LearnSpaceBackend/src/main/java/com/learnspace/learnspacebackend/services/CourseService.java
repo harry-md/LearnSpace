@@ -1,16 +1,16 @@
 package com.learnspace.learnspacebackend.services;
 
-import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.dtos.CourseDto;
 
 import java.util.List;
 import java.util.Map;
 
 public interface CourseService {
-    List<Course> getAllCourses(Map<String, String> params);
+    List<CourseDto> getAllCourses(Map<String, String> params);
 
-    Course getCourseById(int id);
+    CourseDto getCourseById(int id);
 
-    Course createOrUpdate(Course course);
+    //    CourseDto createOrUpdate(CourseDto course);
 
     void deleteCourse(int id);
 }

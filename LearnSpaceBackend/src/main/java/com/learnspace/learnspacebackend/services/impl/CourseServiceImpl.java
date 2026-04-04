@@ -1,9 +1,9 @@
 package com.learnspace.learnspacebackend.services.impl;
 
-import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.dtos.CourseDto;
+import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.services.CourseService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,20 +15,25 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseRepository courseRepository;
 
+    @Autowired
+    private CourseMapper courseMapper;
+
     @Override
-    public List<Course> getAllCourses(Map<String, String> params) {
-        return courseRepository.getAllCourses(params);
+    public List<CourseDto> getAllCourses(Map<String, String> params) {
+        return courseRepository.getAllCourses(params).stream()
+                .map(courseMapper::toDto)
+                .toList();
     }
 
     @Override
-    public Course getCourseById(int id) {
-        return courseRepository.getCourseById(id);
+    public CourseDto getCourseById(int id) {
+        return courseMapper.toDto(courseRepository.getCourseById(id));
     }
 
-    @Override
-    public Course createOrUpdate(Course course) {
-        return courseRepository.createOrUpdate(course);
-    }
+//    @Override
+//    public CourseDto createOrUpdate(Course course) {
+//        return courseMapper.toDto(courseRepository.createOrUpdate(course));
+//    }
 
     @Override
     public void deleteCourse(int id) {
