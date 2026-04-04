@@ -21,7 +21,7 @@ SET @@SESSION.SQL_LOG_BIN= 0;
 -- GTID state at the beginning of the backup 
 --
 
-SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '00546850-b2fe-11f0-8147-f26f4349a4ff:1-4099';
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '00546850-b2fe-11f0-8147-f26f4349a4ff:1-4116';
 
 --
 -- Table structure for table `category`
@@ -39,6 +39,25 @@ CREATE TABLE `category` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `chapter`
+--
+
+DROP TABLE IF EXISTS `chapter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `chapter` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  `order` int NOT NULL,
+  `free` tinyint(1) DEFAULT '0',
+  `course_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_chapter_course_idx` (`course_id`),
+  CONSTRAINT `fk_chapter_course` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `course`
 --
 
@@ -52,15 +71,17 @@ CREATE TABLE `course` (
   `image` varchar(255) DEFAULT 'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg',
   `intro_video` varchar(255) DEFAULT 'https://res.cloudinary.com/dsc8rzpbg/video/upload/v1774930352/0_Teacher_Flowers_3840x2160_azcsmo.mp4',
   `price` decimal(19,2) NOT NULL DEFAULT '0.00',
-  `duration` int NOT NULL DEFAULT '0',
   `category_id` int NOT NULL,
+  `teacher_id` int NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `category_id_UNIQUE` (`category_id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  CONSTRAINT `fk_course_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`)
+  KEY `fk_course_teacher_idx` (`teacher_id`),
+  KEY `fk_course_category` (`category_id`),
+  CONSTRAINT `fk_course_category` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`),
+  CONSTRAINT `fk_course_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -75,6 +96,7 @@ CREATE TABLE `enrollment` (
   `id` int NOT NULL AUTO_INCREMENT,
   `student_id` int NOT NULL,
   `course_id` int NOT NULL,
+  `status` enum('PENDING','ACTIVE','COMPLETED') COLLATE utf8mb4_unicode_ci DEFAULT 'PENDING',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -95,14 +117,16 @@ DROP TABLE IF EXISTS `lesson`;
 CREATE TABLE `lesson` (
   `id` int NOT NULL AUTO_INCREMENT,
   `title` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
-  `content` text NOT NULL,
-  `video` varchar(255) DEFAULT NULL,
-  `course_id` int NOT NULL,
+  `order` int NOT NULL,
+  `content` text,
+  `video` varchar(255) NOT NULL,
+  `video_length` int NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `chapter_id` int NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `fk_lesson_course_idx` (`course_id`),
-  CONSTRAINT `fk_lesson_course` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`)
+  KEY `fk_lesson_chapter_idx` (`chapter_id`),
+  CONSTRAINT `fk_lesson_chapter` FOREIGN KEY (`chapter_id`) REFERENCES `chapter` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -118,7 +142,7 @@ CREATE TABLE `payment` (
   `student_id` int NOT NULL,
   `course_id` int NOT NULL,
   `amount` decimal(19,2) NOT NULL DEFAULT '0.00',
-  `status` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('PENDING','COMPLETED','CANCELLED') COLLATE utf8mb4_unicode_ci DEFAULT 'PENDING',
   `vnp_txn_ref` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -187,4 +211,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-01 11:17:13
+-- Dump completed on 2026-04-04 13:45:00
