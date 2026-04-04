@@ -2,14 +2,11 @@ package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
-
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -38,7 +35,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         CriteriaQuery<Course> q = buider.createQuery(Course.class);
         Root<Course> root = q.from(Course.class);
 
-        root.fetch("category", JoinType.INNER);
+//        root.fetch("category", JoinType.INNER);
         q.select(root);
 
         if (params != null) {

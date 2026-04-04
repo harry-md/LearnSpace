@@ -17,7 +17,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
         basePackages = {
             "com.learnspace.learnspacebackend.controllers",
             "com.learnspace.learnspacebackend.repositories",
-            "com.learnspace.learnspacebackend.services"
+            "com.learnspace.learnspacebackend.services",
+            "com.learnspace.learnspacebackend.mappers"
         })
 @EnableWebMvc
 @EnableTransactionManagement
