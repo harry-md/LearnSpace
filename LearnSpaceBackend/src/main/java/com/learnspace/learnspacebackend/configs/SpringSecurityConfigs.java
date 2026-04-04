@@ -17,7 +17,8 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
         basePackages = {
             "com.learnspace.learnspacebackend.controllers",
             "com.learnspace.learnspacebackend.repositories",
-            "com.learnspace.learnspacebackend.services"
+            "com.learnspace.learnspacebackend.services",
+            "com.learnspace.learnspacebackend.mappers"
         })
 public class SpringSecurityConfigs {
     @Bean
@@ -35,7 +36,11 @@ public class SpringSecurityConfigs {
         http.csrf(c -> c.disable())
                 .authorizeHttpRequests(
                         requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
-                                .permitAll())
+                                .permitAll()
+                                .requestMatchers("/")
+                                .authenticated()
+                                .requestMatchers("/api/**")
+                                .authenticated())
                 .formLogin(form -> form.loginPage("/login")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)

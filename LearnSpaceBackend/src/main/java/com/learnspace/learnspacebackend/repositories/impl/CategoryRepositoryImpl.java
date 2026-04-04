@@ -23,7 +23,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     public List<Category> getCates() {
         Session s = factory.getObject().getCurrentSession();
 
-        Query q = s.createQuery("From Category", Category.class);
+        Query q = s.createQuery("FROM Category", Category.class);
         return q.getResultList();
     }
 
