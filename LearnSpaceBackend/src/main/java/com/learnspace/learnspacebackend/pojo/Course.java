@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -60,12 +58,12 @@ public class Course {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
-    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     public Integer getId() {
