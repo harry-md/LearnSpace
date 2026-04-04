@@ -21,8 +21,8 @@ public class LessonRepositoryImpl implements LessonRepository {
     @Override
     public List<Lesson> getLessons(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-        Query q = session.createQuery(
-                "SELECT l FROM Lesson l JOIN fetch l.ch course WHERE course.id = :courseId", Chapter.class);
+        Query q = session.createQuery("SELECT l FROM Lesson l JOIN l.chapter c WHERE c.id = :chapterId", Chapter.class);
+        q.setParameter("chapterId", chapterId);
         return q.getResultList();
     }
 }

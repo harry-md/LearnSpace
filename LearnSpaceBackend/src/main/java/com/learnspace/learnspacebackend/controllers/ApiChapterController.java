@@ -12,13 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/courses/{id}/chapters")
+@RequestMapping("/api/courses/{courseId}/chapters")
 public class ApiChapterController {
     @Autowired
     private ChapterService chapterService;
 
+    @GetMapping("{id}")
+    public ResponseEntity<ChapterDto> getChapterById(@PathVariable("id") int chapterId) {
+        return ResponseEntity.ok(chapterService.getChapterById(chapterId));
+    }
+
     @GetMapping
-    public ResponseEntity<List<ChapterDto>> getAllChapters(@PathVariable("id") int courseId) {
+    public ResponseEntity<List<ChapterDto>> getAllChapters(@PathVariable("courseId") int courseId) {
 
         List<ChapterDto> chapters = chapterService.getChapters(courseId);
         return ResponseEntity.ok(chapters);

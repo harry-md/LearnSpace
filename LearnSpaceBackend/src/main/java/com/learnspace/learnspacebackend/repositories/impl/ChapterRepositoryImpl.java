@@ -21,8 +21,14 @@ public class ChapterRepositoryImpl implements ChapterRepositiry {
     public List<Chapter> getChaptersByCourse(int courseId) {
         Session s = factory.getObject().getCurrentSession();
         Query q = s.createQuery(
-                "SELECT c FROM Chapter c JOIN fetch c.course course WHERE course.id = :courseId", Chapter.class);
+                "SELECT c FROM Chapter c JOIN c.course course WHERE course.id = :courseId", Chapter.class);
         q.setParameter("courseId", courseId);
         return q.getResultList();
+    }
+
+    @Override
+    public Chapter getChapterById(int ChapterId) {
+        Session s = factory.getObject().getCurrentSession();
+        return s.get(Chapter.class, ChapterId);
     }
 }

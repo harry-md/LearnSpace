@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface ChapterRepositiry {
     List<Chapter> getChaptersByCourse(int courseId);
+
+    Chapter getChapterById(int ChapterId);
 }

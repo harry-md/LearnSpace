@@ -24,4 +24,9 @@ public class ChapterServiceImpl implements ChapterService {
                 .map(chapterMapper::toDto)
                 .toList();
     }
+
+    @Override
+    public ChapterDto getChapterById(int chapterId) {
+        return chapterMapper.toDto(chapterRepositiry.getChapterById(chapterId));
+    }
 }
