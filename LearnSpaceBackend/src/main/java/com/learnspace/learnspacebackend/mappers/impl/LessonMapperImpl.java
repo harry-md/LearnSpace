@@ -5,18 +5,21 @@ import com.learnspace.learnspacebackend.mappers.LessonMapper;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 import org.springframework.stereotype.Component;
 
+import java.time.format.DateTimeFormatter;
+
 @Component
 public class LessonMapperImpl implements LessonMapper {
 
     @Override
     public LessonDto toDto(Lesson lesson) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return new LessonDto(
                 lesson.getId(),
                 lesson.getTitle(),
                 lesson.getContent(),
                 lesson.getVideo(),
-                lesson.getCreatedAt(),
-                lesson.getUpdatedAt());
+                formatter.format(lesson.getCreatedAt()),
+                formatter.format(lesson.getUpdatedAt()));
     }
 
     @Override
@@ -26,8 +29,6 @@ public class LessonMapperImpl implements LessonMapper {
         lesson.setTitle(lessonDto.title());
         lesson.setContent(lessonDto.content());
         lesson.setVideo(lessonDto.video());
-        lesson.setCreatedAt(lessonDto.createdAt());
-        lesson.setUpdatedAt(lessonDto.updatedAt());
         return lesson;
     }
 }

@@ -1,6 +1,5 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
-import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import jakarta.persistence.Query;
@@ -21,7 +20,7 @@ public class LessonRepositoryImpl implements LessonRepository {
     @Override
     public List<Lesson> getLessons(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-        Query q = session.createQuery("SELECT l FROM Lesson l JOIN l.chapter c WHERE c.id = :chapterId", Chapter.class);
+        Query q = session.createQuery("SELECT l FROM Lesson l JOIN l.chapter c WHERE c.id = :chapterId", Lesson.class);
         q.setParameter("chapterId", chapterId);
         return q.getResultList();
     }

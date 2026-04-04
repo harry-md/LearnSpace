@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -24,8 +23,7 @@ public class ApiLessonController {
     private ChapterService chapterService;
 
     @GetMapping
-    public ResponseEntity<List<LessonDto>> getLessons(
-            @RequestParam(name = "courseId", required = true) int courseId, @PathVariable int chapterId) {
+    public ResponseEntity<List<LessonDto>> getLessons(@PathVariable("chapterId") int chapterId) {
         ChapterDto chapter = chapterService.getChapterById(chapterId);
         if (chapter == null) {
             return ResponseEntity.notFound().build();
