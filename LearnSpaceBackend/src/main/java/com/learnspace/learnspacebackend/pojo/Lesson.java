@@ -39,7 +39,7 @@ public class Lesson {
     @Column(name = "video_length", nullable = false)
     private Integer videoLength;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
