@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -44,14 +42,12 @@ public class Payment {
     @Column(name = "vnp_txn_ref", nullable = false, length = 50)
     private String vnpTxnRef;
 
-    @NotNull
-    @Column(name = "created_at", nullable = false)
-    @CreationTimestamp
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @NotNull
-    @Column(name = "updated_at", nullable = false)
-    @UpdateTimestamp
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public Integer getId() {

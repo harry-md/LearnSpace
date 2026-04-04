@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -46,11 +44,6 @@ public class Course {
     private BigDecimal price;
 
     @NotNull
-    @ColumnDefault("0")
-    @Column(name = "duration", nullable = false)
-    private Integer duration;
-
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
@@ -65,12 +58,12 @@ public class Course {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
-    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     public Integer getId() {
@@ -119,14 +112,6 @@ public class Course {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
     }
 
     public Category getCategory() {

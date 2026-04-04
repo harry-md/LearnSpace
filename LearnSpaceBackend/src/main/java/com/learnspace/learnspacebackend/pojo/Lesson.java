@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -23,26 +22,34 @@ public class Lesson {
     private String title;
 
     @NotNull
+    @Column(name = "`order`", nullable = false)
+    private Integer order;
+
     @Lob
-    @Column(name = "content", nullable = false)
+    @Column(name = "content")
     private String content;
 
     @Size(max = 255)
-    @Column(name = "video")
+    @NotNull
+    @Column(name = "video", nullable = false)
     private String video;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @Column(name = "video_length", nullable = false)
+    private Integer videoLength;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
-    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "chapter_id", nullable = false)
+    private Chapter chapter;
 
     public Integer getId() {
         return id;
@@ -58,6 +65,14 @@ public class Lesson {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Integer getOrder() {
+        return order;
+    }
+
+    public void setOrder(Integer order) {
+        this.order = order;
     }
 
     public String getContent() {
@@ -76,12 +91,12 @@ public class Lesson {
         this.video = video;
     }
 
-    public Course getCourse() {
-        return course;
+    public Integer getVideoLength() {
+        return videoLength;
     }
 
-    public void setCourse(Course course) {
-        this.course = course;
+    public void setVideoLength(Integer videoLength) {
+        this.videoLength = videoLength;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -98,5 +113,13 @@ public class Lesson {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Chapter getChapter() {
+        return chapter;
+    }
+
+    public void setChapter(Chapter chapter) {
+        this.chapter = chapter;
     }
 }

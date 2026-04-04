@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -28,10 +26,11 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Size(max = 45)
     @NotNull
-    @Column(name = "role", nullable = false, length = 45)
-    private String role;
+    @ColumnDefault("'STUDENT'")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private UserRole role;
 
     @Size(max = 255)
     @NotNull
@@ -61,12 +60,12 @@ public class User {
     @Column(name = "verified")
     private Boolean verified;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
-    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     public Integer getId() {
@@ -93,11 +92,11 @@ public class User {
         this.password = password;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(UserRole role) {
         this.role = role;
     }
 
