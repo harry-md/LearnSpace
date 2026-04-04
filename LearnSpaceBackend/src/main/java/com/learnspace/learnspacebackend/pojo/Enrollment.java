@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -33,7 +34,7 @@ public class Enrollment {
 
     @NotNull
     @Column(name = "created_at", nullable = false)
-    @UpdateTimestamp
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @NotNull
