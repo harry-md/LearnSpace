@@ -46,11 +46,6 @@ public class Course {
     private BigDecimal price;
 
     @NotNull
-    @ColumnDefault("0")
-    @Column(name = "duration", nullable = false)
-    private Integer duration;
-
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
@@ -119,14 +114,6 @@ public class Course {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
     }
 
     public Category getCategory() {
