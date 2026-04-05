@@ -2,7 +2,6 @@ package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.ChapterDto;
 import com.learnspace.learnspacebackend.services.ChapterService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +26,7 @@ public class ApiChapterController {
         return ResponseEntity.ok(chapters);
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<ChapterDto> createOrUpdateChapter(
             @PathVariable("courseId") int courseId, @RequestBody ChapterDto chapter) {
             ChapterDto createdChapter = chapterService.createOrUpdate(courseId ,chapter);
