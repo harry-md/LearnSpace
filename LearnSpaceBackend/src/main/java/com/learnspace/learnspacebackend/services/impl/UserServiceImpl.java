@@ -6,6 +6,7 @@ import com.learnspace.learnspacebackend.mappers.UserMapper;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,8 +29,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-//    @Autowired
-//    private Cloudinary cloudinary;
+    //    @Autowired
+    //    private Cloudinary cloudinary;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
