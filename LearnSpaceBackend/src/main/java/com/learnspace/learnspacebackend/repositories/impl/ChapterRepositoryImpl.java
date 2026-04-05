@@ -2,7 +2,9 @@ package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
+
 import jakarta.persistence.Query;
+
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -21,7 +23,8 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     public List<Chapter> getChaptersByCourse(int courseId) {
         Session s = factory.getObject().getCurrentSession();
         Query q = s.createQuery(
-                "SELECT c FROM Chapter c JOIN c.course course WHERE course.id = :courseId", Chapter.class);
+                "SELECT c FROM Chapter c JOIN c.course course WHERE course.id = :courseId",
+                Chapter.class);
         q.setParameter("courseId", courseId);
         return q.getResultList();
     }
