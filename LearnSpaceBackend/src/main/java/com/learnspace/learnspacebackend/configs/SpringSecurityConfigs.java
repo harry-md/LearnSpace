@@ -1,8 +1,11 @@
 package com.learnspace.learnspacebackend.configs;
 
+import com.learnspace.learnspacebackend.pojo.UserRole;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -34,22 +37,19 @@ public class SpringSecurityConfigs {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(c -> c.disable())
-                .authorizeHttpRequests(requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
-                        .permitAll()
-                        .requestMatchers("/login")
-                        .permitAll()
-                        .requestMatchers("/api/courses")
-                        .permitAll()
-                        .requestMatchers("/api/courses/**")
-                        .permitAll()
-                        .requestMatchers("/api/categories/**")
-                        .permitAll()
-                        .requestMatchers("/api/chapters")
-                        .permitAll()
-                        .requestMatchers("/api/chapters/**")
-                        .permitAll()
-                        .requestMatchers("/")
-                        .authenticated())
+                .authorizeHttpRequests(
+                        requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
+                                .permitAll()
+                                .requestMatchers("/login")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/categories/**")
+                                .permitAll()
+                                .requestMatchers("/api/categories/**")
+                                .hasRole(UserRole.ADMIN.name())
+                                .requestMatchers(HttpMethod.GET, "/api/courses/**")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/courses")
+                                .hasRole("VERIFIED_TEACHER"))
                 .formLogin(form -> form.loginPage("/login")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
