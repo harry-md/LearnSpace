@@ -1,7 +1,6 @@
 package com.learnspace.learnspacebackend.configs;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,13 +12,13 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 @Configuration
 @EnableWebSecurity
 @EnableTransactionManagement
-@ComponentScan(
-        basePackages = {
-            "com.learnspace.learnspacebackend.controllers",
-            "com.learnspace.learnspacebackend.repositories",
-            "com.learnspace.learnspacebackend.services",
-            "com.learnspace.learnspacebackend.mappers"
-        })
+// @ComponentScan(
+//        basePackages = {
+//            "com.learnspace.learnspacebackend.controllers",
+//            "com.learnspace.learnspacebackend.repositories",
+//            "com.learnspace.learnspacebackend.services",
+//            "com.learnspace.learnspacebackend.mappers"
+//        })
 public class SpringSecurityConfigs {
     @Bean
     public static BCryptPasswordEncoder passwordEncoder() {
