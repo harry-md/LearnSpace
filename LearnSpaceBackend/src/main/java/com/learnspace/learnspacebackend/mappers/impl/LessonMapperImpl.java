@@ -20,16 +20,8 @@ public class LessonMapperImpl implements LessonMapper {
                 lesson.getContent(),
                 lesson.getVideo(),
                 formatter.format(lesson.getCreatedAt()),
-                formatter.format(lesson.getUpdatedAt()));
-    }
-
-    @Override
-    public Lesson toEntity(LessonDto lessonDto) {
-        Lesson lesson = new Lesson();
-        lesson.setId(lessonDto.id());
-        lesson.setTitle(lessonDto.title());
-        lesson.setContent(lessonDto.content());
-        lesson.setVideo(lessonDto.video());
-        return lesson;
+                formatter.format(lesson.getUpdatedAt()),
+                lesson.getOrder(),
+                lesson.getVideoLength());
     }
 }

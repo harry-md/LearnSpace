@@ -123,4 +123,18 @@ public class Lesson {
     public void setChapter(Chapter chapter) {
         this.chapter = chapter;
     }
+
+    @Override
+    public String toString() {
+        return "Lesson{" + "id="
+                + id + ", title='"
+                + title + '\'' + ", order="
+                + order + ", content='"
+                + content + '\'' + ", video='"
+                + video + '\'' + ", videoLength="
+                + videoLength + ", createdAt="
+                + createdAt + ", updatedAt="
+                + updatedAt + ", chapter="
+                + chapter + '}';
+    }
 }

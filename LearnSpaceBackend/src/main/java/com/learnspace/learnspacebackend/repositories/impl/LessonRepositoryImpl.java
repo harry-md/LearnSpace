@@ -27,4 +27,15 @@ public class LessonRepositoryImpl implements LessonRepository {
         q.setParameter("chapterId", chapterId);
         return q.getResultList();
     }
+
+    @Override
+    public Lesson addOrUpdateLesson(Lesson lesson) {
+        Session s = factory.getObject().getCurrentSession();
+        if (lesson.getId() == null) {
+            s.persist(lesson);
+            return lesson;
+        } else {
+            return s.merge(lesson);
+        }
+    }
 }

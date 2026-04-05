@@ -1,5 +1,8 @@
 package com.learnspace.learnspacebackend.configs;
 
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.ServletRegistration;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
@@ -20,6 +23,16 @@ public class DispatcherServletInit extends AbstractAnnotationConfigDispatcherSer
         return new Class[] {
             WebAppContextConfigs.class,
         };
+    }
+
+    @Override
+    protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+        String location = "/";
+        long maxFileSize = 500 * 1024 * 1024;
+        long maxRequestSize = 500 * 1024 * 1024;
+        int fileSizeThreshold = 0;
+        registration.setMultipartConfig(new MultipartConfigElement(
+                location, maxFileSize, maxRequestSize, fileSizeThreshold));
     }
 
     @Override
