@@ -3,7 +3,6 @@ package com.learnspace.learnspacebackend.pojo;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -122,5 +121,20 @@ public class Lesson {
 
     public void setChapter(Chapter chapter) {
         this.chapter = chapter;
+    }
+
+    @Override
+    public String toString() {
+        return "Lesson{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", order=" + order +
+                ", content='" + content + '\'' +
+                ", video='" + video + '\'' +
+                ", videoLength=" + videoLength +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", chapter=" + chapter +
+                '}';
     }
 }

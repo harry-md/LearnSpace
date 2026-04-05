@@ -5,6 +5,4 @@ import com.learnspace.learnspacebackend.pojo.Lesson;
 
 public interface LessonMapper {
     LessonDto toDto(Lesson lesson);
-
-    Lesson toEntity(LessonDto lessonDto);
 }

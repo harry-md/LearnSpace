@@ -6,4 +6,6 @@ public record LessonDto(
         String content,
         String video,
         String createdAt,
-        String updatedAt) {}
+        String updatedAt,
+        Integer order,
+        Integer videoLength) {}
