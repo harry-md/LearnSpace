@@ -1,11 +1,12 @@
 package com.learnspace.learnspacebackend.services;
 
-import com.learnspace.learnspacebackend.pojo.User;
+import com.learnspace.learnspacebackend.dtos.UserProfileDto;
+import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
-    User getUserByUsername(String username);
+    UserProfileDto getUserByUsername(String username);
 
-    User register(User u);
+    UserProfileDto register(UserRegisterDto user);
 }

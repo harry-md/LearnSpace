@@ -21,7 +21,7 @@ SET @@SESSION.SQL_LOG_BIN= 0;
 -- GTID state at the beginning of the backup 
 --
 
-SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '00546850-b2fe-11f0-8147-f26f4349a4ff:1-4165';
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '00546850-b2fe-11f0-8147-f26f4349a4ff:1-4167';
 
 --
 -- Table structure for table `category`
@@ -183,6 +183,35 @@ INSERT INTO `lesson` VALUES (1,'ReactJS là gì?',1,'Lý thuyết cơ bản về
 UNLOCK TABLES;
 
 --
+-- Table structure for table `lesson_progress`
+--
+
+DROP TABLE IF EXISTS `lesson_progress`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lesson_progress` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `enrollment_id` int NOT NULL,
+  `lesson_id` int NOT NULL,
+  `watched_sec` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_lesson_progress_enrollment_idx` (`enrollment_id`),
+  KEY `fk_lesson_progress_lesson_idx` (`lesson_id`),
+  CONSTRAINT `fk_lesson_progress_enrollment` FOREIGN KEY (`enrollment_id`) REFERENCES `enrollment` (`id`),
+  CONSTRAINT `fk_lesson_progress_lesson` FOREIGN KEY (`lesson_id`) REFERENCES `lesson` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lesson_progress`
+--
+
+LOCK TABLES `lesson_progress` WRITE;
+/*!40000 ALTER TABLE `lesson_progress` DISABLE KEYS */;
+/*!40000 ALTER TABLE `lesson_progress` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `payment`
 --
 
@@ -260,7 +289,7 @@ CREATE TABLE `user` (
   `role` enum('ADMIN','STUDENT','TEACHER') NOT NULL DEFAULT 'STUDENT',
   `first_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `last_name` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
-  `email` varchar(255) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
   `avatar` varchar(255) DEFAULT 'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774929819/image-removebg-preview_2_aydokw.png',
   `active` tinyint(1) DEFAULT '1',
   `verified` tinyint(1) DEFAULT '0',
@@ -291,4 +320,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-04 16:32:38
+-- Dump completed on 2026-04-05  0:11:48

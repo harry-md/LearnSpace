@@ -31,3 +31,4 @@ LearnSpace/nb-configuration.xml
 .settings
 **/target/**
 .vscode
+env.properties
