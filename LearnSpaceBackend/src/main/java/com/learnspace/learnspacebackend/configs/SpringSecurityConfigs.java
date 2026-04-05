@@ -40,6 +40,8 @@ public class SpringSecurityConfigs {
                         .permitAll()
                         .requestMatchers("/api/courses")
                         .permitAll()
+                        .requestMatchers("/api/courses/**")
+                        .permitAll()
                         .requestMatchers("/api/categories/**")
                         .permitAll()
                         .requestMatchers("/api/chapters")
