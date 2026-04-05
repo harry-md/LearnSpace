@@ -2,6 +2,7 @@ package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.CourseDto;
 import com.learnspace.learnspacebackend.services.CourseService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +26,9 @@ public class ApiCourseController {
         return ResponseEntity.ok(courseService.getCourseById(id));
     }
 
-//    @PostMapping
-//    public ResponseEntity<Course> createCourse(Course course) {
-//        Course savedCourse = courseService.createOrUpdate(course);
-//        return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
-//    }
+    //    @PostMapping
+    //    public ResponseEntity<Course> createCourse(Course course) {
+    //        Course savedCourse = courseService.createOrUpdate(course);
+    //        return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
+    //    }
 }
