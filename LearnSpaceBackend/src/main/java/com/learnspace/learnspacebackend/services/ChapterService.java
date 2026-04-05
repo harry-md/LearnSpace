@@ -8,4 +8,8 @@ public interface ChapterService {
     List<ChapterDto> getChapters(int courseId);
 
     ChapterDto getChapterById(int chapterId);
+
+    ChapterDto createOrUpdate(int courseId, ChapterDto chapterDto);
+
+    void deleteChapter(int chapterId);
 }

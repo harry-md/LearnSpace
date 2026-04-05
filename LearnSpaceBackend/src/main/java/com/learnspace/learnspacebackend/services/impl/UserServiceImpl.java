@@ -3,7 +3,6 @@ package com.learnspace.learnspacebackend.services.impl;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.UserService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,8 +30,7 @@ public class UserServiceImpl implements UserService {
 
         Set<GrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SimpleGrantedAuthority(u.getRole()));
-        return new org.springframework.security.core.userdetails.User(
-                u.getUsername(), u.getPassword(), authorities);
+        return new org.springframework.security.core.userdetails.User(u.getUsername(), u.getPassword(), authorities);
     }
 
     @Override
