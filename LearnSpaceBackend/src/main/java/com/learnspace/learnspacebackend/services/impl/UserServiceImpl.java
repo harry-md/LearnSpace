@@ -1,6 +1,5 @@
 package com.learnspace.learnspacebackend.services.impl;
 
-import com.cloudinary.Cloudinary;
 import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
 import com.learnspace.learnspacebackend.mappers.UserMapper;
@@ -30,8 +29,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    @Autowired
-    private Cloudinary cloudinary;
+    //    @Autowired
+    //    private Cloudinary cloudinary;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

@@ -1,7 +1,7 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
-import com.learnspace.learnspacebackend.repositories.ChapterRepositiry;
+import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 
 import jakarta.persistence.Query;
 
@@ -15,7 +15,7 @@ import java.util.List;
 
 @Repository
 @Transactional
-public class ChapterRepositoryImpl implements ChapterRepositiry {
+public class ChapterRepositoryImpl implements ChapterRepository {
     @Autowired
     private LocalSessionFactoryBean factory;
 
@@ -33,5 +33,23 @@ public class ChapterRepositoryImpl implements ChapterRepositiry {
     public Chapter getChapterById(int ChapterId) {
         Session s = factory.getObject().getCurrentSession();
         return s.get(Chapter.class, ChapterId);
+    }
+
+    @Override
+    public Chapter createOrUpdate(Chapter chapter) {
+        Session s = factory.getObject().getCurrentSession();
+        if (chapter.getId() == null) {
+            s.persist(chapter);
+            return chapter;
+        } else return s.merge(chapter);
+    }
+
+    @Override
+    public void deleteChapter(int chapterId) {
+        Session s = factory.getObject().getCurrentSession();
+        Chapter chapter = s.get(Chapter.class, chapterId);
+        if (chapter != null) {
+            s.remove(chapter);
+        }
     }
 }
