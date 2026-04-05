@@ -20,10 +20,19 @@ public class LessonRepositoryImpl implements LessonRepository {
     @Override
     public List<Lesson> getLessons(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-        Query q = session.createQuery(
-                "SELECT l FROM Lesson l JOIN l.chapter c WHERE c.id = :chapterId", Lesson.class);
+        Query q = session.createQuery("SELECT l FROM Lesson l JOIN l.chapter c WHERE c.id = :chapterId", Lesson.class);
         q.setParameter("chapterId", chapterId);
         return q.getResultList();
     }
 
+    @Override
+    public Lesson addOrUpdateLesson(Lesson lesson) {
+        Session s = factory.getObject().getCurrentSession();
+        if (lesson.getId() == null) {
+            s.persist(lesson);
+            return lesson;
+        } else {
+            return s.merge(lesson);
+        }
+    }
 }
