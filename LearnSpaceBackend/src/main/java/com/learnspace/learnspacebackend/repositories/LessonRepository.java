@@ -6,6 +6,5 @@ import java.util.List;
 
 public interface LessonRepository {
     List<Lesson> getLessons(int chapterId);
-
-    Lesson createOrUpdateLesson(Lesson lesson);
+    
 }
