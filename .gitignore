@@ -32,3 +32,4 @@ LearnSpace/nb-configuration.xml
 **/target/**
 .vscode
 env.properties
+deploy.sh

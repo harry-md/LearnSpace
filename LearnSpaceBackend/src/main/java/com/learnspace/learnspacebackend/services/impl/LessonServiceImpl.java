@@ -8,6 +8,7 @@ import com.learnspace.learnspacebackend.pojo.Lesson;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.services.LessonService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,14 +39,17 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    public LessonDto addOrUpdateLesson(int chapterId, Map<String, String> lessonMap, MultipartFile video) {
+    public LessonDto addOrUpdateLesson(
+            int chapterId, Map<String, String> lessonMap, MultipartFile video) {
         Lesson lesson = new Lesson();
         lesson.setTitle(lessonMap.get("title"));
         lesson.setContent(lessonMap.get("content"));
         lesson.setOrder(Integer.parseInt(lessonMap.get("order")));
 
         try {
-            Map res = cloudinary.uploader().upload(video.getBytes(), ObjectUtils.asMap("resource_type", "video"));
+            Map res = cloudinary
+                    .uploader()
+                    .upload(video.getBytes(), ObjectUtils.asMap("resource_type", "video"));
             lesson.setVideo(res.get("secure_url").toString());
             lesson.setVideoLength((int) Double.parseDouble(res.get("duration").toString()));
         } catch (Exception e) {
