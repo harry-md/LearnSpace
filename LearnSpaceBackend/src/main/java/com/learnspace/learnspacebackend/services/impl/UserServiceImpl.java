@@ -5,10 +5,11 @@ import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
 import com.learnspace.learnspacebackend.mappers.UserMapper;
 import com.learnspace.learnspacebackend.pojo.User;
-import com.learnspace.learnspacebackend.pojo.UserAuthority;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.UserService;
+
+import jakarta.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,18 +38,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User u = userRepository.getUserByUsername(username);
-        if (u == null) {
-            throw new UsernameNotFoundException("Không tìm thấy người dùng với username");
-        }
+        try {
+            User user = userRepository.getUserByUsername(username);
+            if (user == null) {
+                throw new UsernameNotFoundException("Không tìm thấy người dùng với username");
+            }
 
-        Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + u.getRole().name()));
-        if (u.getRole() == UserRole.TEACHER && u.getVerified()) {
-            authorities.add(new SimpleGrantedAuthority(UserAuthority.ROLE_VERIFIED_TEACHER.name()));
+            Set<GrantedAuthority> authorities = new HashSet<>();
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+            if (user.getRole().equals(UserRole.TEACHER) && user.getVerified()) {
+                authorities.add(new SimpleGrantedAuthority(UserRole.VERIFIED_TEACHER.name()));
+            }
+            return new org.springframework.security.core.userdetails.User(
+                    user.getUsername(), user.getPassword(), authorities);
+        } catch (NoResultException ex) {
+            throw new UsernameNotFoundException("Không tìm thấy username");
         }
-        return new org.springframework.security.core.userdetails.User(
-                u.getUsername(), u.getPassword(), authorities);
     }
 
     @Override
