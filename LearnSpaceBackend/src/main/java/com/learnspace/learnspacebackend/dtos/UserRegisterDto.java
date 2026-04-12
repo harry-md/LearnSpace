@@ -1,9 +1,10 @@
 package com.learnspace.learnspacebackend.dtos;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record UserRegisterDto(
-        String username,
-        String password,
-        String firstName,
-        String lastName,
-        String email,
-        String avatar) {}
+        @NotBlank String username,
+        @NotBlank String password,
+        @NotBlank String firstName,
+        @NotBlank String lastName,
+        String email) {}
