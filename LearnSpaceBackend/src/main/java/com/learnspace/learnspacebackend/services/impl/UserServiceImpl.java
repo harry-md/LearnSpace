@@ -9,7 +9,9 @@ import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.UserService;
+
 import jakarta.persistence.NoResultException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -75,7 +77,9 @@ public class UserServiceImpl implements UserService {
 
         if (avatar != null && !avatar.isEmpty()) {
             try {
-                Map res = cloudinary.uploader().upload(avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+                Map res = cloudinary
+                        .uploader()
+                        .upload(avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
                 u.setAvatar(res.get("secure_url").toString());
             } catch (IOException ex) {
                 ex.printStackTrace();

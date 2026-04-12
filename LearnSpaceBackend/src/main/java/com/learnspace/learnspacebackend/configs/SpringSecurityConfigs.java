@@ -52,6 +52,8 @@ public class SpringSecurityConfigs {
                         .hasRole(UserRole.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "/api/users")
                         .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users")
+                        .permitAll()
                         .requestMatchers("/")
                         .hasRole(UserRole.ADMIN.name())
                         .requestMatchers(HttpMethod.GET, "/api/categories", "/api/categories/*")

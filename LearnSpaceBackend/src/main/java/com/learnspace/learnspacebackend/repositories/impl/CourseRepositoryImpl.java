@@ -33,24 +33,23 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Override
     public List<Course> getAllCourses(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder buider = session.getCriteriaBuilder();
-        CriteriaQuery<Course> q = buider.createQuery(Course.class);
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Course> q = builder.createQuery(Course.class);
         Root<Course> root = q.from(Course.class);
 
-        //        root.fetch("category", JoinType.INNER);
         q.select(root);
 
         if (params != null) {
             List<Predicate> predicates = new ArrayList<>();
             String kw = params.get("kw");
             if (kw != null && !kw.isBlank()) {
-                predicates.add(buider.like(root.get("name"), String.format("%%%s%%", kw)));
+                predicates.add(builder.like(root.get("name"), String.format("%%%s%%", kw)));
             }
             String fromPrice = params.get("fromPrice");
             if (fromPrice != null && !fromPrice.isBlank()) {
                 BigDecimal price = parsePrice(fromPrice);
                 if (price != null) {
-                    predicates.add(buider.greaterThanOrEqualTo(root.get("price"), price));
+                    predicates.add(builder.greaterThanOrEqualTo(root.get("price"), price));
                 }
             }
 
@@ -58,16 +57,22 @@ public class CourseRepositoryImpl implements CourseRepository {
             if (toPrice != null && !toPrice.isBlank()) {
                 BigDecimal price = parsePrice(toPrice);
                 if (price != null) {
-                    predicates.add(buider.lessThanOrEqualTo(root.get("price"), price));
+                    predicates.add(builder.lessThanOrEqualTo(root.get("price"), price));
                 }
             }
             String categoryId = params.get("categoryId");
             if (categoryId != null && !categoryId.isBlank()) {
-                predicates.add(buider.equal(root.get("category"), categoryId));
+                Integer id = parseId(categoryId);
+                if (id != null) {
+                    predicates.add(builder.equal(root.get("category").get("id"), id));
+                }
             }
             String teacherId = params.get("teacherId");
             if (teacherId != null && !teacherId.isBlank()) {
-                predicates.add(buider.equal(root.get("teacher"), teacherId));
+                Integer id = parseId(teacherId);
+                if (id != null) {
+                    predicates.add(builder.equal(root.get("teacher").get("id"), id));
+                }
             }
             q.where(predicates.toArray(Predicate[]::new));
         }
@@ -87,6 +92,14 @@ public class CourseRepositoryImpl implements CourseRepository {
         try {
             return new BigDecimal(price);
         } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private Integer parseId(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
             return null;
         }
     }
