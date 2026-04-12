@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.services.impl;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
 import com.learnspace.learnspacebackend.mappers.UserMapper;
@@ -18,8 +19,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -62,7 +66,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileDto register(UserRegisterDto user) {
-        return null;
+    public UserProfileDto register(UserRegisterDto user, MultipartFile avatar) {
+        User u = new User();
+        u.setUsername(user.username());
+        u.setPassword(passwordEncoder.encode(user.password()));
+        u.setFirstName(user.firstName());
+        u.setLastName(user.lastName());
+        u.setEmail(user.email());
+        u.setRole(UserRole.STUDENT);
+
+        if (!avatar.isEmpty()) {
+            try {
+                Map res = cloudinary
+                        .uploader()
+                        .upload(avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+                u.setAvatar(res.get("secure_url").toString());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return userMapper.toProfileDto(userRepository.register(u));
     }
 }

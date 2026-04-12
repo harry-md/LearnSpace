@@ -65,6 +65,10 @@ public class CourseRepositoryImpl implements CourseRepository {
             if (categoryId != null && !categoryId.isBlank()) {
                 predicates.add(buider.equal(root.get("category"), categoryId));
             }
+            String teacherId = params.get("teacherId");
+            if (teacherId != null && !teacherId.isBlank()) {
+                predicates.add(buider.equal(root.get("teacher"), teacherId));
+            }
             q.where(predicates.toArray(Predicate[]::new));
         }
 

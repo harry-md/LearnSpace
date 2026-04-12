@@ -29,7 +29,6 @@ public class UserMapperImpl implements UserMapper {
         user.setFirstName(dto.firstName());
         user.setLastName(dto.lastName());
         user.setEmail(dto.email());
-        user.setAvatar(dto.avatar());
         return user;
     }
 }
