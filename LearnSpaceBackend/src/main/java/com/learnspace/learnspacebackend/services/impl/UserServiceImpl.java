@@ -87,4 +87,16 @@ public class UserServiceImpl implements UserService {
         }
         return userMapper.toProfileDto(userRepository.register(u));
     }
+
+    @Override
+    public UserProfileDto registerAdmin(UserRegisterDto user) {
+        User u = new User();
+        u.setUsername(user.username());
+        u.setPassword(passwordEncoder.encode(user.password()));
+        u.setFirstName(user.firstName());
+        u.setLastName(user.lastName());
+        u.setEmail(user.email());
+        u.setRole(UserRole.ADMIN);
+        return userMapper.toProfileDto(userRepository.register(u));
+    }
 }

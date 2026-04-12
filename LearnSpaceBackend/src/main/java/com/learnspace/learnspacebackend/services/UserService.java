@@ -10,4 +10,6 @@ public interface UserService extends UserDetailsService {
     UserProfileDto getUserByUsername(String username);
 
     UserProfileDto register(UserRegisterDto user, MultipartFile avatar);
+
+    UserProfileDto registerAdmin(UserRegisterDto user);
 }
