@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
         u.setEmail(user.email());
         u.setRole(UserRole.STUDENT);
 
-        if (!avatar.isEmpty()) {
+        if (avatar != null && !avatar.isEmpty()) {
             try {
                 Map res = cloudinary
                         .uploader()

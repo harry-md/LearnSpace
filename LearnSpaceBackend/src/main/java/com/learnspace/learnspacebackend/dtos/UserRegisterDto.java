@@ -7,4 +7,4 @@ public record UserRegisterDto(
         @NotBlank String password,
         @NotBlank String firstName,
         @NotBlank String lastName,
-        String email) {}
+        @NotBlank String email) {}
