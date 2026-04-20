@@ -3,6 +3,7 @@ package com.learnspace.learnspacebackend.configs;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.learnspace.learnspacebackend.pojo.UserRole;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;

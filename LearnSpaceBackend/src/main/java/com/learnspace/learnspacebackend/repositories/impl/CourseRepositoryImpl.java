@@ -71,7 +71,7 @@ public class CourseRepositoryImpl implements CourseRepository {
             if (teacherId != null && !teacherId.isBlank()) {
                 Integer id = parseId(teacherId);
                 if (id != null) {
-                    predicates.add(builder.equal(root.get("teacher").get("id"), id));
+                    predicates.add(builder.equal(root.get("teacher").as(Integer.class), id));
                 }
             }
             q.where(predicates.toArray(Predicate[]::new));

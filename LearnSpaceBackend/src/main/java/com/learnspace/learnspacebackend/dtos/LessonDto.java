@@ -1,11 +1,13 @@
 package com.learnspace.learnspacebackend.dtos;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record LessonDto(
         Integer id,
-        String title,
+        @NotBlank String title,
         String content,
-        String video,
+        @NotBlank String video,
+        @NotBlank Integer order,
+        Integer videoLength,
         String createdAt,
-        String updatedAt,
-        Integer order,
-        Integer videoLength) {}
+        String updatedAt) {}
