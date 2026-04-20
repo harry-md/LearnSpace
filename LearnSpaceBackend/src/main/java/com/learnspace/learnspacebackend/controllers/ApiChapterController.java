@@ -29,9 +29,13 @@ public class ApiChapterController {
     }
 
     @PostMapping
-    public ResponseEntity<ChapterDto> createOrUpdateChapter(
+    public ResponseEntity<?> createOrUpdateChapter(
             @PathVariable("courseId") int courseId, @RequestBody ChapterDto chapter) {
-        ChapterDto createdChapter = chapterService.createOrUpdate(courseId, chapter);
-        return new ResponseEntity<>(createdChapter, HttpStatus.CREATED);
+        try {
+            ChapterDto createdChapter = chapterService.createOrUpdate(courseId, chapter);
+            return new ResponseEntity<>(createdChapter, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 }

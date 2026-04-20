@@ -39,8 +39,7 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public ChapterDto createOrUpdate(int courseId, ChapterDto chapterdto) {
         Chapter chapter = chapterMapper.toEntity(chapterdto);
-        chapter.setCourse(courseRepository.getCourseById(courseId));
-        return chapterMapper.toDto(chapterRepository.createOrUpdate(chapter));
+        return chapterMapper.toDto(chapterRepository.createOrUpdate(courseId, chapter));
     }
 
     @Override

@@ -12,4 +12,6 @@ public record UserProfileDto(
         @NotBlank String email,
         String avatar,
         Boolean active,
-        Boolean verified) {}
+        Boolean verified,
+        String createdAt,
+        String updatedAt) {}

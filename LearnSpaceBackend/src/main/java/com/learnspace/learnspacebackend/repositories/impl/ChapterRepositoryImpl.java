@@ -1,7 +1,9 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
+import com.learnspace.learnspacebackend.repositories.CourseRepository;
 
 import jakarta.persistence.Query;
 
@@ -18,6 +20,9 @@ import java.util.List;
 public class ChapterRepositoryImpl implements ChapterRepository {
     @Autowired
     private LocalSessionFactoryBean factory;
+
+    @Autowired
+    private CourseRepository courseRepository;
 
     @Override
     public List<Chapter> getChaptersByCourse(int courseId) {
@@ -36,12 +41,20 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     }
 
     @Override
-    public Chapter createOrUpdate(Chapter chapter) {
+    public Chapter createOrUpdate(int courseId, Chapter chapter) throws RuntimeException {
         Session s = factory.getObject().getCurrentSession();
+        Course course = courseRepository.getCourseById(courseId);
+        if (course == null) {
+            throw new RuntimeException("Course " + courseId + " not found");
+        }
+
+        chapter.setCourse(course);
         if (chapter.getId() == null) {
             s.persist(chapter);
             return chapter;
-        } else return s.merge(chapter);
+        } else {
+            return s.merge(chapter);
+        }
     }
 
     @Override
