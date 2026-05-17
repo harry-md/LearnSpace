@@ -2,6 +2,7 @@ package com.learnspace.learnspacebackend.services.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.learnspace.learnspacebackend.dtos.AdminUserUpdateDto;
 import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
 import com.learnspace.learnspacebackend.mappers.UserMapper;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,5 +100,45 @@ public class UserServiceImpl implements UserService {
         u.setEmail(user.email());
         u.setRole(UserRole.ADMIN);
         return userMapper.toProfileDto(userRepository.register(u));
+    }
+
+    @Override
+    public List<UserProfileDto> getAllUsers(Map<String, String> params) {
+        return userRepository.getAllUsers(params).stream()
+                .map(userMapper::toProfileDto)
+                .toList();
+    }
+
+    @Override
+    public void updateByAdmin(AdminUserUpdateDto user, MultipartFile avatar) {
+        User u = userRepository.getUserById(user.id());
+        if (u == null) {
+            throw new RuntimeException("Không tìm thấy User");
+        }
+
+        u.setFirstName(user.firstName());
+        u.setLastName(user.lastName());
+        u.setEmail(user.email());
+        u.setRole(user.role());
+        u.setActive(user.active() != null ? user.active() : false);
+
+        if (user.role() == UserRole.TEACHER) {
+            u.setVerified(user.verified() != null ? user.verified() : false);
+        } else {
+            u.setVerified(false);
+        }
+
+        if (avatar != null && !avatar.isEmpty()) {
+            try {
+                Map res = cloudinary
+                        .uploader()
+                        .upload(avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+                u.setAvatar(res.get("secure_url").toString());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        userRepository.update(u);
     }
 }

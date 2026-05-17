@@ -8,6 +8,8 @@ import java.util.Map;
 public interface CourseService {
     List<CourseDto> getAllCourses(Map<String, String> params);
 
+    Long countCourses(Map<String, String> params);
+
     CourseDto getCourseById(int id);
 
     //    CourseDto createOrUpdate(CourseDto course);

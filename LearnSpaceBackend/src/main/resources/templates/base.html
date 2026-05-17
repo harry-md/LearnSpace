@@ -35,37 +35,37 @@
             <li class="nav-item mb-1">
                 <a th:href="@{/}"
                    th:class="${activeTab == 'dashboard' ? 'nav-link active' : 'nav-link text-dark'}">
-                    <i class="fa-solid fa-gauge w-25 text-center"></i> Dashboard
+                    <i class="fa-solid fa-gauge fa-fw me-2 text-center"></i>Dashboard
                 </a>
             </li>
             <li class="nav-item mb-1">
                 <a th:href="@{/users}"
                    th:class="${activeTab == 'users' ? 'nav-link active' : 'nav-link text-dark'}">
-                    <i class="fa-solid fa-users w-25 text-center"></i> QL Người dùng
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a th:href="@{/courses}"
-                   th:class="${activeTab == 'courses' ? 'nav-link active' : 'nav-link text-dark'}">
-                    <i class="fa-solid fa-book w-25 text-center"></i> QL Khóa học
+                    <i class="fa-solid fa-users fa-fw me-2 text-center"></i>Người dùng
                 </a>
             </li>
             <li class="nav-item mb-1">
                 <a th:href="@{/categories}"
                    th:class="${activeTab == 'categories' ? 'nav-link active' : 'nav-link text-dark'}">
-                    <i class="fa-solid fa-list w-25 text-center"></i> QL Danh mục
+                    <i class="fa-solid fa-list fa-fw me-2 text-center"></i>Danh mục
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a th:href="@{/courses}"
+                   th:class="${activeTab == 'courses' ? 'nav-link active' : 'nav-link text-dark'}">
+                    <i class="fa-solid fa-book fa-fw me-2 text-center"></i>Khóa học
                 </a>
             </li>
             <li class="nav-item mb-1">
                 <a th:href="@{/enrollments}"
                    th:class="${activeTab == 'enrollments' ? 'nav-link active' : 'nav-link text-dark'}">
-                    <i class="fa-solid fa-user-check w-25 text-center"></i> QL Đăng ký
+                    <i class="fa-solid fa-user-check fa-fw me-2 text-center"></i>Đăng ký
                 </a>
             </li>
             <li class="nav-item mb-1">
                 <a th:href="@{/payments}"
                    th:class="${activeTab == 'payments' ? 'nav-link active' : 'nav-link text-dark'}">
-                    <i class="fa-solid fa-file-invoice-dollar w-25 text-center"></i> QL Thanh toán
+                    <i class="fa-solid fa-file-invoice-dollar fa-fw me-2 text-center"></i>Thanh toán
                 </a>
             </li>
         </ul>
@@ -73,7 +73,7 @@
         <div class="px-3 mt-auto mb-3">
             <hr class="text-secondary opacity-25">
             <a th:href="@{/logout}" class="btn btn-outline-danger w-100 text-start">
-                <i class="fa-solid fa-right-from-bracket w-25 text-center"></i> Đăng xuất
+                <i class="fa-solid fa-right-from-bracket fa-fw me-2 text-center"></i> Đăng xuất
             </a>
         </div>
 

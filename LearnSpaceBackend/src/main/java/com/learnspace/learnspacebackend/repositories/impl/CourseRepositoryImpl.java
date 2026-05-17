@@ -11,6 +11,7 @@ import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 @Repository
 @Transactional
+@PropertySource("classpath:configs.properties")
 public class CourseRepositoryImpl implements CourseRepository {
     @Autowired
     private LocalSessionFactoryBean factory;
@@ -36,6 +38,9 @@ public class CourseRepositoryImpl implements CourseRepository {
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Course> q = builder.createQuery(Course.class);
         Root<Course> root = q.from(Course.class);
+
+        root.fetch("category", jakarta.persistence.criteria.JoinType.INNER);
+        root.fetch("teacher", jakarta.persistence.criteria.JoinType.INNER);
 
         q.select(root);
 
@@ -74,8 +79,16 @@ public class CourseRepositoryImpl implements CourseRepository {
                     predicates.add(builder.equal(root.get("teacher").as(Integer.class), id));
                 }
             }
+
+            String active = params.get("active");
+            if (active != null && !active.isBlank()) {
+                predicates.add(builder.equal(root.get("active"), active.equals("1")));
+            }
+
             q.where(predicates.toArray(Predicate[]::new));
         }
+
+        q.orderBy(builder.asc(root.get("id")));
 
         Query query = session.createQuery(q);
         if (params != null && params.containsKey("page")) {
@@ -86,6 +99,61 @@ public class CourseRepositoryImpl implements CourseRepository {
             query.setMaxResults(pageSize);
         }
         return query.getResultList();
+    }
+
+    public Long countCourses(Map<String, String> params) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = builder.createQuery(Long.class);
+        Root<Course> root = q.from(Course.class);
+
+        q.select(builder.count(root));
+
+        if (params != null) {
+            List<Predicate> predicates = new ArrayList<>();
+            String kw = params.get("kw");
+            if (kw != null && !kw.isBlank()) {
+                predicates.add(builder.like(root.get("name"), String.format("%%%s%%", kw)));
+            }
+            String fromPrice = params.get("fromPrice");
+            if (fromPrice != null && !fromPrice.isBlank()) {
+                BigDecimal price = parsePrice(fromPrice);
+                if (price != null) {
+                    predicates.add(builder.greaterThanOrEqualTo(root.get("price"), price));
+                }
+            }
+
+            String toPrice = params.get("toPrice");
+            if (toPrice != null && !toPrice.isBlank()) {
+                BigDecimal price = parsePrice(toPrice);
+                if (price != null) {
+                    predicates.add(builder.lessThanOrEqualTo(root.get("price"), price));
+                }
+            }
+            String categoryId = params.get("categoryId");
+            if (categoryId != null && !categoryId.isBlank()) {
+                Integer id = parseId(categoryId);
+                if (id != null) {
+                    predicates.add(builder.equal(root.get("category").get("id"), id));
+                }
+            }
+            String teacherId = params.get("teacherId");
+            if (teacherId != null && !teacherId.isBlank()) {
+                Integer id = parseId(teacherId);
+                if (id != null) {
+                    predicates.add(builder.equal(root.get("teacher").as(Integer.class), id));
+                }
+            }
+
+            String active = params.get("active");
+            if (active != null && !active.isBlank()) {
+                predicates.add(builder.equal(root.get("active"), active.equals("1")));
+            }
+
+            q.where(predicates.toArray(Predicate[]::new));
+        }
+
+        return session.createQuery(q).getSingleResult();
     }
 
     private BigDecimal parsePrice(String price) {
