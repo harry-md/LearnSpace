@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 public interface CourseRepository {
+
     List<Course> getAllCourses(Map<String, String> params);
+
+    Long countCourses(Map<String, String> params);
 
     Course getCourseById(int id);
 

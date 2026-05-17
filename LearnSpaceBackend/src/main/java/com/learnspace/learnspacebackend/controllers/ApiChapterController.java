@@ -11,24 +11,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/courses/{courseId}/chapters")
+@RequestMapping("/api")
 public class ApiChapterController {
     @Autowired
     private ChapterService chapterService;
 
-    @GetMapping("{id}")
-    public ResponseEntity<ChapterDto> getChapterById(@PathVariable("id") int chapterId) {
-        return ResponseEntity.ok(chapterService.getChapterById(chapterId));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<ChapterDto>> getAllChapters(@PathVariable("courseId") int courseId) {
-
+    @GetMapping("/courses/{courseId}/chapters")
+    public ResponseEntity<List<ChapterDto>> getChapters(@PathVariable("courseId") int courseId) {
         List<ChapterDto> chapters = chapterService.getChapters(courseId);
         return ResponseEntity.ok(chapters);
     }
 
-    @PostMapping
+    @GetMapping("/chapters/{id}")
+    public ResponseEntity<ChapterDto> getChapterById(@PathVariable("id") int chapterId) {
+        return ResponseEntity.ok(chapterService.getChapterById(chapterId));
+    }
+
+    @PostMapping("/courses/{courseId}/chapters")
     public ResponseEntity<?> createOrUpdateChapter(
             @PathVariable("courseId") int courseId, @RequestBody ChapterDto chapter) {
         try {

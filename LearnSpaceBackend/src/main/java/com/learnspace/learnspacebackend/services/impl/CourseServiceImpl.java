@@ -31,6 +31,11 @@ public class CourseServiceImpl implements CourseService {
         return courseMapper.toDto(courseRepository.getCourseById(id));
     }
 
+    @Override
+    public Long countCourses(Map<String, String> params) {
+        return courseRepository.countCourses(params);
+    }
+
     //    @Override
     //    public CourseDto createOrUpdate(Course course) {
     //        return courseMapper.toDto(courseRepository.createOrUpdate(course));

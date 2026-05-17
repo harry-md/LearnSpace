@@ -1,123 +1,123 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
+  <head>
     <meta charset="UTF-8">
     <title>Quản lý Danh mục - Learn Space</title>
     <th:block th:replace="~{base :: styles}"></th:block>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-</head>
-<body class="bg-light">
+  </head>
+  <body class="bg-light">
 
-<div class="container-fluid">
-    <div class="row">
+    <div class="container-fluid">
+      <div class="row">
 
         <nav th:replace="~{base :: admin_sidebar('categories')}"></nav>
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
 
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
-                <h1 class="h3 fw-bold text-dark">Danh sách Danh mục Khóa học</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <button id="btnAddCategory" class="btn btn-primary shadow-sm">
-                        <i class="fa-solid fa-plus me-1"></i> Thêm danh mục
-                    </button>
-                </div>
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
+            <h1 class="h3 fw-bold text-dark">Danh sách Danh mục Khóa học</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <button id="btnAddCategory" class="btn btn-primary shadow-sm">
+                <i class="fa-solid fa-plus me-1"></i> Thêm danh mục
+              </button>
             </div>
+          </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
 
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i
-                                        class="fa-solid fa-magnifying-glass"></i></span>
-                                <input type="text" class="form-control" placeholder="Tìm kiếm tên danh mục...">
-                            </div>
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <div class="input-group">
+                    <span class="input-group-text bg-white"><i
+                      class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" class="form-control" placeholder="Tìm kiếm tên danh mục...">
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th width="10%">ID</th>
+                      <th width="70%">Tên Danh Mục</th>
+                      <th width="20%" class="text-end"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="cat : ${categories}">
+                      <td class="text-muted fw-bold" th:text="${'#' + cat.id}"></td>
+                      <td class="fw-semibold text-dark" th:text="${cat.name}"></td>
+                      <td class="text-end">
+                        <div class="btn-group shadow-sm">
+                          <button type="button"
+                            class="btn btn-sm btn-light text-warning btn-edit-category"
+                            th:data-id="${cat.id}"
+                            th:data-name="${cat.name}">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                          </button>
+
+
+                          <button class="btn btn-sm btn-light text-danger btn-delete"
+                            th:data-id="${cat.id}"
+                            th:data-name="${cat.name}"
+                            type="submit"
+                            th:data-url="@{'/categories/' + ${cat.id}}"
+                          >
+
+                            <i class="fa-solid fa-trash-can"></i>
+                          </button>
+
+
                         </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                            <tr>
-                                <th width="10%">ID</th>
-                                <th width="70%">Tên Danh Mục</th>
-                                <th width="20%" class="text-end">Hành động</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="cat : ${categories}">
-                                <td class="text-muted fw-bold" th:text="${'#' + cat.id}"></td>
-                                <td class="fw-semibold text-dark" th:text="${cat.name}"></td>
-                                <td class="text-end">
-                                    <div class="btn-group shadow-sm">
-                                        <button type="button"
-                                                class="btn btn-sm btn-light text-warning btn-edit-category"
-                                                th:data-id="${cat.id}"
-                                                th:data-name="${cat.name}">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </button>
-
-
-                                        <button class="btn btn-sm btn-light text-danger btn-delete"
-                                                th:data-id="${cat.id}"
-                                                th:data-name="${cat.name}"
-                                                type="submit"
-                                                th:data-url="@{'/categories/' + ${cat.id}}"
-                                        >
-
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-
-
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
+          </div>
         </main>
+      </div>
     </div>
-</div>
 
-<footer th:replace="~{base :: footer}"></footer>
+    <footer th:replace="~{base :: footer}"></footer>
 
-<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold" id="categoryModalTitle">
-                    <i class="fa-solid fa-folder-plus me-2"></i> Thêm Danh Mục
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Đóng"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form th:action="@{/categories}" th:object="${category}" method="post" id="categoryForm">
-                    <input type="hidden" id="categoryId" name="id">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Tên danh mục <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="categoryName" name="name"
-                               placeholder="Nhập tên danh mục..." required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="submit" form="categoryForm" class="btn btn-primary" id="btnSaveCategory">Lưu danh mục
-                </button>
-            </div>
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title fw-bold" id="categoryModalTitle">
+              <i class="fa-solid fa-folder-plus me-2"></i> Thêm Danh Mục
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+              aria-label="Đóng"></button>
+          </div>
+          <div class="modal-body p-4">
+            <form th:action="@{/categories}" th:object="${category}" method="post" id="categoryForm">
+              <input type="hidden" id="categoryId" name="id">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Tên danh mục <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="categoryName" name="name"
+                  placeholder="Nhập tên danh mục..." required>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" form="categoryForm" class="btn btn-primary" id="btnSaveCategory">Lưu danh mục
+            </button>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
-<th:block th:replace="~{base :: generic_delete_modal}"></th:block>
-<th:block th:replace="~{base :: global_toast}"></th:block>
+    <th:block th:replace="~{base :: generic_delete_modal}"></th:block>
+    <th:block th:replace="~{base :: global_toast}"></th:block>
 
-<script th:src="@{/js/AdminCategories.js}"></script>
+    <script th:src="@{/js/AdminCategories.js}"></script>
 
-</body>
+  </body>
 </html>

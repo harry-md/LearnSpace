@@ -51,7 +51,7 @@ public class User {
 
     @Size(max = 255)
     @ColumnDefault(
-            "'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774929819/image-removebg-preview_2_aydokw.png'")
+            "'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png'")
     @Column(name = "avatar")
     private String avatar;
 

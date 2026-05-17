@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/api/chapters/{chapterId}/lessons")
+@RequestMapping("/api")
 public class ApiLessonController {
     @Autowired
     private LessonService lessonService;
@@ -25,7 +25,7 @@ public class ApiLessonController {
     @Autowired
     private ChapterService chapterService;
 
-    @GetMapping
+    @GetMapping("/chapters/{chapterId}/lessons")
     public ResponseEntity<List<LessonDto>> getLessons(@PathVariable("chapterId") int chapterId) {
         ChapterDto chapter = chapterService.getChapterById(chapterId);
         if (chapter == null) {
@@ -34,7 +34,9 @@ public class ApiLessonController {
         return ResponseEntity.ok(lessonService.getLessons(chapter.id()));
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(
+            value = "/chapters/{chapterId}/lessons",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LessonDto> addOrUpdateLesson(
             @PathVariable("chapterId") int chapterId,
             @RequestParam Map<String, String> lesson,
