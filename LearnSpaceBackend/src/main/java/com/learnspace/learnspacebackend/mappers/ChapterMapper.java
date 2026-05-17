@@ -9,6 +9,7 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
 public interface ChapterMapper {
+
     ChapterDto toDto(Chapter c);
 
     @Mapping(target = "id", ignore = true)
