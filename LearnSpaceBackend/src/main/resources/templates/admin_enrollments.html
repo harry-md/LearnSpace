@@ -1,167 +1,167 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
+  <head>
     <meta charset="UTF-8">
     <title>Quản lý Đăng ký - Learn Space</title>
 
     <th:block th:replace="~{base :: styles}"></th:block>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-</head>
-<body class="bg-light">
+  </head>
+  <body class="bg-light">
 
-<div class="container-fluid">
-    <div class="row">
+    <div class="container-fluid">
+      <div class="row">
 
         <nav th:replace="~{base :: admin_sidebar('enrollments')}"></nav>
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
 
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
-                <h1 class="h3 fw-bold text-dark">Lịch sử Đăng ký Khóa học</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <button class="btn btn-outline-success shadow-sm">
-                        <i class="fa-solid fa-file-excel me-1"></i> Xuất Excel
-                    </button>
-                </div>
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
+            <h1 class="h3 fw-bold text-dark">Lịch sử Đăng ký Khóa học</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <button class="btn btn-outline-success shadow-sm">
+                <i class="fa-solid fa-file-excel me-1"></i> Xuất Excel
+              </button>
             </div>
+          </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
 
-                    <div class="row mb-4 g-2">
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i
-                                        class="fa-solid fa-magnifying-glass"></i></span>
-                                <input type="text" class="form-control" placeholder="Tìm tên học viên hoặc email...">
+              <div class="row mb-4 g-2">
+                <div class="col-md-4">
+                  <div class="input-group">
+                    <span class="input-group-text bg-white"><i
+                      class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" class="form-control" placeholder="Tìm tên học viên hoặc email...">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <select class="form-select">
+                    <option value="">Tất cả khóa học</option>
+                    <option value="1">Lập trình Java Spring Boot</option>
+                    <option value="2">Lập trình Python từ Zero đến Hero</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <input type="date" class="form-control" title="Từ ngày">
+                </div>
+                <div class="col-md-2">
+                  <button class="btn btn-secondary w-100">Lọc dữ liệu</button>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Mã ĐK</th>
+                      <th>Học viên</th>
+                      <th>Khóa học</th>
+                      <th>Ngày đăng ký</th>
+                      <th class="text-end"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="enrollment : ${enrollments}">
+                      <td class="text-muted fw-bold" th:text="${'#ENR' + enrollment.id}">#ENR1024</td>
+
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img th:src="${enrollment.student.avatar != null ? enrollment.student.avatar : 'https://ui-avatars.com/api/?name=' + enrollment.student.firstName + '+' + enrollment.student.lastName}"
+                            alt="Avatar" class="rounded-circle me-2 border" width="35" height="35">
+                          <div>
+                            <div class="fw-bold text-dark"
+                              th:text="${enrollment.student.firstName + ' ' + enrollment.student.lastName}">
+                              Nguyễn Văn A
                             </div>
+                            <div class="small text-muted" th:text="${enrollment.student.email}">
+                              user@example.com
+                            </div>
+                          </div>
                         </div>
-                        <div class="col-md-4">
-                            <select class="form-select">
-                                <option value="">Tất cả khóa học</option>
-                                <option value="1">Lập trình Java Spring Boot</option>
-                                <option value="2">Lập trình Python từ Zero đến Hero</option>
-                            </select>
+                      </td>
+
+                      <td>
+                        <div class="fw-semibold text-primary" th:text="${enrollment.course.name}">Lập trình
+                          Java Spring Boot
                         </div>
-                        <div class="col-md-2">
-                            <input type="date" class="form-control" title="Từ ngày">
+                        <div class="small text-muted">Mã KH: <span
+                          th:text="${'#CRS' + enrollment.course.id}">#CRS1</span></div>
+                      </td>
+
+                      <td class="text-muted">
+                        <i class="fa-regular fa-calendar me-1"></i>
+                        <span th:text="${#temporals.format(enrollment.createdAt, 'dd/MM/yyyy HH:mm')}">25/10/2023 14:30</span>
+                      </td>
+
+                      <td class="text-end">
+                        <div class="btn-group shadow-sm">
+                          <a th:href="@{'/admin/enrollments/view/' + ${enrollment.id}}"
+                            class="btn btn-sm btn-light text-primary" data-bs-toggle="tooltip"
+                            title="Chi tiết">
+                            <i class="fa-solid fa-circle-info"></i>
+                          </a>
+                          <a th:href="@{'/admin/enrollments/delete/' + ${enrollment.id}}"
+                            class="btn btn-sm btn-light text-danger"
+                            onclick="return confirm('Bạn có chắc chắn muốn hủy đăng ký này? Học viên sẽ mất quyền truy cập khóa học.');"
+                            data-bs-toggle="tooltip" title="Hủy đăng ký">
+                            <i class="fa-solid fa-user-minus"></i>
+                          </a>
                         </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-secondary w-100">Lọc dữ liệu</button>
+                      </td>
+                    </tr>
+
+                    <tr th:if="${enrollments == null or enrollments.empty}">
+                      <td class="text-muted fw-bold">#ENR1025</td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img src="https://ui-avatars.com/api/?name=Tran+Bao&background=e9ecef&color=495057"
+                            alt="Avatar" class="rounded-circle me-2 border" width="35" height="35">
+                          <div>
+                            <div class="fw-bold text-dark">Trần Bảo</div>
+                            <div class="small text-muted">baotran@example.com</div>
+                          </div>
                         </div>
-                    </div>
+                      </td>
+                      <td>
+                        <div class="fw-semibold text-primary">Web Development với Bootstrap</div>
+                        <div class="small text-muted">Mã KH: #CRS2</div>
+                      </td>
+                      <td class="text-muted"><i class="fa-regular fa-calendar me-1"></i> 26/10/2023 09:15</td>
+                      <td class="text-end">
+                        <div class="btn-group shadow-sm">
+                          <button class="btn btn-sm btn-light text-primary"><i
+                            class="fa-solid fa-circle-info"></i></button>
+                          <button class="btn btn-sm btn-light text-danger"><i
+                            class="fa-solid fa-user-minus"></i></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Mã ĐK</th>
-                                <th>Học viên</th>
-                                <th>Khóa học</th>
-                                <th>Ngày đăng ký</th>
-                                <th class="text-end"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="enrollment : ${enrollments}">
-                                <td class="text-muted fw-bold" th:text="${'#ENR' + enrollment.id}">#ENR1024</td>
-
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img th:src="${enrollment.student.avatar != null ? enrollment.student.avatar : 'https://ui-avatars.com/api/?name=' + enrollment.student.firstName + '+' + enrollment.student.lastName}"
-                                             alt="Avatar" class="rounded-circle me-2 border" width="35" height="35">
-                                        <div>
-                                            <div class="fw-bold text-dark"
-                                                 th:text="${enrollment.student.firstName + ' ' + enrollment.student.lastName}">
-                                                Nguyễn Văn A
-                                            </div>
-                                            <div class="small text-muted" th:text="${enrollment.student.email}">
-                                                user@example.com
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <div class="fw-semibold text-primary" th:text="${enrollment.course.name}">Lập trình
-                                        Java Spring Boot
-                                    </div>
-                                    <div class="small text-muted">Mã KH: <span
-                                            th:text="${'#CRS' + enrollment.course.id}">#CRS1</span></div>
-                                </td>
-
-                                <td class="text-muted">
-                                    <i class="fa-regular fa-calendar me-1"></i>
-                                    <span th:text="${#temporals.format(enrollment.createdAt, 'dd/MM/yyyy HH:mm')}">25/10/2023 14:30</span>
-                                </td>
-
-                                <td class="text-end">
-                                    <div class="btn-group shadow-sm">
-                                        <a th:href="@{'/admin/enrollments/view/' + ${enrollment.id}}"
-                                           class="btn btn-sm btn-light text-primary" data-bs-toggle="tooltip"
-                                           title="Chi tiết">
-                                            <i class="fa-solid fa-circle-info"></i>
-                                        </a>
-                                        <a th:href="@{'/admin/enrollments/delete/' + ${enrollment.id}}"
-                                           class="btn btn-sm btn-light text-danger"
-                                           onclick="return confirm('Bạn có chắc chắn muốn hủy đăng ký này? Học viên sẽ mất quyền truy cập khóa học.');"
-                                           data-bs-toggle="tooltip" title="Hủy đăng ký">
-                                            <i class="fa-solid fa-user-minus"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <tr th:if="${enrollments == null or enrollments.empty}">
-                                <td class="text-muted fw-bold">#ENR1025</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://ui-avatars.com/api/?name=Tran+Bao&background=e9ecef&color=495057"
-                                             alt="Avatar" class="rounded-circle me-2 border" width="35" height="35">
-                                        <div>
-                                            <div class="fw-bold text-dark">Trần Bảo</div>
-                                            <div class="small text-muted">baotran@example.com</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold text-primary">Web Development với Bootstrap</div>
-                                    <div class="small text-muted">Mã KH: #CRS2</div>
-                                </td>
-                                <td class="text-muted"><i class="fa-regular fa-calendar me-1"></i> 26/10/2023 09:15</td>
-                                <td class="text-end">
-                                    <div class="btn-group shadow-sm">
-                                        <button class="btn btn-sm btn-light text-primary"><i
-                                                class="fa-solid fa-circle-info"></i></button>
-                                        <button class="btn btn-sm btn-light text-danger"><i
-                                                class="fa-solid fa-user-minus"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
-
-                <div class="card-footer bg-white border-top-0 py-3">
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-end mb-0">
-                            <li class="page-item disabled"><a class="page-link" href="#">Trang trước</a></li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">Trang sau</a></li>
-                        </ul>
-                    </nav>
-                </div>
             </div>
+
+            <div class="card-footer bg-white border-top-0 py-3">
+              <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end mb-0">
+                  <li class="page-item disabled"><a class="page-link" href="#">Trang trước</a></li>
+                  <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                  <li class="page-item"><a class="page-link" href="#">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#">Trang sau</a></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
 
         </main>
+      </div>
     </div>
-</div>
 
-<footer th:replace="~{base :: footer}"></footer>
+    <footer th:replace="~{base :: footer}"></footer>
 
-</body>
+  </body>
 </html>
