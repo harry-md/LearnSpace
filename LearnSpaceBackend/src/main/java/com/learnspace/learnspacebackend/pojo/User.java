@@ -33,7 +33,7 @@ public class User {
     @ColumnDefault("'STUDENT'")
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private UserRole role;
+    private UserRole role = UserRole.STUDENT;
 
     @Size(max = 255)
     @NotNull
@@ -54,11 +54,12 @@ public class User {
     @ColumnDefault(
             "'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png'")
     @Column(name = "avatar")
-    private String avatar;
+    private String avatar =
+            "https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png";
 
     @ColumnDefault("1")
     @Column(name = "active")
-    private Boolean active;
+    private Boolean active = true;
 
     @ColumnDefault("0")
     @Column(name = "verified")

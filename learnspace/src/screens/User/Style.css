@@ -1,0 +1,66 @@
+.full-page-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+}
+
+.floating-input-group {
+  position: relative;
+}
+
+.floating-input.form-control-lg {
+  height: 3.6rem;
+  padding-top: 1.4rem;
+  padding-bottom: 0.2rem;
+  font-size: 1rem;
+  color: #000;
+  border: 1px solid #aaa !important;
+  border-radius: 6px !important;
+}
+
+.rounded-input {
+  border: 1px solid #aaa !important;
+  border-radius: 6px !important;
+}
+
+.rounded-button {
+  border-radius: 6px !important;
+}
+
+.floating-input.form-control-lg:focus {
+  border-color: #5624d0 !important;
+  box-selection: none;
+  box-shadow: none;
+}
+
+.floating-label {
+  position: absolute;
+  top: 1.1rem;
+  left: 1rem;
+  font-size: 0.95rem;
+  color: #6a6f73;
+  pointer-events: none;
+  transition: all 0.15s ease-in-out;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+  top: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600 !important;
+  color: #000 !important;
+}
+
+.registration-page-container {
+  background-color: #fff !important;
+  border: none !important;
+}
+
+hr {
+  color: #d1d7dc;
+}
