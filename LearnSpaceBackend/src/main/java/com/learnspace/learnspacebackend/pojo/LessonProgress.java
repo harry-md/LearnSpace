@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Table(name = "lesson_progress")
 public class LessonProgress {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

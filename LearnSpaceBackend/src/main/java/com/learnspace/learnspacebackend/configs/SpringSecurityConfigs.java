@@ -28,6 +28,7 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
             "com.learnspace.learnspacebackend.mappers"
         })
 public class SpringSecurityConfigs {
+
     @Autowired
     private Environment env;
 

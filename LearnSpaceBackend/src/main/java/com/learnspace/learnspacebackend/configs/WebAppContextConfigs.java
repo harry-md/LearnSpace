@@ -21,6 +21,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
             "com.learnspace.learnspacebackend.mappers"
         })
 public class WebAppContextConfigs implements WebMvcConfigurer {
+
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable();

@@ -26,6 +26,7 @@ import java.util.Map;
 @Transactional
 @PropertySource("classpath:configs.properties")
 public class CourseRepositoryImpl implements CourseRepository {
+
     @Autowired
     private LocalSessionFactoryBean factory;
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface UserRepository {
+
     User getUserByUsername(String username);
 
     User register(User u);

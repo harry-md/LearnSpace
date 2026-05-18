@@ -4,8 +4,11 @@ import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
 import com.learnspace.learnspacebackend.services.UserService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,14 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 public class ApiUserController {
+
     @Autowired
     private UserService userService;
 
-    @PostMapping
+    @PostMapping(
+            path = "/users",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserProfileDto> register(
-            @RequestPart(value = "data") UserRegisterDto user,
+            @Valid @RequestPart(value = "data") UserRegisterDto user,
             @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
         return new ResponseEntity<>(userService.register(user, avatar), HttpStatus.CREATED);
     }

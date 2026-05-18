@@ -16,6 +16,7 @@ import java.util.List;
 @Repository
 @Transactional
 public class LessonRepositoryImpl implements LessonRepository {
+
     @Autowired
     private LocalSessionFactoryBean factory;
 
