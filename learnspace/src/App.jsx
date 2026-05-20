@@ -1,18 +1,18 @@
 import "./App.css";
-import { Container } from "react-bootstrap";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./screens/Home/Home";
+import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
 import Login from "./screens/User/Login";
 import Register from "./screens/User/Register";
-import "bootstrap/dist/css/bootstrap.min.css";
+import LandingPage from "./screens/LandingPage/LandingPage";
+import Home from "./screens/Home/Home";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/home" element={<Home />} />
       </Routes>
     </BrowserRouter>
   );
