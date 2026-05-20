@@ -6,7 +6,9 @@ import jakarta.validation.constraints.Pattern;
 
 public record UserRegisterDto(
         @NotBlank(message = "Tên đăng nhập không được để trống")
-        @Pattern(regexp = "^[A-Za-z]+$", message = "Tên đăng nhập không được chứa ký tự đặc biệt")
+        @Pattern(
+                regexp = "^[A-Za-z0-9]+$",
+                message = "Tên đăng nhập không được chứa ký tự đặc biệt")
         String username,
 
         @NotBlank(message = "Mật khẩu không được để trống") String password,
@@ -15,8 +17,10 @@ public record UserRegisterDto(
         @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Tên không được chứa ký tự đặc biệt")
         String firstName,
 
-        @NotBlank(message = "Họ không được để trống")
-        @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Họ không được chứa ký tự đặc biệt")
+        @NotBlank(message = "Họ và tên lót không được để trống")
+        @Pattern(
+                regexp = "^[\\p{L}\\s]+$",
+                message = "Họ và tên lót không được chứa ký tự đặc biệt")
         String lastName,
 
         @NotBlank(message = "Email không được để trống")

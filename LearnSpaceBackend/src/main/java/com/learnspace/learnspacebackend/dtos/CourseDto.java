@@ -9,7 +9,8 @@ public record CourseDto(
         String image,
         String introVideo,
         BigDecimal price,
-        Boolean active,
         String categoryName,
+        String teacherName,
+        Boolean active,
         String createdAt,
         String updatedAt) {}

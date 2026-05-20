@@ -5,9 +5,8 @@ import com.learnspace.learnspacebackend.pojo.Chapter;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
+@Mapper(componentModel = "spring")
 public interface ChapterMapper {
 
     ChapterDto toDto(Chapter c);

@@ -3,6 +3,7 @@ import RegisterImg from "../../assets/desktop-illustration-step-2-x2.webp";
 import "./Style.css";
 import { Button, Col, Form, Placeholder, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
+import Apis, { endpoints } from "../../configs/Apis";
 
 const FloatingField = ({
   id,
@@ -63,9 +64,17 @@ const Register = () => {
         return false;
       }
 
-      if (["firstName", "lastName", "username"].includes(u.field)) {
-        const specialCharRegex = /^[\p{L}\s]+$/u;
-        if (specialCharRegex.test(user[u.field])) {
+      if (["firstName", "lastName"].includes(u.field)) {
+        const nameRegex = /^[\p{L}\s]+$/u;
+        if (!nameRegex.test(user[u.field])) {
+          setError(`${u.title} không được chứa ký tự đặc biệt`);
+          return false;
+        }
+      }
+
+      if (u.field === "username") {
+        const usernameRegex = /^[A-Za-z0-9]+$/;
+        if (!usernameRegex.test(user[u.field])) {
           setError(`${u.title} không được chứa ký tự đặc biệt`);
           return false;
         }
@@ -93,18 +102,39 @@ const Register = () => {
     e.preventDefault();
     if (validateData() === true) {
       let form = new FormData();
-      for (let key of Object.keys(user)) {
-        form.append(key, user[key]);
-      }
+
+      const { confirm, ...registerData } = user;
+
+      const jsonBlob = new Blob([JSON.stringify(registerData)], {
+        type: "application/json",
+      });
+
+      form.append("data", jsonBlob);
 
       if (avatar.current.files.length > 0) {
         form.append("avatar", avatar.current.files[0]);
       }
 
       try {
+        setLoading(true);
+        let res = await Apis.post(endpoints.register, form, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (res.status === 201) {
+          nav("/login");
+        }
       } catch (err) {
-        setError(err);
         console.error(err);
+        if (err.response && err.response.data && err.response.data.message) {
+          setError(err.response.data.message);
+        } else {
+          setError(err.message || "Đã có lỗi xảy ra, vui lòng thử lại sau.");
+        }
+      } finally {
+        setLoading(false);
       }
     }
   };
