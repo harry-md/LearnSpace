@@ -1,14 +1,21 @@
 package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
+import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.ChapterMapper;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
+import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.ChapterService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,10 +30,16 @@ public class ChapterServiceImpl implements ChapterService {
     private CourseRepository courseRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private ChapterMapper chapterMapper;
 
     @Override
     public List<ChapterDto> getChapters(int courseId) {
+        if (courseRepository.getCourseById(courseId) == null) {
+            throw new ResourceNotFoundException("Không tìm thấy khóa học");
+        }
         return chapterRepository.getChaptersByCourse(courseId).stream()
                 .map(chapterMapper::toDto)
                 .toList();
@@ -37,18 +50,63 @@ public class ChapterServiceImpl implements ChapterService {
         return chapterMapper.toDto(chapterRepository.getChapterById(chapterId));
     }
 
-    @Override
-    public ChapterDto createOrUpdate(int courseId, ChapterDto chapterdto) {
-        Course course = courseRepository.getCourseById(courseId);
+    private User getLoggedInTeacher() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("Bạn cần đăng nhập!");
+        }
 
-        Chapter chapter = chapterMapper.toEntity(chapterdto);
+        CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+        return userRepository.getUserReference(principal.getId());
+    }
+
+    private void verifyCourseOwner(Course course) {
+        User currentTeacher = getLoggedInTeacher();
+        if (course.getTeacher() == null
+                || !course.getTeacher().getId().equals(currentTeacher.getId())) {
+            throw new AccessDeniedException(
+                    "Bạn không có quyền chỉnh sửa nội dung của khóa học này");
+        }
+    }
+
+    @Override
+    public ChapterDto createChapter(int courseId, ChapterDto chapterDto) {
+        Course course = courseRepository.getCourseById(courseId);
+        if (course == null) {
+            throw new ResourceNotFoundException("Không tìm thấy khóa học");
+        }
+
+        verifyCourseOwner(course);
+
+        Chapter chapter = chapterMapper.toEntity(chapterDto);
         chapter.setCourse(course);
 
         return chapterMapper.toDto(chapterRepository.createOrUpdate(chapter));
     }
 
     @Override
+    public ChapterDto updateChapter(int chapterId, ChapterDto chapterDto) {
+        Chapter existingChapter = chapterRepository.getChapterById(chapterId);
+        if (existingChapter == null) {
+            throw new ResourceNotFoundException("Không tìm thấy chương học");
+        }
+
+        verifyCourseOwner(existingChapter.getCourse());
+
+        chapterMapper.updateEntityFromDto(existingChapter, chapterDto);
+
+        return chapterMapper.toDto(chapterRepository.createOrUpdate(existingChapter));
+    }
+
+    @Override
     public void deleteChapter(int chapterId) {
+        Chapter existingChapter = chapterRepository.getChapterById(chapterId);
+        if (existingChapter == null) {
+            throw new ResourceNotFoundException("Không tìm thấy chương học");
+        }
+
+        verifyCourseOwner(existingChapter.getCourse());
+
         chapterRepository.deleteChapter(chapterId);
     }
 }

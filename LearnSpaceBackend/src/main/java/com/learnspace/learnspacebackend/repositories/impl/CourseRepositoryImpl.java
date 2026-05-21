@@ -145,8 +145,10 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Override
     public Course getCourseById(int id) {
         Session session = factory.getObject().getCurrentSession();
+
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Course> q = builder.createQuery(Course.class);
+
         Root<Course> root = q.from(Course.class);
         root.fetch("category", JoinType.INNER);
         root.fetch("teacher", JoinType.INNER);

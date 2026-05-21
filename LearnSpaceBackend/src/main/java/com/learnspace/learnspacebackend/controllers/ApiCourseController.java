@@ -33,14 +33,14 @@ public class ApiCourseController {
 
     @PostMapping
     public ResponseEntity<CourseDto> create(@Valid @RequestBody CourseDto courseDto) {
-        CourseDto savedCourse = courseService.create(courseDto);
+        CourseDto savedCourse = courseService.createCourse(courseDto);
         return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CourseDto> update(
             @PathVariable(value = "id") int id, @Valid @RequestBody CourseDto courseDto) {
-        CourseDto updatedCourse = courseService.update(id, courseDto);
+        CourseDto updatedCourse = courseService.updateCourse(id, courseDto);
         return new ResponseEntity<>(updatedCourse, HttpStatus.OK);
     }
 

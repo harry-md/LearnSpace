@@ -72,8 +72,7 @@ public class CourseServiceImpl implements CourseService {
         }
 
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
-        int teacherId = principal.getId();
-        return userRepository.getUserReference(teacherId);
+        return userRepository.getUserReference(principal.getId());
     }
 
     private void checkAndSetRelationship(Course course, CourseDto courseDto) {
@@ -91,7 +90,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDto create(CourseDto courseDto) {
+    public CourseDto createCourse(CourseDto courseDto) {
         Course course = courseMapper.toEntity(courseDto);
 
         this.checkAndSetRelationship(course, courseDto);
@@ -101,7 +100,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDto update(int id, CourseDto courseDto) {
+    public CourseDto updateCourse(int id, CourseDto courseDto) {
         Course existCourse = courseRepository.getCourseById(id);
         if (existCourse == null) {
             throw new ResourceNotFoundException("Không tìm thấy khóa học cần cập nhật");
@@ -109,8 +108,7 @@ public class CourseServiceImpl implements CourseService {
 
         User teacher = getLoggedInTeacher();
 
-        if (existCourse.getTeacher() == null
-                || !existCourse.getTeacher().getId().equals(teacher.getId())) {
+        if (existCourse.getTeacher().getId() != teacher.getId()) {
             throw new AccessDeniedException("Bạn không có quyền chỉnh sửa khóa học này");
         }
 
@@ -129,8 +127,7 @@ public class CourseServiceImpl implements CourseService {
 
         User teacher = getLoggedInTeacher();
 
-        if (existCourse.getTeacher() == null
-                || !existCourse.getTeacher().getId().equals(teacher.getId())) {
+        if (existCourse.getTeacher().getId() != teacher.getId()) {
             throw new AccessDeniedException("Bạn không có quyền xóa khóa học này");
         }
 

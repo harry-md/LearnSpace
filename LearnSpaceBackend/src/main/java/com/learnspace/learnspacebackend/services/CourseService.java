@@ -16,9 +16,9 @@ public interface CourseService {
 
     CourseDto getCourseById(int id);
 
-    CourseDto create(CourseDto courseDto);
+    CourseDto createCourse(CourseDto courseDto);
 
-    CourseDto update(int id, CourseDto courseDto);
+    CourseDto updateCourse(int id, CourseDto courseDto);
 
     void deleteCourse(int id);
 }
