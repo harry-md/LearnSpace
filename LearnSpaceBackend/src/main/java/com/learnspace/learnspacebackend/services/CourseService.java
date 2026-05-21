@@ -10,11 +10,11 @@ public interface CourseService {
 
     List<CourseDto> getAllCoursesWithDetail(Map<String, String> params);
 
-    List<CourseListDto> getAllCourses(Map<String, String> params);
+    List<CourseListDto> getCourses(Map<String, String> params);
 
     Long countCourses(Map<String, String> params);
 
-    CourseDto getCourseById(int id);
+    CourseDto getCourse(int id);
 
     CourseDto createCourse(CourseDto courseDto);
 

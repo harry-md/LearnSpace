@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -18,12 +19,13 @@ public record LessonDto(
         String content,
 
         @NotBlank(message = "Video bài học không được để trống")
+        @Size(max = 255, message = "Video bài học vượt quá độ dài cho phép")
         String video,
 
         @Min(value = 1, message = "Thứ tự bài học không hợp lệ")
         Integer order,
 
-        Integer videoLength,
+        @JsonProperty(access = Access.READ_ONLY) Integer videoLength,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         String createdAt,

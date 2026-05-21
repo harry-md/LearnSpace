@@ -61,7 +61,7 @@ public class AdminController {
 
     @GetMapping("/courses")
     public String course(Model model, @RequestParam Map<String, String> params) {
-        model.addAttribute("categories", categoryService.getCates());
+        model.addAttribute("categories", categoryService.getCategories());
         model.addAttribute("courses", courseService.getAllCoursesWithDetail(params));
 
         int pageSize = env.getProperty("course.pageSize", Integer.class);

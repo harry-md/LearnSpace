@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface CategoryService {
 
-    List<Category> getCates();
+    List<Category> getCategories();
 
-    Category getCategotyById(int id);
+    Category getCategory(int id);
 
     Category createOrUpdate(Category category);
 

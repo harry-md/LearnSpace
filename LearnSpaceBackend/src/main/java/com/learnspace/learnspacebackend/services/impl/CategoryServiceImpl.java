@@ -16,12 +16,12 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryRepository categoryRepository;
 
     @Override
-    public List<Category> getCates() {
+    public List<Category> getCategories() {
         return categoryRepository.getCates();
     }
 
     @Override
-    public Category getCategotyById(int id) {
+    public Category getCategory(int id) {
         return categoryRepository.getCateById(id);
     }
 

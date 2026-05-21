@@ -23,12 +23,12 @@ public class ApiCourseController {
 
     @GetMapping
     public ResponseEntity<List<CourseListDto>> list(@RequestParam Map<String, String> params) {
-        return ResponseEntity.ok(courseService.getAllCourses(params));
+        return ResponseEntity.ok(courseService.getCourses(params));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CourseDto> retrieve(@PathVariable("id") int id) {
-        return ResponseEntity.ok(courseService.getCourseById(id));
+        return ResponseEntity.ok(courseService.getCourse(id));
     }
 
     @PostMapping

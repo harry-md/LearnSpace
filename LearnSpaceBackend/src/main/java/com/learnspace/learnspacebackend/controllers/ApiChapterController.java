@@ -27,7 +27,7 @@ public class ApiChapterController {
 
     @GetMapping("/chapters/{id}")
     public ResponseEntity<ChapterDto> retrieve(@PathVariable("id") int chapterId) {
-        return ResponseEntity.ok(chapterService.getChapterById(chapterId));
+        return ResponseEntity.ok(chapterService.getChapter(chapterId));
     }
 
     @PostMapping("/courses/{courseId}/chapters")

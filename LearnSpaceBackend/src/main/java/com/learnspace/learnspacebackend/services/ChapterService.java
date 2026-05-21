@@ -8,7 +8,7 @@ public interface ChapterService {
 
     List<ChapterDto> getChapters(int courseId);
 
-    ChapterDto getChapterById(int chapterId);
+    ChapterDto getChapter(int chapterId);
 
     ChapterDto createChapter(int courseId, ChapterDto chapterDto);
 
