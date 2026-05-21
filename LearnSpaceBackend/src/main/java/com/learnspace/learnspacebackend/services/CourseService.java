@@ -2,6 +2,7 @@ package com.learnspace.learnspacebackend.services;
 
 import com.learnspace.learnspacebackend.dtos.CourseDto;
 import com.learnspace.learnspacebackend.dtos.CourseListDto;
+import com.learnspace.learnspacebackend.dtos.CoursePatchDto;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ public interface CourseService {
 
     CourseDto createCourse(CourseDto courseDto);
 
-    CourseDto updateCourse(int id, CourseDto courseDto);
+    CourseDto updateCourse(int id, CoursePatchDto courseDto);
 
     void deleteCourse(int id);
 }

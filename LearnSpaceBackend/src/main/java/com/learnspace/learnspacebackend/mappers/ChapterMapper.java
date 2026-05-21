@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.mappers;
 
 import com.learnspace.learnspacebackend.dtos.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.ChapterPatchDto;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 
 import org.mapstruct.BeanMapping;
@@ -22,5 +23,5 @@ public interface ChapterMapper {
 
     @Mapping(target = "course", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDto(@MappingTarget Chapter chapter, ChapterDto dto);
+    void updateEntityFromDto(@MappingTarget Chapter chapter, ChapterPatchDto dto);
 }

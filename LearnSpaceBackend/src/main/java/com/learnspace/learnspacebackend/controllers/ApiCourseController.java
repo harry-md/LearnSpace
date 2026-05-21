@@ -2,6 +2,7 @@ package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.CourseDto;
 import com.learnspace.learnspacebackend.dtos.CourseListDto;
+import com.learnspace.learnspacebackend.dtos.CoursePatchDto;
 import com.learnspace.learnspacebackend.services.CourseService;
 
 import jakarta.validation.Valid;
@@ -37,9 +38,9 @@ public class ApiCourseController {
         return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<CourseDto> update(
-            @PathVariable(value = "id") int id, @Valid @RequestBody CourseDto courseDto) {
+            @PathVariable(value = "id") int id, @Valid @RequestBody CoursePatchDto courseDto) {
         CourseDto updatedCourse = courseService.updateCourse(id, courseDto);
         return new ResponseEntity<>(updatedCourse, HttpStatus.OK);
     }

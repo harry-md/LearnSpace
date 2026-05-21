@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.ChapterPatchDto;
 import com.learnspace.learnspacebackend.services.ChapterService;
 
 import jakarta.validation.Valid;
@@ -37,9 +38,9 @@ public class ApiChapterController {
         return new ResponseEntity<>(createdChapter, HttpStatus.CREATED);
     }
 
-    @PutMapping("/chapters/{id}")
+    @PatchMapping("/chapters/{id}")
     public ResponseEntity<ChapterDto> update(
-            @PathVariable("id") int id, @Valid @RequestBody ChapterDto chapterDto) {
+            @PathVariable("id") int id, @Valid @RequestBody ChapterPatchDto chapterDto) {
         ChapterDto updatedChapter = chapterService.updateChapter(id, chapterDto);
         return ResponseEntity.ok(updatedChapter);
     }
