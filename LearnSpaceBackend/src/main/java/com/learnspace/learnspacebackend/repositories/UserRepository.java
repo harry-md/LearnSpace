@@ -18,4 +18,6 @@ public interface UserRepository {
     User getUserById(Integer id);
 
     void update(User user);
+
+    User getUserReference(int id);
 }

@@ -10,7 +10,7 @@ public interface ChapterRepository {
 
     Chapter getChapterById(int ChapterId);
 
-    Chapter createOrUpdate(int courseId, Chapter chapter);
+    Chapter createOrUpdate(Chapter chapter);
 
     void deleteChapter(int chapterId);
 }

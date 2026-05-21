@@ -3,6 +3,7 @@ package com.learnspace.learnspacebackend.services.impl;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.learnspace.learnspacebackend.dtos.AdminUserUpdateDto;
+import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.dtos.UserLoginDto;
 import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
@@ -75,8 +76,8 @@ public class UserServiceImpl implements UserService {
                 authorities.add(
                         new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
             }
-            return new org.springframework.security.core.userdetails.User(
-                    user.getUsername(), user.getPassword(), authorities);
+            return new CustomUserDetails(
+                    user.getUsername(), user.getPassword(), authorities, user.getId());
         } catch (NoResultException ex) {
             throw new UsernameNotFoundException("Không tìm thấy username");
         }
@@ -122,9 +123,7 @@ public class UserServiceImpl implements UserService {
 
             Authentication authenticatedToken = authenticationManager.authenticate(authentication);
 
-            org.springframework.security.core.userdetails.User principal =
-                    (org.springframework.security.core.userdetails.User)
-                            authenticatedToken.getPrincipal();
+            CustomUserDetails principal = (CustomUserDetails) authenticatedToken.getPrincipal();
 
             String authority = principal.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
@@ -132,7 +131,8 @@ public class UserServiceImpl implements UserService {
                     .orElse("ROLE_STUDENT")
                     .replace("ROLE_", "");
 
-            return JwtUtils.generateToken(principal.getUsername(), UserRole.valueOf(authority));
+            return JwtUtils.generateToken(
+                    principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
         } catch (AuthenticationException ex) {
             System.err.println(ex.getMessage());
             throw new InvalidLoginException("Tên đăng nhập hoặc mật khẩu không đúng");

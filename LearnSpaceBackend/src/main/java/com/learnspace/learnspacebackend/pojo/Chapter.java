@@ -30,7 +30,7 @@ public class Chapter {
 
     @ColumnDefault("0")
     @Column(name = "free")
-    private Boolean free;
+    private boolean free = false;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -69,11 +69,11 @@ public class Chapter {
         this.order = order;
     }
 
-    public Boolean getFree() {
+    public boolean getFree() {
         return free;
     }
 
-    public void setFree(Boolean free) {
+    public void setFree(boolean free) {
         this.free = free;
     }
 

@@ -1,5 +1,6 @@
 package com.learnspace.learnspacebackend.filters;
 
+import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.utils.JwtUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 
@@ -29,8 +30,10 @@ public class JwtFilter implements Filter {
             String token = header.substring(7);
 
             try {
-                JWTClaimsSet claims = JwtUtils.validateTokenAndGetUsername(token);
+                JWTClaimsSet claims = JwtUtils.validateTokenAndGetClaims(token);
+
                 if (claims != null) {
+                    Integer userId = claims.getIntegerClaim("userId");
                     String username = claims.getSubject();
 
                     httpRequest.setAttribute("username", username);
@@ -40,8 +43,10 @@ public class JwtFilter implements Filter {
                     List<SimpleGrantedAuthority> authorities =
                             List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
+                    CustomUserDetails principal =
+                            new CustomUserDetails(username, "", authorities, userId);
                     UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(username, null, authorities);
+                            new UsernamePasswordAuthenticationToken(principal, null, authorities);
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     chain.doFilter(request, response);
