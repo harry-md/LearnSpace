@@ -16,14 +16,14 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping
-    public String adminCategory(Model model) {
+    public String categoryView(Model model) {
         model.addAttribute("categories", categoryService.getCates());
         model.addAttribute("category", new Category());
         return "admin_categories";
     }
 
     @PostMapping
-    public String add(@ModelAttribute(value = "category") Category category) {
+    public String create(@ModelAttribute(value = "category") Category category) {
         categoryService.createOrUpdate(category);
         return "redirect:/categories";
     }

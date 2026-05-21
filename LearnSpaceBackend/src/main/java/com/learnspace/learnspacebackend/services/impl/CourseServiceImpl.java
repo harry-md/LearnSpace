@@ -2,6 +2,7 @@ package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.CourseDto;
 import com.learnspace.learnspacebackend.dtos.CourseListDto;
+import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
@@ -31,10 +32,10 @@ public class CourseServiceImpl implements CourseService {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private CourseMapper courseMapper;
 
     @Autowired
-    private CourseMapper courseMapper;
+    private UserRepository userRepository;
 
     @Override
     public List<CourseDto> getAllCoursesWithDetail(Map<String, String> params) {
@@ -64,32 +65,15 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.countCourses(params);
     }
 
-    private User getCurrentLoggedInTeacher() {
+    private User getLoggedInTeacher() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AccessDeniedException("Bạn cần đăng nhập để thực hiện thao tác này");
-        }
-        String username = authentication.getName();
-        User teacher = userRepository.getUserByUsername(username);
-        if (teacher == null) {
-            throw new ResourceNotFoundException("Không tìm thấy giáo viên với tài khoản: " + username);
-        }
-        return teacher;
-    }
-
-    @Override
-    public void deleteCourse(int id) {
-        Course existCourse = courseRepository.getCourseById(id);
-        if (existCourse == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học để xóa");
+            throw new AccessDeniedException("Bạn cần đăng nhập!");
         }
 
-        User teacher = getCurrentLoggedInTeacher();
-        if (existCourse.getTeacher() == null || !existCourse.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException("Bạn không có quyền xóa khóa học này");
-        }
-
-        courseRepository.deleteCourse(id);
+        CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+        int teacherId = principal.getId();
+        return userRepository.getUserReference(teacherId);
     }
 
     private void checkAndSetRelationship(Course course, CourseDto courseDto) {
@@ -101,14 +85,14 @@ public class CourseServiceImpl implements CourseService {
             }
             course.setCategory(category);
         }
+
+        User teacher = getLoggedInTeacher();
+        course.setTeacher(teacher);
     }
 
     @Override
     public CourseDto create(CourseDto courseDto) {
         Course course = courseMapper.toEntity(courseDto);
-
-        User teacher = getCurrentLoggedInTeacher();
-        course.setTeacher(teacher);
 
         this.checkAndSetRelationship(course, courseDto);
 
@@ -123,8 +107,10 @@ public class CourseServiceImpl implements CourseService {
             throw new ResourceNotFoundException("Không tìm thấy khóa học cần cập nhật");
         }
 
-        User teacher = getCurrentLoggedInTeacher();
-        if (existCourse.getTeacher() == null || !existCourse.getTeacher().getId().equals(teacher.getId())) {
+        User teacher = getLoggedInTeacher();
+
+        if (existCourse.getTeacher() == null
+                || !existCourse.getTeacher().getId().equals(teacher.getId())) {
             throw new AccessDeniedException("Bạn không có quyền chỉnh sửa khóa học này");
         }
 
@@ -132,5 +118,22 @@ public class CourseServiceImpl implements CourseService {
 
         this.checkAndSetRelationship(existCourse, courseDto);
         return courseMapper.toDto(courseRepository.createOrUpdate(existCourse));
+    }
+
+    @Override
+    public void deleteCourse(int id) {
+        Course existCourse = courseRepository.getCourseById(id);
+        if (existCourse == null) {
+            throw new ResourceNotFoundException("Không tìm thấy khóa học để xóa");
+        }
+
+        User teacher = getLoggedInTeacher();
+
+        if (existCourse.getTeacher() == null
+                || !existCourse.getTeacher().getId().equals(teacher.getId())) {
+            throw new AccessDeniedException("Bạn không có quyền xóa khóa học này");
+        }
+
+        courseRepository.deleteCourse(id);
     }
 }

@@ -59,11 +59,11 @@ public class User {
 
     @ColumnDefault("1")
     @Column(name = "active")
-    private boolean active = true;
+    private Boolean active = true;
 
     @ColumnDefault("0")
     @Column(name = "verified")
-    private boolean verified = false;
+    private Boolean verified = false;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -137,19 +137,19 @@ public class User {
         this.avatar = avatar;
     }
 
-    public boolean getActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 
-    public boolean getVerified() {
+    public Boolean getVerified() {
         return verified;
     }
 
-    public void setVerified(boolean verified) {
+    public void setVerified(Boolean verified) {
         this.verified = verified;
     }
 

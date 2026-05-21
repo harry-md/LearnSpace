@@ -21,11 +21,13 @@ public class JwtUtils {
     private static String SECRET;
     private static final long EXPIRATION_MS = 86400000;
 
-    public static String generateToken(String username, UserRole role) throws Exception {
+    public static String generateToken(Integer userId, String username, UserRole role)
+            throws Exception {
         JWSSigner signer = new MACSigner(SECRET);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(username)
+                .claim("userId", userId)
                 .claim("role", role.name())
                 .expirationTime(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .issueTime(new Date())
@@ -38,7 +40,7 @@ public class JwtUtils {
         return signedJWT.serialize();
     }
 
-    public static JWTClaimsSet validateTokenAndGetUsername(String token) throws Exception {
+    private static JWTClaimsSet validateToken(String token) throws Exception {
         SignedJWT signedJWT = SignedJWT.parse(token);
         JWSVerifier verifier = new MACVerifier(SECRET);
 
@@ -48,8 +50,27 @@ public class JwtUtils {
                 return signedJWT.getJWTClaimsSet();
             }
         }
-
         return null;
+    }
+
+    public static String validateTokenAndGetUsername(String token) throws Exception {
+        JWTClaimsSet claims = validateToken(token);
+        if (claims != null) {
+            return claims.getSubject();
+        }
+        return null;
+    }
+
+    public static Integer validateTokenAndGetUserId(String token) throws Exception {
+        JWTClaimsSet claims = validateToken(token);
+        if (claims != null && claims.getClaim("userId") != null) {
+            return Integer.parseInt(claims.getClaim("userId").toString());
+        }
+        return null;
+    }
+
+    public static JWTClaimsSet validateTokenAndGetClaims(String token) throws Exception {
+        return validateToken(token);
     }
 
     @Autowired
