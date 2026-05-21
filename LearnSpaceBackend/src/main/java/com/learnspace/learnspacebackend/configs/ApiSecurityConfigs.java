@@ -66,14 +66,9 @@ public class ApiSecurityConfigs {
                         .hasRole(UserRole.VERIFIED_TEACHER.name())
                         .anyRequest()
                         .authenticated())
-                .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    @Bean
-    public JwtFilter jwtFilter() {
-        return new JwtFilter();
     }
 
     @Bean

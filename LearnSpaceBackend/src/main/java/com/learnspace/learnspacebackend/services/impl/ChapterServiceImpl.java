@@ -14,7 +14,7 @@ import com.learnspace.learnspacebackend.services.ChapterService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -46,30 +46,30 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public ChapterDto getChapterById(int chapterId) {
-        return chapterMapper.toDto(chapterRepository.getChapterById(chapterId));
+    public ChapterDto getChapter(int chapterId) {
+        Chapter chapter = chapterRepository.getChapterById(chapterId);
+        if (chapter == null) {
+            throw new ResourceNotFoundException("Không tìm thấy chương học");
+        }
+        return chapterMapper.toDto(chapter);
     }
 
     private User getLoggedInTeacher() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AccessDeniedException("Bạn cần đăng nhập!");
-        }
-
-        CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
-        return userRepository.getUserReference(principal.getId());
+        CustomUserDetails principal = (CustomUserDetails)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userRepository.getUserById(principal.getId());
     }
 
     private void verifyCourseOwner(Course course) {
-        User currentTeacher = getLoggedInTeacher();
-        if (course.getTeacher() == null
-                || !course.getTeacher().getId().equals(currentTeacher.getId())) {
+        User teacher = getLoggedInTeacher();
+        if (!course.getTeacher().getId().equals(teacher.getId())) {
             throw new AccessDeniedException(
                     "Bạn không có quyền chỉnh sửa nội dung của khóa học này");
         }
     }
 
     @Override
+    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public ChapterDto createChapter(int courseId, ChapterDto chapterDto) {
         Course course = courseRepository.getCourseById(courseId);
         if (course == null) {
@@ -85,6 +85,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public ChapterDto updateChapter(int chapterId, ChapterDto chapterDto) {
         Chapter existingChapter = chapterRepository.getChapterById(chapterId);
         if (existingChapter == null) {
@@ -99,6 +100,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public void deleteChapter(int chapterId) {
         Chapter existingChapter = chapterRepository.getChapterById(chapterId);
         if (existingChapter == null) {

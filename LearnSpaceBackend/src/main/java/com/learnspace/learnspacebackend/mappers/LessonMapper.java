@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.mappers;
 
 import com.learnspace.learnspacebackend.dtos.LessonDto;
+import com.learnspace.learnspacebackend.dtos.LessonListDto;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 
 import org.mapstruct.Mapper;
@@ -8,6 +9,8 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface LessonMapper {
+
+    LessonListDto toListDto(Lesson lesson);
 
     @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(target = "updatedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")

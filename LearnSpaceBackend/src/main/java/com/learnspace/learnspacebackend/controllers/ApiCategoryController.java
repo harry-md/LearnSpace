@@ -21,12 +21,12 @@ public class ApiCategoryController {
 
     @GetMapping
     public ResponseEntity<List<Category>> list() {
-        List<Category> cates = categoryService.getCates();
+        List<Category> cates = categoryService.getCategories();
         return ResponseEntity.ok(cates);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Category> retrieve(@PathVariable("id") int id) {
-        return ResponseEntity.ok(categoryService.getCategotyById(id));
+        return ResponseEntity.ok(categoryService.getCategory(id));
     }
 }

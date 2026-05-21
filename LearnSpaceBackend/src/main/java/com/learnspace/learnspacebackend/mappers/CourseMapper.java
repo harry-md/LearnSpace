@@ -19,7 +19,7 @@ public interface CourseMapper {
     @Mapping(target = "teacherName", source = "teacher.fullName")
     @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(target = "updatedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    @Mapping(target = "categoryId", ignore = true)
+    @Mapping(target = "categoryId", source = "category.id")
     CourseDto toDto(Course course);
 
     @Mapping(target = "id", ignore = true)
