@@ -5,6 +5,17 @@ export const endpoints = {
   courses: "/courses",
   register: "/users",
   login: "/login",
+  current_user: "/current-user",
+  update_user: "/users/update",
+};
+
+export const authApis = (token) => {
+  return axios.create({
+    baseURL: "http://localhost:8080/LearnSpaceBackend/api/",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
 export default axios.create({

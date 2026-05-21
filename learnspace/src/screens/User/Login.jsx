@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import RegisterImg from "../../assets/desktop-illustration-step-2-x2.webp";
 import "./Style.css";
 import { Button, Col, Form, Placeholder } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import Apis, { endpoints } from "../../configs/Apis";
+import Apis, { endpoints, authApis } from "../../configs/Apis";
+import { UserContext } from "@/configs/Context";
 
 const FloatingField = ({
   id,
@@ -45,6 +46,9 @@ const Login = () => {
   const [user, setUser] = useState({ username: "", password: "" });
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
+
+  const [userContext, dispatchUser] = useContext(UserContext);
+
   const nav = useNavigate();
 
   const userInfo = [
@@ -71,6 +75,9 @@ const Login = () => {
         let res = await Apis.post(endpoints.login, user);
 
         if (res.status === 200) {
+          const token = res.data.token;
+          const u = await currentUser(token);
+          dispatchUser({ type: "LOGIN", payload: { ...u, token: token } });
           nav("/");
         }
       } catch (err) {
@@ -82,6 +89,14 @@ const Login = () => {
       } finally {
         setLoading(false);
       }
+    }
+  };
+  const currentUser = async (token) => {
+    try {
+      const res = await authApis(token).get(endpoints.current_user);
+      return res.data;
+    } catch (err) {
+      console.log(err);
     }
   };
 

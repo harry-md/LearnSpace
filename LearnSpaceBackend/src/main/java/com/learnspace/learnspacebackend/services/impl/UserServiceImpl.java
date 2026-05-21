@@ -193,4 +193,30 @@ public class UserServiceImpl implements UserService {
 
         userRepository.update(u);
     }
+
+    @Override
+    public UserProfileDto updateProfile(Integer userId, String firstName, String lastName, String email, MultipartFile avatar) {
+        User u = userRepository.getUserById(userId);
+        if (u == null) {
+            throw new ResourceNotFoundException("Không tìm thấy người dùng");
+        }
+
+        u.setFirstName(firstName);
+        u.setLastName(lastName);
+        u.setEmail(email);
+
+        if (avatar != null && !avatar.isEmpty()) {
+            try {
+                Map res = cloudinary
+                        .uploader()
+                        .upload(avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+                u.setAvatar(res.get("secure_url").toString());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        userRepository.update(u);
+        return userMapper.toProfileDto(u);
+    }
 }

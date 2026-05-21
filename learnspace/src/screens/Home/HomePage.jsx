@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { ChevronRight } from "lucide-react";
 import SectionContainer from "../../components/SectionContainer/SectionContainer";
 import CourseCard from "../../components/CourseCard/CourseCard";
 import CourseHoverDetail from "@/components/CourseHoverDetail/CourseHoverDetail";
-import Header from "../../components/Header/Header";
+import { UserContext } from "@/configs/Context";
 
 const courses = [
   {
@@ -146,11 +146,10 @@ const categories = [
 ];
 
 const HomePage = () => {
+  const [user] = useContext(UserContext);
+  console.log(user);
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-      {/* 1. TOP NAVIGATION */}
-      <Header showCategories={true} />
-
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 flex flex-col">
       <main className="max-w-7xl mx-auto px-6 py-10">
         <SectionContainer>
           <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-600 to-blue-500 text-white flex items-center justify-center text-3xl font-bold shadow-md">
