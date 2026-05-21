@@ -63,7 +63,7 @@ public class User {
 
     @ColumnDefault("0")
     @Column(name = "verified")
-    private Boolean verified;
+    private Boolean verified = false;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -167,5 +167,9 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
     }
 }

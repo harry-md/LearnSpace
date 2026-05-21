@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.CourseDto;
+import com.learnspace.learnspacebackend.dtos.CourseListDto;
 import com.learnspace.learnspacebackend.services.CourseService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,8 @@ public class ApiCourseController {
     private CourseService courseService;
 
     @GetMapping
-    public ResponseEntity<List<CourseDto>> getCourses(@RequestParam Map<String, String> params) {
+    public ResponseEntity<List<CourseListDto>> getCourses(
+            @RequestParam Map<String, String> params) {
         return ResponseEntity.ok(courseService.getAllCourses(params));
     }
 

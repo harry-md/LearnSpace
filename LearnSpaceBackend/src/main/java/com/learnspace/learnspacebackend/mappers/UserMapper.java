@@ -7,7 +7,7 @@ import com.learnspace.learnspacebackend.pojo.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = org.mapstruct.ReportingPolicy.WARN)
+@Mapper(componentModel = "spring")
 public interface UserMapper {
 
     @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")

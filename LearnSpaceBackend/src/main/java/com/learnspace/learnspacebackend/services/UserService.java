@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.services;
 
 import com.learnspace.learnspacebackend.dtos.AdminUserUpdateDto;
+import com.learnspace.learnspacebackend.dtos.UserLoginDto;
 import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
 
@@ -15,6 +16,8 @@ public interface UserService extends UserDetailsService {
     UserProfileDto getUserByUsername(String username);
 
     UserProfileDto register(UserRegisterDto user, MultipartFile avatar);
+
+    String login(UserLoginDto user);
 
     UserProfileDto registerAdmin(UserRegisterDto user);
 

@@ -9,6 +9,8 @@ public interface UserRepository {
 
     User getUserByUsername(String username);
 
+    boolean checkUsernameExist(String username);
+
     User register(User u);
 
     List<User> getAllUsers(Map<String, String> params);

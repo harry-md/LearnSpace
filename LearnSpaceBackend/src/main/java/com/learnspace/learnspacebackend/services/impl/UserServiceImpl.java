@@ -3,17 +3,27 @@ package com.learnspace.learnspacebackend.services.impl;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.learnspace.learnspacebackend.dtos.AdminUserUpdateDto;
+import com.learnspace.learnspacebackend.dtos.UserLoginDto;
 import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
+import com.learnspace.learnspacebackend.exceptions.DuplicateResourceException;
+import com.learnspace.learnspacebackend.exceptions.InvalidLoginException;
+import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.UserMapper;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.UserService;
+import com.learnspace.learnspacebackend.utils.JwtUtils;
 
 import jakarta.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,7 +48,12 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Autowired
+    @Lazy
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    @Lazy
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private Cloudinary cloudinary;
@@ -52,9 +67,13 @@ public class UserServiceImpl implements UserService {
             }
 
             Set<GrantedAuthority> authorities = new HashSet<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+
             if (user.getRole().equals(UserRole.TEACHER) && user.getVerified()) {
-                authorities.add(new SimpleGrantedAuthority(UserRole.VERIFIED_TEACHER.name()));
+                authorities.add(
+                        new SimpleGrantedAuthority("ROLE_" + UserRole.VERIFIED_TEACHER.name()));
+            } else {
+                authorities.add(
+                        new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
             }
             return new org.springframework.security.core.userdetails.User(
                     user.getUsername(), user.getPassword(), authorities);
@@ -70,6 +89,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileDto register(UserRegisterDto user, MultipartFile avatar) {
+        if (userRepository.checkUsernameExist(user.username())) {
+            throw new DuplicateResourceException("Username đã tồn tại");
+        }
+
         User u = new User();
         u.setUsername(user.username());
         u.setPassword(passwordEncoder.encode(user.password()));
@@ -89,6 +112,34 @@ public class UserServiceImpl implements UserService {
             }
         }
         return userMapper.toProfileDto(userRepository.register(u));
+    }
+
+    @Override
+    public String login(UserLoginDto user) {
+        try {
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(user.username(), user.password());
+
+            Authentication authenticatedToken = authenticationManager.authenticate(authentication);
+
+            org.springframework.security.core.userdetails.User principal =
+                    (org.springframework.security.core.userdetails.User)
+                            authenticatedToken.getPrincipal();
+
+            String authority = principal.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .findFirst()
+                    .orElse("ROLE_STUDENT")
+                    .replace("ROLE_", "");
+
+            return JwtUtils.generateToken(principal.getUsername(), UserRole.valueOf(authority));
+        } catch (AuthenticationException ex) {
+            System.err.println(ex.getMessage());
+            throw new InvalidLoginException("Tên đăng nhập hoặc mật khẩu không đúng");
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+            throw new RuntimeException("Có lỗi khi tạo token");
+        }
     }
 
     @Override
@@ -114,7 +165,7 @@ public class UserServiceImpl implements UserService {
     public void updateByAdmin(AdminUserUpdateDto user, MultipartFile avatar) {
         User u = userRepository.getUserById(user.id());
         if (u == null) {
-            throw new RuntimeException("Không tìm thấy User");
+            throw new ResourceNotFoundException("Không tìm thấy user");
         }
 
         u.setFirstName(user.firstName());

@@ -5,9 +5,8 @@ import com.learnspace.learnspacebackend.pojo.Lesson;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
+@Mapper(componentModel = "spring")
 public interface LessonMapper {
 
     @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")

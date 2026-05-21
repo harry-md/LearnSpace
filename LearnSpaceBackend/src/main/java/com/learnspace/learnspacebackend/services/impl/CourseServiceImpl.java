@@ -1,7 +1,10 @@
 package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.CourseDto;
+import com.learnspace.learnspacebackend.dtos.CourseListDto;
+import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.services.CourseService;
 
@@ -21,15 +24,26 @@ public class CourseServiceImpl implements CourseService {
     private CourseMapper courseMapper;
 
     @Override
-    public List<CourseDto> getAllCourses(Map<String, String> params) {
-        return courseRepository.getAllCourses(params).stream()
+    public List<CourseDto> getAllCoursesWithDetail(Map<String, String> params) {
+        return courseRepository.getAllCourses(params, true).stream()
                 .map(courseMapper::toDto)
                 .toList();
     }
 
     @Override
+    public List<CourseListDto> getAllCourses(Map<String, String> params) {
+        return courseRepository.getAllCourses(params, false).stream()
+                .map(courseMapper::toListDto)
+                .toList();
+    }
+
+    @Override
     public CourseDto getCourseById(int id) {
-        return courseMapper.toDto(courseRepository.getCourseById(id));
+        Course course = courseRepository.getCourseById(id);
+        if (course == null) {
+            throw new ResourceNotFoundException("Không tìm thấy khóa học");
+        }
+        return courseMapper.toDto(course);
     }
 
     @Override
@@ -37,13 +51,13 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.countCourses(params);
     }
 
-    //    @Override
-    //    public CourseDto createOrUpdate(Course course) {
-    //        return courseMapper.toDto(courseRepository.createOrUpdate(course));
-    //    }
-
     @Override
     public void deleteCourse(int id) {
         courseRepository.deleteCourse(id);
+    }
+
+    @Override
+    public CourseDto createOrUpdate(CourseDto course) {
+        throw new UnsupportedOperationException("Unimplemented method 'createOrUpdate'");
     }
 }
