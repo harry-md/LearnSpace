@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.ChapterPatchDto;
 import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.ChapterMapper;
@@ -17,10 +18,12 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class ChapterServiceImpl implements ChapterService {
 
     @Autowired
@@ -86,7 +89,7 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public ChapterDto updateChapter(int chapterId, ChapterDto chapterDto) {
+    public ChapterDto updateChapter(int chapterId, ChapterPatchDto chapterDto) {
         Chapter existingChapter = chapterRepository.getChapterById(chapterId);
         if (existingChapter == null) {
             throw new ResourceNotFoundException("Không tìm thấy chương học");

@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.services;
 
 import com.learnspace.learnspacebackend.dtos.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.ChapterPatchDto;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface ChapterService {
 
     ChapterDto createChapter(int courseId, ChapterDto chapterDto);
 
-    ChapterDto updateChapter(int chapterId, ChapterDto chapterDto);
+    ChapterDto updateChapter(int chapterId, ChapterPatchDto chapterDto);
 
     void deleteChapter(int chapterId);
 }

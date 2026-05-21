@@ -2,6 +2,7 @@ package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.CourseDto;
 import com.learnspace.learnspacebackend.dtos.CourseListDto;
+import com.learnspace.learnspacebackend.dtos.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Transactional
 public class CourseServiceImpl implements CourseService {
 
     @Autowired
@@ -78,7 +80,11 @@ public class CourseServiceImpl implements CourseService {
         }
     }
 
-    private void checkAndSetRelationship(Course course, CourseDto courseDto, User teacher) {
+    @Override
+    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
+    public CourseDto createCourse(CourseDto courseDto) {
+        Course course = courseMapper.toEntity(courseDto);
+
         if (courseDto.categoryId() != null) {
             Category category = categoryRepository.getCateById(courseDto.categoryId());
             if (category == null) {
@@ -88,42 +94,37 @@ public class CourseServiceImpl implements CourseService {
             course.setCategory(category);
         }
 
-        course.setTeacher(teacher);
-    }
-
-    @Override
-    @Transactional
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public CourseDto createCourse(CourseDto courseDto) {
-        Course course = courseMapper.toEntity(courseDto);
-
-        checkAndSetRelationship(course, courseDto, getLoggedInTeacher());
+        course.setTeacher(getLoggedInTeacher());
 
         Course savedCourse = courseRepository.createOrUpdate(course);
         return courseMapper.toDto(savedCourse);
     }
 
     @Override
-    @Transactional
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public CourseDto updateCourse(int id, CourseDto courseDto) {
+    public CourseDto updateCourse(int id, CoursePatchDto courseDto) {
         Course existCourse = courseRepository.getCourseById(id);
         if (existCourse == null) {
             throw new ResourceNotFoundException("Không tìm thấy khóa học cần cập nhật");
         }
 
         User teacher = getLoggedInTeacher();
-
         verifyCourseOwner(existCourse, teacher);
 
         courseMapper.updateEntityFromDto(existCourse, courseDto);
 
-        checkAndSetRelationship(existCourse, courseDto, teacher);
+        if (courseDto.categoryId() != null) {
+            Category category = categoryRepository.getCateById(courseDto.categoryId());
+            if (category == null) {
+                throw new ResourceNotFoundException(
+                        "Không tìm thấy danh mục " + courseDto.categoryId());
+            }
+            existCourse.setCategory(category);
+        }
         return courseMapper.toDto(courseRepository.createOrUpdate(existCourse));
     }
 
     @Override
-    @Transactional
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public void deleteCourse(int id) {
         Course existCourse = courseRepository.getCourseById(id);
@@ -132,7 +133,6 @@ public class CourseServiceImpl implements CourseService {
         }
 
         User teacher = getLoggedInTeacher();
-
         verifyCourseOwner(existCourse, teacher);
 
         courseRepository.deleteCourse(id);

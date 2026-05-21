@@ -36,7 +36,6 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     @Override
     public Chapter getChapterById(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Chapter> q = builder.createQuery(Chapter.class);
 
