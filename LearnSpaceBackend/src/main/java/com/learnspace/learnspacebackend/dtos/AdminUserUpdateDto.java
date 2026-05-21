@@ -10,5 +10,5 @@ public record AdminUserUpdateDto(
         String lastName,
         String email,
         UserRole role,
-        Boolean active,
-        Boolean verified) {}
+        boolean active,
+        boolean verified) {}

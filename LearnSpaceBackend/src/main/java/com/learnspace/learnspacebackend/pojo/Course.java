@@ -59,7 +59,7 @@ public class Course {
     @NotNull
     @ColumnDefault("1")
     @Column(name = "active", nullable = false)
-    private Boolean active;
+    private boolean active;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -133,11 +133,11 @@ public class Course {
         this.teacher = teacher;
     }
 
-    public Boolean getActive() {
+    public boolean getActive() {
         return active;
     }
 
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         this.active = active;
     }
 

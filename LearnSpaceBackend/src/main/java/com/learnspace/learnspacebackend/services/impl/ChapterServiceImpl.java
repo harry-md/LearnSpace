@@ -3,6 +3,7 @@ package com.learnspace.learnspacebackend.services.impl;
 import com.learnspace.learnspacebackend.dtos.ChapterDto;
 import com.learnspace.learnspacebackend.mappers.ChapterMapper;
 import com.learnspace.learnspacebackend.pojo.Chapter;
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.services.ChapterService;
@@ -38,8 +39,12 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public ChapterDto createOrUpdate(int courseId, ChapterDto chapterdto) {
+        Course course = courseRepository.getCourseById(courseId);
+
         Chapter chapter = chapterMapper.toEntity(chapterdto);
-        return chapterMapper.toDto(chapterRepository.createOrUpdate(courseId, chapter));
+        chapter.setCourse(course);
+
+        return chapterMapper.toDto(chapterRepository.createOrUpdate(chapter));
     }
 
     @Override

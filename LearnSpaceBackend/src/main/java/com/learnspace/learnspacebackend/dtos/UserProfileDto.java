@@ -13,7 +13,7 @@ public record UserProfileDto(
         @NotBlank String lastName,
         @NotBlank String email,
         String avatar,
-        @NotNull Boolean active,
-        Boolean verified,
+        @NotNull boolean active,
+        boolean verified,
         String createdAt,
         String updatedAt) {}
