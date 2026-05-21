@@ -38,11 +38,9 @@ public class ApiSecurityConfigs {
                         .requestMatchers(HttpMethod.GET, "/api/courses", "/api/courses/*")
                         .permitAll()
                         .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/courses/*/chapters",
-                                "/api/courses/*/chapters/*")
+                                HttpMethod.GET, "/api/courses/*/chapters", "/api/chapters/*")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/categories/*")
+                        .requestMatchers(HttpMethod.POST, "/api/categories")
                         .hasRole(UserRole.ADMIN.name())
                         .requestMatchers(HttpMethod.PUT, "/api/categories/*")
                         .hasRole(UserRole.ADMIN.name())
@@ -57,14 +55,14 @@ public class ApiSecurityConfigs {
                         .requestMatchers(
                                 HttpMethod.PUT,
                                 "/api/courses/*",
-                                "/api/courses/*/chapters/*",
-                                "/api/chapters/*/lessons/*")
+                                "/api/chapters/*",
+                                "/api/lessons/*")
                         .hasRole(UserRole.VERIFIED_TEACHER.name())
                         .requestMatchers(
                                 HttpMethod.DELETE,
                                 "/api/courses/*",
-                                "/api/courses/*/chapters/*",
-                                "/api/chapters/*/lessons/*")
+                                "/api/chapters/*",
+                                "/api/lessons/*")
                         .hasRole(UserRole.VERIFIED_TEACHER.name())
                         .anyRequest()
                         .authenticated())
@@ -82,7 +80,7 @@ public class ApiSecurityConfigs {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization"));
