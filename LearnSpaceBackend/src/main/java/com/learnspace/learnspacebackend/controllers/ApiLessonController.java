@@ -35,7 +35,10 @@ public class ApiLessonController {
 
     @PostMapping(
             value = "/chapters/{chapterId}/lessons",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+            consumes = {
+                MediaType.MULTIPART_FORM_DATA_VALUE,
+                MediaType.APPLICATION_OCTET_STREAM_VALUE
+            })
     public ResponseEntity<LessonDto> create(
             @PathVariable("chapterId") int chapterId,
             @Valid @RequestPart("data") LessonDto lessonDto,
@@ -44,16 +47,17 @@ public class ApiLessonController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/lessons/{id}")
+    @PatchMapping(
+            value = "/lessons/{id}",
+            consumes = {
+                MediaType.MULTIPART_FORM_DATA_VALUE,
+                MediaType.APPLICATION_OCTET_STREAM_VALUE
+            })
     public ResponseEntity<LessonDto> update(
-            @PathVariable("id") int id, @Valid @RequestBody LessonPatchDto lessonDto) {
-        return ResponseEntity.ok(lessonService.updateLesson(id, lessonDto));
-    }
-
-    @PatchMapping(value = "/lessons/{id}/video", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<LessonDto> updateVideo(
-            @PathVariable("id") int id, @RequestPart("video") MultipartFile video) {
-        return ResponseEntity.ok(lessonService.updateLessonVideo(id, video));
+            @PathVariable("id") int id,
+            @Valid @RequestPart(value = "data", required = false) LessonPatchDto lessonDto,
+            @RequestPart(value = "video", required = false) MultipartFile video) {
+        return ResponseEntity.ok(lessonService.updateLesson(id, lessonDto, video));
     }
 
     @DeleteMapping("/lessons/{id}")

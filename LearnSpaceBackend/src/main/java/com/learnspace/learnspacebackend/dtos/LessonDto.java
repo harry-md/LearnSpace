@@ -21,6 +21,8 @@ public record LessonDto(
         @Min(value = 1, message = "Thứ tự bài học không hợp lệ")
         Integer order,
 
+        @JsonProperty(access = Access.READ_ONLY) String video,
+
         @JsonProperty(access = Access.READ_ONLY) Integer videoLength,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)

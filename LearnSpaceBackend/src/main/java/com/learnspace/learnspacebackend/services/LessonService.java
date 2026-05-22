@@ -16,9 +16,7 @@ public interface LessonService {
 
     LessonDto createLesson(int chapterId, LessonDto lessonDto, MultipartFile video);
 
-    LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto);
-
-    LessonDto updateLessonVideo(int lessonId, MultipartFile video);
+    LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto, MultipartFile video);
 
     void deleteLesson(int lessonId);
 }

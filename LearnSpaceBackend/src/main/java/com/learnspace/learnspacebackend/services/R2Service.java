@@ -1,10 +1,12 @@
 package com.learnspace.learnspacebackend.services;
 
-import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
 
 public interface R2Service {
 
-    String uploadFile(MultipartFile video, String folder);
+    String uploadVideo(File video, String contentType, String folder);
 
-    int getVideoLength(MultipartFile video);
+    int getVideoLength(File video);
+
+    void deleteVideo(String videoUrl);
 }

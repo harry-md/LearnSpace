@@ -9,13 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.IOException;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -30,11 +32,11 @@ public class R2ServiceImpl implements R2Service {
     private Environment env;
 
     @Override
-    public String uploadFile(MultipartFile file, String folder) {
+    public String uploadVideo(File video, String contentType, String folder) {
         String bucketName = env.getProperty("r2.bucket_name");
         String publicUrl = env.getProperty("r2.public_url");
 
-        String originFileName = file.getOriginalFilename();
+        String originFileName = video.getName();
         String extension = "";
         if (originFileName != null && originFileName.contains(".")) {
             extension = originFileName.substring(originFileName.lastIndexOf("."));
@@ -45,23 +47,22 @@ public class R2ServiceImpl implements R2Service {
             PutObjectRequest putRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
                     .key(key)
-                    .contentType(file.getContentType())
+                    .contentType(contentType)
                     .contentDisposition("inline")
                     .build();
 
-            r2Client.putObject(
-                    putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            r2Client.putObject(putRequest, RequestBody.fromFile(video));
 
             return publicUrl + "/" + key;
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             System.err.println(ex.getMessage());
             throw new RuntimeException("Lỗi khi upload file");
         }
     }
 
     @Override
-    public int getVideoLength(MultipartFile video) {
-        try (InputStream inputStream = video.getInputStream()) {
+    public int getVideoLength(File video) {
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(video))) {
             Metadata metadata = Mp4MetadataReader.readMetadata(inputStream);
 
             Mp4Directory directory = metadata.getFirstDirectoryOfType(Mp4Directory.class);
@@ -73,5 +74,21 @@ public class R2ServiceImpl implements R2Service {
             throw new RuntimeException("Lỗi khi đọc độ dài video");
         }
         return 0;
+    }
+
+    @Override
+    public void deleteVideo(String videoUrl) {
+        String bucketName = env.getProperty("r2.bucket_name");
+        String publicUrl = env.getProperty("r2.public_url");
+        String key = videoUrl.replace(publicUrl + "/", "");
+
+        try {
+            DeleteObjectRequest delRequest =
+                    DeleteObjectRequest.builder().bucket(bucketName).key(key).build();
+            r2Client.deleteObject(delRequest);
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+            throw new RuntimeException("Có lỗi khi xóa video");
+        }
     }
 }

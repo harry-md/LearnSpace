@@ -25,6 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -106,6 +109,26 @@ public class LessonServiceImpl implements LessonService {
         return lessonMapper.toDto(lesson);
     }
 
+    private void validateMp4File(File file) throws IOException {
+        if (file.length() < 8) {
+            throw new RuntimeException("File quá nhỏ");
+        }
+
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            byte[] header = new byte[8];
+            if (fileInputStream.read(header) < 8) {
+                throw new IllegalArgumentException("Không thể đọc header file");
+            }
+
+            boolean isMp4 =
+                    header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p';
+
+            if (!isMp4) {
+                throw new RuntimeException("Chỉ chấp nhận upload file mp4");
+            }
+        }
+    }
+
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public LessonDto createLesson(int chapterId, LessonDto lessonDto, MultipartFile video) {
@@ -116,20 +139,45 @@ public class LessonServiceImpl implements LessonService {
 
         verifyCourseOwner(chapter.getCourse());
 
-        String videoUrl = r2Service.uploadFile(video, "lessons");
-        int videoLength = r2Service.getVideoLength(video);
+        if (video.isEmpty()) {
+            throw new RuntimeException("File không được trống");
+        }
 
-        Lesson lesson = lessonMapper.toEntity(lessonDto);
-        lesson.setChapter(chapter);
-        lesson.setVideo(videoUrl);
-        lesson.setVideoLength(videoLength);
+        File tmpFile = null;
+        try {
+            tmpFile = File.createTempFile("video-", ".mp4");
+            video.transferTo(tmpFile);
 
-        return lessonMapper.toDto(lessonRepository.addOrUpdateLesson(lesson));
+            validateMp4File(tmpFile);
+
+            String videoUrl = r2Service.uploadVideo(tmpFile, video.getContentType(), "lessons");
+            int videoLength = r2Service.getVideoLength(tmpFile);
+
+            Lesson lesson = lessonMapper.toEntity(lessonDto);
+            lesson.setChapter(chapter);
+            lesson.setVideo(videoUrl);
+            lesson.setVideoLength(videoLength);
+
+            return lessonMapper.toDto(lessonRepository.addOrUpdateLesson(lesson));
+
+        } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+            throw new RuntimeException("Lỗi khi xử lý video");
+        } finally {
+            if (tmpFile != null && tmpFile.exists()) {
+                tmpFile.delete();
+            }
+        }
     }
 
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
+    public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto, MultipartFile video) {
+        if (lessonDto == null && (video == null || video.isEmpty())) {
+            throw new RuntimeException(
+                    "Cần cung cấp ít nhất thông tin bài học hoặc video để cập nhật");
+        }
+
         Lesson existingLesson = lessonRepository.getLessonById(lessonId);
         if (existingLesson == null) {
             throw new ResourceNotFoundException("Không tìm thấy bài học");
@@ -137,26 +185,38 @@ public class LessonServiceImpl implements LessonService {
 
         verifyCourseOwner(existingLesson.getChapter().getCourse());
 
-        lessonMapper.updateEntityFromDto(existingLesson, lessonDto);
-
-        return lessonMapper.toDto(lessonRepository.addOrUpdateLesson(existingLesson));
-    }
-
-    @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public LessonDto updateLessonVideo(int lessonId, MultipartFile video) {
-        Lesson existingLesson = lessonRepository.getLessonById(lessonId);
-        if (existingLesson == null) {
-            throw new ResourceNotFoundException("Không tìm thấy bài học");
+        if (lessonDto != null) {
+            lessonMapper.updateEntityFromDto(existingLesson, lessonDto);
         }
 
-        verifyCourseOwner(existingLesson.getChapter().getCourse());
+        if (video != null && !video.isEmpty()) {
+            String oldVideoUrl = existingLesson.getVideo();
+            if (oldVideoUrl != null && !oldVideoUrl.isBlank()) {
+                r2Service.deleteVideo(oldVideoUrl);
+            }
 
-        String videoUrl = r2Service.uploadFile(video, "lessons");
-        int videoLength = r2Service.getVideoLength(video);
+            File tmpFile = null;
+            try {
 
-        existingLesson.setVideo(videoUrl);
-        existingLesson.setVideoLength(videoLength);
+                tmpFile = File.createTempFile("video-", ".mp4");
+                video.transferTo(tmpFile);
+                validateMp4File(tmpFile);
+
+                String videoUrl = r2Service.uploadVideo(tmpFile, video.getContentType(), "lessons");
+                int videoLength = r2Service.getVideoLength(tmpFile);
+
+                existingLesson.setVideo(videoUrl);
+                existingLesson.setVideoLength(videoLength);
+
+            } catch (Exception ex) {
+                System.err.println(ex.getMessage());
+                throw new RuntimeException("Lỗi khi xử lý video");
+            } finally {
+                if (tmpFile != null && tmpFile.exists()) {
+                    tmpFile.delete();
+                }
+            }
+        }
 
         return lessonMapper.toDto(lessonRepository.addOrUpdateLesson(existingLesson));
     }
@@ -170,6 +230,8 @@ public class LessonServiceImpl implements LessonService {
         }
 
         verifyCourseOwner(existingLesson.getChapter().getCourse());
+
+        r2Service.deleteVideo(existingLesson.getVideo());
 
         lessonRepository.deleteLesson(lessonId);
     }
