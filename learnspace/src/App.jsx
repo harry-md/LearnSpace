@@ -13,9 +13,13 @@ import { UserContext } from "./configs/Context";
 import { useReducer } from "react";
 import UserReducer from "./reducers/UserReducer";
 import cookies from "react-cookies";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const [user, dispatch] = useReducer(UserReducer, cookies.load("user") || null);
+  const [user, dispatch] = useReducer(
+    UserReducer,
+    cookies.load("user") || null,
+  );
   return (
     <UserContext.Provider value={[user, dispatch]}>
       <BrowserRouter>
@@ -23,12 +27,35 @@ function App() {
           {/* Routes without shared Header/Footer */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+
+          {/* Protected Teacher Route */}
+          <Route
+            path="/teacher"
+            element={
+              <ProtectedRoute allowedRoles={["TEACHER", "VERIFIED_TEACHER"]}>
+                <TeacherDashboard />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Routes with shared Header/Footer */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/learning" element={<LearningPage />} />
+            <Route
+              path="/learning"
+              element={
+                <ProtectedRoute
+                  allowedRoles={[
+                    "STUDENT",
+                    "TEACHER",
+                    "VERIFIED_TEACHER",
+                    "ADMIN",
+                  ]}
+                >
+                  <LearningPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/course/:id" element={<CourseDetailPage />} />

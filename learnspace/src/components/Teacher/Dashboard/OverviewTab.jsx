@@ -41,15 +41,6 @@ const OverviewTab = ({
             border: "#8b5cf6",
           },
           {
-            icon: Users,
-            label: "Tổng học viên",
-            value: totalStudents.toLocaleString(),
-            sub: "Tất cả khóa học",
-            color: "#3b82f6",
-            bg: "rgba(59,130,246,0.08)",
-            border: "#3b82f6",
-          },
-          {
             icon: Layers,
             label: "Tổng chương",
             value: totalSections,

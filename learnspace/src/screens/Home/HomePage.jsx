@@ -4,6 +4,7 @@ import SectionContainer from "../../components/SectionContainer/SectionContainer
 import CourseCard from "../../components/CourseCard/CourseCard";
 import CourseHoverDetail from "@/components/CourseHoverDetail/CourseHoverDetail";
 import { UserContext } from "@/configs/Context";
+import { Link } from "react-router-dom";
 
 const courses = [
   {
@@ -159,7 +160,7 @@ const HomePage = () => {
             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
               Chào mừng Udemy User!
             </h2>
-            <a
+            <Link
               href="#"
               className="text-purple-600 font-semibold hover:text-purple-800 mt-2 text-base flex items-center gap-1 group"
             >
@@ -168,7 +169,7 @@ const HomePage = () => {
                 size={16}
                 className="group-hover:translate-x-1 transition-transform"
               />
-            </a>
+            </Link>
           </div>
         </SectionContainer>
 

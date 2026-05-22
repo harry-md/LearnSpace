@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { INITIAL_COURSES, totalLessons, newId } from "../../data/TeacherData";
 
 import Sidebar from "../../components/Teacher/Dashboard/Sidebar";
@@ -7,6 +7,8 @@ import OverviewTab from "../../components/Teacher/Dashboard/OverviewTab";
 import CoursesTab from "../../components/Teacher/Dashboard/CoursesTab";
 import ManageCourseTab from "../../components/Teacher/Dashboard/ManageCourseTab";
 import DashboardModals from "../../components/Teacher/Dashboard/DashboardModals";
+import Apis, { authApis, endpoints } from "@/configs/Apis";
+import { UserContext } from "@/configs/Context";
 
 const TeacherDashboard = () => {
   const [courses, setCourses] = useState(INITIAL_COURSES);
@@ -14,6 +16,8 @@ const TeacherDashboard = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [openSections, setOpenSections] = useState({});
   const [modal, setModal] = useState(null);
+
+  const [user] = useContext(UserContext);
 
   // States dành cho Modals
   const [chapterTab, setChapterTab] = useState("new");
@@ -54,6 +58,88 @@ const TeacherDashboard = () => {
   );
 
   // === Handlers ===
+
+  const loadCourse = async () => {
+    try {
+      // 1. Fetch danh sách khóa học
+      const res = await authApis(user.token).get(
+        `${endpoints.courses}?teacherId=${user.id}`,
+      );
+      const rawCourses = res.data;
+
+      // 2. Fetch thông tin chi tiết (chapters, lessons) cho mỗi khóa học
+      const mappedCourses = await Promise.all(
+        rawCourses.map(async (course) => {
+          try {
+            // Lấy danh sách chương của khóa học này
+            const chaptersRes = await authApis(user.token).get(
+              `${endpoints.courses}/${course.id}/chapters`,
+            );
+            const rawChapters = chaptersRes.data;
+
+            // Lấy danh sách bài học cho từng chương
+            const mappedChapters = await Promise.all(
+              rawChapters.map(async (chapter) => {
+                try {
+                  const lessonsRes = await authApis(user.token).get(
+                    `${endpoints.chapters}/${chapter.id}/lessons`,
+                  );
+                  const rawLessons = lessonsRes.data;
+                  
+                  return {
+                    id: chapter.id,
+                    title: chapter.name,
+                    order: chapter.order,
+                    isFree: chapter.free,
+                    lessons: rawLessons.map((l) => ({
+                      id: l.id,
+                      title: l.title,
+                      content: l.content,
+                      video: l.video,
+                      order: l.order,
+                      duration: l.videoLength || 0,
+                      createdAt: l.createdAt,
+                      updatedAt: l.updatedAt,
+                    })),
+                  };
+                } catch (lessonErr) {
+                  console.error(`Lỗi fetch bài học cho chương ${chapter.id}`, lessonErr);
+                  return { id: chapter.id, title: chapter.name, lessons: [] };
+                }
+              })
+            );
+
+            return {
+              id: course.id,
+              title: course.name || "Không có tên",
+              image: course.image || `https://placehold.co/320x180/5624d0/ffffff?text=${encodeURIComponent((course.name || "Course").slice(0, 10))}`,
+              price: course.price || 0,
+              status: course.active ? "published" : "draft",
+              category: "Phát triển", 
+              level: "Cơ bản",
+              studentsCount: 0,
+              rating: 0,
+              revenue: "0 ₫",
+              sections: mappedChapters,
+            };
+          } catch (chapterErr) {
+            console.error(`Lỗi fetch chương cho khóa học ${course.id}`, chapterErr);
+            return {
+              id: course.id,
+              title: course.name,
+              image: course.image,
+              sections: [],
+            };
+          }
+        })
+      );
+
+      setCourses(mappedCourses);
+    } catch (err) {
+      console.error("Lỗi khi fetch danh sách khóa học:", err);
+    }
+  };
+
   const handleCreateCourse = () => {
     if (!courseForm.title.trim()) return;
     const nc = {
@@ -278,7 +364,10 @@ const TeacherDashboard = () => {
     updateReorderedSections(newSections);
     setDraggedLessonInfo(null);
   };
-  // ─────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    loadCourse();
+  }, [user]);
 
   return (
     <div
@@ -336,7 +425,6 @@ const TeacherDashboard = () => {
             openAddLesson={openAddLesson}
             handleDeleteSection={handleDeleteSection}
             handleDeleteLesson={handleDeleteLesson}
-            // Các props này giờ đã được định nghĩa ở trên
             draggedSectionIdx={draggedSectionIdx}
             handleSectionDragStart={handleSectionDragStart}
             handleSectionDragOver={handleSectionDragOver}

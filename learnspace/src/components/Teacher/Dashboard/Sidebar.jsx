@@ -275,7 +275,7 @@ const Sidebar = ({ view, setView }) => {
           </span>
         </button>
         <Link
-          to="/home"
+          to="/"
           style={{
             width: "100%",
             display: "flex",

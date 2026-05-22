@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   BookOpen,
@@ -14,7 +14,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { totalLessons } from "../../../data/TeacherData";
-
 const CoursesTab = ({
   courses,
   setModal,
@@ -79,7 +78,6 @@ const CoursesTab = ({
               >
                 {[
                   "Khóa học",
-                  "Học viên",
                   "Chương",
                   "Bài học",
                   "Doanh thu",
@@ -160,26 +158,6 @@ const CoursesTab = ({
                           {course.category} · {course.level}
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td style={{ padding: "16px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      <Users size={14} style={{ color: "#9ca3af" }} />
-                      <span
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: 700,
-                          color: "#1c1d1f",
-                        }}
-                      >
-                        {course.studentsCount.toLocaleString()}
-                      </span>
                     </div>
                   </td>
                   <td style={{ padding: "16px" }}>

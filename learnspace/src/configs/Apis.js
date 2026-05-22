@@ -3,10 +3,10 @@ import axios from "axios";
 export const endpoints = {
   categories: "/categories",
   courses: "/courses",
+  chapters: "/chapters",
   register: "/users",
   login: "/login",
   current_user: "/current-user",
-  update_user: "/users/update",
 };
 
 export const authApis = (token) => {

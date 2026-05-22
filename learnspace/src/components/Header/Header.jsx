@@ -108,12 +108,12 @@ const Header = () => {
                       className="w-16 h-10 object-cover rounded border border-gray-200 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <a
-                        href="#"
+                      <Link
+                        to="#"
                         className="font-bold text-xs text-[#2d2f31] line-clamp-2 !no-underline hover:!text-purple-600 transition-colors"
                       >
                         {item.title}
-                      </a>
+                      </Link>
                       <p className="text-[10px] text-gray-500 mt-0.5">
                         {item.author}
                       </p>
