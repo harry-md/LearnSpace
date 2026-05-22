@@ -22,11 +22,9 @@ public record CourseDto(
         @Pattern(regexp = "^[^<>]*$", message = "Mô tả khóa học không hợp lệ")
         String description,
 
-        @Size(max = 255, message = "URL hình ảnh vượt quá độ dài cho phép")
-        String image,
+        @JsonProperty(access = Access.READ_ONLY) String image,
 
-        @Size(max = 255, message = "URL video giới thiệu vượt quá độ dài cho phép")
-        String introVideo,
+        @JsonProperty(access = Access.READ_ONLY) String introVideo,
 
         @Digits(integer = 17, fraction = 2, message = "Giá tiền không đúng định dạng")
         BigDecimal price,

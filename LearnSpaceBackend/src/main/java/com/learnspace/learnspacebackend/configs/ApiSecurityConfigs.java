@@ -40,9 +40,13 @@ public class ApiSecurityConfigs {
                         .requestMatchers(
                                 HttpMethod.GET, "/api/courses/*/chapters", "/api/chapters/*")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/chapters/*/lessons")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/lessons/*")
+                        .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/categories")
                         .hasRole(UserRole.ADMIN.name())
-                        .requestMatchers(HttpMethod.PUT, "/api/categories/*")
+                        .requestMatchers(HttpMethod.PATCH, "/api/categories/*")
                         .hasRole(UserRole.ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/*")
                         .hasRole(UserRole.ADMIN.name())
@@ -53,7 +57,7 @@ public class ApiSecurityConfigs {
                                 "/api/chapters/*/lessons")
                         .hasRole(UserRole.VERIFIED_TEACHER.name())
                         .requestMatchers(
-                                HttpMethod.PUT,
+                                HttpMethod.PATCH,
                                 "/api/courses/*",
                                 "/api/chapters/*",
                                 "/api/lessons/*")
@@ -76,7 +80,7 @@ public class ApiSecurityConfigs {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);

@@ -4,6 +4,8 @@ import com.learnspace.learnspacebackend.dtos.CourseDto;
 import com.learnspace.learnspacebackend.dtos.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.CoursePatchDto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +19,10 @@ public interface CourseService {
 
     CourseDto getCourse(int id);
 
-    CourseDto createCourse(CourseDto courseDto);
+    CourseDto createCourse(CourseDto courseDto, MultipartFile image, MultipartFile introVideo);
 
-    CourseDto updateCourse(int id, CoursePatchDto courseDto);
+    CourseDto updateCourse(
+            int id, CoursePatchDto courseDto, MultipartFile image, MultipartFile introVideo);
 
     void deleteCourse(int id);
 }

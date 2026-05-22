@@ -15,9 +15,6 @@ public record CoursePatchDto(
         @Pattern(regexp = "^[^<>]*$", message = "Mô tả khóa học không hợp lệ")
         String description,
 
-        @Size(max = 255) String image,
-        @Size(max = 255) String introVideo,
-
         @Digits(integer = 17, fraction = 2, message = "Giá tiền không đúng định dạng")
         BigDecimal price,
 
