@@ -9,4 +9,8 @@ public interface LessonRepository {
     List<Lesson> getLessons(int chapterId);
 
     Lesson addOrUpdateLesson(Lesson lesson);
+
+    Lesson getLessonById(int lessonId);
+
+    void deleteLesson(int lessonId);
 }

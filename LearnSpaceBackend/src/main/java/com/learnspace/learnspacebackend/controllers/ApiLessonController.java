@@ -1,14 +1,64 @@
 package com.learnspace.learnspacebackend.controllers;
 
+import com.learnspace.learnspacebackend.dtos.LessonDto;
+import com.learnspace.learnspacebackend.dtos.LessonListDto;
+import com.learnspace.learnspacebackend.dtos.LessonPatchDto;
 import com.learnspace.learnspacebackend.services.LessonService;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
-@Controller
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+@RestController
 @RequestMapping("/api")
 public class ApiLessonController {
+
     @Autowired
     private LessonService lessonService;
+
+    @GetMapping("/chapters/{chapterId}/lessons")
+    public ResponseEntity<List<LessonListDto>> list(@PathVariable("chapterId") int chapterId) {
+        return ResponseEntity.ok(lessonService.getLessons(chapterId));
+    }
+
+    @GetMapping("/lessons/{id}")
+    public ResponseEntity<LessonDto> retrieve(@PathVariable("id") int lessonId) {
+        return ResponseEntity.ok(lessonService.getLesson(lessonId));
+    }
+
+    @PostMapping(
+            value = "/chapters/{chapterId}/lessons",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<LessonDto> create(
+            @PathVariable("chapterId") int chapterId,
+            @Valid @RequestPart("data") LessonDto lessonDto,
+            @RequestPart("video") MultipartFile video) {
+        LessonDto created = lessonService.createLesson(chapterId, lessonDto, video);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/lessons/{id}")
+    public ResponseEntity<LessonDto> update(
+            @PathVariable("id") int id, @Valid @RequestBody LessonPatchDto lessonDto) {
+        return ResponseEntity.ok(lessonService.updateLesson(id, lessonDto));
+    }
+
+    @PatchMapping(value = "/lessons/{id}/video", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<LessonDto> updateVideo(
+            @PathVariable("id") int id, @RequestPart("video") MultipartFile video) {
+        return ResponseEntity.ok(lessonService.updateLessonVideo(id, video));
+    }
+
+    @DeleteMapping("/lessons/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") int id) {
+        lessonService.deleteLesson(id);
+        return ResponseEntity.noContent().build();
+    }
 }

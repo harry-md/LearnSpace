@@ -27,7 +27,8 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     public List<Chapter> getChaptersByCourse(int courseId) {
         Session s = factory.getObject().getCurrentSession();
         Query q = s.createQuery(
-                "SELECT c FROM Chapter c JOIN c.course course WHERE course.id = :courseId",
+                "SELECT c FROM Chapter c JOIN c.course course WHERE course.id = :courseId ORDER BY"
+                        + " c.order",
                 Chapter.class);
         q.setParameter("courseId", courseId);
         return q.getResultList();

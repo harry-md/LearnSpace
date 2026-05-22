@@ -18,10 +18,6 @@ public record LessonDto(
         @Size(max = 255, message = "Nội dung bài học vượt quá độ dài cho phép")
         String content,
 
-        @NotBlank(message = "Video bài học không được để trống")
-        @Size(max = 255, message = "Video bài học vượt quá độ dài cho phép")
-        String video,
-
         @Min(value = 1, message = "Thứ tự bài học không hợp lệ")
         Integer order,
 
