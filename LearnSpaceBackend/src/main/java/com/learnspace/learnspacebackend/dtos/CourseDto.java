@@ -3,7 +3,7 @@ package com.learnspace.learnspacebackend.dtos;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -28,14 +28,15 @@ public record CourseDto(
         @Size(max = 255, message = "URL video giới thiệu vượt quá độ dài cho phép")
         String introVideo,
 
-        @DecimalMin(value = "0.0", message = "Giá khóa học phải là số dương")
+        @Digits(integer = 17, fraction = 2, message = "Giá tiền không đúng định dạng")
         BigDecimal price,
 
-        @JsonProperty(access = Access.WRITE_ONLY) Integer categoryId,
+        Integer categoryId,
 
         @JsonProperty(access = Access.READ_ONLY) String categoryName,
         @JsonProperty(access = Access.READ_ONLY) String teacherName,
 
         Boolean active,
-        String createdAt,
-        String updatedAt) {}
+
+        @JsonProperty(access = Access.READ_ONLY) String createdAt,
+        @JsonProperty(access = Access.READ_ONLY) String updatedAt) {}

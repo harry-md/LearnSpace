@@ -8,7 +8,7 @@ public interface ChapterRepository {
 
     List<Chapter> getChaptersByCourse(int courseId);
 
-    Chapter getChapterById(int ChapterId);
+    Chapter getChapterById(int chapterId);
 
     Chapter createOrUpdate(Chapter chapter);
 

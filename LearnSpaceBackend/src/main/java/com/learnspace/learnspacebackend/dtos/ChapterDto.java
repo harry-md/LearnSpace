@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -17,6 +18,9 @@ public record ChapterDto(
         String name,
 
         @Min(value = 0, message = "Số thứ tự của chương không hợp lệ")
-        int order,
+        Integer order,
 
-        boolean free) {}
+        Boolean free,
+
+        @JsonProperty(access = Access.READ_ONLY) String createdAt,
+        @JsonProperty(access = Access.READ_ONLY) String updatedAt) {}

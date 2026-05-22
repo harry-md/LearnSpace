@@ -4,6 +4,9 @@ import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 
 import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +34,16 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     }
 
     @Override
-    public Chapter getChapterById(int ChapterId) {
-        Session s = factory.getObject().getCurrentSession();
-        return s.get(Chapter.class, ChapterId);
+    public Chapter getChapterById(int chapterId) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Chapter> q = builder.createQuery(Chapter.class);
+
+        Root<Chapter> root = q.from(Chapter.class);
+        root.fetch("course");
+        q.select(root).where(builder.equal(root.get("id"), chapterId));
+
+        return session.createQuery(q).getSingleResultOrNull();
     }
 
     @Override

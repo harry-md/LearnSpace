@@ -17,7 +17,7 @@ public class CategoryController {
 
     @GetMapping
     public String categoryView(Model model) {
-        model.addAttribute("categories", categoryService.getCates());
+        model.addAttribute("categories", categoryService.getCategories());
         model.addAttribute("category", new Category());
         return "admin_categories";
     }

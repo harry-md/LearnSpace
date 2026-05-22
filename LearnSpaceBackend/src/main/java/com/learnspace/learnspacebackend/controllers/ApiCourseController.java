@@ -2,6 +2,7 @@ package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.CourseDto;
 import com.learnspace.learnspacebackend.dtos.CourseListDto;
+import com.learnspace.learnspacebackend.dtos.CoursePatchDto;
 import com.learnspace.learnspacebackend.services.CourseService;
 
 import jakarta.validation.Valid;
@@ -23,24 +24,24 @@ public class ApiCourseController {
 
     @GetMapping
     public ResponseEntity<List<CourseListDto>> list(@RequestParam Map<String, String> params) {
-        return ResponseEntity.ok(courseService.getAllCourses(params));
+        return ResponseEntity.ok(courseService.getCourses(params));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CourseDto> retrieve(@PathVariable("id") int id) {
-        return ResponseEntity.ok(courseService.getCourseById(id));
+        return ResponseEntity.ok(courseService.getCourse(id));
     }
 
     @PostMapping
     public ResponseEntity<CourseDto> create(@Valid @RequestBody CourseDto courseDto) {
-        CourseDto savedCourse = courseService.create(courseDto);
+        CourseDto savedCourse = courseService.createCourse(courseDto);
         return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<CourseDto> update(
-            @PathVariable(value = "id") int id, @Valid @RequestBody CourseDto courseDto) {
-        CourseDto updatedCourse = courseService.update(id, courseDto);
+            @PathVariable(value = "id") int id, @Valid @RequestBody CoursePatchDto courseDto) {
+        CourseDto updatedCourse = courseService.updateCourse(id, courseDto);
         return new ResponseEntity<>(updatedCourse, HttpStatus.OK);
     }
 

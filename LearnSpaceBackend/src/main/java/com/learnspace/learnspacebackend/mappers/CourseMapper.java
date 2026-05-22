@@ -2,6 +2,7 @@ package com.learnspace.learnspacebackend.mappers;
 
 import com.learnspace.learnspacebackend.dtos.CourseDto;
 import com.learnspace.learnspacebackend.dtos.CourseListDto;
+import com.learnspace.learnspacebackend.dtos.CoursePatchDto;
 import com.learnspace.learnspacebackend.pojo.Course;
 
 import org.mapstruct.BeanMapping;
@@ -19,7 +20,7 @@ public interface CourseMapper {
     @Mapping(target = "teacherName", source = "teacher.fullName")
     @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(target = "updatedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    @Mapping(target = "categoryId", ignore = true)
+    @Mapping(target = "categoryId", source = "category.id")
     CourseDto toDto(Course course);
 
     @Mapping(target = "id", ignore = true)
@@ -35,5 +36,5 @@ public interface CourseMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDto(@MappingTarget Course course, CourseDto dto);
+    void updateEntityFromDto(@MappingTarget Course course, CoursePatchDto dto);
 }

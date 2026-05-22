@@ -1,11 +1,11 @@
 package com.learnspace.learnspacebackend.services.impl;
 
 import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.learnspace.learnspacebackend.dtos.LessonDto;
+import com.learnspace.learnspacebackend.dtos.LessonListDto;
 import com.learnspace.learnspacebackend.mappers.LessonMapper;
-import com.learnspace.learnspacebackend.pojo.Lesson;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
+import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.services.LessonService;
 
@@ -26,37 +26,31 @@ public class LessonServiceImpl implements LessonService {
     private ChapterRepository chapterRepository;
 
     @Autowired
+    private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
     private LessonMapper lessonMapper;
 
     @Autowired
     private Cloudinary cloudinary;
 
     @Override
-    public List<LessonDto> getLessons(int chapterId) {
+    public List<LessonListDto> getLessons(int chapterId) {
         return lessonRepository.getLessons(chapterId).stream()
-                .map(lessonMapper::toDto)
+                .map(lessonMapper::toListDto)
                 .toList();
     }
 
     @Override
+    public LessonDto getLesson(int lessonId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getLesson'");
+    }
+
+    @Override
     public LessonDto addOrUpdateLesson(
-            int chapterId, Map<String, String> lessonMap, MultipartFile video) {
-        Lesson lesson = new Lesson();
-        lesson.setTitle(lessonMap.get("title"));
-        lesson.setContent(lessonMap.get("content"));
-        lesson.setOrder(Integer.parseInt(lessonMap.get("order")));
-
-        try {
-            Map res = cloudinary
-                    .uploader()
-                    .upload(video.getBytes(), ObjectUtils.asMap("resource_type", "video"));
-            lesson.setVideo(res.get("secure_url").toString());
-            lesson.setVideoLength((int) Double.parseDouble(res.get("duration").toString()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        lesson.setChapter(chapterRepository.getChapterById(chapterId));
-        return lessonMapper.toDto(lessonRepository.addOrUpdateLesson(lesson));
+            int chapterId, Map<String, String> lesson, MultipartFile video) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addOrUpdateLesson'");
     }
 }
