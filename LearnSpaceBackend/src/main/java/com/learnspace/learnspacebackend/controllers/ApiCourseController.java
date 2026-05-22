@@ -9,8 +9,10 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -32,17 +34,27 @@ public class ApiCourseController {
         return ResponseEntity.ok(courseService.getCourse(id));
     }
 
-    @PostMapping
-    public ResponseEntity<CourseDto> create(@Valid @RequestBody CourseDto courseDto) {
-        CourseDto savedCourse = courseService.createCourse(courseDto);
-        return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
+    @PostMapping(
+            consumes = {
+                MediaType.MULTIPART_FORM_DATA_VALUE,
+                MediaType.APPLICATION_OCTET_STREAM_VALUE
+            })
+    public ResponseEntity<CourseDto> create(
+            @Valid @RequestPart("data") CourseDto courseDto,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "introVideo", required = false) MultipartFile introVideo) {
+        CourseDto saved = courseService.createCourse(courseDto, image, introVideo);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CourseDto> update(
-            @PathVariable(value = "id") int id, @Valid @RequestBody CoursePatchDto courseDto) {
-        CourseDto updatedCourse = courseService.updateCourse(id, courseDto);
-        return new ResponseEntity<>(updatedCourse, HttpStatus.OK);
+            @PathVariable("id") int id,
+            @Valid @RequestPart(value = "data", required = false) CoursePatchDto courseDto,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "introVideo", required = false) MultipartFile introVideo) {
+        CourseDto updated = courseService.updateCourse(id, courseDto, image, introVideo);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
