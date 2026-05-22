@@ -33,7 +33,7 @@ public class ApiCourseController {
     }
 
     @PostMapping
-    public ResponseEntity<CourseDto> create(@Valid @RequestBody CourseDto courseDto) {
+    public ResponseEntity<CourseDto> create(@Valid @RequestPart("data") CourseDto courseDto) {
         CourseDto savedCourse = courseService.createCourse(courseDto);
         return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
     }

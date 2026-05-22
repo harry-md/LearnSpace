@@ -1,13 +1,16 @@
 import React from "react";
 import { BookOpen, ChevronRight, PlusCircle, FolderPlus } from "lucide-react";
+import { useTeacherDashboardContext } from "../TeacherDashboardContext";
 
-const Header = ({
-  view,
-  setView,
-  selectedCourse,
-  setModal,
-  openAddChapter,
-}) => {
+const Header = () => {
+  const {
+    view,
+    setView,
+    selectedCourse,
+    setModal,
+    openAddChapter,
+  } = useTeacherDashboardContext();
+
   return (
     <header
       style={{

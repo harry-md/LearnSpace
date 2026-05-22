@@ -4,6 +4,7 @@ export const endpoints = {
   categories: "/categories",
   courses: "/courses",
   chapters: "/chapters",
+  lessons: "/lessons",
   register: "/users",
   login: "/login",
   current_user: "/current-user",

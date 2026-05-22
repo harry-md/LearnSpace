@@ -39,4 +39,19 @@ public class LessonRepositoryImpl implements LessonRepository {
             return s.merge(lesson);
         }
     }
+
+    @Override
+    public Lesson getLessonById(int lessonId) {
+        Session s = factory.getObject().getCurrentSession();
+        return s.get(Lesson.class, lessonId);
+    }
+
+    @Override
+    public void deleteLesson(int lessonId) {
+        Session s = factory.getObject().getCurrentSession();
+        Lesson lesson = getLessonById(lessonId);
+        if (lesson != null) {
+            s.remove(lesson);
+        }
+    }
 }
