@@ -18,6 +18,8 @@ public interface CourseMapper {
 
     @Mapping(target = "categoryName", source = "category.name")
     @Mapping(target = "teacherName", source = "teacher.fullName")
+    @Mapping(target = "image", source = "image")
+    @Mapping(target = "introVideo", source = "introVideo")
     @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(target = "updatedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(target = "categoryId", source = "category.id")
@@ -26,6 +28,8 @@ public interface CourseMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "teacher", ignore = true)
+    @Mapping(target = "image", ignore = true)
+    @Mapping(target = "introVideo", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Course toEntity(CourseDto dto);

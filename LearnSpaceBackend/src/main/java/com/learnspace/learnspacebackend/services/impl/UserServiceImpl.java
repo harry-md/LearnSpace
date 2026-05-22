@@ -1,7 +1,5 @@
 package com.learnspace.learnspacebackend.services.impl;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.learnspace.learnspacebackend.dtos.AdminUserUpdateDto;
 import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.dtos.UserLoginDto;
@@ -14,6 +12,7 @@ import com.learnspace.learnspacebackend.mappers.UserMapper;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
+import com.learnspace.learnspacebackend.services.CloudinaryService;
 import com.learnspace.learnspacebackend.services.UserService;
 import com.learnspace.learnspacebackend.utils.JwtUtils;
 
@@ -33,7 +32,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +55,7 @@ public class UserServiceImpl implements UserService {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private Cloudinary cloudinary;
+    private CloudinaryService cloudinaryService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -103,15 +101,9 @@ public class UserServiceImpl implements UserService {
         u.setRole(UserRole.STUDENT);
 
         if (avatar != null && !avatar.isEmpty()) {
-            try {
-                Map res = cloudinary
-                        .uploader()
-                        .upload(avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
-                u.setAvatar(res.get("secure_url").toString());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            u.setAvatar(cloudinaryService.uploadImage(avatar));
         }
+
         return userMapper.toProfileDto(userRepository.register(u));
     }
 
@@ -181,14 +173,9 @@ public class UserServiceImpl implements UserService {
         }
 
         if (avatar != null && !avatar.isEmpty()) {
-            try {
-                Map res = cloudinary
-                        .uploader()
-                        .upload(avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
-                u.setAvatar(res.get("secure_url").toString());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            cloudinaryService.deleteImage(u.getAvatar());
+
+            u.setAvatar(cloudinaryService.uploadImage(avatar));
         }
 
         userRepository.update(u);

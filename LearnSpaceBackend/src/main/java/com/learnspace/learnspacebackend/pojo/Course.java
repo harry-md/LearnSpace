@@ -33,13 +33,15 @@ public class Course {
     @ColumnDefault(
             "'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg'")
     @Column(name = "image")
-    private String image;
+    private String image =
+            "https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg";
 
     @Size(max = 255)
     @ColumnDefault(
             "'https://res.cloudinary.com/dsc8rzpbg/video/upload/v1774930352/0_Teacher_Flowers_3840x2160_azcsmo.mp4'")
     @Column(name = "intro_video")
-    private String introVideo;
+    private String introVideo =
+            "https://res.cloudinary.com/dsc8rzpbg/video/upload/v1774930352/0_Teacher_Flowers_3840x2160_azcsmo.mp4";
 
     @NotNull
     @ColumnDefault("0.00")
