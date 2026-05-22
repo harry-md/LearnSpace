@@ -47,7 +47,12 @@ public class ApiCourseController {
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
-    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(
+            value = "/{id}",
+            consumes = {
+                MediaType.MULTIPART_FORM_DATA_VALUE,
+                MediaType.APPLICATION_OCTET_STREAM_VALUE
+            })
     public ResponseEntity<CourseDto> update(
             @PathVariable("id") int id,
             @Valid @RequestPart(value = "data", required = false) CoursePatchDto courseDto,
