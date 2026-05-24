@@ -12,13 +12,17 @@ import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -80,6 +84,7 @@ public class R2ServiceImpl implements R2Service {
     public void deleteVideo(String videoUrl) {
         String bucketName = env.getProperty("r2.bucket_name");
         String publicUrl = env.getProperty("r2.public_url");
+
         String key = videoUrl.replace(publicUrl + "/", "");
 
         try {
@@ -88,6 +93,35 @@ public class R2ServiceImpl implements R2Service {
             r2Client.deleteObject(delRequest);
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
+            throw new RuntimeException("Có lỗi khi xóa video");
+        }
+    }
+
+    @Override
+    public void deleteVideos(List<String> videoUrls) {
+        String bucketName = env.getProperty("r2.bucket_name");
+        String publicUrl = env.getProperty("r2.public_url");
+
+        List<ObjectIdentifier> keys = videoUrls.stream()
+                .filter(url -> !url.isBlank())
+                .map(url -> ObjectIdentifier.builder()
+                        .key(url.replace(publicUrl + "/", ""))
+                        .build())
+                .toList();
+
+        if (keys.isEmpty()) {
+            return;
+        }
+
+        try {
+            DeleteObjectsRequest delRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucketName)
+                    .delete(Delete.builder().objects(keys).quiet(true).build())
+                    .build();
+
+            r2Client.deleteObjects(delRequest);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
             throw new RuntimeException("Có lỗi khi xóa video");
         }
     }

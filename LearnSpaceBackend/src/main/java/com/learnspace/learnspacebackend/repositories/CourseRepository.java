@@ -11,9 +11,11 @@ public interface CourseRepository {
 
     Long countCourses(Map<String, String> params);
 
-    Course getCourseById(int id);
+    Course getCourseById(int courseId);
+
+    boolean existCourse(int courseId);
 
     Course createOrUpdate(Course course);
 
-    void deleteCourse(int id);
+    void deleteCourse(int courseId);
 }

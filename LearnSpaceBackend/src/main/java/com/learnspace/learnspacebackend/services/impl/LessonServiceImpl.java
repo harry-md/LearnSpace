@@ -89,7 +89,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public List<LessonListDto> getLessons(int chapterId) {
-        if (chapterRepository.getChapterById(chapterId) == null) {
+        if (!chapterRepository.existChapter(chapterId)) {
             throw new ResourceNotFoundException("Không tìm thấy chương học");
         }
         return lessonRepository.getLessons(chapterId).stream()

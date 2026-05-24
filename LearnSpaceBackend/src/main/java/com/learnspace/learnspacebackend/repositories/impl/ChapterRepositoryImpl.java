@@ -27,8 +27,7 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     public List<Chapter> getChaptersByCourse(int courseId) {
         Session s = factory.getObject().getCurrentSession();
         Query q = s.createQuery(
-                "SELECT c FROM Chapter c JOIN c.course course WHERE course.id = :courseId ORDER BY"
-                        + " c.order",
+                "SELECT c FROM Chapter c WHERE c.course.id = :courseId ORDER BY c.order",
                 Chapter.class);
         q.setParameter("courseId", courseId);
         return q.getResultList();
@@ -45,6 +44,16 @@ public class ChapterRepositoryImpl implements ChapterRepository {
         q.select(root).where(builder.equal(root.get("id"), chapterId));
 
         return session.createQuery(q).getSingleResultOrNull();
+    }
+
+    @Override
+    public boolean existChapter(int chapterId) {
+        Session session = factory.getObject().getCurrentSession();
+        Long count = session.createQuery(
+                        "SELECT COUNT(c) FROM Chapter c WHERE c.id = :chapterId", Long.class)
+                .setParameter("chapterId", chapterId)
+                .getSingleResultOrNull();
+        return count != null && count > 0;
     }
 
     @Override
