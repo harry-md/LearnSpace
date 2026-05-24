@@ -143,7 +143,7 @@ public class CourseRepositoryImpl implements CourseRepository {
     }
 
     @Override
-    public Course getCourseById(int id) {
+    public Course getCourseById(int courseId) {
         Session session = factory.getObject().getCurrentSession();
 
         CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -153,9 +153,19 @@ public class CourseRepositoryImpl implements CourseRepository {
         root.fetch("category", JoinType.INNER);
         root.fetch("teacher", JoinType.INNER);
 
-        q.select(root).where(builder.equal(root.get("id"), id));
+        q.select(root).where(builder.equal(root.get("id"), courseId));
 
         return session.createQuery(q).getSingleResultOrNull();
+    }
+
+    @Override
+    public boolean existCourse(int courseId) {
+        Session session = factory.getObject().getCurrentSession();
+        return session.createQuery("SELECT 1 FROM Course c WHERE c.id = :courseId", Integer.class)
+                        .setParameter("courseId", courseId)
+                        .setMaxResults(1)
+                        .getSingleResultOrNull()
+                != null;
     }
 
     @Override
@@ -169,9 +179,10 @@ public class CourseRepositoryImpl implements CourseRepository {
     }
 
     @Override
-    public void deleteCourse(int id) {
+    public void deleteCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        Course c = session.get(Course.class, id);
+        Course c = session.get(Course.class, courseId);
+
         if (c != null) {
             session.remove(c);
         }

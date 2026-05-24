@@ -6,9 +6,12 @@ import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "chapter")
@@ -35,7 +38,11 @@ public class Chapter {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "course_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Course course;
+
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
+    private List<Lesson> lessons;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -83,6 +90,10 @@ public class Chapter {
 
     public void setCourse(Course course) {
         this.course = course;
+    }
+
+    public List<Lesson> getLessons() {
+        return lessons;
     }
 
     public LocalDateTime getCreatedAt() {

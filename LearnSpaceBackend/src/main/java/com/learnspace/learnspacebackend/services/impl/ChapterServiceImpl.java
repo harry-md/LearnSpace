@@ -10,8 +10,10 @@ import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
+import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.ChapterService;
+import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -38,9 +40,15 @@ public class ChapterServiceImpl implements ChapterService {
     @Autowired
     private ChapterMapper chapterMapper;
 
+    @Autowired
+    private LessonRepository lessonRepository;
+
+    @Autowired
+    private R2Service r2Service;
+
     @Override
     public List<ChapterDto> getChapters(int courseId) {
-        if (courseRepository.getCourseById(courseId) == null) {
+        if (!courseRepository.existCourse(courseId)) {
             throw new ResourceNotFoundException("Không tìm thấy khóa học");
         }
         return chapterRepository.getChaptersByCourse(courseId).stream()
@@ -111,6 +119,9 @@ public class ChapterServiceImpl implements ChapterService {
         }
 
         verifyCourseOwner(existingChapter.getCourse());
+
+        List<String> videoUrls = lessonRepository.getVideoUrlsByChapterId(chapterId);
+        r2Service.deleteVideos(videoUrls);
 
         chapterRepository.deleteChapter(chapterId);
     }

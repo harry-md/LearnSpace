@@ -16,8 +16,6 @@ import com.learnspace.learnspacebackend.services.CloudinaryService;
 import com.learnspace.learnspacebackend.services.UserService;
 import com.learnspace.learnspacebackend.utils.JwtUtils;
 
-import jakarta.persistence.NoResultException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -59,31 +57,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        try {
-            User user = userRepository.getUserByUsername(username);
-            if (user == null) {
-                throw new UsernameNotFoundException("Không tìm thấy người dùng với username");
-            }
-
-            Set<GrantedAuthority> authorities = new HashSet<>();
-
-            if (user.getRole().equals(UserRole.TEACHER) && user.getVerified()) {
-                authorities.add(
-                        new SimpleGrantedAuthority("ROLE_" + UserRole.VERIFIED_TEACHER.name()));
-            } else {
-                authorities.add(
-                        new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-            }
-            return new CustomUserDetails(
-                    user.getUsername(), user.getPassword(), authorities, user.getId());
-        } catch (NoResultException ex) {
-            throw new UsernameNotFoundException("Không tìm thấy username");
+        User user = userRepository.getUserByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("Không tìm thấy người dùng với username");
         }
+
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        if (user.getRole().equals(UserRole.TEACHER) && user.getVerified()) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + UserRole.VERIFIED_TEACHER.name()));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        }
+        return new CustomUserDetails(
+                user.getUsername(), user.getPassword(), authorities, user.getId());
     }
 
     @Override
     public UserProfileDto getUserByUsername(String username) {
-        return userMapper.toProfileDto(userRepository.getUserByUsername(username));
+        User user = userRepository.getUserByUsername(username);
+        if (user == null) {
+            throw new ResourceNotFoundException("Không tìm thấy người dùng với username");
+        }
+        return userMapper.toProfileDto(user);
     }
 
     @Override
