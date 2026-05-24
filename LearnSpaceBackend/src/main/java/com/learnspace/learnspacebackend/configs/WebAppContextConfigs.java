@@ -19,7 +19,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
             "com.learnspace.learnspacebackend.repositories",
             "com.learnspace.learnspacebackend.services",
             "com.learnspace.learnspacebackend.mappers",
-            "com.learnspace.learnspacebackend.exceptions"
+            "com.learnspace.learnspacebackend.exceptions",
+            "com.learnspace.learnspacebackend.interceptors"
         })
 public class WebAppContextConfigs implements WebMvcConfigurer {
 

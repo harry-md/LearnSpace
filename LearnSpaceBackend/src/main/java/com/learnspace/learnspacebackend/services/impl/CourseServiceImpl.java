@@ -11,9 +11,11 @@ import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
+import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.CloudinaryService;
 import com.learnspace.learnspacebackend.services.CourseService;
+import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -44,6 +46,12 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private R2Service r2Service;
+
+    @Autowired
+    private LessonRepository lessonRepository;
 
     @Override
     public List<CourseDto> getAllCoursesWithDetail(Map<String, String> params) {
@@ -158,6 +166,9 @@ public class CourseServiceImpl implements CourseService {
 
         User teacher = getLoggedInTeacher();
         verifyCourseOwner(existCourse, teacher);
+
+        List<String> lessonVideoUrls = lessonRepository.getVideoUrlsByCourseId(id);
+        r2Service.deleteVideos(lessonVideoUrls);
 
         if (existCourse.getImage() != null) {
             cloudinaryService.deleteImage(existCourse.getImage());

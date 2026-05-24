@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Table(name = "course")
 @Entity
@@ -57,6 +58,9 @@ public class Course {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
+
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    private List<Chapter> chapters;
 
     @NotNull
     @ColumnDefault("1")
@@ -133,6 +137,10 @@ public class Course {
 
     public void setTeacher(User teacher) {
         this.teacher = teacher;
+    }
+
+    public List<Chapter> getChapters() {
+        return chapters;
     }
 
     public boolean getActive() {
