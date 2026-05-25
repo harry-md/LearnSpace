@@ -30,18 +30,33 @@ const EditCourseModal = ({ open, onClose, course, categories, user, onSuccess })
     if (!editCourseForm.name.trim()) return;
 
     const updatePromise = async () => {
-      const payload = {
-        name: editCourseForm.name,
-        description: editCourseForm.description,
-        categoryId: editCourseForm.categoryId,
-        price: editCourseForm.price || 0,
-        image: editCourseForm.image,
-        introVideo: editCourseForm.introVideo,
-      };
+      // Backend yêu cầu multipart/form-data với phần 'data' là JSON
+      const formData = new FormData();
+      formData.append(
+        "data",
+        new Blob(
+          [JSON.stringify({
+            name: editCourseForm.name,
+            description: editCourseForm.description,
+            categoryId: editCourseForm.categoryId,
+            price: editCourseForm.price || 0,
+            active: course.active,
+          })],
+          { type: "application/json" }
+        )
+      );
+
+      // Upload ảnh / video mới nếu giáo viên có chọn
+      if (editCourseForm.image instanceof File) {
+        formData.append("image", editCourseForm.image);
+      }
+      if (editCourseForm.introVideo instanceof File) {
+        formData.append("introVideo", editCourseForm.introVideo);
+      }
 
       const res = await authApis(user.token).patch(
         `${endpoints.courses}/${course.id}`,
-        payload,
+        formData
       );
 
       return res.data;
@@ -136,38 +151,33 @@ const EditCourseModal = ({ open, onClose, course, categories, user, onSuccess })
         </Field>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "16px",
-        }}
-      >
-        <Field label="Đường dẫn ảnh bìa (Image URL)">
-          <input
-            className={inputCls}
-            style={inputStyle}
-            placeholder="https://..."
-            value={editCourseForm.image}
-            onChange={(e) =>
-              setEditCourseForm({ ...editCourseForm, image: e.target.value })
-            }
-            onFocus={(e) => (e.target.style.borderColor = "#8b5cf6")}
-            onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
-          />
+      {/* Upload ảnh bìa và video giới thiệu */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <Field label="Đổi ảnh bìa" hint="Để trống nếu không muốn thay">
+          <label style={{ border: "2px dashed #e5e7eb", borderRadius: "12px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", cursor: "pointer", background: "#fafafa" }}>
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(e) => setEditCourseForm({ ...editCourseForm, image: e.target.files[0] })}
+            />
+            <span style={{ fontSize: "12px", color: editCourseForm.image instanceof File ? "#059669" : "#6b7280", fontWeight: 600 }}>
+              {editCourseForm.image instanceof File ? `✓ ${editCourseForm.image.name}` : "Click để upload ảnh mới"}
+            </span>
+          </label>
         </Field>
-        <Field label="Đường dẫn video giới thiệu (Video URL/Filename)">
-          <input
-            className={inputCls}
-            style={inputStyle}
-            placeholder="intro.mp4"
-            value={editCourseForm.introVideo}
-            onChange={(e) =>
-              setEditCourseForm({ ...editCourseForm, introVideo: e.target.value })
-            }
-            onFocus={(e) => (e.target.style.borderColor = "#8b5cf6")}
-            onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
-          />
+        <Field label="Đổi video giới thiệu" hint="Để trống nếu không muốn thay">
+          <label style={{ border: "2px dashed #e5e7eb", borderRadius: "12px", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", cursor: "pointer", background: "#fafafa" }}>
+            <input
+              type="file"
+              accept="video/mp4"
+              style={{ display: "none" }}
+              onChange={(e) => setEditCourseForm({ ...editCourseForm, introVideo: e.target.files[0] })}
+            />
+            <span style={{ fontSize: "12px", color: editCourseForm.introVideo instanceof File ? "#059669" : "#6b7280", fontWeight: 600 }}>
+              {editCourseForm.introVideo instanceof File ? `✓ ${editCourseForm.introVideo.name}` : "Click để upload video .mp4 mới"}
+            </span>
+          </label>
         </Field>
       </div>
 

@@ -9,18 +9,23 @@ import { useTeacherDashboardContext } from "../TeacherDashboardContext";
 
 const DashboardModals = () => {
   const {
+    // Dữ liệu cần thiết cho các modal
+    user,
     categories,
+    editingCourse,
+    editingChapter,
+    editingLesson,
+
+    // Điều khiển modal
     modal,
     setModal,
-    user,
-    onSuccessCreateCourse,
-    editingCourse,
-    onSuccessEditCourse,
+
+    // Callbacks sau khi form submit thành công
+    onCourseCreated,
+    onCourseUpdated,
     handleAddChapter,
-    editingChapter,
     handleUpdateChapter,
     handleAddLesson,
-    editingLesson,
     handleUpdateLesson,
   } = useTeacherDashboardContext();
 
@@ -28,29 +33,33 @@ const DashboardModals = () => {
 
   return (
     <>
+      {/* Tạo khóa học mới */}
       <CreateCourseModal
         open={modal === "create-course"}
         onClose={onClose}
         categories={categories}
         user={user}
-        onSuccess={onSuccessCreateCourse}
+        onSuccess={onCourseCreated}
       />
 
+      {/* Sửa khóa học */}
       <EditCourseModal
         open={modal === "edit-course"}
         onClose={onClose}
         course={editingCourse}
         categories={categories}
         user={user}
-        onSuccess={onSuccessEditCourse}
+        onSuccess={onCourseUpdated}
       />
 
+      {/* Thêm chương */}
       <AddChapterModal
         open={modal === "add-chapter"}
         onClose={onClose}
         onSubmit={handleAddChapter}
       />
 
+      {/* Sửa chương */}
       <EditChapterModal
         open={modal === "edit-chapter"}
         onClose={onClose}
@@ -58,12 +67,14 @@ const DashboardModals = () => {
         onSubmit={handleUpdateChapter}
       />
 
+      {/* Thêm bài học */}
       <AddLessonModal
         open={modal === "add-lesson"}
         onClose={onClose}
         onSubmit={handleAddLesson}
       />
 
+      {/* Sửa bài học */}
       <EditLessonModal
         open={modal === "edit-lesson"}
         onClose={onClose}

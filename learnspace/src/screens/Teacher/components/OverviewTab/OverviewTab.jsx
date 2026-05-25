@@ -4,16 +4,11 @@ import { useTeacherDashboardContext } from "../../TeacherDashboardContext";
 import "./OverviewTab.css";
 
 const OverviewTab = () => {
-  const {
-    courses,
-    totalSections,
-    totalLessonsAll,
-    openManage,
-  } = useTeacherDashboardContext();
+  const { courses, totalSections, totalLessonsAll, openManage } =
+    useTeacherDashboardContext();
 
   return (
     <div className="overview-container">
-      {/* Stats grid */}
       <div className="stats-grid">
         {[
           {
@@ -60,15 +55,9 @@ const OverviewTab = () => {
               <Icon size={24} style={{ color }} />
             </div>
             <div>
-              <div className="stat-num-val">
-                {value}
-              </div>
-              <div className="stat-num-label">
-                {label}
-              </div>
-              <div className="stat-num-sub">
-                {sub}
-              </div>
+              <div className="stat-num-val">{value}</div>
+              <div className="stat-num-label">{label}</div>
+              <div className="stat-num-sub">{sub}</div>
             </div>
           </div>
         ))}
@@ -78,9 +67,7 @@ const OverviewTab = () => {
       <div className="course-list-wrapper">
         <div className="course-list-header">
           <BookOpen size={18} className="text-[#8b5cf6]" />
-          <h2 className="course-list-title">
-            Khóa học của bạn
-          </h2>
+          <h2 className="course-list-title">Khóa học của bạn</h2>
         </div>
         {courses.map((c, idx) => (
           <div
@@ -92,16 +79,10 @@ const OverviewTab = () => {
             }}
             onClick={() => openManage(c)}
           >
-            <img
-              src={c.image}
-              alt={c.title}
-              className="course-row-thumb"
-            />
+            <img src={c.image} alt={c.title} className="course-row-thumb" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-3">
-                <span className="course-row-title">
-                  {c.title}
-                </span>
+                <span className="course-row-title">{c.title}</span>
                 <div className="flex items-center gap-4 shrink-0">
                   <span className="course-row-price">
                     {c.price.toLocaleString()} ₫

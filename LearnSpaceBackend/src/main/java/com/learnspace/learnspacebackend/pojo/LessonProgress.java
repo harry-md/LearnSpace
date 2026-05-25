@@ -3,6 +3,8 @@ package com.learnspace.learnspacebackend.pojo;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "lesson_progress")
 public class LessonProgress {
@@ -23,8 +25,20 @@ public class LessonProgress {
     private Lesson lesson;
 
     @NotNull
+    @Column(name = "completed", nullable = false)
+    private Boolean completed = false;
+
+    @NotNull
     @Column(name = "watched_sec", nullable = false)
     private Integer watchedSec;
+
+    @NotNull
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @NotNull
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     public Integer getId() {
         return id;
@@ -56,5 +70,13 @@ public class LessonProgress {
 
     public void setWatchedSec(Integer watchedSec) {
         this.watchedSec = watchedSec;
+    }
+
+    public Boolean getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
     }
 }

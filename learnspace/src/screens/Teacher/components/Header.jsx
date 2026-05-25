@@ -3,13 +3,8 @@ import { BookOpen, ChevronRight, PlusCircle, FolderPlus } from "lucide-react";
 import { useTeacherDashboardContext } from "../TeacherDashboardContext";
 
 const Header = () => {
-  const {
-    view,
-    setView,
-    selectedCourse,
-    setModal,
-    openAddChapter,
-  } = useTeacherDashboardContext();
+  const { view, setView, selectedCourse, setModal, openAddChapter } =
+    useTeacherDashboardContext();
 
   return (
     <header
@@ -94,7 +89,7 @@ const Header = () => {
         )}
         {view === "manage" && selectedCourse && (
           <button
-            onClick={() => openAddChapter(selectedCourse.id)}
+            onClick={() => openAddChapter()}
             style={{
               display: "flex",
               alignItems: "center",

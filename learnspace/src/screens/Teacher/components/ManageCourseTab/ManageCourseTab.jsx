@@ -15,13 +15,12 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
-import { totalLessons } from "../../../../data/TeacherData";
 import { useTeacherDashboardContext } from "../../TeacherDashboardContext";
 import "./ManageCourseTab.css";
 
+// Hiển thị icon tương ứng với loại bài học
 const typeIcon = (type) => {
-  if (type === "quiz")
-    return <FileQuestion size={14} className="text-[#f59e0b]" />;
+  if (type === "quiz") return <FileQuestion size={14} className="text-[#f59e0b]" />;
   if (type === "doc") return <FileType size={14} className="text-[#3b82f6]" />;
   return <PlayCircle size={14} className="text-[#8b5cf6]" />;
 };
@@ -31,20 +30,28 @@ const ManageCourseTab = () => {
     selectedCourse,
     openSections,
     toggleSection,
-    openAddLesson,
-    handleDeleteSection,
-    handleDeleteLesson,
-    openEditCourse,
+    setModal,
+
+    // Chương
+    openAddChapter,
     openEditChapter,
-    openEditLesson,
+    handleDeleteSection,
     handleMoveSection,
+
+    // Bài học
+    openAddLesson,
+    openEditLesson,
+    handleDeleteLesson,
     handleMoveLesson,
   } = useTeacherDashboardContext();
-  console.log(selectedCourse);
+
+  // Tính tổng số bài học
+  const totalLessons = (sections) =>
+    (sections || []).reduce((sum, s) => sum + (s.lessons?.length || 0), 0);
 
   return (
     <div className="manage-course-container">
-      {/* Mini stats */}
+      {/* Mini stats – tóm tắt nhanh số chương / bài học */}
       <div className="mini-stats-grid">
         {[
           {
@@ -73,23 +80,22 @@ const ManageCourseTab = () => {
           </div>
         ))}
 
+        {/* Nút sửa thông tin khóa học */}
         <button
-          onClick={() => openEditCourse(selectedCourse)}
+          onClick={() => setModal("edit-course")}
           className="edit-course-btn"
         >
           <div className="stat-icon-wrapper bg-[rgba(59,130,246,0.08)]">
             <Pencil size={20} className="text-[#3b82f6]" />
           </div>
           <div>
-            <div className="text-[14px] font-extrabold text-[#1c1d1f]">
-              Chỉnh sửa
-            </div>
+            <div className="text-[14px] font-extrabold text-[#1c1d1f]">Chỉnh sửa</div>
             <div className="stat-label">Thông tin khóa học</div>
           </div>
         </button>
       </div>
 
-      {/* Sections */}
+      {/* Thông báo khi chưa có chương nào */}
       {selectedCourse.sections.length === 0 && (
         <div className="empty-sections-box">
           <FolderPlus size={40} className="opacity-40" />
@@ -99,9 +105,12 @@ const ManageCourseTab = () => {
         </div>
       )}
 
+      {/* Danh sách chương */}
       <div className="sections-list">
         {selectedCourse.sections.map((section, sIdx) => (
           <div key={section.id} className="chapter-card">
+
+            {/* Header của chương – click để mở/đóng danh sách bài học */}
             <div
               onClick={() => toggleSection(section.id)}
               className="chapter-header"
@@ -114,16 +123,15 @@ const ManageCourseTab = () => {
                 <div className="flex items-center gap-2 mt-0.5">
                   <FileText size={12} className="text-[#9ca3af]" />
                   <span className="text-xs text-[#9ca3af]">
-                    {section.lessons.length} bài học
+                    {section.lessons?.length || 0} bài học
                   </span>
                 </div>
               </div>
+
+              {/* Các nút thao tác trên chương */}
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openAddLesson(section.id);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); openAddLesson(section.id); }}
                   className="btn-add-lesson"
                 >
                   <Plus size={13} />
@@ -131,10 +139,7 @@ const ManageCourseTab = () => {
                 </button>
                 <button
                   disabled={sIdx === 0}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveSection(sIdx, "up");
-                  }}
+                  onClick={(e) => { e.stopPropagation(); handleMoveSection(sIdx, "up"); }}
                   className="btn-order-change"
                   title="Di chuyển lên"
                 >
@@ -142,49 +147,40 @@ const ManageCourseTab = () => {
                 </button>
                 <button
                   disabled={sIdx === selectedCourse.sections.length - 1}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveSection(sIdx, "down");
-                  }}
+                  onClick={(e) => { e.stopPropagation(); handleMoveSection(sIdx, "down"); }}
                   className="btn-order-change"
                   title="Di chuyển xuống"
                 >
                   <ArrowDown size={14} />
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openEditChapter(section);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); openEditChapter(section); }}
                   className="btn-chapter-edit"
                 >
                   <Pencil size={14} />
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteSection(selectedCourse.id, section.id);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); handleDeleteSection(selectedCourse.id, section.id); }}
                   className="btn-chapter-delete"
                 >
                   <Trash2 size={14} />
                 </button>
-                {openSections[section.id] ? (
-                  <ChevronUp size={16} className="text-[#9ca3af]" />
-                ) : (
-                  <ChevronDown size={16} className="text-[#9ca3af]" />
-                )}
+                {openSections[section.id]
+                  ? <ChevronUp size={16} className="text-[#9ca3af]" />
+                  : <ChevronDown size={16} className="text-[#9ca3af]" />
+                }
               </div>
             </div>
 
+            {/* Danh sách bài học – chỉ hiện khi chương được mở */}
             {openSections[section.id] && (
               <div className="border-t border-[#f3f4f6]">
-                {section.lessons.length === 0 && (
+                {(section.lessons?.length === 0 || !section.lessons) && (
                   <div className="empty-lessons">
                     Chưa có bài học. Hãy nhấn nút "+ Thêm bài học" để thêm mới!
                   </div>
                 )}
-                {section.lessons.map((lesson, lIdx) => (
+                {(section.lessons || []).map((lesson, lIdx) => (
                   <div key={lesson.id} className="group lesson-row">
                     <span className="lesson-idx">{lIdx + 1}</span>
 
@@ -194,44 +190,32 @@ const ManageCourseTab = () => {
                     {lesson.isFree && (
                       <span className="lesson-free-badge">FREE</span>
                     )}
-                    <span className="lesson-duration">{lesson.duration}</span>
-                    <span className="lesson-type-tag">{lesson.type}</span>
+                    <span className="lesson-duration">{lesson.videoLength ? `${Math.floor(lesson.videoLength / 60)}:${String(lesson.videoLength % 60).padStart(2, "0")}` : ""}</span>
+
                     <button
                       disabled={lIdx === 0}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleMoveLesson(section.id, lIdx, "up");
-                      }}
+                      onClick={(e) => { e.stopPropagation(); handleMoveLesson(section.id, lIdx, "up"); }}
                       className="btn-lesson-order"
                       title="Di chuyển bài học lên"
                     >
                       <ArrowUp size={13} />
                     </button>
                     <button
-                      disabled={lIdx === section.lessons.length - 1}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleMoveLesson(section.id, lIdx, "down");
-                      }}
+                      disabled={lIdx === (section.lessons?.length || 0) - 1}
+                      onClick={(e) => { e.stopPropagation(); handleMoveLesson(section.id, lIdx, "down"); }}
                       className="btn-lesson-order"
                       title="Di chuyển bài học xuống"
                     >
                       <ArrowDown size={13} />
                     </button>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEditLesson(section.id, lesson);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); openEditLesson(lesson); }}
                       className="btn-lesson-edit"
                     >
                       <Pencil size={13} />
                     </button>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteLesson(section.id, lesson.id);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteLesson(section.id, lesson.id); }}
                       className="btn-lesson-delete"
                     >
                       <Trash2 size={13} />
