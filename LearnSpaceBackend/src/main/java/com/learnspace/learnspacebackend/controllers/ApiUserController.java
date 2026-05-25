@@ -50,6 +50,17 @@ public class ApiUserController {
         return ResponseEntity.ok(userService.getUserByUsername(currentUser.getUsername()));
     }
 
+    @GetMapping("/current-user")
+    public ResponseEntity<UserProfileDto> getCurrentUser(
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+        if (currentUser == null) {
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        }
+
+        UserProfileDto profile = userService.getUserByUsername(currentUser.getUsername());
+        return ResponseEntity.ok(profile);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody UserLoginDto user) {
         return ResponseEntity.ok().body(Collections.singletonMap("token", userService.login(user)));
