@@ -5,6 +5,7 @@ import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.dtos.UserLoginDto;
 import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
+import com.learnspace.learnspacebackend.dtos.UserUpdateDto;
 import com.learnspace.learnspacebackend.exceptions.DuplicateResourceException;
 import com.learnspace.learnspacebackend.exceptions.InvalidLoginException;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
@@ -93,7 +94,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setRole(UserRole.STUDENT);
 
-        if (dto.avatar() != null && !dto.avatar().isEmpty()) {
+        if (dto != null && !dto.avatar().isEmpty()) {
             user.setAvatar(cloudinaryService.uploadImage(dto.avatar()));
         }
 
@@ -128,15 +129,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileDto registerAdmin(UserRegisterDto user) {
-        User u = new User();
-        u.setUsername(user.username());
-        u.setPassword(passwordEncoder.encode(user.password()));
-        u.setFirstName(user.firstName());
-        u.setLastName(user.lastName());
-        u.setEmail(user.email());
-        u.setRole(UserRole.ADMIN);
-        return userMapper.toProfileDto(userRepository.register(u));
+    public UserProfileDto registerAdmin(UserRegisterDto dto) {
+        User user = userMapper.toEntity(dto);
+        user.setPassword(passwordEncoder.encode(dto.password()));
+        user.setRole(UserRole.ADMIN);
+        return userMapper.toProfileDto(userRepository.register(user));
     }
 
     @Override
@@ -146,31 +143,52 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    private void handleAvatarUpdate(User u, MultipartFile newAvatar) {
+        if (newAvatar != null && !newAvatar.isEmpty()) {
+            if (u.getAvatar() != null) {
+                cloudinaryService.deleteImage(u.getAvatar());
+            }
+            u.setAvatar(cloudinaryService.uploadImage(newAvatar));
+        }
+    }
+
     @Override
-    public void updateByAdmin(AdminUserUpdateDto user, MultipartFile avatar) {
-        User u = userRepository.getUserById(user.id());
-        if (u == null) {
+    public void updateByAdmin(AdminUserUpdateDto dto) {
+        User user = userRepository.getUserById(dto.id());
+        if (user == null) {
             throw new ResourceNotFoundException("Không tìm thấy user");
         }
 
-        u.setFirstName(user.firstName());
-        u.setLastName(user.lastName());
-        u.setEmail(user.email());
-        u.setRole(user.role());
-        u.setActive(user.active() != null ? user.active() : false);
+        user.setFirstName(dto.firstName());
+        user.setLastName(dto.lastName());
+        user.setEmail(dto.email());
+        user.setRole(dto.role());
+        user.setActive(dto.active() != null ? dto.active() : false);
 
-        if (user.role() == UserRole.TEACHER) {
-            u.setVerified(user.verified() != null ? user.verified() : false);
+        if (dto.role() == UserRole.TEACHER) {
+            user.setVerified(dto.verified() != null ? dto.verified() : false);
         } else {
-            u.setVerified(false);
+            user.setVerified(false);
         }
 
-        if (avatar != null && !avatar.isEmpty()) {
-            cloudinaryService.deleteImage(u.getAvatar());
+        handleAvatarUpdate(user, dto.avatar());
+        userRepository.update(user);
+    }
 
-            u.setAvatar(cloudinaryService.uploadImage(avatar));
+    @Override
+    public UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto) {
+        User user = userRepository.getUserById(currentUserId);
+        if (user == null) {
+            throw new ResourceNotFoundException("Không tìm thấy user");
         }
 
-        userRepository.update(u);
+        user.setFirstName(dto.firstName());
+        user.setLastName(dto.lastName());
+        user.setEmail(dto.email());
+
+        handleAvatarUpdate(user, dto.avatar());
+
+        userRepository.update(user);
+        return userMapper.toProfileDto(user);
     }
 }

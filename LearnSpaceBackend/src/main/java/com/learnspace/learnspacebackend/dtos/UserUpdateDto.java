@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public record UserUpdateDto(
         @Size(max = 255, message = "Tên vượt quá độ dài cho phép")
         @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Tên không được chứa ký tự đặc biệt")
@@ -15,5 +17,4 @@ public record UserUpdateDto(
 
         @Email(message = "Định dạng email không hợp lệ") String email,
 
-        @Size(max = 255, message = "URL avatar vượt quá độ dài cho phép")
-        String avatar) {}
+        MultipartFile avatar) {}

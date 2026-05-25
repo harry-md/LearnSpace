@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -40,10 +39,8 @@ public class ApiLessonController {
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
     public ResponseEntity<LessonDto> create(
-            @PathVariable("chapterId") int chapterId,
-            @Valid @RequestPart("data") LessonDto lessonDto,
-            @RequestPart("video") MultipartFile video) {
-        LessonDto created = lessonService.createLesson(chapterId, lessonDto, video);
+            @PathVariable("chapterId") int chapterId, @Valid @ModelAttribute LessonDto lessonDto) {
+        LessonDto created = lessonService.createLesson(chapterId, lessonDto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
@@ -54,10 +51,8 @@ public class ApiLessonController {
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
     public ResponseEntity<LessonDto> update(
-            @PathVariable("id") int id,
-            @Valid @RequestPart(value = "data", required = false) LessonPatchDto lessonDto,
-            @RequestPart(value = "video", required = false) MultipartFile video) {
-        return ResponseEntity.ok(lessonService.updateLesson(id, lessonDto, video));
+            @PathVariable("id") int id, @Valid @ModelAttribute LessonPatchDto lessonDto) {
+        return ResponseEntity.ok(lessonService.updateLesson(id, lessonDto));
     }
 
     @DeleteMapping("/lessons/{id}")

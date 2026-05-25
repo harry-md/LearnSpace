@@ -1,26 +1,27 @@
 package com.learnspace.learnspacebackend.pojo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "lesson_progress")
-public class LessonProgress {
+@Table(name = "comment")
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @Size(max = 1000)
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "enrollment_id", nullable = false)
-    private Enrollment enrollment;
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    private String content;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -28,20 +29,15 @@ public class LessonProgress {
     private Lesson lesson;
 
     @NotNull
-    @Column(name = "completed", nullable = false)
-    private Boolean completed = false;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @NotNull
-    @Column(name = "watched_sec", nullable = false)
-    private Integer watchedSec;
-
-    @NotNull
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @NotNull
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
@@ -53,12 +49,12 @@ public class LessonProgress {
         this.id = id;
     }
 
-    public Enrollment getEnrollment() {
-        return enrollment;
+    public String getContent() {
+        return content;
     }
 
-    public void setEnrollment(Enrollment enrollment) {
-        this.enrollment = enrollment;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public Lesson getLesson() {
@@ -69,20 +65,12 @@ public class LessonProgress {
         this.lesson = lesson;
     }
 
-    public Integer getWatchedSec() {
-        return watchedSec;
+    public User getUser() {
+        return user;
     }
 
-    public void setWatchedSec(Integer watchedSec) {
-        this.watchedSec = watchedSec;
-    }
-
-    public Boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(Boolean completed) {
-        this.completed = completed;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public LocalDateTime getCreatedAt() {

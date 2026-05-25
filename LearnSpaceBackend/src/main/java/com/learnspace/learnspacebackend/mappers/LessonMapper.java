@@ -16,6 +16,7 @@ public interface LessonMapper {
 
     LessonListDto toListDto(Lesson lesson);
 
+    @Mapping(target = "videoFile", ignore = true)
     LessonDto toDto(Lesson lesson);
 
     @Mapping(target = "id", ignore = true)
