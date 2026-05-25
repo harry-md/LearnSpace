@@ -6,6 +6,7 @@ import com.learnspace.learnspacebackend.pojo.UserRole;
 import java.time.LocalDateTime;
 
 public record UserProfileDto(
+        Integer id,
         String username,
         UserRole role,
         String firstName,

@@ -1,7 +1,11 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +23,28 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     @Override
     public boolean hasValidEnrollment(int studentId, int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        String hql =
-                "SELECT COUNT(e) FROM Enrollment e WHERE e.student.id = :studentId AND e.course.id"
-                        + " = :courseId AND e.status IN ('ACTIVE', 'COMPLETED')";
+        String hql = "SELECT COUNT(e) FROM Enrollment e WHERE e.student.id = :studentId AND e.course.id"
+                + " = :courseId AND e.status IN ('ACTIVE', 'COMPLETED')";
 
         Query<Long> query = session.createQuery(hql, Long.class);
         query.setParameter("studentId", studentId);
         query.setParameter("courseId", courseId);
         return query.getSingleResult() > 0;
+    }
+
+    @Override
+    public Enrollment getEnrollmentById(int id) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
+
+        Root<Enrollment> root = q.from(Enrollment.class);
+        root.fetch("course");
+        root.fetch("student");
+
+        q.select(root)
+                .where(builder.and(
+                        builder.equal(root.get("id"), id), root.get("status").in("ACTIVE", "COMPLETED")));
+        return session.createQuery(q).getSingleResultOrNull();
     }
 }

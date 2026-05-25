@@ -16,7 +16,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import Header from "../../components/Header/Header";
+import CourseCard from "../../components/CourseCard/CourseCard";
+import CourseHoverDetail from "../../components/CourseHoverDetail/CourseHoverDetail";
 
 // MOCK DATA FOR COURSES
 const mockEnrolledCourses = [
@@ -194,9 +195,6 @@ const LearningPage = () => {
           </div>
         </div>
       )}
-
-      {/* 1. MAIN HEADER (UDEMY/LEARNSPACE NAV) */}
-      <Header />
 
       {/* 2. SUB-HEADER / DARK BANNER */}
       <section className="bg-[#1c1d1f] text-white pt-8 px-6 md:px-12 border-b border-gray-800 shrink-0">
