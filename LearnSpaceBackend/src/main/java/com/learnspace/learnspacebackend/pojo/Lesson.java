@@ -27,7 +27,7 @@ public class Lesson {
 
     @NotNull
     @Column(name = "`order`", nullable = false)
-    private Integer order;
+    private Integer order = 1000;
 
     @Lob
     @Column(name = "content")

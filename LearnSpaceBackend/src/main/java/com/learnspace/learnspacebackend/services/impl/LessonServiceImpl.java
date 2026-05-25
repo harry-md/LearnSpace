@@ -157,6 +157,7 @@ public class LessonServiceImpl implements LessonService {
             lesson.setChapter(chapter);
             lesson.setVideo(videoUrl);
             lesson.setVideoLength(videoLength);
+            lesson.setOrder(lessonRepository.getMaxOrder(chapterId) + 1000);
 
             return lessonMapper.toDto(lessonRepository.addOrUpdateLesson(lesson));
 

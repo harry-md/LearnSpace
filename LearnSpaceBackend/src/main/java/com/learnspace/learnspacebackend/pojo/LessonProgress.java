@@ -40,6 +40,10 @@ public class LessonProgress {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @NotNull
+    @Column(name = "completed", nullable = false)
+    private Boolean completed;
+
     public Integer getId() {
         return id;
     }
@@ -72,7 +76,7 @@ public class LessonProgress {
         this.watchedSec = watchedSec;
     }
 
-    public Boolean getCompleted() {
+    public Boolean isCompleted() {
         return completed;
     }
 

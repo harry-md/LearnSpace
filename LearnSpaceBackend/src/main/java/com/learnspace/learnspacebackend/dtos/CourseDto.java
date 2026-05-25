@@ -1,5 +1,6 @@
 package com.learnspace.learnspacebackend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
@@ -9,6 +10,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public record CourseDto(
         @JsonProperty(access = Access.READ_ONLY) Integer id,
@@ -36,5 +38,10 @@ public record CourseDto(
 
         Boolean active,
 
-        @JsonProperty(access = Access.READ_ONLY) String createdAt,
-        @JsonProperty(access = Access.READ_ONLY) String updatedAt) {}
+        @JsonProperty(access = Access.READ_ONLY)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime createdAt,
+
+        @JsonProperty(access = Access.READ_ONLY)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime updatedAt) {}

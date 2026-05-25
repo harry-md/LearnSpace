@@ -1,12 +1,14 @@
 package com.learnspace.learnspacebackend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
 
 public record ChapterDto(
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -17,10 +19,12 @@ public record ChapterDto(
         @Size(max = 255, message = "Tên chương vượt quá độ dài cho phép")
         String name,
 
-        @Min(value = 0, message = "Số thứ tự của chương không hợp lệ")
-        Integer order,
-
         Boolean free,
 
-        @JsonProperty(access = Access.READ_ONLY) String createdAt,
-        @JsonProperty(access = Access.READ_ONLY) String updatedAt) {}
+        @JsonProperty(access = Access.READ_ONLY)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        LocalDateTime createdAt,
+
+        @JsonProperty(access = Access.READ_ONLY)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        LocalDateTime updatedAt) {}

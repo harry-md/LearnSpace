@@ -29,7 +29,7 @@ public class LessonRepositoryImpl implements LessonRepository {
     public List<Lesson> getLessons(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery(
-                        "SELECT l FROM Lesson l WHERE l.chapter.id = :chapterId ORDER BY l.order",
+                        "FROM Lesson l WHERE l.chapter.id = :chapterId ORDER BY l.order",
                         Lesson.class)
                 .setParameter("chapterId", chapterId)
                 .getResultList();
@@ -37,12 +37,12 @@ public class LessonRepositoryImpl implements LessonRepository {
 
     @Override
     public Lesson addOrUpdateLesson(Lesson lesson) {
-        Session s = factory.getObject().getCurrentSession();
+        Session session = factory.getObject().getCurrentSession();
         if (lesson.getId() == null) {
-            s.persist(lesson);
+            session.persist(lesson);
             return lesson;
         } else {
-            return s.merge(lesson);
+            return session.merge(lesson);
         }
     }
 
@@ -64,10 +64,10 @@ public class LessonRepositoryImpl implements LessonRepository {
 
     @Override
     public void deleteLesson(int lessonId) {
-        Session s = factory.getObject().getCurrentSession();
-        Lesson lesson = s.get(Lesson.class, lessonId);
+        Session session = factory.getObject().getCurrentSession();
+        Lesson lesson = session.get(Lesson.class, lessonId);
         if (lesson != null) {
-            s.remove(lesson);
+            session.remove(lesson);
         }
     }
 
@@ -90,5 +90,15 @@ public class LessonRepositoryImpl implements LessonRepository {
                         String.class)
                 .setParameter("courseId", courseId)
                 .getResultList();
+    }
+
+    @Override
+    public Integer getMaxOrder(int chapterId) {
+        Session session = factory.getObject().getCurrentSession();
+        return session.createQuery(
+                        "SELECT COALESCE(MAX()) FROM Lesson l WHERE l.chapter.id = :chapterId",
+                        Integer.class)
+                .setParameter("chapterId", chapterId)
+                .getSingleResult();
     }
 }

@@ -15,4 +15,6 @@ public interface ChapterRepository {
     Chapter createOrUpdate(Chapter chapter);
 
     void deleteChapter(int chapterId);
+
+    Integer getMaxOrder(int courseId);
 }

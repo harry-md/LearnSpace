@@ -17,8 +17,6 @@ public interface ChapterMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "course", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     Chapter toEntity(ChapterDto dto);
 
     @Mapping(target = "course", ignore = true)
