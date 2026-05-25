@@ -4,15 +4,21 @@ import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.dtos.EnrollmentDto;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.EnrollmentMapper;
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
+import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 import com.learnspace.learnspacebackend.pojo.User;
+import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.EnrollmentService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -22,6 +28,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private CourseRepository courseRepository;
 
     @Autowired
     private EnrollmentMapper enrollmentMapper;
@@ -43,5 +52,34 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             throw new AccessDeniedException("Bạn không có quyền truy cập enrollment này");
         }
         return enrollmentMapper.toDto(enrollment);
+    }
+
+    @Override
+    public EnrollmentDto createEnrollment(int courseId) {
+        CustomUserDetails principal = getLoggedInPrincipal();
+        User student = userRepository.getUserById(principal.getId());
+
+        if (student == null) {
+            throw new ResourceNotFoundException("Không tìm thấy thông tin user hiện tại.");
+        }
+        Course course = courseRepository.getCourseById(courseId);
+        if (course == null) {
+            throw new ResourceNotFoundException("Không tìm thấy khóa học này.");
+        }
+        if (enrollmentRepository.hasValidEnrollment(student.getId(), courseId)) {
+            throw new IllegalArgumentException("Bạn đã đăng ký khóa học này rồi.");
+        }
+
+        Enrollment enrollment = new Enrollment();
+        enrollment.setStudent(student);
+        enrollment.setCourse(course);
+
+        if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
+            enrollment.setStatus(EnrollmentStatus.ACTIVE);
+        } else {
+            enrollment.setStatus(EnrollmentStatus.PENDING);
+        }
+
+        return enrollmentMapper.toDto(enrollmentRepository.addOrUpdateEnrollment(enrollment));
     }
 }

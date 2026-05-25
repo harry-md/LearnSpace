@@ -205,10 +205,6 @@ public class LessonServiceImpl implements LessonService {
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
-        MultipartFile videoFile = lessonDto.videoFile();
-        if (lessonDto == null && (videoFile == null || videoFile.isEmpty())) {
-            throw new RuntimeException("Cần cung cấp ít nhất thông tin bài học hoặc video");
-        }
 
         Lesson existingLesson = lessonRepository.getLessonById(lessonId);
         if (existingLesson == null) {
@@ -217,16 +213,14 @@ public class LessonServiceImpl implements LessonService {
 
         verifyCourseOwner(existingLesson.getChapter().getCourse());
 
-        if (lessonDto != null) {
-            lessonMapper.updateEntityFromDto(existingLesson, lessonDto);
+        lessonMapper.updateEntityFromDto(existingLesson, lessonDto);
 
-            if (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null) {
-                int newOrder =
-                        calculateNewOrder(lessonDto.frontLessonId(), lessonDto.behindLessonId());
-                existingLesson.setOrder(newOrder);
-            }
+        if (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null) {
+            int newOrder = calculateNewOrder(lessonDto.frontLessonId(), lessonDto.behindLessonId());
+            existingLesson.setOrder(newOrder);
         }
 
+        MultipartFile videoFile = lessonDto.videoFile();
         if (videoFile != null && !videoFile.isEmpty()) {
             String oldVideoUrl = existingLesson.getVideo();
             if (oldVideoUrl != null && !oldVideoUrl.isBlank()) {

@@ -6,8 +6,8 @@ import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
@@ -23,13 +23,16 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     @Override
     public boolean hasValidEnrollment(int studentId, int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        String hql = "SELECT COUNT(e) FROM Enrollment e WHERE e.student.id = :studentId AND e.course.id"
-                + " = :courseId AND e.status IN ('ACTIVE', 'COMPLETED')";
-
-        Query<Long> query = session.createQuery(hql, Long.class);
-        query.setParameter("studentId", studentId);
-        query.setParameter("courseId", courseId);
-        return query.getSingleResult() > 0;
+        return session.createQuery(
+                                "SELECT 1 FROM Enrollment e WHERE e.student.id = :studentId AND"
+                                        + " e.course.id = :courseId AND e.status IN ('ACTIVE',"
+                                        + " 'COMPLETED')",
+                                Integer.class)
+                        .setParameter("studentId", studentId)
+                        .setParameter("courseId", courseId)
+                        .setMaxResults(1)
+                        .getSingleResultOrNull()
+                != null;
     }
 
     @Override
@@ -44,7 +47,27 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
 
         q.select(root)
                 .where(builder.and(
-                        builder.equal(root.get("id"), id), root.get("status").in("ACTIVE", "COMPLETED")));
+                        builder.equal(root.get("id"), id),
+                        root.get("status").in("ACTIVE", "COMPLETED")));
         return session.createQuery(q).getSingleResultOrNull();
+    }
+
+    @Override
+    public Enrollment addOrUpdateEnrollment(Enrollment enrollment) {
+        Session session = factory.getObject().getCurrentSession();
+        if (enrollment.getId() == null) {
+            session.persist(enrollment);
+            return enrollment;
+        }
+        return session.merge(enrollment);
+    }
+
+    @Override
+    public void deleteEnrollment(int enrollmentId) {
+        Session session = factory.getObject().getCurrentSession();
+        Enrollment enrollment = session.get(Enrollment.class, enrollmentId);
+        if (enrollment != null) {
+            session.remove(enrollment);
+        }
     }
 }
