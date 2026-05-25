@@ -9,9 +9,27 @@ function HoverCard({
 }
 
 function HoverCardTrigger({
+  asChild,
+  children,
   ...props
 }) {
-  return (<PreviewCardPrimitive.Trigger data-slot="hover-card-trigger" {...props} />);
+  if (asChild) {
+    return (
+      <PreviewCardPrimitive.Trigger
+        data-slot="hover-card-trigger"
+        render={children}
+        {...props}
+      />
+    );
+  }
+  return (
+    <PreviewCardPrimitive.Trigger
+      data-slot="hover-card-trigger"
+      {...props}
+    >
+      {children}
+    </PreviewCardPrimitive.Trigger>
+  );
 }
 
 function HoverCardContent({
