@@ -83,24 +83,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileDto register(UserRegisterDto user, MultipartFile avatar) {
-        if (userRepository.checkUsernameExist(user.username())) {
+    public UserProfileDto register(UserRegisterDto dto) {
+        if (userRepository.checkUsernameExist(dto.username())) {
             throw new DuplicateResourceException("Username đã tồn tại");
         }
 
-        User u = new User();
-        u.setUsername(user.username());
-        u.setPassword(passwordEncoder.encode(user.password()));
-        u.setFirstName(user.firstName());
-        u.setLastName(user.lastName());
-        u.setEmail(user.email());
-        u.setRole(UserRole.STUDENT);
+        User user = userMapper.toEntity(dto);
 
-        if (avatar != null && !avatar.isEmpty()) {
-            u.setAvatar(cloudinaryService.uploadImage(avatar));
+        user.setPassword(passwordEncoder.encode(dto.password()));
+        user.setRole(UserRole.STUDENT);
+
+        if (dto.avatar() != null && !dto.avatar().isEmpty()) {
+            user.setAvatar(cloudinaryService.uploadImage(dto.avatar()));
         }
 
-        return userMapper.toProfileDto(userRepository.register(u));
+        return userMapper.toProfileDto(userRepository.register(user));
     }
 
     @Override

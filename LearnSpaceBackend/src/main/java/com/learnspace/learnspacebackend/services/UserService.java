@@ -15,7 +15,7 @@ public interface UserService extends UserDetailsService {
 
     UserProfileDto getUserByUsername(String username);
 
-    UserProfileDto register(UserRegisterDto user, MultipartFile avatar);
+    UserProfileDto register(UserRegisterDto user);
 
     String login(UserLoginDto user);
 

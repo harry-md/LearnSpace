@@ -33,6 +33,6 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<UserProfileDto> adminRegister(
             @Valid @RequestPart(value = "data") UserRegisterDto userDto) {
-        return new ResponseEntity<>(userService.register(userDto, null), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.register(userDto), HttpStatus.CREATED);
     }
 }

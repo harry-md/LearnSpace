@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public record UserRegisterDto(
         @NotBlank(message = "Tên đăng nhập không được để trống")
         @Size(max = 255, message = "Tên đăng nhập vượt quá độ dài cho phép")
@@ -31,4 +33,6 @@ public record UserRegisterDto(
 
         @NotBlank(message = "Email không được để trống")
         @Email(message = "Định dạng email không hợp lệ")
-        String email) {}
+        String email,
+
+        MultipartFile avatar) {}
