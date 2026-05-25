@@ -22,37 +22,37 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
     @Override
     public List<Category> getCates() {
-        Session s = factory.getObject().getCurrentSession();
+        Session session = factory.getObject().getCurrentSession();
 
-        Query q = s.createQuery("FROM Category", Category.class);
+        Query q = session.createQuery("FROM Category", Category.class);
         return q.getResultList();
     }
 
     @Override
     public Category getCateById(int id) {
-        Session s = factory.getObject().getCurrentSession();
+        Session session = factory.getObject().getCurrentSession();
 
-        return s.get(Category.class, id);
+        return session.get(Category.class, id);
     }
 
     @Override
     public Category createOrUpdate(Category category) {
-        Session s = factory.getObject().getCurrentSession();
+        Session session = factory.getObject().getCurrentSession();
         if (category.getId() == null) {
-            s.persist(category);
+            session.persist(category);
         } else {
-            category = s.merge(category);
+            category = session.merge(category);
         }
         return category;
     }
 
     @Override
     public void deleteCate(int id) {
-        Session s = factory.getObject().getCurrentSession();
+        Session session = factory.getObject().getCurrentSession();
 
-        Category c = s.get(Category.class, id);
+        Category c = session.get(Category.class, id);
         if (c != null) {
-            s.remove(c);
+            session.remove(c);
         }
     }
 }

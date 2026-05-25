@@ -26,6 +26,10 @@ public class LessonProgress {
     @Column(name = "watched_sec", nullable = false)
     private Integer watchedSec;
 
+    @NotNull
+    @Column(name = "completed", nullable = false)
+    private Boolean completed;
+
     public Integer getId() {
         return id;
     }
@@ -56,5 +60,13 @@ public class LessonProgress {
 
     public void setWatchedSec(Integer watchedSec) {
         this.watchedSec = watchedSec;
+    }
+
+    public Boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
     }
 }

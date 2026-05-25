@@ -11,7 +11,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "chapter")
@@ -29,7 +28,7 @@ public class Chapter {
 
     @NotNull
     @Column(name = "`order`", nullable = false)
-    private Integer order;
+    private Integer order = 1000;
 
     @ColumnDefault("0")
     @Column(name = "free")
@@ -40,9 +39,6 @@ public class Chapter {
     @JoinColumn(name = "course_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Course course;
-
-    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY)
-    private List<Lesson> lessons;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -90,10 +86,6 @@ public class Chapter {
 
     public void setCourse(Course course) {
         this.course = course;
-    }
-
-    public List<Lesson> getLessons() {
-        return lessons;
     }
 
     public LocalDateTime getCreatedAt() {

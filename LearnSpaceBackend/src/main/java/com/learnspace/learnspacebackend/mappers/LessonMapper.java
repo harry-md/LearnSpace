@@ -16,8 +16,6 @@ public interface LessonMapper {
 
     LessonListDto toListDto(Lesson lesson);
 
-    @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    @Mapping(target = "updatedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     LessonDto toDto(Lesson lesson);
 
     @Mapping(target = "id", ignore = true)

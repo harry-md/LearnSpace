@@ -20,8 +20,6 @@ public interface CourseMapper {
     @Mapping(target = "teacherName", source = "teacher.fullName")
     @Mapping(target = "image", source = "image")
     @Mapping(target = "introVideo", source = "introVideo")
-    @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    @Mapping(target = "updatedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     @Mapping(target = "categoryId", source = "category.id")
     CourseDto toDto(Course course);
 
