@@ -31,4 +31,15 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
         q.select(root).where(builder.equal(root.get("id"), progressId));
         return session.createQuery(q).getSingleResultOrNull();
     }
+
+    @Override
+    public LessonProgress addOrUpdateLessonProgress(LessonProgress lessonProgress) {
+        Session session = factory.getObject().getCurrentSession();
+        if (lessonProgress.getId() == null) {
+            session.persist(lessonProgress);
+            return lessonProgress;
+        } else {
+            return session.merge(lessonProgress);
+        }
+    }
 }

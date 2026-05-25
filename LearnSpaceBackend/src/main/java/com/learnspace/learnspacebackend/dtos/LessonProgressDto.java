@@ -1,5 +1,6 @@
 package com.learnspace.learnspacebackend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -21,7 +22,9 @@ public record LessonProgressDto(
         Boolean completed,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime updatedAt,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
         LocalDateTime createdAt) {}
