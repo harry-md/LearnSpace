@@ -45,20 +45,9 @@ public class ApiUserController {
     public ResponseEntity<UserProfileDto> getCurrentUser(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         if (currentUser == null) {
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
         return ResponseEntity.ok(userService.getUserByUsername(currentUser.getUsername()));
-    }
-
-    @GetMapping("/current-user")
-    public ResponseEntity<UserProfileDto> getCurrentUser(
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
-        if (currentUser == null) {
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-        }
-
-        UserProfileDto profile = userService.getUserByUsername(currentUser.getUsername());
-        return ResponseEntity.ok(profile);
     }
 
     @PostMapping("/login")

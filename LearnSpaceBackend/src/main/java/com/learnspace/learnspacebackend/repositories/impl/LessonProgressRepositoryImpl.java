@@ -1,11 +1,12 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
-import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -38,8 +39,7 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
         if (lessonProgress.getId() == null) {
             session.persist(lessonProgress);
             return lessonProgress;
-        } else {
-            return session.merge(lessonProgress);
         }
+        return session.merge(lessonProgress);
     }
 }
