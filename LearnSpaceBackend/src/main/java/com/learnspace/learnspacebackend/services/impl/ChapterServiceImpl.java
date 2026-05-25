@@ -108,9 +108,11 @@ public class ChapterServiceImpl implements ChapterService {
         return (frontChapter.getOrder() + behindChapter.getOrder()) / 2;
     }
 
-    private void rebalanceIfNeeded(int courseId) {
+    private void checkAndReorderChapter(int courseId) {
         List<Chapter> chapters = chapterRepository.getChaptersByCourse(courseId);
-        if (chapters.size() < 2) return;
+        if (chapters.size() < 2) {
+            return;
+        }
 
         boolean needRebalance = false;
         for (int i = 1; i < chapters.size(); i++) {
@@ -144,8 +146,13 @@ public class ChapterServiceImpl implements ChapterService {
                     calculateNewOrder(chapterDto.frontChapterId(), chapterDto.behindChapterId());
             existingChapter.setOrder(newOrder);
         }
-        Chapter savedChapter = chapterRepository.createOrUpdate(existingChapter);
-        return chapterMapper.toDto(savedChapter);
+
+        Chapter updatedChapter = chapterRepository.createOrUpdate(existingChapter);
+
+        if (chapterDto.frontChapterId() != null || chapterDto.behindChapterId() != null) {
+            checkAndReorderChapter(existingChapter.getCourse().getId());
+        }
+        return chapterMapper.toDto(updatedChapter);
     }
 
     @Override

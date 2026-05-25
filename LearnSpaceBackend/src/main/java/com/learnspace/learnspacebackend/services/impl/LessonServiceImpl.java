@@ -131,7 +131,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public LessonDto createLesson(int chapterId, LessonDto lessonDto, MultipartFile video) {
+    public LessonDto createLesson(int chapterId, LessonDto lessonDto) {
         Chapter chapter = chapterRepository.getChapterById(chapterId);
         if (chapter == null) {
             throw new ResourceNotFoundException("Không tìm thấy chương học");
@@ -139,18 +139,19 @@ public class LessonServiceImpl implements LessonService {
 
         verifyCourseOwner(chapter.getCourse());
 
-        if (video.isEmpty()) {
+        MultipartFile videoFile = lessonDto.videoFile();
+        if (videoFile.isEmpty()) {
             throw new RuntimeException("File không được trống");
         }
 
         File tmpFile = null;
         try {
             tmpFile = File.createTempFile("video-", ".mp4");
-            video.transferTo(tmpFile);
+            videoFile.transferTo(tmpFile);
 
             validateMp4File(tmpFile);
 
-            String videoUrl = r2Service.uploadVideo(tmpFile, video.getContentType(), "lessons");
+            String videoUrl = r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");
             int videoLength = r2Service.getVideoLength(tmpFile);
 
             Lesson lesson = lessonMapper.toEntity(lessonDto);
@@ -171,12 +172,42 @@ public class LessonServiceImpl implements LessonService {
         }
     }
 
+    private int calculateNewOrder(Integer frontLessonId, Integer behindLessonId) {
+        if (frontLessonId == null) {
+            return lessonRepository.getLessonById(behindLessonId).getOrder() / 2;
+        }
+        if (behindLessonId == null) {
+            return lessonRepository.getLessonById(frontLessonId).getOrder() + 1000;
+        }
+        Lesson frontLesson = lessonRepository.getLessonById(frontLessonId);
+        Lesson behindLesson = lessonRepository.getLessonById(behindLessonId);
+        return (frontLesson.getOrder() + behindLesson.getOrder()) / 2;
+    }
+
+    private void checkAndReorderLesson(int chapterId) {
+        List<Lesson> lessons = lessonRepository.getLessons(chapterId);
+        if (lessons.size() < 2) return;
+        boolean needRebalance = false;
+        for (int i = 1; i < lessons.size(); i++) {
+            int gap = lessons.get(i).getOrder() - lessons.get(i - 1).getOrder();
+            if (gap <= 1) {
+                needRebalance = true;
+                break;
+            }
+        }
+        if (needRebalance) {
+            for (int i = 0; i < lessons.size(); i++) {
+                lessons.get(i).setOrder((i + 1) * 1000);
+            }
+        }
+    }
+
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto, MultipartFile video) {
-        if (lessonDto == null && (video == null || video.isEmpty())) {
-            throw new RuntimeException(
-                    "Cần cung cấp ít nhất thông tin bài học hoặc video để cập nhật");
+    public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
+        MultipartFile videoFile = lessonDto.videoFile();
+        if (lessonDto == null && (videoFile == null || videoFile.isEmpty())) {
+            throw new RuntimeException("Cần cung cấp ít nhất thông tin bài học hoặc video");
         }
 
         Lesson existingLesson = lessonRepository.getLessonById(lessonId);
@@ -188,9 +219,15 @@ public class LessonServiceImpl implements LessonService {
 
         if (lessonDto != null) {
             lessonMapper.updateEntityFromDto(existingLesson, lessonDto);
+
+            if (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null) {
+                int newOrder =
+                        calculateNewOrder(lessonDto.frontLessonId(), lessonDto.behindLessonId());
+                existingLesson.setOrder(newOrder);
+            }
         }
 
-        if (video != null && !video.isEmpty()) {
+        if (videoFile != null && !videoFile.isEmpty()) {
             String oldVideoUrl = existingLesson.getVideo();
             if (oldVideoUrl != null && !oldVideoUrl.isBlank()) {
                 r2Service.deleteVideo(oldVideoUrl);
@@ -198,12 +235,12 @@ public class LessonServiceImpl implements LessonService {
 
             File tmpFile = null;
             try {
-
                 tmpFile = File.createTempFile("video-", ".mp4");
-                video.transferTo(tmpFile);
+                videoFile.transferTo(tmpFile);
                 validateMp4File(tmpFile);
 
-                String videoUrl = r2Service.uploadVideo(tmpFile, video.getContentType(), "lessons");
+                String videoUrl =
+                        r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");
                 int videoLength = r2Service.getVideoLength(tmpFile);
 
                 existingLesson.setVideo(videoUrl);
@@ -219,7 +256,14 @@ public class LessonServiceImpl implements LessonService {
             }
         }
 
-        return lessonMapper.toDto(lessonRepository.addOrUpdateLesson(existingLesson));
+        Lesson updatedLesson = lessonRepository.addOrUpdateLesson(existingLesson);
+
+        if (lessonDto != null
+                && (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null)) {
+            checkAndReorderLesson(existingLesson.getChapter().getId());
+        }
+
+        return lessonMapper.toDto(updatedLesson);
     }
 
     @Override
