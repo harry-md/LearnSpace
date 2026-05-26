@@ -49,7 +49,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         }
         User student = enrollment.getStudent();
         if (!student.getId().equals(principal.getId())) {
-            throw new AccessDeniedException("Bạn không có quyền truy cập enrollment này");
+            throw new AccessDeniedException("Bạn không có quyền truy cập");
         }
         return enrollmentMapper.toDto(enrollment);
     }
@@ -60,14 +60,15 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         User student = userRepository.getUserById(principal.getId());
 
         if (student == null) {
-            throw new ResourceNotFoundException("Không tìm thấy thông tin user hiện tại.");
+            throw new ResourceNotFoundException("Không tìm thấy thông tin tài khoản của bạn.");
         }
+
         Course course = courseRepository.getCourseById(courseId);
         if (course == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học này.");
+            throw new ResourceNotFoundException("Không tìm thấy khóa học");
         }
-        if (enrollmentRepository.hasValidEnrollment(student.getId(), courseId)) {
-            throw new IllegalArgumentException("Bạn đã đăng ký khóa học này rồi.");
+        if (enrollmentRepository.checkValidEnrollment(student.getId(), courseId)) {
+            throw new IllegalArgumentException("Bạn đã đăng ký khóa học này rồi");
         }
 
         Enrollment enrollment = new Enrollment();

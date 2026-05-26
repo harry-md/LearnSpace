@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
                     principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
         } catch (AuthenticationException ex) {
             System.err.println(ex.getMessage());
-            throw new InvalidLoginException("Tên đăng nhập hoặc mật khẩu không đúng");
+            throw new InvalidLoginException();
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
             throw new RuntimeException("Có lỗi khi tạo token");

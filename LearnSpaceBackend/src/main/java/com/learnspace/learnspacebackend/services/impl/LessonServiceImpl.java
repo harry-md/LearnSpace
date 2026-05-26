@@ -64,8 +64,7 @@ public class LessonServiceImpl implements LessonService {
     private void verifyCourseOwner(Course course) {
         User teacher = getLoggedInTeacher();
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException(
-                    "Bạn không có quyền chỉnh sửa nội dung của khóa học này");
+            throw new AccessDeniedException("Bạn không có quyền thực hiện hành động này");
         }
     }
 
@@ -82,7 +81,7 @@ public class LessonServiceImpl implements LessonService {
             return;
         }
 
-        if (!enrollmentRepository.hasValidEnrollment(principal.getId(), course.getId())) {
+        if (!enrollmentRepository.checkValidEnrollment(principal.getId(), course.getId())) {
             throw new AccessDeniedException("Bạn cần mua khóa học này để xem bài học");
         }
     }

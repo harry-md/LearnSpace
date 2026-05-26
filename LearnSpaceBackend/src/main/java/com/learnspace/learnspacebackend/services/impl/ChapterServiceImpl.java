@@ -74,8 +74,7 @@ public class ChapterServiceImpl implements ChapterService {
     private void verifyCourseOwner(Course course) {
         User teacher = getLoggedInTeacher();
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException(
-                    "Bạn không có quyền chỉnh sửa nội dung của khóa học này");
+            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này");
         }
     }
 

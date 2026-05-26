@@ -4,7 +4,7 @@ import com.learnspace.learnspacebackend.pojo.Enrollment;
 
 public interface EnrollmentRepository {
 
-    boolean hasValidEnrollment(int studentId, int courseId);
+    boolean checkValidEnrollment(int studentId, int courseId);
 
     Enrollment getEnrollmentById(int enrollmentId);
 
