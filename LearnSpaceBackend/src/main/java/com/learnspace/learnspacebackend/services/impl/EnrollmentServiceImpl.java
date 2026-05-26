@@ -17,12 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
+@Transactional
 public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Autowired
@@ -59,7 +60,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public List<EnrollmentDto> getMyEnrollments() {
         CustomUserDetails principal = getLoggedInPrincipal();
-        List<Enrollment> enrollments = enrollmentRepository.getEnrollmentsByStudentId(principal.getId());
+        List<Enrollment> enrollments =
+                enrollmentRepository.getEnrollmentsByStudentId(principal.getId());
         return enrollments.stream().map(enrollmentMapper::toDto).toList();
     }
 
