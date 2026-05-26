@@ -37,7 +37,7 @@ public record CourseDto(
         @JsonProperty(access = Access.WRITE_ONLY) Integer categoryId,
 
         @JsonProperty(access = Access.READ_ONLY) CategoryDto category,
-        @JsonProperty(access = Access.READ_ONLY) TeacherDto teacher,
+        @JsonProperty(access = Access.READ_ONLY) SimpleUserDto teacher,
 
         Boolean active,
 
