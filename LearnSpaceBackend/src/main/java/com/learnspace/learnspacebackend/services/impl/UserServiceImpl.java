@@ -43,6 +43,9 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
+    private JwtUtils jwtUtils;
+
+    @Autowired
     private UserMapper userMapper;
 
     @Autowired
@@ -117,7 +120,7 @@ public class UserServiceImpl implements UserService {
                     .orElse("ROLE_STUDENT")
                     .replace("ROLE_", "");
 
-            return JwtUtils.generateToken(
+            return jwtUtils.generateToken(
                     principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
         } catch (AuthenticationException ex) {
             System.err.println(ex.getMessage());

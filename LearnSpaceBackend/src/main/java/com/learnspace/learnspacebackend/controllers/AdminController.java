@@ -5,8 +5,9 @@ import com.learnspace.learnspacebackend.services.CategoryService;
 import com.learnspace.learnspacebackend.services.CourseService;
 import com.learnspace.learnspacebackend.services.UserService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,7 +21,6 @@ import java.util.Map;
 
 @Controller
 @RequestMapping
-@PropertySource("classpath:configs.properties")
 public class AdminController {
 
     @Autowired
@@ -47,7 +47,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/update")
-    public String updateUser(@ModelAttribute("userDto") AdminUserUpdateDto dto) {
+    public String updateUser(@Valid @ModelAttribute("userDto") AdminUserUpdateDto dto) {
         userService.updateByAdmin(dto);
         return "redirect:/users";
     }

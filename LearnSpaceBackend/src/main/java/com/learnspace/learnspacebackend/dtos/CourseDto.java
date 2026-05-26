@@ -34,10 +34,10 @@ public record CourseDto(
         @Digits(integer = 17, fraction = 2, message = "Giá tiền không đúng định dạng")
         BigDecimal price,
 
-        Integer categoryId,
+        @JsonProperty(access = Access.WRITE_ONLY) Integer categoryId,
 
-        @JsonProperty(access = Access.READ_ONLY) String categoryName,
-        @JsonProperty(access = Access.READ_ONLY) String teacherName,
+        @JsonProperty(access = Access.READ_ONLY) CategoryDto category,
+        @JsonProperty(access = Access.READ_ONLY) TeacherDto teacher,
 
         Boolean active,
 
