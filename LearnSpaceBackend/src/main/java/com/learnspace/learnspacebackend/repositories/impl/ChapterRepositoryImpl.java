@@ -25,11 +25,9 @@ public class ChapterRepositoryImpl implements ChapterRepository {
 
     @Override
     public List<Chapter> getChaptersByCourse(int courseId) {
-        Session s = factory.getObject().getCurrentSession();
-        Query q = s.createQuery(
-                "SELECT c FROM Chapter c JOIN c.course course WHERE course.id = :courseId ORDER BY"
-                        + " c.order",
-                Chapter.class);
+        Session session = factory.getObject().getCurrentSession();
+        Query q = session.createQuery(
+                "FROM Chapter c WHERE c.course.id = :courseId ORDER BY c.order", Chapter.class);
         q.setParameter("courseId", courseId);
         return q.getResultList();
     }
@@ -48,23 +46,42 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     }
 
     @Override
-    public Chapter createOrUpdate(Chapter chapter) throws RuntimeException {
-        Session s = factory.getObject().getCurrentSession();
+    public boolean existChapter(int chapterId) {
+        Session session = factory.getObject().getCurrentSession();
+        return session.createQuery("SELECT 1 FROM Chapter c WHERE c.id = :chapterId", Integer.class)
+                        .setParameter("chapterId", chapterId)
+                        .setMaxResults(1)
+                        .getSingleResultOrNull()
+                != null;
+    }
 
+    @Override
+    public Chapter createOrUpdate(Chapter chapter) {
+        Session session = factory.getObject().getCurrentSession();
         if (chapter.getId() == null) {
-            s.persist(chapter);
+            session.persist(chapter);
             return chapter;
-        } else {
-            return s.merge(chapter);
         }
+        return session.merge(chapter);
     }
 
     @Override
     public void deleteChapter(int chapterId) {
-        Session s = factory.getObject().getCurrentSession();
-        Chapter chapter = s.get(Chapter.class, chapterId);
+        Session session = factory.getObject().getCurrentSession();
+        Chapter chapter = session.get(Chapter.class, chapterId);
         if (chapter != null) {
-            s.remove(chapter);
+            session.remove(chapter);
         }
+    }
+
+    @Override
+    public Integer getMaxOrder(int courseId) {
+        Session session = factory.getObject().getCurrentSession();
+        return session.createQuery(
+                        "SELECT COALESCE(MAX(c.order), 0) FROM Chapter c WHERE c.course.id ="
+                                + " :courseId",
+                        Integer.class)
+                .setParameter("courseId", courseId)
+                .getSingleResult();
     }
 }

@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.services;
 
 import java.io.File;
+import java.util.List;
 
 public interface R2Service {
 
@@ -9,4 +10,6 @@ public interface R2Service {
     int getVideoLength(File video);
 
     void deleteVideo(String videoUrl);
+
+    void deleteVideos(List<String> videoUrls);
 }

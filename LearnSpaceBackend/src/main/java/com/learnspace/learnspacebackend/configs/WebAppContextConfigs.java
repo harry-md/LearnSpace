@@ -1,5 +1,7 @@
 package com.learnspace.learnspacebackend.configs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +21,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
             "com.learnspace.learnspacebackend.repositories",
             "com.learnspace.learnspacebackend.services",
             "com.learnspace.learnspacebackend.mappers",
-            "com.learnspace.learnspacebackend.exceptions"
+            "com.learnspace.learnspacebackend.exceptions",
+            "com.learnspace.learnspacebackend.interceptors",
+            "com.learnspace.learnspacebackend.utils",
+            "com.learnspace.learnspacebackend.filters",
         })
 public class WebAppContextConfigs implements WebMvcConfigurer {
 
@@ -36,5 +41,10 @@ public class WebAppContextConfigs implements WebMvcConfigurer {
     @Bean
     public StandardServletMultipartResolver multipartResolver() {
         return new StandardServletMultipartResolver();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }

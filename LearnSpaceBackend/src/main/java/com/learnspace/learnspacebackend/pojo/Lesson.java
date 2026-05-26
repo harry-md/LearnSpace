@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -25,7 +27,7 @@ public class Lesson {
 
     @NotNull
     @Column(name = "`order`", nullable = false)
-    private Integer order;
+    private Integer order = 1000;
 
     @Lob
     @Column(name = "content")
@@ -51,6 +53,7 @@ public class Lesson {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "chapter_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Chapter chapter;
 
     public Integer getId() {

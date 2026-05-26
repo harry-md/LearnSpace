@@ -10,7 +10,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jakartaee>11.0.0-M1</jakartaee>
     <spring.version>6.5.7</spring.version>
     <java.version>25</java.version>
   </properties>
@@ -41,7 +40,7 @@
     <dependency>
       <groupId>jakarta.platform</groupId>
       <artifactId>jakarta.jakartaee-api</artifactId>
-      <version>${jakartaee}</version>
+      <version>11.0.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -51,9 +50,15 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+      <version>2.21.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.21.0</version>
+      <version>2.21.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -104,7 +109,8 @@
     <dependency>
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>6.6.44.Final</version>
+      <version>6.6.50.Final</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.mysql</groupId>

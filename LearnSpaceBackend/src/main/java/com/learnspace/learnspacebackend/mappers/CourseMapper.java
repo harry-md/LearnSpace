@@ -3,7 +3,9 @@ package com.learnspace.learnspacebackend.mappers;
 import com.learnspace.learnspacebackend.dtos.CourseDto;
 import com.learnspace.learnspacebackend.dtos.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.CoursePatchDto;
+import com.learnspace.learnspacebackend.dtos.TeacherDto;
 import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.pojo.User;
 
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -16,14 +18,19 @@ public interface CourseMapper {
 
     CourseListDto toListDto(Course course);
 
-    @Mapping(target = "categoryName", source = "category.name")
-    @Mapping(target = "teacherName", source = "teacher.fullName")
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "teacher", source = "teacher")
     @Mapping(target = "image", source = "image")
+    @Mapping(target = "imageFile", ignore = true)
     @Mapping(target = "introVideo", source = "introVideo")
-    @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    @Mapping(target = "updatedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Mapping(target = "introVideoFile", ignore = true)
     @Mapping(target = "categoryId", source = "category.id")
     CourseDto toDto(Course course);
+
+    @Mapping(target = "fullName", expression = "java(teacher.getFullName())")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "avatar", source = "avatar")
+    TeacherDto toTeacherDto(User teacher);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)

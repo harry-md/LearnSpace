@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -26,7 +28,7 @@ public class Chapter {
 
     @NotNull
     @Column(name = "`order`", nullable = false)
-    private Integer order;
+    private Integer order = 1000;
 
     @ColumnDefault("0")
     @Column(name = "free")
@@ -35,6 +37,7 @@ public class Chapter {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "course_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Course course;
 
     @Column(name = "created_at", updatable = false)

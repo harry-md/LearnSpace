@@ -4,7 +4,6 @@ import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 
-import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -30,21 +29,20 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User getUserByUsername(String username) {
         Session session = factory.getObject().getCurrentSession();
-        Query query = session.createQuery("FROM User WHERE username=:username", User.class);
-        query.setParameter("username", username);
-        return (User) query.getSingleResult();
+        return session.createQuery("FROM User WHERE username = :username", User.class)
+                .setParameter("username", username)
+                .getSingleResultOrNull();
     }
 
     @Override
     public boolean checkUsernameExist(String username) {
         Session session = factory.getObject().getCurrentSession();
-        List<Integer> result = session.createQuery(
-                        "SELECT 1 FROM User u WHERE u.username = :username", Integer.class)
-                .setParameter("username", username)
-                .setMaxResults(1)
-                .getResultList();
-
-        return !result.isEmpty();
+        return session.createQuery(
+                                "SELECT 1 FROM User u WHERE u.username = :username", Integer.class)
+                        .setParameter("username", username)
+                        .setMaxResults(1)
+                        .getSingleResultOrNull()
+                != null;
     }
 
     @Override

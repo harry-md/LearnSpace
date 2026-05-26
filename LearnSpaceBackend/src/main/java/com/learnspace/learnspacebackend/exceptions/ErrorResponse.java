@@ -2,16 +2,10 @@ package com.learnspace.learnspacebackend.exceptions;
 
 public class ErrorResponse {
 
-    private int statusCode;
     private String message;
 
-    public ErrorResponse(int statusCode, String message) {
-        this.statusCode = statusCode;
+    public ErrorResponse(String message) {
         this.message = message;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
     }
 
     public String getMessage() {

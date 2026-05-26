@@ -10,8 +10,10 @@ import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
+import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.ChapterService;
+import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -38,9 +40,15 @@ public class ChapterServiceImpl implements ChapterService {
     @Autowired
     private ChapterMapper chapterMapper;
 
+    @Autowired
+    private LessonRepository lessonRepository;
+
+    @Autowired
+    private R2Service r2Service;
+
     @Override
     public List<ChapterDto> getChapters(int courseId) {
-        if (courseRepository.getCourseById(courseId) == null) {
+        if (!courseRepository.existCourse(courseId)) {
             throw new ResourceNotFoundException("Không tìm thấy khóa học");
         }
         return chapterRepository.getChaptersByCourse(courseId).stream()
@@ -66,8 +74,7 @@ public class ChapterServiceImpl implements ChapterService {
     private void verifyCourseOwner(Course course) {
         User teacher = getLoggedInTeacher();
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException(
-                    "Bạn không có quyền chỉnh sửa nội dung của khóa học này");
+            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này");
         }
     }
 
@@ -83,8 +90,43 @@ public class ChapterServiceImpl implements ChapterService {
 
         Chapter chapter = chapterMapper.toEntity(chapterDto);
         chapter.setCourse(course);
+        chapter.setOrder(chapterRepository.getMaxOrder(courseId) + 1000);
 
         return chapterMapper.toDto(chapterRepository.createOrUpdate(chapter));
+    }
+
+    private int calculateNewOrder(Integer frontChapterId, Integer behindChapterId) {
+        if (frontChapterId == null) {
+            return chapterRepository.getChapterById(behindChapterId).getOrder() / 2;
+        }
+        if (behindChapterId == null) {
+            return chapterRepository.getChapterById(frontChapterId).getOrder() + 1000;
+        }
+        Chapter frontChapter = chapterRepository.getChapterById(frontChapterId);
+        Chapter behindChapter = chapterRepository.getChapterById(behindChapterId);
+        return (frontChapter.getOrder() + behindChapter.getOrder()) / 2;
+    }
+
+    private void checkAndReorderChapter(int courseId) {
+        List<Chapter> chapters = chapterRepository.getChaptersByCourse(courseId);
+        if (chapters.size() < 2) {
+            return;
+        }
+
+        boolean needRebalance = false;
+        for (int i = 1; i < chapters.size(); i++) {
+            int gap = chapters.get(i).getOrder() - chapters.get(i - 1).getOrder();
+            if (gap <= 1) {
+                needRebalance = true;
+                break;
+            }
+        }
+
+        if (needRebalance) {
+            for (int i = 0; i < chapters.size(); i++) {
+                chapters.get(i).setOrder((i + 1) * 1000);
+            }
+        }
     }
 
     @Override
@@ -98,8 +140,18 @@ public class ChapterServiceImpl implements ChapterService {
         verifyCourseOwner(existingChapter.getCourse());
 
         chapterMapper.updateEntityFromDto(existingChapter, chapterDto);
+        if (chapterDto.frontChapterId() != null || chapterDto.behindChapterId() != null) {
+            int newOrder =
+                    calculateNewOrder(chapterDto.frontChapterId(), chapterDto.behindChapterId());
+            existingChapter.setOrder(newOrder);
+        }
 
-        return chapterMapper.toDto(chapterRepository.createOrUpdate(existingChapter));
+        Chapter updatedChapter = chapterRepository.createOrUpdate(existingChapter);
+
+        if (chapterDto.frontChapterId() != null || chapterDto.behindChapterId() != null) {
+            checkAndReorderChapter(existingChapter.getCourse().getId());
+        }
+        return chapterMapper.toDto(updatedChapter);
     }
 
     @Override
@@ -111,6 +163,9 @@ public class ChapterServiceImpl implements ChapterService {
         }
 
         verifyCourseOwner(existingChapter.getCourse());
+
+        List<String> videoUrls = lessonRepository.getVideoUrlsByChapterId(chapterId);
+        r2Service.deleteVideos(videoUrls);
 
         chapterRepository.deleteChapter(chapterId);
     }

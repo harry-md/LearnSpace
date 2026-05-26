@@ -47,6 +47,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             Map res = cloudinary
                     .uploader()
                     .upload(file.getBytes(), ObjectUtils.asMap("resource_type", resourceType));
+
             return res.get("secure_url").toString();
         } catch (IOException ex) {
             System.err.println(ex.getMessage());

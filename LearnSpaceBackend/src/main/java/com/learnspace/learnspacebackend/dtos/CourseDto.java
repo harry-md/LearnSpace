@@ -1,5 +1,7 @@
 package com.learnspace.learnspacebackend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
@@ -8,7 +10,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public record CourseDto(
         @JsonProperty(access = Access.READ_ONLY) Integer id,
@@ -29,12 +34,21 @@ public record CourseDto(
         @Digits(integer = 17, fraction = 2, message = "Giá tiền không đúng định dạng")
         BigDecimal price,
 
-        Integer categoryId,
+        @JsonProperty(access = Access.WRITE_ONLY) Integer categoryId,
 
-        @JsonProperty(access = Access.READ_ONLY) String categoryName,
-        @JsonProperty(access = Access.READ_ONLY) String teacherName,
+        @JsonProperty(access = Access.READ_ONLY) CategoryDto category,
+        @JsonProperty(access = Access.READ_ONLY) TeacherDto teacher,
 
         Boolean active,
 
-        @JsonProperty(access = Access.READ_ONLY) String createdAt,
-        @JsonProperty(access = Access.READ_ONLY) String updatedAt) {}
+        @JsonProperty(access = Access.READ_ONLY)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime createdAt,
+
+        @JsonProperty(access = Access.READ_ONLY)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime updatedAt,
+
+        @JsonIgnore MultipartFile imageFile,
+
+        @JsonIgnore MultipartFile introVideoFile) {}

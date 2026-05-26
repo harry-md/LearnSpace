@@ -10,7 +10,11 @@ public interface ChapterRepository {
 
     Chapter getChapterById(int chapterId);
 
+    boolean existChapter(int chapterId);
+
     Chapter createOrUpdate(Chapter chapter);
 
     void deleteChapter(int chapterId);
+
+    Integer getMaxOrder(int courseId);
 }

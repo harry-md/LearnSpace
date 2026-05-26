@@ -1,8 +1,12 @@
 package com.learnspace.learnspacebackend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
+import java.time.LocalDateTime;
+
 public record UserProfileDto(
+        Integer id,
         String username,
         UserRole role,
         String firstName,
@@ -11,5 +15,9 @@ public record UserProfileDto(
         String avatar,
         boolean active,
         boolean verified,
-        String createdAt,
-        String updatedAt) {}
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime createdAt,
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime updatedAt) {}

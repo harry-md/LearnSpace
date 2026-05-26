@@ -11,9 +11,11 @@ import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
+import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.CloudinaryService;
 import com.learnspace.learnspacebackend.services.CourseService;
+import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -44,6 +46,12 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private R2Service r2Service;
+
+    @Autowired
+    private LessonRepository lessonRepository;
 
     @Override
     public List<CourseDto> getAllCoursesWithDetail(Map<String, String> params) {
@@ -81,14 +89,13 @@ public class CourseServiceImpl implements CourseService {
 
     private void verifyCourseOwner(Course course, User teacher) {
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException("Bạn không có quyền chỉnh sửa khóa học này");
+            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này");
         }
     }
 
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public CourseDto createCourse(
-            CourseDto courseDto, MultipartFile image, MultipartFile introVideo) {
+    public CourseDto createCourse(CourseDto courseDto) {
         Course course = courseMapper.toEntity(courseDto);
 
         if (courseDto.categoryId() != null) {
@@ -102,11 +109,14 @@ public class CourseServiceImpl implements CourseService {
 
         course.setTeacher(getLoggedInTeacher());
 
-        if (image != null && !image.isEmpty()) {
-            course.setImage(cloudinaryService.uploadImage(image));
+        MultipartFile imageFile = courseDto.imageFile();
+        if (imageFile != null && !imageFile.isEmpty()) {
+            course.setImage(cloudinaryService.uploadImage(imageFile));
         }
-        if (introVideo != null && !introVideo.isEmpty()) {
-            course.setIntroVideo(cloudinaryService.uploadVideo(introVideo));
+
+        MultipartFile introVideoFile = courseDto.introVideoFile();
+        if (introVideoFile != null && !introVideoFile.isEmpty()) {
+            course.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
 
         Course savedCourse = courseRepository.createOrUpdate(course);
@@ -115,8 +125,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public CourseDto updateCourse(
-            int id, CoursePatchDto courseDto, MultipartFile image, MultipartFile introVideo) {
+    public CourseDto updateCourse(int id, CoursePatchDto courseDto) {
         Course existCourse = courseRepository.getCourseById(id);
         if (existCourse == null) {
             throw new ResourceNotFoundException("Không tìm thấy khóa học cần cập nhật");
@@ -136,13 +145,16 @@ public class CourseServiceImpl implements CourseService {
             existCourse.setCategory(category);
         }
 
-        if (image != null && !image.isEmpty()) {
+        MultipartFile imageFile = courseDto.imageFile();
+        if (imageFile != null && !imageFile.isEmpty()) {
             cloudinaryService.deleteImage(existCourse.getImage());
-            existCourse.setImage(cloudinaryService.uploadImage(image));
+            existCourse.setImage(cloudinaryService.uploadImage(imageFile));
         }
-        if (introVideo != null && !introVideo.isEmpty()) {
+
+        MultipartFile introVideoFile = courseDto.introVideoFile();
+        if (introVideoFile != null && !introVideoFile.isEmpty()) {
             cloudinaryService.deleteVideo(existCourse.getIntroVideo());
-            existCourse.setIntroVideo(cloudinaryService.uploadVideo(introVideo));
+            existCourse.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
 
         return courseMapper.toDto(courseRepository.createOrUpdate(existCourse));
@@ -158,6 +170,9 @@ public class CourseServiceImpl implements CourseService {
 
         User teacher = getLoggedInTeacher();
         verifyCourseOwner(existCourse, teacher);
+
+        List<String> lessonVideoUrls = lessonRepository.getVideoUrlsByCourseId(id);
+        r2Service.deleteVideos(lessonVideoUrls);
 
         if (existCourse.getImage() != null) {
             cloudinaryService.deleteImage(existCourse.getImage());

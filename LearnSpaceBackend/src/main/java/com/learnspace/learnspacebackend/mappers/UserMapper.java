@@ -10,9 +10,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Mapping(target = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    @Mapping(target = "updatedAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     UserProfileDto toProfileDto(User user);
 
+    @Mapping(target = "avatar", ignore = true)
     User toEntity(UserRegisterDto dto);
 }

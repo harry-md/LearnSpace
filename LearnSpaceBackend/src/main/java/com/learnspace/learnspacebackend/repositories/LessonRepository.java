@@ -13,4 +13,12 @@ public interface LessonRepository {
     Lesson getLessonById(int lessonId);
 
     void deleteLesson(int lessonId);
+
+    List<String> getVideoUrlsByChapterId(int chapterId);
+
+    List<String> getVideoUrlsByCourseId(int courseId);
+
+    Integer getMaxOrder(int chapterId);
+
+    int countLessonsByCourseId(int courseId);
 }

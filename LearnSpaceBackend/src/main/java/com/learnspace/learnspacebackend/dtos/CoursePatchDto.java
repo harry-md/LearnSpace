@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.math.BigDecimal;
 
 public record CoursePatchDto(
@@ -19,4 +21,6 @@ public record CoursePatchDto(
         BigDecimal price,
 
         Integer categoryId,
-        Boolean active) {}
+        Boolean active,
+        MultipartFile imageFile,
+        MultipartFile introVideoFile) {}

@@ -6,36 +6,38 @@ import com.drew.metadata.mp4.Mp4Directory;
 import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Service
-@PropertySource("classpath:env.properties")
 public class R2ServiceImpl implements R2Service {
 
     @Autowired
     private S3Client r2Client;
 
-    @Autowired
-    private Environment env;
+    @Value("${r2.bucket_name}")
+    private String bucketName;
+
+    @Value("${r2.public_url}")
+    private String publicUrl;
 
     @Override
     public String uploadVideo(File video, String contentType, String folder) {
-        String bucketName = env.getProperty("r2.bucket_name");
-        String publicUrl = env.getProperty("r2.public_url");
-
         String originFileName = video.getName();
         String extension = "";
         if (originFileName != null && originFileName.contains(".")) {
@@ -78,8 +80,6 @@ public class R2ServiceImpl implements R2Service {
 
     @Override
     public void deleteVideo(String videoUrl) {
-        String bucketName = env.getProperty("r2.bucket_name");
-        String publicUrl = env.getProperty("r2.public_url");
         String key = videoUrl.replace(publicUrl + "/", "");
 
         try {
@@ -88,6 +88,32 @@ public class R2ServiceImpl implements R2Service {
             r2Client.deleteObject(delRequest);
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
+            throw new RuntimeException("Có lỗi khi xóa video");
+        }
+    }
+
+    @Override
+    public void deleteVideos(List<String> videoUrls) {
+        List<ObjectIdentifier> keys = videoUrls.stream()
+                .filter(url -> !url.isBlank())
+                .map(url -> ObjectIdentifier.builder()
+                        .key(url.replace(publicUrl + "/", ""))
+                        .build())
+                .toList();
+
+        if (keys.isEmpty()) {
+            return;
+        }
+
+        try {
+            DeleteObjectsRequest delRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucketName)
+                    .delete(Delete.builder().objects(keys).quiet(true).build())
+                    .build();
+
+            r2Client.deleteObjects(delRequest);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
             throw new RuntimeException("Có lỗi khi xóa video");
         }
     }

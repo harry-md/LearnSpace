@@ -12,8 +12,7 @@ import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,14 +24,13 @@ import java.util.Map;
 
 @Repository
 @Transactional
-@PropertySource("classpath:configs.properties")
 public class CourseRepositoryImpl implements CourseRepository {
 
     @Autowired
     private LocalSessionFactoryBean factory;
 
-    @Autowired
-    private Environment env;
+    @Value("${course.pageSize}")
+    private int COURSE_PAGE_SIZE_KEY;
 
     private List<Predicate> filter(
             CriteriaBuilder builder, Root<Course> root, Map<String, String> params) {
@@ -103,7 +101,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         Query query = session.createQuery(q);
         if (params != null && params.containsKey("page")) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
-            int pageSize = env.getProperty("course.pageSize", Integer.class);
+            int pageSize = COURSE_PAGE_SIZE_KEY;
             int start = (page - 1) * pageSize;
             query.setFirstResult(start);
             query.setMaxResults(pageSize);
@@ -143,7 +141,7 @@ public class CourseRepositoryImpl implements CourseRepository {
     }
 
     @Override
-    public Course getCourseById(int id) {
+    public Course getCourseById(int courseId) {
         Session session = factory.getObject().getCurrentSession();
 
         CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -153,9 +151,19 @@ public class CourseRepositoryImpl implements CourseRepository {
         root.fetch("category", JoinType.INNER);
         root.fetch("teacher", JoinType.INNER);
 
-        q.select(root).where(builder.equal(root.get("id"), id));
+        q.select(root).where(builder.equal(root.get("id"), courseId));
 
         return session.createQuery(q).getSingleResultOrNull();
+    }
+
+    @Override
+    public boolean existCourse(int courseId) {
+        Session session = factory.getObject().getCurrentSession();
+        return session.createQuery("SELECT 1 FROM Course c WHERE c.id = :courseId", Integer.class)
+                        .setParameter("courseId", courseId)
+                        .setMaxResults(1)
+                        .getSingleResultOrNull()
+                != null;
     }
 
     @Override
@@ -169,9 +177,10 @@ public class CourseRepositoryImpl implements CourseRepository {
     }
 
     @Override
-    public void deleteCourse(int id) {
+    public void deleteCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        Course c = session.get(Course.class, id);
+        Course c = session.get(Course.class, courseId);
+
         if (c != null) {
             session.remove(c);
         }

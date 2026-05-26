@@ -1,7 +1,12 @@
 package com.learnspace.learnspacebackend.pojo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lesson_progress")
@@ -23,8 +28,20 @@ public class LessonProgress {
     private Lesson lesson;
 
     @NotNull
+    @Column(name = "completed", nullable = false)
+    private Boolean completed = false;
+
+    @NotNull
     @Column(name = "watched_sec", nullable = false)
-    private Integer watchedSec;
+    private Integer watchedSec = 0;
+
+    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public Integer getId() {
         return id;
@@ -56,5 +73,29 @@ public class LessonProgress {
 
     public void setWatchedSec(Integer watchedSec) {
         this.watchedSec = watchedSec;
+    }
+
+    public Boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

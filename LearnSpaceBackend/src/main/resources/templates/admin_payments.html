@@ -99,7 +99,7 @@
                     <tr th:each="payment : ${payments}">
                       <td>
                         <div class="fw-bold text-dark"
-                          th:text="${payment.vnpTxnRef != null ? payment.vnpTxnRef : '#PAY' + payment.id}">
+                          th:text="${payment.paypalOrderId != null ? payment.paypalOrderId : '#PAY' + payment.id}">
                           VNP12345678
                         </div>
                       </td>
