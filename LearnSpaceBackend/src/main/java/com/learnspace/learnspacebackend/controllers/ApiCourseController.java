@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -39,11 +38,8 @@ public class ApiCourseController {
                 MediaType.MULTIPART_FORM_DATA_VALUE,
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
-    public ResponseEntity<CourseDto> create(
-            @Valid @RequestPart("data") CourseDto courseDto,
-            @RequestPart(value = "image", required = false) MultipartFile image,
-            @RequestPart(value = "introVideo", required = false) MultipartFile introVideo) {
-        CourseDto saved = courseService.createCourse(courseDto, image, introVideo);
+    public ResponseEntity<CourseDto> create(@Valid @ModelAttribute CourseDto courseDto) {
+        CourseDto saved = courseService.createCourse(courseDto);
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
@@ -54,11 +50,8 @@ public class ApiCourseController {
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
     public ResponseEntity<CourseDto> update(
-            @PathVariable("id") int id,
-            @Valid @RequestPart(value = "data", required = false) CoursePatchDto courseDto,
-            @RequestPart(value = "image", required = false) MultipartFile image,
-            @RequestPart(value = "introVideo", required = false) MultipartFile introVideo) {
-        CourseDto updated = courseService.updateCourse(id, courseDto, image, introVideo);
+            @PathVariable("id") int id, @Valid @ModelAttribute CoursePatchDto courseDto) {
+        CourseDto updated = courseService.updateCourse(id, courseDto);
         return ResponseEntity.ok(updated);
     }
 

@@ -2,10 +2,13 @@ package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.EnrollmentDto;
 import com.learnspace.learnspacebackend.services.EnrollmentService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,5 +29,9 @@ public class ApiEnrollmentController {
     @GetMapping("/enrollments/my-courses")
     public ResponseEntity<List<EnrollmentDto>> getMyEnrollments() {
         return ResponseEntity.ok(enrollmentService.getMyEnrollments());
+    @PostMapping("/courses/{courseId}/enrollments")
+    public ResponseEntity<EnrollmentDto> create(@PathVariable("courseId") int courseId) {
+        return new ResponseEntity<>(
+                enrollmentService.createEnrollment(courseId), HttpStatus.CREATED);
     }
 }

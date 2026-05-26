@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -48,14 +47,8 @@ public class AdminController {
     }
 
     @PostMapping("/users/update")
-    public String updateUser(
-            @ModelAttribute("userDto") AdminUserUpdateDto dto,
-            @RequestParam(value = "avatar", required = false) MultipartFile avatar) {
-        try {
-            userService.updateByAdmin(dto, avatar);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    public String updateUser(@ModelAttribute("userDto") AdminUserUpdateDto dto) {
+        userService.updateByAdmin(dto);
         return "redirect:/users";
     }
 

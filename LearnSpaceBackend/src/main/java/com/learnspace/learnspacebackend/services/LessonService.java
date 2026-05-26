@@ -4,8 +4,6 @@ import com.learnspace.learnspacebackend.dtos.LessonDto;
 import com.learnspace.learnspacebackend.dtos.LessonListDto;
 import com.learnspace.learnspacebackend.dtos.LessonPatchDto;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 public interface LessonService {
@@ -14,9 +12,9 @@ public interface LessonService {
 
     LessonDto getLesson(int lessonId);
 
-    LessonDto createLesson(int chapterId, LessonDto lessonDto, MultipartFile video);
+    LessonDto createLesson(int chapterId, LessonDto lessonDto);
 
-    LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto, MultipartFile video);
+    LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto);
 
     void deleteLesson(int lessonId);
 }

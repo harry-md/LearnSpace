@@ -5,6 +5,7 @@ import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.dtos.UserLoginDto;
 import com.learnspace.learnspacebackend.dtos.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
+import com.learnspace.learnspacebackend.dtos.UserUpdateDto;
 import com.learnspace.learnspacebackend.exceptions.DuplicateResourceException;
 import com.learnspace.learnspacebackend.exceptions.InvalidLoginException;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
@@ -83,24 +84,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileDto register(UserRegisterDto user, MultipartFile avatar) {
-        if (userRepository.checkUsernameExist(user.username())) {
+    public UserProfileDto register(UserRegisterDto dto) {
+        if (userRepository.checkUsernameExist(dto.username())) {
             throw new DuplicateResourceException("Username đã tồn tại");
         }
 
-        User u = new User();
-        u.setUsername(user.username());
-        u.setPassword(passwordEncoder.encode(user.password()));
-        u.setFirstName(user.firstName());
-        u.setLastName(user.lastName());
-        u.setEmail(user.email());
-        u.setRole(UserRole.STUDENT);
+        User user = userMapper.toEntity(dto);
 
-        if (avatar != null && !avatar.isEmpty()) {
-            u.setAvatar(cloudinaryService.uploadImage(avatar));
+        user.setPassword(passwordEncoder.encode(dto.password()));
+        user.setRole(UserRole.STUDENT);
+
+        if (dto != null && !dto.avatar().isEmpty()) {
+            user.setAvatar(cloudinaryService.uploadImage(dto.avatar()));
         }
 
-        return userMapper.toProfileDto(userRepository.register(u));
+        return userMapper.toProfileDto(userRepository.register(user));
     }
 
     @Override
@@ -123,7 +121,7 @@ public class UserServiceImpl implements UserService {
                     principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
         } catch (AuthenticationException ex) {
             System.err.println(ex.getMessage());
-            throw new InvalidLoginException("Tên đăng nhập hoặc mật khẩu không đúng");
+            throw new InvalidLoginException();
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
             throw new RuntimeException("Có lỗi khi tạo token");
@@ -131,15 +129,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileDto registerAdmin(UserRegisterDto user) {
-        User u = new User();
-        u.setUsername(user.username());
-        u.setPassword(passwordEncoder.encode(user.password()));
-        u.setFirstName(user.firstName());
-        u.setLastName(user.lastName());
-        u.setEmail(user.email());
-        u.setRole(UserRole.ADMIN);
-        return userMapper.toProfileDto(userRepository.register(u));
+    public UserProfileDto registerAdmin(UserRegisterDto dto) {
+        User user = userMapper.toEntity(dto);
+        user.setPassword(passwordEncoder.encode(dto.password()));
+        user.setRole(UserRole.ADMIN);
+        return userMapper.toProfileDto(userRepository.register(user));
     }
 
     @Override
@@ -149,32 +143,52 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    private void handleAvatarUpdate(User u, MultipartFile newAvatar) {
+        if (newAvatar != null && !newAvatar.isEmpty()) {
+            if (u.getAvatar() != null) {
+                cloudinaryService.deleteImage(u.getAvatar());
+            }
+            u.setAvatar(cloudinaryService.uploadImage(newAvatar));
+        }
+    }
+
     @Override
-    public void updateByAdmin(AdminUserUpdateDto user, MultipartFile avatar) {
-        User u = userRepository.getUserById(user.id());
-        if (u == null) {
+    public void updateByAdmin(AdminUserUpdateDto dto) {
+        User user = userRepository.getUserById(dto.id());
+        if (user == null) {
             throw new ResourceNotFoundException("Không tìm thấy user");
         }
 
-        u.setFirstName(user.firstName());
-        u.setLastName(user.lastName());
-        u.setEmail(user.email());
-        u.setRole(user.role());
-        u.setActive(user.active() != null ? user.active() : false);
+        user.setFirstName(dto.firstName());
+        user.setLastName(dto.lastName());
+        user.setEmail(dto.email());
+        user.setRole(dto.role());
+        user.setActive(dto.active() != null ? dto.active() : false);
 
-        if (user.role() == UserRole.TEACHER) {
-            u.setVerified(user.verified() != null ? user.verified() : false);
+        if (dto.role() == UserRole.TEACHER) {
+            user.setVerified(dto.verified() != null ? dto.verified() : false);
         } else {
-            u.setVerified(false);
+            user.setVerified(false);
         }
 
-        if (avatar != null && !avatar.isEmpty()) {
-            cloudinaryService.deleteImage(u.getAvatar());
-
-            u.setAvatar(cloudinaryService.uploadImage(avatar));
-        }
-
-        userRepository.update(u);
+        handleAvatarUpdate(user, dto.avatar());
+        userRepository.update(user);
     }
 
+    @Override
+    public UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto) {
+        User user = userRepository.getUserById(currentUserId);
+        if (user == null) {
+            throw new ResourceNotFoundException("Không tìm thấy user");
+        }
+
+        user.setFirstName(dto.firstName());
+        user.setLastName(dto.lastName());
+        user.setEmail(dto.email());
+
+        handleAvatarUpdate(user, dto.avatar());
+
+        userRepository.update(user);
+        return userMapper.toProfileDto(user);
+    }
 }

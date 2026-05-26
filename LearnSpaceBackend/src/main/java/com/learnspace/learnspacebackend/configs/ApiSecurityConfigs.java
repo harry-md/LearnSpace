@@ -3,6 +3,8 @@ package com.learnspace.learnspacebackend.configs;
 import com.learnspace.learnspacebackend.filters.JwtFilter;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -20,6 +22,7 @@ import java.util.List;
 @Configuration
 @Order(1)
 public class ApiSecurityConfigs {
+
     @Bean
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/api/**")
@@ -27,6 +30,20 @@ public class ApiSecurityConfigs {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter()
+                                    .write("{\"message\": \"" + authException.getMessage() + "\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter()
+                                    .write("{\"message\": \"" + accessDeniedException.getMessage()
+                                            + "\"}");
+                        }))
                 .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/login")
@@ -42,6 +59,10 @@ public class ApiSecurityConfigs {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/chapters/*/lessons")
                         .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/courses/*/enrollments")
+                        .authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/enrollments/*")
+                        .authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/lessons/*")
                         .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/categories")

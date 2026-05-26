@@ -19,7 +19,9 @@ public interface CourseMapper {
     @Mapping(target = "categoryName", source = "category.name")
     @Mapping(target = "teacherName", source = "teacher.fullName")
     @Mapping(target = "image", source = "image")
+    @Mapping(target = "imageFile", ignore = true)
     @Mapping(target = "introVideo", source = "introVideo")
+    @Mapping(target = "introVideoFile", ignore = true)
     @Mapping(target = "categoryId", source = "category.id")
     CourseDto toDto(Course course);
 

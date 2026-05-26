@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
             this.getAttribute("data-verified") === "true";
         }
 
-        document.getElementById("avatarFile").value = "";
+        document.getElementById("avatar").value = "";
 
         toggleVerifySection();
         userModal.show();
@@ -122,4 +122,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
-

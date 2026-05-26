@@ -39,9 +39,8 @@ public class LessonRepositoryImpl implements LessonRepository {
         if (lesson.getId() == null) {
             session.persist(lesson);
             return lesson;
-        } else {
-            return session.merge(lesson);
         }
+        return session.merge(lesson);
     }
 
     @Override
@@ -91,7 +90,9 @@ public class LessonRepositoryImpl implements LessonRepository {
     public Integer getMaxOrder(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery(
-                        "SELECT COALESCE(MAX()) FROM Lesson l WHERE l.chapter.id = :chapterId", Integer.class)
+                        "SELECT COALESCE(MAX(l.order), 0) FROM Lesson l WHERE l.chapter.id ="
+                                + " :chapterId",
+                        Integer.class)
                 .setParameter("chapterId", chapterId)
                 .getSingleResult();
     }
