@@ -24,9 +24,9 @@ public class ApiEnrollmentController {
         return ResponseEntity.ok(enrollmentService.getEnrollment(id));
     }
 
-    @PostMapping("/enrollments")
-    public ResponseEntity<EnrollmentDto> create(int courseId) {
+    @PostMapping("/courses/{courseId}/enrollments")
+    public ResponseEntity<EnrollmentDto> create(@PathVariable("courseId") int courseId) {
         return new ResponseEntity<>(
-                enrollmentService.createEnrollment(courseId), null, HttpStatus.CREATED);
+                enrollmentService.createEnrollment(courseId), HttpStatus.CREATED);
     }
 }

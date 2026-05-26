@@ -89,7 +89,7 @@ public class CourseServiceImpl implements CourseService {
 
     private void verifyCourseOwner(Course course, User teacher) {
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException("Bạn không có quyền chỉnh sửa khóa học này");
+            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này");
         }
     }
 

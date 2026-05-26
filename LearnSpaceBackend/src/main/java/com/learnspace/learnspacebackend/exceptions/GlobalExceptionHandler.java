@@ -1,9 +1,10 @@
 package com.learnspace.learnspacebackend.exceptions;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,44 +17,75 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFoundException(
             ResourceNotFoundException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(
             MethodArgumentNotValidException ex, WebRequest request) {
+
         String errMsg = ex.getBindingResult().getFieldErrors().stream()
-                .map(FieldError::getDefaultMessage)
+                .map(fieldError -> {
+                    if (fieldError.getCode() != null
+                            && fieldError.getCode().equals("typeMismatch")) {
+                        return "Dữ liệu field " + fieldError.getField() + " không hợp lệ";
+                    }
+                    return fieldError.getDefaultMessage();
+                })
                 .findFirst()
                 .orElse("Lỗi dữ liệu đầu vào");
+
         ErrorResponse error = new ErrorResponse(errMsg);
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponse> handleDuplication(
             DuplicateResourceException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(error);
     }
 
     @ExceptionHandler(InvalidLoginException.class)
-    public ResponseEntity<ErrorResponse> handleDuplication(
+    public ResponseEntity<ErrorResponse> handleInvalidLogin(
             InvalidLoginException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(error);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(
             AccessDeniedException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex, WebRequest request) {
+
+        ErrorResponse error = new ErrorResponse("Dữ liệu đã tồn tại");
+
+        System.err.println(ex.getMostSpecificCause().getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(error);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(Exception ex, WebRequest request) {
-        ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorResponse error = new ErrorResponse("Đã xảy ra lỗi hệ thống");
+        System.err.println("Exception 500: " + ex.getMessage());
+        return ResponseEntity.internalServerError()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(error);
     }
 }

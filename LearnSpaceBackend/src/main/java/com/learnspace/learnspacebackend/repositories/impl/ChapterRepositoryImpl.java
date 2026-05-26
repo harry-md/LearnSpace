@@ -56,15 +56,13 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     }
 
     @Override
-    public Chapter createOrUpdate(Chapter chapter) throws RuntimeException {
+    public Chapter createOrUpdate(Chapter chapter) {
         Session session = factory.getObject().getCurrentSession();
-
         if (chapter.getId() == null) {
             session.persist(chapter);
             return chapter;
-        } else {
-            return session.merge(chapter);
         }
+        return session.merge(chapter);
     }
 
     @Override

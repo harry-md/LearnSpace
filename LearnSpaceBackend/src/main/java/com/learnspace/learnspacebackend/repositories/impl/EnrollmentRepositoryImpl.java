@@ -21,7 +21,7 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     private LocalSessionFactoryBean factory;
 
     @Override
-    public boolean hasValidEnrollment(int studentId, int courseId) {
+    public boolean checkValidEnrollment(int studentId, int courseId) {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery(
                                 "SELECT 1 FROM Enrollment e WHERE e.student.id = :studentId AND"
