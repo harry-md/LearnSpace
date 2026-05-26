@@ -9,7 +9,6 @@ const AddLessonModal = ({ open, onClose, onSubmit }) => {
     videoFile: null,
   });
 
-  // Reset form mỗi khi modal mở
   useEffect(() => {
     if (open) {
       setForm({ title: "", content: "", videoFile: null });
@@ -81,31 +80,76 @@ const AddLessonModal = ({ open, onClose, onSubmit }) => {
               width: "40px",
               height: "40px",
               borderRadius: "10px",
-              background: form.videoFile ? "rgba(16,185,129,0.15)" : "rgba(139,92,246,0.1)",
+              background: form.videoFile
+                ? "rgba(16,185,129,0.15)"
+                : "rgba(139,92,246,0.1)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Video size={20} style={{ color: form.videoFile ? "#10b981" : "#8b5cf6" }} />
+            <Video
+              size={20}
+              style={{ color: form.videoFile ? "#10b981" : "#8b5cf6" }}
+            />
           </div>
-          <span style={{ fontSize: "12px", color: form.videoFile ? "#059669" : "#6b7280", fontWeight: 600 }}>
-            {form.videoFile ? `✓ ${form.videoFile.name}` : "Click để chọn file .mp4"}
+          <span
+            style={{
+              fontSize: "12px",
+              color: form.videoFile ? "#059669" : "#6b7280",
+              fontWeight: 600,
+            }}
+          >
+            {form.videoFile
+              ? `✓ ${form.videoFile.name}`
+              : "Click để chọn file .mp4"}
           </span>
         </label>
       </Field>
 
       {/* Nút hành động */}
-      <div style={{ display: "flex", gap: "12px", paddingTop: "16px", borderTop: "1px solid #f3f4f6", marginTop: "8px" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          paddingTop: "16px",
+          borderTop: "1px solid #f3f4f6",
+          marginTop: "8px",
+        }}
+      >
         <button
           onClick={onClose}
-          style={{ flex: 1, padding: "12px", border: "1px solid #e5e7eb", color: "#6b7280", fontWeight: 700, borderRadius: "10px", cursor: "pointer", background: "white", fontSize: "14px" }}
+          style={{
+            flex: 1,
+            padding: "12px",
+            border: "1px solid #e5e7eb",
+            color: "#6b7280",
+            fontWeight: 700,
+            borderRadius: "10px",
+            cursor: "pointer",
+            background: "white",
+            fontSize: "14px",
+          }}
         >
           Hủy bỏ
         </button>
         <button
           onClick={handleAdd}
-          style={{ flex: 1, padding: "12px", background: "#5624d0", color: "white", fontWeight: 700, borderRadius: "10px", border: "none", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
+          style={{
+            flex: 1,
+            padding: "12px",
+            background: "#5624d0",
+            color: "white",
+            fontWeight: 700,
+            borderRadius: "10px",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "14px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+          }}
         >
           <PlusCircle size={16} />
           Tạo bài học

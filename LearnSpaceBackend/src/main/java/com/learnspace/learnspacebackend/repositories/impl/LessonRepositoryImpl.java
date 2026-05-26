@@ -28,9 +28,7 @@ public class LessonRepositoryImpl implements LessonRepository {
     @Override
     public List<Lesson> getLessons(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "FROM Lesson l WHERE l.chapter.id = :chapterId ORDER BY l.order",
-                        Lesson.class)
+        return session.createQuery("FROM Lesson l WHERE l.chapter.id = :chapterId ORDER BY l.order", Lesson.class)
                 .setParameter("chapterId", chapterId)
                 .getResultList();
     }
@@ -73,9 +71,7 @@ public class LessonRepositoryImpl implements LessonRepository {
     @Override
     public List<String> getVideoUrlsByChapterId(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "SELECT l.video FROM Lesson l WHERE l.chapter.id = :chapterId",
-                        String.class)
+        return session.createQuery("SELECT l.video FROM Lesson l WHERE l.chapter.id = :chapterId", String.class)
                 .setParameter("chapterId", chapterId)
                 .getResultList();
     }
@@ -84,8 +80,7 @@ public class LessonRepositoryImpl implements LessonRepository {
     public List<String> getVideoUrlsByCourseId(int courseId) {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery(
-                        "SELECT l.video FROM Lesson l JOIN l.chapter c WHERE c.course.id ="
-                                + " :courseId",
+                        "SELECT l.video FROM Lesson l JOIN l.chapter c WHERE c.course.id =" + " :courseId",
                         String.class)
                 .setParameter("courseId", courseId)
                 .getResultList();
@@ -100,5 +95,19 @@ public class LessonRepositoryImpl implements LessonRepository {
                         Integer.class)
                 .setParameter("chapterId", chapterId)
                 .getSingleResult();
+    }
+
+    @Override
+    public int countLessonsByCourseId(int courseId) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = builder.createQuery(Long.class);
+
+        Root<Lesson> root = q.from(Lesson.class);
+        q.select(builder.count(root));
+        q.where(builder.equal(root.get("chapter").get("course").get("id"), courseId));
+
+        Long result = session.createQuery(q).getSingleResult();
+        return result == null ? 0 : result.intValue();
     }
 }

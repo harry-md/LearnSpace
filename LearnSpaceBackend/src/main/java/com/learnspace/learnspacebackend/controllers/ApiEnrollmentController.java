@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 public class ApiEnrollmentController {
@@ -24,6 +26,9 @@ public class ApiEnrollmentController {
         return ResponseEntity.ok(enrollmentService.getEnrollment(id));
     }
 
+    @GetMapping("/enrollments/my-courses")
+    public ResponseEntity<List<EnrollmentDto>> getMyEnrollments() {
+        return ResponseEntity.ok(enrollmentService.getMyEnrollments());
     @PostMapping("/courses/{courseId}/enrollments")
     public ResponseEntity<EnrollmentDto> create(@PathVariable("courseId") int courseId) {
         return new ResponseEntity<>(

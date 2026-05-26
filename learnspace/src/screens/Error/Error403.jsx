@@ -5,13 +5,14 @@ import { ShieldAlert, ArrowLeft } from "lucide-react";
 const Error403 = () => {
   return (
     <div
+      className="font-sans"
       style={{
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         background: "#f7f9fa",
-        fontFamily: "'Inter', sans-serif",
+        padding: "20px",
       }}
     >
       <div style={{ textAlign: "center", maxWidth: "480px", padding: "32px" }}>

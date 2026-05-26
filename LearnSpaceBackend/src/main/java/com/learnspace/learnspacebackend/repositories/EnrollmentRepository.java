@@ -11,4 +11,8 @@ public interface EnrollmentRepository {
     Enrollment addOrUpdateEnrollment(Enrollment enrollment);
 
     void deleteEnrollment(int enrollmentId);
+
+    Enrollment getEnrollmentByStudentAndCourse(int studentId, int courseId);
+
+    List<Enrollment> getEnrollmentsByStudentId(int studentId);
 }

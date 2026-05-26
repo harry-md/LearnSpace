@@ -5,13 +5,13 @@ import { Lock, LogIn, UserPlus, ArrowLeft } from "lucide-react";
 const RequiredLogin = () => {
   return (
     <div
+      className="font-sans"
       style={{
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         background: "#f7f9fa",
-        fontFamily: "'Inter', sans-serif",
         padding: "20px",
       }}
     >

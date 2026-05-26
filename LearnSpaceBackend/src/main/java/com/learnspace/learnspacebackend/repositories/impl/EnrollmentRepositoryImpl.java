@@ -13,6 +13,8 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 @Transactional
 public class EnrollmentRepositoryImpl implements EnrollmentRepository {
@@ -50,6 +52,39 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
                         builder.equal(root.get("id"), id),
                         root.get("status").in("ACTIVE", "COMPLETED")));
         return session.createQuery(q).getSingleResultOrNull();
+    }
+
+    @Override
+    public Enrollment getEnrollmentByStudentAndCourse(int studentId, int courseId) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
+
+        Root<Enrollment> root = q.from(Enrollment.class);
+        root.fetch("course");
+        root.fetch("student");
+
+        q.select(root)
+                .where(builder.and(
+                        builder.equal(root.get("student").get("id"), studentId),
+                        builder.equal(root.get("course").get("id"), courseId),
+                        root.get("status").in("ACTIVE", "COMPLETED")));
+        return session.createQuery(q).getSingleResultOrNull();
+    }
+
+    @Override
+    public List<Enrollment> getEnrollmentsByStudentId(int studentId) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
+        Root<Enrollment> root = q.from(Enrollment.class);
+        root.fetch("course");
+        root.fetch("student");
+        q.select(root)
+                .where(builder.and(
+                        builder.equal(root.get("student").get("id"), studentId),
+                        root.get("status").in("ACTIVE", "COMPLETED")));
+        return session.createQuery(q).getResultList();
     }
 
     @Override

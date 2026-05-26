@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   BookMarked,
   Star,
@@ -8,13 +8,14 @@ import {
   BookOpen,
   Settings,
   Globe,
+  LogOut,
 } from "lucide-react";
-import { useTeacherDashboardContext } from "../../TeacherDashboardContext";
 import "./Sidebar.css";
+import { UserContext } from "@/configs/Context";
 
-const Sidebar = () => {
-  const { view, setView } = useTeacherDashboardContext();
-
+const Sidebar = ({ view, setView }) => {
+  const [user, dispatcher] = useContext(UserContext);
+  const nav = useNavigate();
   const navItems = [
     { id: "overview", label: "Tổng quan", icon: LayoutDashboard },
     { id: "courses", label: "Khóa học của tôi", icon: BookOpen },
@@ -40,13 +41,18 @@ const Sidebar = () => {
       {/* Teacher card */}
       <div className="teacher-card-container">
         <div className="flex items-center gap-3">
-          <div className="teacher-avatar">NT</div>
+          <img
+            src={user.avatar}
+            alt=""
+            className="teacher-avatar"
+            style={{ objectFit: "cover" }}
+          />
           <div className="min-w-0">
-            <div className="teacher-name">Nguyễn Minh Trí</div>
+            <div className="teacher-name">{`${user.firstName} ${user.lastName}`}</div>
             <div className="flex items-center gap-1 mt-0.5">
               <Star size={10} fill="#f59e0b" color="#f59e0b" />
               <span className="text-[11px] text-[#9ca3af]">
-                4.8 · Giảng viên
+                {user.role === "TEACHER" ? "Giảng viên" : "Học viên"}
               </span>
             </div>
           </div>
@@ -84,6 +90,16 @@ const Sidebar = () => {
           <Globe size={17} />
           Về trang học viên
         </Link>
+        <button
+          className="sidebar-btn logout-btn"
+          onClick={() => {
+            dispatcher({ type: "LOGOUT", payload: null });
+            nav("/login");
+          }}
+        >
+          <LogOut size={17} />
+          <span className="text-[13px] font-semibold">Đăng xuất</span>
+        </button>
       </div>
     </aside>
   );

@@ -125,3 +125,12 @@
   padding: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+.logout-btn {
+  color: #ef4444 !important; /* red-500 */
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #dc2626 !important; /* red-600 */
+}
