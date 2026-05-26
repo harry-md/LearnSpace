@@ -1,11 +1,7 @@
 import React from "react";
-import { BookOpen, ChevronRight, PlusCircle, FolderPlus } from "lucide-react";
-import { useTeacherDashboardContext } from "../TeacherDashboardContext";
+import { BookOpen, ChevronRight } from "lucide-react";
 
-const Header = () => {
-  const { view, setView, selectedCourse, setModal, openAddChapter } =
-    useTeacherDashboardContext();
-
+const Header = ({ view, selectedCourse, onBackToCourses }) => {
   return (
     <header
       style={{
@@ -24,7 +20,7 @@ const Header = () => {
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         {view === "manage" && (
           <button
-            onClick={() => setView("courses")}
+            onClick={onBackToCourses}
             style={{
               display: "flex",
               alignItems: "center",
@@ -57,57 +53,10 @@ const Header = () => {
                 display: "inline-block",
               }}
             >
-              {selectedCourse?.title}
+              {selectedCourse?.name || selectedCourse?.title}
             </span>
           )}
         </h1>
-      </div>
-      <div style={{ display: "flex", gap: "12px" }}>
-        {view === "courses" && (
-          <button
-            onClick={() => setModal("create-course")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "10px 18px",
-              background: "#5624d0",
-              color: "white",
-              fontWeight: 700,
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "13px",
-              boxShadow: "0 4px 12px rgba(86,36,208,0.3)",
-              transition: "all 0.15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#4712c4")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#5624d0")}
-          >
-            <PlusCircle size={16} /> Tạo khóa học mới
-          </button>
-        )}
-        {view === "manage" && selectedCourse && (
-          <button
-            onClick={() => openAddChapter()}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "10px 18px",
-              background: "#5624d0",
-              color: "white",
-              fontWeight: 700,
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "13px",
-              boxShadow: "0 4px 12px rgba(86,36,208,0.3)",
-            }}
-          >
-            <FolderPlus size={16} /> Thêm chương
-          </button>
-        )}
       </div>
     </header>
   );

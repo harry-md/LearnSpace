@@ -7,8 +7,8 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface LessonProgressMapper {
-    @Mapping(target = "lessonName", source = "lesson.title")
     LessonProgressDto toDto(LessonProgress lessonProgress);
 
+    @Mapping(target = "completed", ignore = true)
     LessonProgress toEntity(LessonProgressDto dto);
 }

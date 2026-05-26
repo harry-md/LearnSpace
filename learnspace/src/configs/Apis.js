@@ -4,10 +4,14 @@ export const endpoints = {
   categories: "/categories",
   courses: "/courses",
   chapters: "/chapters",
+  chapter_lesson: (chapterId) => `/chapters/${chapterId}/lessons`,
+  course_chapter: (courseId) => `/courses/${courseId}/chapters`,
   lessons: "/lessons",
   register: "/users",
   login: "/login",
   current_user: "/current-user",
+  enrolled_courses: "/enrollments/my-courses",
+  course_progress: (courseId) => `/courses/${courseId}/progress`,
 };
 
 export const authApis = (token) => {

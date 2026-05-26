@@ -1,9 +1,11 @@
 package com.learnspace.learnspacebackend.services.impl;
 
+import com.learnspace.learnspacebackend.dtos.CourseProgressDto;
 import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
 import com.learnspace.learnspacebackend.dtos.LessonProgressDto;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 
 import com.learnspace.learnspacebackend.pojo.Lesson;
@@ -65,14 +67,79 @@ public class LessonProgressServiceImpl implements LessonProgressService {
         if (lesson == null) {
             throw new ResourceNotFoundException("Không tìm thấy bài học");
         }
-        Enrollment enrollment = enrollmentRepository.getEnrollmentById(lessonProgressDto.enrollmentId());
-        if (enrollment == null) {
-            throw new ResourceNotFoundException("Không tìm thấy enrollment");
-        }
-        LessonProgress lessonProgress = lessonProgressMapper.toEntity(lessonProgressDto);
-        lessonProgress.setLesson(lesson);
-        lessonProgress.setEnrollment(enrollment);
 
-        return lessonProgressMapper.toDto(lessonProgressRepository.addOrUpdateLessonProgress(lessonProgress));
+        Course course = lesson.getChapter().getCourse();
+        int userId = getLoggedInPrincipal().getId();
+        Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(userId, course.getId());
+
+        if (enrollment == null) {
+            throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
+        }
+        LessonProgress existing =
+                lessonProgressRepository.getLessonProgressByEnrollmentAndLesson(enrollment.getId(), lessonId);
+
+        if (existing != null) {
+            existing.setWatchedSec(lessonProgressDto.watchedSec());
+            return lessonProgressMapper.toDto(lessonProgressRepository.addOrUpdateLessonProgress(existing));
+        }
+
+        LessonProgress progress = lessonProgressMapper.toEntity(lessonProgressDto);
+        progress.setLesson(lesson);
+        progress.setEnrollment(enrollment);
+        return lessonProgressMapper.toDto(lessonProgressRepository.addOrUpdateLessonProgress(progress));
+    }
+
+    @Override
+    public LessonProgressDto updateLessonProgress(int lessonId, LessonProgressDto lessonProgressDto) {
+        Lesson lesson = lessonRepository.getLessonById(lessonId);
+        if (lesson == null) {
+            throw new ResourceNotFoundException("Không tìm thấy bài học");
+        }
+
+        Course course = lesson.getChapter().getCourse();
+        int userId = getLoggedInPrincipal().getId();
+        Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(userId, course.getId());
+
+        if (enrollment == null) {
+            throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
+        }
+        LessonProgress existing =
+                lessonProgressRepository.getLessonProgressByEnrollmentAndLesson(enrollment.getId(), lessonId);
+
+        if (existing != null) {
+            existing.setWatchedSec(lessonProgressDto.watchedSec());
+            if (existing.getWatchedSec() >= lesson.getVideoLength()) {
+                existing.setCompleted(true);
+            }
+            return lessonProgressMapper.toDto(lessonProgressRepository.addOrUpdateLessonProgress(existing));
+        }
+
+        LessonProgress progress = lessonProgressMapper.toEntity(lessonProgressDto);
+        progress.setWatchedSec(lessonProgressDto.watchedSec());
+        progress.setLesson(lesson);
+
+        if (progress.getWatchedSec() >= lesson.getVideoLength()) {
+            progress.setCompleted(true);
+        }
+        return lessonProgressMapper.toDto(lessonProgressRepository.addOrUpdateLessonProgress(progress));
+    }
+
+    @Override
+    public CourseProgressDto getCourseProgress(int courseId) {
+        int userId = getLoggedInPrincipal().getId();
+
+        Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(userId, courseId);
+        if (enrollment == null) {
+            throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
+        }
+
+        int completed = lessonProgressRepository.countCompletedLessonsByStudentAndCourse(userId, courseId);
+        int total = lessonRepository.countLessonsByCourseId(courseId);
+        int percent = 0;
+        if (total > 0) {
+            percent = (int) Math.round(completed * 100.0 / total);
+        }
+
+        return new CourseProgressDto(completed, total, percent);
     }
 }

@@ -10,4 +10,8 @@ public interface EnrollmentRepository {
     boolean hasValidEnrollment(int studentId, int courseId);
 
     Enrollment getEnrollmentById(int id);
+
+    Enrollment getEnrollmentByStudentAndCourse(int studentId, int courseId);
+
+    List<Enrollment> getEnrollmentsByStudentId(int studentId);
 }

@@ -50,15 +50,17 @@ const AvatarMenu = () => {
       </div>
 
       <hr className="border-gray-150 m-0" />
-      <div className="py-1.5 font-normal">
-        <Link
-          to="/teacher"
-          className="flex items-center gap-3 py-2.5 px-4 text-[13px] !text-[#2d2f31] hover:!bg-gray-50 hover:!text-purple-600 transition-colors !no-underline cursor-pointer"
-        >
-          <GraduationCap size={16} />
-          Trang giáo viên
-        </Link>
-      </div>
+      {user.role.includes("TEACHER") && (
+        <div className="py-1.5 font-normal">
+          <Link
+            to="/teacher"
+            className="flex items-center gap-3 py-2.5 px-4 text-[13px] !text-[#2d2f31] hover:!bg-gray-50 hover:!text-purple-600 transition-colors !no-underline cursor-pointer"
+          >
+            <GraduationCap size={16} />
+            Trang giáo viên
+          </Link>
+        </div>
+      )}
 
       <div className="py-1.5 font-normal">
         <Link

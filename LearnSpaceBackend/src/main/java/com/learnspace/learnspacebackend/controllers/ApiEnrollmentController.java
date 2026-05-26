@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 public class ApiEnrollmentController {
@@ -19,5 +21,10 @@ public class ApiEnrollmentController {
     @GetMapping("/enrollments/{enrollmentId}")
     public ResponseEntity<EnrollmentDto> retrive(@PathVariable("enrollmentId") int id) {
         return ResponseEntity.ok(enrollmentService.getEnrollment(id));
+    }
+
+    @GetMapping("/enrollments/my-courses")
+    public ResponseEntity<List<EnrollmentDto>> getMyEnrollments() {
+        return ResponseEntity.ok(enrollmentService.getMyEnrollments());
     }
 }

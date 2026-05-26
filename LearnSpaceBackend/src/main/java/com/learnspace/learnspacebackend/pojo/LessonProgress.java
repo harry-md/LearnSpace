@@ -33,14 +33,12 @@ public class LessonProgress {
 
     @NotNull
     @Column(name = "watched_sec", nullable = false)
-    private Integer watchedSec;
+    private Integer watchedSec = 0;
 
-    @NotNull
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @NotNull
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;

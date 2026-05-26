@@ -1,344 +1,197 @@
-import React, { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
-  Check,
+  ArrowLeft,
   ChevronDown,
-  ChevronUp,
   Play,
   Monitor,
   FileText,
-  Infinity,
+  Infinity as InfinityIcon,
   Trophy,
   Globe,
   Star,
   StarHalf,
   Clock,
-  BarChart,
-  Users,
   Heart,
   ShoppingCart,
 } from "lucide-react";
-import CourseCard from "../../components/CourseCard/CourseCard";
-import CourseHoverDetail from "../../components/CourseHoverDetail/CourseHoverDetail";
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const COURSE = {
-  id: 123,
-  title: "Cấu trúc dữ liệu & Giải thuật trong Python – Luyện LeetCode từ 0 đến 1000 bài",
-  subtitle:
-    "Học Cấu trúc dữ liệu & Giải thuật bằng Python, giải hơn 150 bài LeetCode từ Easy đến Hard cùng giải thích chi tiết và tư duy tiếp cận.",
-  rating: 4.7,
-  ratingCount: "2.134",
-  studentsCount: "15.800",
-  author: "Nguyễn Minh Trí",
-  authorTitle: "Senior Software Engineer @ Google",
-  updatedDate: "05/2026",
-  language: "Tiếng Việt",
-  level: "Trung cấp đến Nâng cao",
-  totalHours: 42.5,
-  lectures: 387,
-  image: "https://placehold.co/640x360/1e293b/facc15?text=DSA+Python",
-  price: "499.000 ₫",
-  originalPrice: "1.999.000 ₫",
-  badges: ["Bán chạy nhất"],
-  description:
-    "Đây là khóa học toàn diện nhất về Cấu trúc dữ liệu & Giải thuật bằng Python tại Việt Nam. Khóa học được thiết kế từ cơ bản đến nâng cao, giúp bạn nắm vững các khái niệm cốt lõi và áp dụng ngay vào luyện tập LeetCode – nền tảng phỏng vấn kỹ thuật hàng đầu thế giới. Mỗi chủ đề đều có bài giảng lý thuyết súc tích, kèm giải bài chi tiết với nhiều cách tiếp cận từ Brute Force đến tối ưu O(n) hay O(1).",
-  objectives: [
-    "Nắm vững Array, LinkedList, Stack, Queue, HashMap, Tree, Graph, Heap",
-    "Thành thạo các thuật toán sắp xếp, tìm kiếm kinh điển",
-    "Giải 150+ bài LeetCode từ Easy đến Hard có giải thích",
-    "Tư duy tiếp cận bài toán theo template chuẩn phỏng vấn FAANG",
-    "Hiểu và phân tích độ phức tạp O(n) chính xác",
-    "Áp dụng Two Pointers, Sliding Window, BFS/DFS, Dynamic Programming",
-    "Thực hành Backtracking, Binary Search, Divide & Conquer",
-    "Chuẩn bị tự tin cho buổi phỏng vấn kỹ thuật tại các công ty lớn",
-  ],
-  requirements: [
-    "Biết lập trình Python cơ bản (biến, vòng lặp, hàm, list)",
-    "Không cần kiến thức về thuật toán trước đó",
-    "Máy tính có cài Python 3.x hoặc dùng Google Colab miễn phí",
-  ],
-  sections: [
-    {
-      id: 1,
-      title: "Giới thiệu & Cài đặt môi trường",
-      lectures: 5,
-      duration: "45 phút",
-      lessons: [
-        { title: "Giới thiệu khóa học và lộ trình học", duration: "8:32", free: true },
-        { title: "Cài đặt Python, VS Code và Jupyter Notebook", duration: "12:15", free: true },
-        { title: "Làm quen với LeetCode – Hướng dẫn submit bài", duration: "7:44", free: false },
-        { title: "Phân tích độ phức tạp Big-O: Lý thuyết & Ví dụ", duration: "14:20", free: false },
-        { title: "Tổng quan các CTDL & Giải thuật sẽ học", duration: "3:10", free: false },
-      ],
-    },
-    {
-      id: 2,
-      title: "Array & Hashing",
-      lectures: 28,
-      duration: "4 giờ 15 phút",
-      lessons: [
-        { title: "Array cơ bản – Truy cập, duyệt, cập nhật", duration: "18:05", free: false },
-        { title: "Two Sum – Bài kinh điển số 1 LeetCode", duration: "22:30", free: false },
-        { title: "Contains Duplicate – 3 cách giải", duration: "15:44", free: false },
-        { title: "Group Anagrams – HashMap approach", duration: "19:12", free: false },
-      ],
-    },
-    {
-      id: 3,
-      title: "Two Pointers",
-      lectures: 15,
-      duration: "2 giờ 30 phút",
-      lessons: [
-        { title: "Template Two Pointers chuẩn phỏng vấn", duration: "11:20", free: false },
-        { title: "Valid Palindrome", duration: "9:55", free: false },
-        { title: "3Sum – Giải O(n²) không cần brute force", duration: "25:40", free: false },
-      ],
-    },
-    {
-      id: 4,
-      title: "Sliding Window",
-      lectures: 12,
-      duration: "2 giờ 10 phút",
-      lessons: [
-        { title: "Template Sliding Window cơ bản và nâng cao", duration: "16:33", free: false },
-        { title: "Best Time to Buy and Sell Stock", duration: "12:10", free: false },
-      ],
-    },
-    {
-      id: 5,
-      title: "Stack & Queue",
-      lectures: 18,
-      duration: "3 giờ 05 phút",
-      lessons: [
-        { title: "Stack – Cơ chế LIFO và ứng dụng", duration: "14:22", free: false },
-        { title: "Valid Parentheses – Bài kinh điển Stack", duration: "18:00", free: false },
-        { title: "Monotonic Stack – Kỹ thuật nâng cao", duration: "28:40", free: false },
-      ],
-    },
-    {
-      id: 6,
-      title: "Tree (Binary Tree & BST)",
-      lectures: 35,
-      duration: "6 giờ 20 phút",
-      lessons: [
-        { title: "Binary Tree – Duyệt Pre/In/Post Order", duration: "20:15", free: false },
-        { title: "Maximum Depth of Binary Tree", duration: "12:30", free: false },
-        { title: "Level Order Traversal (BFS)", duration: "22:45", free: false },
-        { title: "Lowest Common Ancestor", duration: "25:10", free: false },
-      ],
-    },
-  ],
-  reviews: [
-    {
-      id: 1,
-      name: "Trần Văn Hải",
-      avatar: "H",
-      rating: 5,
-      date: "1 tháng trước",
-      comment:
-        "Khóa học cực kỳ chất lượng! Thầy giảng rất rõ ràng, từng bước từng bước. Sau 2 tháng học tôi đã pass được vòng coding interview tại Shopee. Cực kỳ worth it!",
-    },
-    {
-      id: 2,
-      name: "Nguyễn Thị Lan Anh",
-      avatar: "L",
-      rating: 5,
-      date: "3 tuần trước",
-      comment:
-        "Phần Dynamic Programming được giải thích quá xuất sắc. Đây là lần đầu tiên tôi thực sự hiểu DP sau khi học ở rất nhiều nguồn khác nhau. Highly recommended!",
-    },
-    {
-      id: 3,
-      name: "Phạm Đức Minh",
-      avatar: "M",
-      rating: 4,
-      date: "2 tháng trước",
-      comment:
-        "Nội dung rất đầy đủ và phong phú. Chỉ mong thầy có thể cập nhật thêm các bài LeetCode 2024-2025 mới nhất. Phần cũ vẫn rất giá trị!",
-    },
-  ],
-};
-
-const RELATED_COURSES = [
-  {
-    id: 201,
-    title: "Python từ cơ bản đến nâng cao – Complete Bootcamp",
-    author: "AI Coding",
-    image: "https://placehold.co/400x225/3b82f6/ffffff?text=Python+Bootcamp",
-    rating: 4.8,
-    reviews: "3.210",
-    price: "299.000 ₫",
-    originalPrice: "1.299.000 ₫",
-    badges: ["Bán chạy nhất"],
-    description: "Khóa học Python toàn diện từ A-Z, bao gồm OOP, modules, decorators và real-world projects.",
-    objectives: ["Nắm vững Python từ cơ bản", "OOP trong Python", "Xây dựng dự án thực tế"],
-    updatedDate: "04/2026",
-    totalHours: 38,
-    level: "Cơ bản đến Nâng cao",
-  },
-  {
-    id: 202,
-    title: "System Design cho Fresher & Junior Dev",
-    author: "Minh Trí",
-    image: "https://placehold.co/400x225/7c3aed/ffffff?text=System+Design",
-    rating: 4.9,
-    reviews: "1.045",
-    price: "699.000 ₫",
-    originalPrice: "2.499.000 ₫",
-    badges: ["Cao cấp", "Bán chạy nhất"],
-    description: "Hiểu System Design từ cơ bản: Load Balancer, Database, Cache, CDN, Microservices.",
-    objectives: ["Thiết kế hệ thống quy mô lớn", "Load balancing & caching", "Microservices architecture"],
-    updatedDate: "05/2026",
-    totalHours: 22,
-    level: "Trung cấp",
-  },
-  {
-    id: 203,
-    title: "AWS Cloud Solutions Architect – Tiếng Việt",
-    author: "Viet Tran",
-    image: "https://placehold.co/400x225/f97316/ffffff?text=AWS+SAA",
-    rating: 4.6,
-    reviews: "892",
-    price: "549.000 ₫",
-    originalPrice: "1.999.000 ₫",
-    badges: ["Cao cấp"],
-    description: "Học AWS từ đầu, luyện thi chứng chỉ SAA-C03 với mock exam và hands-on lab thực tế.",
-    objectives: ["Triển khai ứng dụng trên AWS", "Luyện thi SAA-C03", "VPC, EC2, S3, RDS, Lambda"],
-    updatedDate: "03/2026",
-    totalHours: 28,
-    level: "Trung cấp đến Nâng cao",
-  },
-  {
-    id: 204,
-    title: "JavaScript & TypeScript nâng cao – Thiết kế Pattern",
-    author: "Nam Nguyen Dev",
-    image: "https://placehold.co/400x225/eab308/1c1d1f?text=JS+TS+Advanced",
-    rating: 4.7,
-    reviews: "1.560",
-    price: "399.000 ₫",
-    originalPrice: "1.499.000 ₫",
-    badges: [],
-    description: "Nắm vững JavaScript & TypeScript nâng cao: Closures, Promises, Design Patterns, SOLID.",
-    objectives: ["JavaScript nâng cao", "TypeScript từ đầu", "Design patterns thực tế"],
-    updatedDate: "02/2026",
-    totalHours: 32,
-    level: "Trung cấp",
-  },
-];
-
-// ─── Sub Components ────────────────────────────────────────────────────────────
-
-function RatingStars({ rating, size = 14 }) {
-  const full = Math.floor(rating);
-  const half = rating % 1 >= 0.5;
-  return (
-    <div className="flex items-center gap-0.5 text-amber-400">
-      {[...Array(full)].map((_, i) => <Star key={i} size={size} fill="currentColor" />)}
-      {half && <StarHalf size={size} fill="currentColor" />}
-      {[...Array(5 - full - (half ? 1 : 0))].map((_, i) => <Star key={`e${i}`} size={size} className="text-amber-200" />)}
-    </div>
-  );
-}
-
-function AccordionSection({ section }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden mb-2">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left gap-3"
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          {open ? <ChevronUp size={18} className="text-gray-500 shrink-0" /> : <ChevronDown size={18} className="text-gray-500 shrink-0" />}
-          <span className="font-bold text-[#1c1d1f] text-[15px] truncate">{section.title}</span>
-        </div>
-        <div className="text-xs text-gray-500 shrink-0 text-right">
-          {section.lectures} bài • {section.duration}
-        </div>
-      </button>
-      {open && (
-        <div className="divide-y divide-gray-100">
-          {section.lessons.map((lesson, idx) => (
-            <div key={idx} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors">
-              <Play size={14} className="text-gray-400 shrink-0" />
-              <span className={`text-sm flex-1 ${lesson.free ? "text-purple-700 hover:underline cursor-pointer" : "text-gray-700"}`}>
-                {lesson.title}
-              </span>
-              {lesson.free && (
-                <span className="text-[11px] font-bold text-purple-600 border border-purple-300 rounded px-1.5 py-0.5 shrink-0">
-                  Xem trước
-                </span>
-              )}
-              <span className="text-xs text-gray-400 shrink-0">{lesson.duration}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
+import Apis, { authApis, endpoints } from "@/configs/Apis";
+import { UserContext } from "@/configs/Context";
+import ProtectLessonDisplay from "./ProtectLessonDisplay";
 
 const CourseDetailPage = () => {
   const { id } = useParams();
-  const course = COURSE; // In real app: fetch by id
-  const [wishlist, setWishlist] = useState(false);
-  const [addedToCart, setAddedToCart] = useState(false);
+  const [user] = useContext(UserContext);
+
+  const [courseDetails, setCourseDetails] = useState({ chapters: [] });
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [selectedLessonId, setSelectedLessonId] = useState(null);
+  const [showLessonModal, setShowLessonModal] = useState(false);
+
+  const loadCourseDetails = async () => {
+    setLoading(true);
+    setNotFound(false);
+    try {
+      const res = await Apis.get(`${endpoints.courses}/${id}`);
+      if (res.data && res.data.id) {
+        const course = res.data;
+
+        // 1. Fetch chapters
+        const chapterRes = await Apis.get(endpoints.course_chapter(id));
+        const chaptersList = chapterRes.data || [];
+
+        // 2. Fetch lessons for each chapter in parallel
+        const chaptersWithLessons = await Promise.all(
+          chaptersList.map(async (chapter) => {
+            try {
+              const lessonRes = await Apis.get(
+                endpoints.chapter_lesson(chapter.id),
+              );
+              return { ...chapter, lessons: lessonRes.data || [] };
+            } catch (err) {
+              console.error(
+                `Lỗi khi tải bài học của chapter ${chapter.id}:`,
+                err,
+              );
+              return { ...chapter, lessons: [] };
+            }
+          }),
+        );
+
+        // 3. Set courseDetails with nested chapters and lessons
+        setCourseDetails({
+          ...course,
+          chapters: chaptersWithLessons,
+        });
+        console.log({
+          ...course,
+          chapters: chaptersWithLessons,
+        });
+
+        // 4. Check enrollment status
+        if (user && user.token) {
+          try {
+            const enrollRes = await authApis(user.token).get(
+              endpoints.enrolled_courses,
+            );
+            const enrolledList = enrollRes.data;
+            const enrolled = enrolledList.some((c) => c.courseId == id);
+            setIsEnrolled(enrolled);
+          } catch (enrollErr) {
+            console.error("Lỗi khi check enroll:", enrollErr);
+            setIsEnrolled(false);
+          }
+        } else {
+          setIsEnrolled(false);
+        }
+      } else {
+        setNotFound(true);
+      }
+    } catch (error) {
+      console.error("Lỗi khi load chi tiết khóa học:", error);
+      setNotFound(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCourseDetails();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#5624d0]"></div>
+      </div>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center bg-white px-6 text-center animate-[fadeIn_0.4s_ease-out]">
+        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-6 shadow-sm">
+          <svg
+            className="w-10 h-10"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+        <h2 className="text-xl font-black text-gray-900 mb-2">
+          Không tìm thấy khóa học
+        </h2>
+        <p className="text-sm text-gray-500 max-w-sm mb-6">
+          Khóa học bạn đang tìm kiếm không tồn tại hoặc đã bị xóa. Vui lòng kiểm
+          tra lại đường dẫn.
+        </p>
+        <Link
+          to="/learning"
+          className="px-5 py-2.5 bg-[#5624d0] hover:bg-[#4712c4] text-white text-sm font-bold rounded-lg shadow-sm transition-all active:scale-95 no-underline hover:text-white"
+        >
+          Quay lại khóa học của tôi
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white text-[#1c1d1f] font-sans">
+    <div className="bg-white text-[#1c1d1f] font-sans animate-[fadeIn_0.4s_ease-out]">
       {/* ─── Dark Hero Banner ─────────────────────────────────── */}
       <div className="bg-[#1c1d1f] w-full">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
+        <div
+          className={`max-w-7xl mx-auto px-6 md:px-12 py-6 grid grid-cols-1 gap-8 ${!isEnrolled ? "lg:grid-cols-[1fr_360px]" : ""}`}
+        >
           {/* Left hero content */}
           <div className="text-white">
-            {/* Breadcrumbs */}
-            <nav className="flex items-center gap-2 text-xs text-gray-400 mb-5 flex-wrap">
-              <Link to="/home" className="hover:text-white !text-gray-400 !no-underline transition-colors">Trang chủ</Link>
-              <span>/</span>
-              <span className="hover:text-white cursor-pointer transition-colors">Phát triển</span>
-              <span>/</span>
-              <span className="hover:text-white cursor-pointer transition-colors">Cấu trúc dữ liệu</span>
-              <span>/</span>
-              <span className="text-white">Python & LeetCode</span>
-            </nav>
+            {/* Back to Management button */}
+            <Link
+              to="/learning"
+              className="flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-3 transition-colors no-underline !text-gray-400 font-semibold"
+            >
+              <ArrowLeft size={16} />
+              Quản lý khóa học của tôi
+            </Link>
 
             {/* Title */}
-            <h1 className="text-2xl md:text-3xl font-black leading-tight mb-4 text-white">
-              {course.title}
+            <h1 className="text-2xl md:text-3xl font-black leading-tight mb-2 text-white">
+              {courseDetails.name}
             </h1>
 
             {/* Subtitle */}
-            <p className="text-gray-300 text-base mb-5 leading-relaxed max-w-2xl">
-              {course.subtitle}
+            <p className="text-gray-300 text-base mb-3 leading-relaxed max-w-2xl">
+              {courseDetails.description}
             </p>
 
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2 mb-5">
-              {course.badges.map((badge, i) => (
-                <span key={i} className="px-3 py-1 bg-[#eceb98] text-[#3d3c0a] text-xs font-black rounded">
-                  {badge}
-                </span>
-              ))}
-            </div>
-
             {/* Rating row */}
-            <div className="flex items-center flex-wrap gap-3 mb-4">
-              <span className="font-black text-amber-400 text-lg">{course.rating}</span>
-              <RatingStars rating={course.rating} size={16} />
+            <div className="flex items-center flex-wrap gap-3 mb-2">
+              <span className="font-black text-amber-400 text-lg">4.7</span>
+              <div className="flex items-center gap-0.5 text-amber-400">
+                <Star size={16} fill="currentColor" />
+                <Star size={16} fill="currentColor" />
+                <Star size={16} fill="currentColor" />
+                <Star size={16} fill="currentColor" />
+                <StarHalf size={16} fill="currentColor" />
+              </div>
               <span className="text-amber-400 text-sm underline cursor-pointer">
-                ({course.ratingCount} đánh giá)
+                (2.134 đánh giá)
               </span>
-              <span className="text-gray-400 text-sm">{course.studentsCount} học viên</span>
             </div>
 
             {/* Author */}
-            <p className="text-sm text-gray-300 mb-3">
+            <p className="text-sm text-gray-300 mb-2">
               Tạo bởi{" "}
               <span className="text-purple-400 underline cursor-pointer hover:text-purple-300 transition-colors">
-                {course.author}
+                {courseDetails.teacherName}
               </span>
             </p>
 
@@ -346,262 +199,469 @@ const CourseDetailPage = () => {
             <div className="flex flex-wrap items-center gap-5 text-sm text-gray-400">
               <span className="flex items-center gap-1.5">
                 <Clock size={14} className="shrink-0" />
-                Cập nhật {course.updatedDate}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Globe size={14} className="shrink-0" />
-                {course.language}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <BarChart size={14} className="shrink-0" />
-                {course.level}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Users size={14} className="shrink-0" />
-                {course.studentsCount} học viên
+                {courseDetails.updatedAt}
               </span>
             </div>
           </div>
 
           {/* Right column placeholder for sticky card alignment */}
-          <div className="hidden lg:block" />
+          {!isEnrolled && <div className="hidden lg:block" />}
         </div>
       </div>
 
       {/* ─── Main Layout ──────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-10 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-10 items-start">
-
+      <div
+        className={`max-w-7xl mx-auto px-6 md:px-12 py-10 grid grid-cols-1 gap-10 items-start ${!isEnrolled ? "lg:grid-cols-[1fr_360px]" : ""}`}
+      >
         {/* ── LEFT: Main Content ────────────────────────────────── */}
         <div className="min-w-0">
+          {/* Intro Video Section */}
+          {courseDetails.introVideo && (
+            <section className="mb-10">
+              <h2 className="text-2xl font-black mb-4 text-[#1c1d1f]">
+                Video giới thiệu khóa học
+              </h2>
 
-          {/* What you'll learn */}
-          <section className="border border-gray-200 rounded-xl p-7 mb-10">
-            <h2 className="text-2xl font-black mb-5 text-[#1c1d1f]">Bạn sẽ học được gì</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
-              {course.objectives.map((obj, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <Check size={16} className="text-[#1c1d1f] shrink-0 mt-0.5" strokeWidth={3} />
-                  <span className="text-sm text-gray-700 leading-relaxed">{obj}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Frequently bought together */}
-          <section className="mb-10">
-            <h2 className="text-2xl font-black mb-6 text-[#1c1d1f]">Thường được mua cùng nhau</h2>
-            <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-              {RELATED_COURSES.map((rc) => (
-                <CourseCard key={rc.id} course={rc}>
-                  <CourseHoverDetail course={rc} />
-                </CourseCard>
-              ))}
-            </div>
-          </section>
+              <div className="relative rounded-xl overflow-hidden shadow-lg aspect-video bg-black border border-gray-200">
+                <video
+                  src="https://www.w3schools.com/html/mov_bbb.mp4"
+                  controls
+                  className="w-full h-full object-cover"
+                  poster="https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg"
+                />
+              </div>
+            </section>
+          )}
 
           {/* Course Content / Accordion */}
           <section className="mb-10">
-            <h2 className="text-2xl font-black mb-2 text-[#1c1d1f]">Nội dung khóa học</h2>
+            <h2 className="text-2xl font-black mb-2 text-[#1c1d1f]">
+              Nội dung khóa học
+            </h2>
             <p className="text-sm text-gray-500 mb-5">
-              {course.sections.length} chương • {course.sections.reduce((acc, s) => acc + s.lectures, 0)} bài giảng • Tổng {course.totalHours} giờ
+              {courseDetails.chapters?.length || 0} chương •{" "}
+              {courseDetails.chapters?.reduce(
+                (acc, ch) => acc + (ch.lessons?.length || 0),
+                0,
+              ) || 0}{" "}
+              bài giảng
             </p>
             <div>
-              {course.sections.map((section) => (
-                <AccordionSection key={section.id} section={section} />
+              {(courseDetails.chapters || []).map((chapter) => (
+                <details
+                  key={chapter.id}
+                  className="border border-gray-200 rounded-lg overflow-hidden mb-2"
+                  open
+                >
+                  <summary className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left gap-3 cursor-pointer">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <ChevronDown
+                        className="text-gray-500 shrink-0 chevron-icon"
+                        size={18}
+                      />
+                      <span className="font-bold text-[#1c1d1f] text-[15px] truncate">
+                        {chapter.name}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 shrink-0 text-right">
+                      {chapter.lessons?.length || 0} bài giảng
+                    </div>
+                  </summary>
+                  <div className="divide-y divide-gray-100 border-t border-gray-200">
+                    {chapter.lessons && chapter.lessons.length > 0 ? (
+                      chapter.lessons.map((lesson) => (
+                        <div
+                          key={lesson.id}
+                          onClick={() => {
+                            if (isEnrolled) {
+                              setSelectedLessonId(lesson.id);
+                              setShowLessonModal(true);
+                            } else {
+                              alert(
+                                "Vui lòng đăng ký khóa học để xem nội dung bài giảng!",
+                              );
+                            }
+                          }}
+                          className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors cursor-pointer group/lesson"
+                        >
+                          <Play
+                            size={14}
+                            className="text-gray-400 group-hover/lesson:text-purple-600 transition-colors shrink-0"
+                          />
+                          <span className="text-sm flex-1 text-gray-700 group-hover/lesson:text-purple-600 group-hover/lesson:underline transition-colors font-medium">
+                            {lesson.title}
+                          </span>
+                          {lesson.videoLength !== undefined &&
+                          lesson.videoLength !== null ? (
+                            <span className="text-xs text-gray-400 shrink-0 font-medium">
+                              {Math.floor(lesson.videoLength / 60)}:
+                              {String(lesson.videoLength % 60).padStart(2, "0")}
+                            </span>
+                          ) : null}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-5 py-3 text-sm text-gray-500 italic">
+                        Chưa có bài học nào trong chương này
+                      </div>
+                    )}
+                  </div>
+                </details>
               ))}
             </div>
           </section>
 
-          {/* Requirements */}
+          {/* Related Courses Section */}
           <section className="mb-10">
-            <h2 className="text-2xl font-black mb-4 text-[#1c1d1f]">Yêu cầu</h2>
-            <ul className="space-y-2.5">
-              {course.requirements.map((req, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1c1d1f] shrink-0 mt-1.5" />
-                  {req}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* Description */}
-          <section className="mb-10">
-            <h2 className="text-2xl font-black mb-4 text-[#1c1d1f]">Mô tả</h2>
-            <p className="text-[15px] text-gray-700 leading-relaxed">{course.description}</p>
-          </section>
-
-          {/* Instructor */}
-          <section className="mb-10">
-            <h2 className="text-2xl font-black mb-6 text-[#1c1d1f]">Giảng viên</h2>
-            <div className="flex items-start gap-5">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 text-white flex items-center justify-center text-3xl font-black shrink-0 shadow-md">
-                {course.author.charAt(0)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-xl font-black text-purple-700 hover:underline cursor-pointer mb-0.5">
-                  {course.author}
-                </h3>
-                <p className="text-sm text-gray-500 mb-3">{course.authorTitle}</p>
-                <div className="flex flex-wrap gap-5 text-sm text-gray-600 mb-3">
-                  <span className="flex items-center gap-1.5"><Star size={14} className="text-amber-400" fill="currentColor" /> 4.8 Xếp hạng giảng viên</span>
-                  <span className="flex items-center gap-1.5"><Users size={14} /> 28.400 Học viên</span>
-                  <span className="flex items-center gap-1.5"><Play size={14} /> 6 Khóa học</span>
+            <h2 className="text-2xl font-black mb-6 text-[#1c1d1f]">
+              Các khóa học khác
+            </h2>
+            <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+              {/* Related Course Card 1 */}
+              <div className="bg-white border border-[#d1d7dc] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group min-w-[280px] max-w-[300px] shrink-0 snap-start">
+                <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                  <img
+                    src="https://placehold.co/400x225/3b82f6/ffffff?text=NextJS+Course"
+                    alt="NextJS"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  Kỹ sư phần mềm cấp cao với hơn 8 năm kinh nghiệm, chuyên sâu về thuật toán và hệ thống phân tán. Từng làm việc tại Google và nhiều startup lớn. Đam mê giảng dạy và giúp các bạn trẻ Việt Nam chinh phục thị trường công nghệ thế giới.
-                </p>
+                <div className="p-4 flex-1 flex flex-col">
+                  <h4 className="font-bold text-sm text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-1">
+                    Lập trình Web nâng cao với NextJS
+                  </h4>
+                  <p className="text-xs text-gray-500 font-medium mb-3">
+                    Nguyễn Văn A
+                  </p>
+                  <div className="mt-auto space-y-2">
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="font-black text-amber-500 text-xs">
+                        4.8
+                      </span>
+                      <div className="flex text-amber-400 gap-0.5">
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                      </div>
+                      <span className="text-gray-400 text-[10px]">(1.420)</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-extrabold text-base text-[#1c1d1f]">
+                        699.000 ₫
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Related Course Card 2 */}
+              <div className="bg-white border border-[#d1d7dc] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group min-w-[280px] max-w-[300px] shrink-0 snap-start">
+                <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                  <img
+                    src="https://placehold.co/400x225/7c3aed/ffffff?text=React+Native"
+                    alt="React Native"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-4 flex-1 flex flex-col">
+                  <h4 className="font-bold text-sm text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-1">
+                    Lập trình di động Multi-platform với React Native
+                  </h4>
+                  <p className="text-xs text-gray-500 font-medium mb-3">
+                    Nguyễn Văn A
+                  </p>
+                  <div className="mt-auto space-y-2">
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="font-black text-amber-500 text-xs">
+                        4.9
+                      </span>
+                      <div className="flex text-amber-400 gap-0.5">
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                      </div>
+                      <span className="text-gray-400 text-[10px]">(890)</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-extrabold text-base text-[#1c1d1f]">
+                        799.000 ₫
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Related Course Card 3 */}
+              <div className="bg-white border border-[#d1d7dc] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group min-w-[280px] max-w-[300px] shrink-0 snap-start">
+                <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                  <img
+                    src="https://placehold.co/400x225/f97316/ffffff?text=HTML+CSS+JS"
+                    alt="HTML CSS JS"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-4 flex-1 flex flex-col">
+                  <h4 className="font-bold text-sm text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-1">
+                    HTML, CSS và JavaScript cho người mới bắt đầu
+                  </h4>
+                  <p className="text-xs text-gray-500 font-medium mb-3">
+                    AI Coding
+                  </p>
+                  <div className="mt-auto space-y-2">
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="font-black text-amber-500 text-xs">
+                        4.6
+                      </span>
+                      <div className="flex text-amber-400 gap-0.5">
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                        <Star size={12} fill="currentColor" />
+                        <StarHalf size={12} fill="currentColor" />
+                      </div>
+                      <span className="text-gray-400 text-[10px]">(3.210)</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-extrabold text-base text-[#1c1d1f]">
+                        199.000 ₫
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
 
           {/* Reviews */}
           <section className="mb-10">
-            <h2 className="text-2xl font-black mb-2 text-[#1c1d1f]">Đánh giá của học viên</h2>
+            <h2 className="text-2xl font-black mb-2 text-[#1c1d1f]">
+              Đánh giá của học viên
+            </h2>
 
             {/* Rating Summary */}
             <div className="flex items-center gap-8 mb-7 p-5 bg-amber-50 rounded-xl border border-amber-100">
               <div className="text-center shrink-0">
-                <div className="text-6xl font-black text-amber-500">{course.rating}</div>
-                <RatingStars rating={course.rating} size={18} />
-                <div className="text-sm text-gray-500 mt-1">Xếp hạng khóa học</div>
+                <div className="text-6xl font-black text-amber-500">4.7</div>
+                <div className="flex items-center gap-0.5 text-amber-400">
+                  <Star size={18} fill="currentColor" />
+                  <Star size={18} fill="currentColor" />
+                  <Star size={18} fill="currentColor" />
+                  <Star size={18} fill="currentColor" />
+                  <StarHalf size={18} fill="currentColor" />
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  Xếp hạng khóa học
+                </div>
               </div>
               {/* Bar chart fake */}
               <div className="flex-1 space-y-2 min-w-0">
-                {[
-                  { stars: 5, pct: 72 },
-                  { stars: 4, pct: 18 },
-                  { stars: 3, pct: 6 },
-                  { stars: 2, pct: 2 },
-                  { stars: 1, pct: 2 },
-                ].map((row) => (
-                  <div key={row.stars} className="flex items-center gap-3">
-                    <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
-                      <div className="h-2 bg-amber-400 rounded-full" style={{ width: `${row.pct}%` }} />
-                    </div>
-                    <span className="text-xs text-gray-500 shrink-0">{row.pct}%</span>
-                    <RatingStars rating={row.stars} size={12} />
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
+                    <div
+                      className="h-2 bg-amber-400 rounded-full"
+                      style={{ width: "72%" }}
+                    />
                   </div>
-                ))}
+                  <span className="text-xs text-gray-500 shrink-0">72%</span>
+                  <div className="flex items-center gap-0.5 text-amber-400">
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
+                    <div
+                      className="h-2 bg-amber-400 rounded-full"
+                      style={{ width: "18%" }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-500 shrink-0">18%</span>
+                  <div className="flex items-center gap-0.5 text-amber-400">
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} className="text-amber-200" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
+                    <div
+                      className="h-2 bg-amber-400 rounded-full"
+                      style={{ width: "6%" }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-500 shrink-0">6%</span>
+                  <div className="flex items-center gap-0.5 text-amber-400">
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} className="text-amber-200" />
+                    <Star size={12} className="text-amber-200" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
+                    <div
+                      className="h-2 bg-amber-400 rounded-full"
+                      style={{ width: "2%" }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-500 shrink-0">2%</span>
+                  <div className="flex items-center gap-0.5 text-amber-400">
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} className="text-amber-200" />
+                    <Star size={12} className="text-amber-200" />
+                    <Star size={12} className="text-amber-200" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
+                    <div
+                      className="h-2 bg-amber-400 rounded-full"
+                      style={{ width: "2%" }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-500 shrink-0">2%</span>
+                  <div className="flex items-center gap-0.5 text-amber-400">
+                    <Star size={12} fill="currentColor" />
+                    <Star size={12} className="text-amber-200" />
+                    <Star size={12} className="text-amber-200" />
+                    <Star size={12} className="text-amber-200" />
+                    <Star size={12} className="text-amber-200" />
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Review Cards */}
             <div className="space-y-6">
-              {course.reviews.map((rev) => (
-                <div key={rev.id} className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-400 text-white flex items-center justify-center font-bold shrink-0 text-base">
-                    {rev.avatar}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 flex-wrap mb-1">
-                      <span className="font-bold text-[#1c1d1f] text-sm">{rev.name}</span>
-                      <RatingStars rating={rev.rating} size={13} />
-                      <span className="text-xs text-gray-400">{rev.date}</span>
-                    </div>
-                    <p className="text-sm text-gray-700 leading-relaxed">{rev.comment}</p>
-                  </div>
+              {/* Review 1 */}
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-400 text-white flex items-center justify-center font-bold shrink-0 text-base">
+                  H
                 </div>
-              ))}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 flex-wrap mb-1">
+                    <span className="font-bold text-[#1c1d1f] text-sm">
+                      Trần Văn Hải
+                    </span>
+                    <div className="flex items-center gap-0.5 text-amber-400">
+                      <Star size={13} fill="currentColor" />
+                      <Star size={13} fill="currentColor" />
+                      <Star size={13} fill="currentColor" />
+                      <Star size={13} fill="currentColor" />
+                      <Star size={13} fill="currentColor" />
+                    </div>
+                    <span className="text-xs text-gray-400">1 tháng trước</span>
+                  </div>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    Khóa học cực kỳ chất lượng! Giảng viên giảng rất rõ ràng,
+                    từng bước từng bước. Sau 2 tháng học tôi đã tự tin ứng dụng
+                    vào dự án thực tế. Cực kỳ worth it!
+                  </p>
+                </div>
+              </div>
+
+              {/* Review 2 */}
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-400 text-white flex items-center justify-center font-bold shrink-0 text-base">
+                  L
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 flex-wrap mb-1">
+                    <span className="font-bold text-[#1c1d1f] text-sm">
+                      Nguyễn Thị Lan Anh
+                    </span>
+                    <div className="flex items-center gap-0.5 text-amber-400">
+                      <Star size={13} fill="currentColor" />
+                      <Star size={13} fill="currentColor" />
+                      <Star size={13} fill="currentColor" />
+                      <Star size={13} fill="currentColor" />
+                      <Star size={13} fill="currentColor" />
+                    </div>
+                    <span className="text-xs text-gray-400">3 tuần trước</span>
+                  </div>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    Nội dung ReactJS được giải thích quá xuất sắc. Đây là lần
+                    đầu tiên tôi thực sự hiểu các Hook cơ bản sau khi tự học ở
+                    rất nhiều nguồn khác nhau. Highly recommended!
+                  </p>
+                </div>
+              </div>
             </div>
           </section>
         </div>
 
         {/* ── RIGHT: Sticky Checkout Sidebar ───────────────────── */}
-        <div className="lg:sticky lg:top-20 self-start">
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
-            {/* Video Preview */}
-            <div className="relative">
-              <img
-                src={course.image}
-                alt={course.title}
-                className="w-full aspect-video object-cover"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors cursor-pointer group">
-                <div className="w-16 h-16 rounded-full bg-white/90 group-hover:bg-white flex items-center justify-center shadow-lg transition-all">
-                  <Play size={28} className="text-[#1c1d1f] ml-1" fill="currentColor" />
+        {!isEnrolled && (
+          <div className="lg:sticky lg:top-20 self-start">
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
+              {/* Course Image */}
+              <div className="w-full aspect-video overflow-hidden">
+                <img
+                  src={
+                    courseDetails.image ||
+                    "https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg"
+                  }
+                  alt={courseDetails.name || "Chi tiết khóa học"}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="p-4">
+                {/* Price */}
+                <div className="flex items-baseline gap-3 mb-3">
+                  <span className="text-2xl font-black text-[#1c1d1f]">
+                    {courseDetails.price
+                      ? `${Number(courseDetails.price).toLocaleString("vi-VN")} ₫`
+                      : "Miễn phí"}
+                  </span>
                 </div>
+
+                {/* Buttons */}
+                <button className="w-full py-2.5 rounded-lg font-extrabold text-sm mb-2 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer bg-[#5624d0] hover:bg-[#4712c4] text-white">
+                  <ShoppingCart size={16} />
+                  Thêm vào giỏ hàng
+                </button>
+                <button className="w-full py-2.5 border-2 border-[#1c1d1f] hover:bg-gray-50 text-[#1c1d1f] font-extrabold rounded-lg text-sm mb-3 transition-all active:scale-95 cursor-pointer">
+                  Mua ngay
+                </button>
+
+                <p className="text-center text-[11px] text-gray-500 mb-1">
+                  Đảm bảo hoàn tiền 100% trong 30 ngày
+                </p>
               </div>
-              <div className="absolute bottom-3 left-0 right-0 text-center">
-                <span className="text-white text-xs font-bold bg-black/60 px-3 py-1 rounded-full backdrop-blur-sm">
-                  Xem trước khóa học
-                </span>
-              </div>
-            </div>
-
-            <div className="p-5">
-              {/* Price */}
-              <div className="flex items-baseline gap-3 mb-5">
-                <span className="text-3xl font-black text-[#1c1d1f]">{course.price}</span>
-                <span className="text-base text-gray-400 line-through">{course.originalPrice}</span>
-                <span className="text-sm font-bold text-red-500">-75%</span>
-              </div>
-
-              {/* Timer */}
-              <p className="text-xs text-red-600 font-bold mb-4">
-                🔥 Giảm giá còn <span className="font-black">1 ngày 12 giờ</span>!
-              </p>
-
-              {/* Buttons */}
-              <button
-                onClick={() => setAddedToCart(!addedToCart)}
-                className={`w-full py-3.5 rounded-lg font-extrabold text-base mb-3 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
-                  addedToCart
-                    ? "bg-green-600 hover:bg-green-700 text-white"
-                    : "bg-[#5624d0] hover:bg-[#4712c4] text-white"
-                }`}
-              >
-                <ShoppingCart size={18} />
-                {addedToCart ? "✓ Đã thêm vào giỏ" : "Thêm vào giỏ hàng"}
-              </button>
-              <button className="w-full py-3.5 border-2 border-[#1c1d1f] hover:bg-gray-50 text-[#1c1d1f] font-extrabold rounded-lg text-base mb-4 transition-all active:scale-95 cursor-pointer">
-                Mua ngay
-              </button>
-
-              <p className="text-center text-xs text-gray-400 mb-5">
-                Đảm bảo hoàn tiền 100% trong 30 ngày nếu bạn không hài lòng
-              </p>
-
-              {/* Includes */}
-              <div>
-                <h4 className="font-extrabold text-[#1c1d1f] text-sm mb-3">Khóa học này bao gồm:</h4>
-                <ul className="space-y-2.5">
-                  {[
-                    { icon: Monitor, text: `${course.totalHours} giờ video theo yêu cầu` },
-                    { icon: FileText, text: `${course.lectures} bài giảng` },
-                    { icon: FileText, text: "25 bài tập thực hành có lời giải" },
-                    { icon: Infinity, text: "Truy cập trọn đời không giới hạn" },
-                    { icon: Globe, text: "Học trên điện thoại & máy tính" },
-                    { icon: Trophy, text: "Giấy chứng nhận hoàn thành" },
-                  ].map(({ icon: Icon, text }, i) => (
-                    <li key={i} className="flex items-center gap-2.5 text-sm text-gray-700">
-                      <Icon size={15} className="text-gray-500 shrink-0" />
-                      {text}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Wishlist */}
-              <button
-                onClick={() => setWishlist(!wishlist)}
-                className={`mt-5 w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border transition-all text-sm font-bold cursor-pointer ${
-                  wishlist
-                    ? "border-pink-400 text-pink-600 bg-pink-50"
-                    : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                <Heart size={16} className={wishlist ? "fill-pink-500 text-pink-500" : ""} />
-                {wishlist ? "Đã thêm vào danh sách" : "Thêm vào danh sách mong ước"}
-              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
+
+      <ProtectLessonDisplay
+        isShow={showLessonModal}
+        lessonId={selectedLessonId}
+        onClose={() => setShowLessonModal(false)}
+      />
 
       <style>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        summary::-webkit-details-marker { display: none; }
+        summary { list-style: none; }
+        details summary .chevron-icon {
+          transition: transform 0.2s ease;
+        }
+        details[open] summary .chevron-icon {
+          transform: rotate(180deg);
+        }
       `}</style>
     </div>
   );

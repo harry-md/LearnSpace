@@ -14,6 +14,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
 
@@ -43,5 +45,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
             throw new AccessDeniedException("Bạn không có quyền truy cập enrollment này");
         }
         return enrollmentMapper.toDto(enrollment);
+    }
+
+    @Override
+    public List<EnrollmentDto> getMyEnrollments() {
+        CustomUserDetails principal = getLoggedInPrincipal();
+        List<Enrollment> enrollments = enrollmentRepository.getEnrollmentsByStudentId(principal.getId());
+        return enrollments.stream().map(enrollmentMapper::toDto).toList();
     }
 }

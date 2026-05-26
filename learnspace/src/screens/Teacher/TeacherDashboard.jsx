@@ -1,26 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Header from "./components/Header";
 import OverviewTab from "./components/OverviewTab/OverviewTab";
 import CoursesTab from "./components/CoursesTab/CoursesTab";
 import ManageCourseTab from "./components/ManageCourseTab/ManageCourseTab";
-import DashboardModals from "./components/DashboardModals";
-import { TeacherDashboardProvider, useTeacherDashboardContext } from "./TeacherDashboardContext";
 
-const DashboardContent = () => {
-  const { view, selectedCourse } = useTeacherDashboardContext();
+const TeacherDashboard = () => {
+  const [view, setView] = useState("overview");
+  const [selectedCourse, setSelectedCourse] = useState(null);
+
+  const handleManageCourse = (course) => {
+    setSelectedCourse(course);
+    setView("manage");
+  };
+
+  const handleBackToCourses = () => {
+    setSelectedCourse(null);
+    setView("courses");
+  };
 
   return (
     <div
+      className="font-sans"
       style={{
         minHeight: "100vh",
         display: "flex",
-        fontFamily: "'Inter', sans-serif",
         background: "#f7f9fa",
         color: "#1c1d1f",
       }}
     >
-      <Sidebar />
+      <Sidebar view={view} setView={setView} />
 
       <div
         style={{
@@ -30,25 +39,25 @@ const DashboardContent = () => {
           flexDirection: "column",
         }}
       >
-        <Header />
+        <Header
+          view={view}
+          selectedCourse={selectedCourse}
+          onBackToCourses={handleBackToCourses}
+        />
 
-        {view === "overview" && <OverviewTab />}
+        {view === "overview" && (
+          <OverviewTab onManageCourse={handleManageCourse} />
+        )}
 
-        {view === "courses" && <CoursesTab />}
+        {view === "courses" && (
+          <CoursesTab onManageCourse={handleManageCourse} />
+        )}
 
-        {view === "manage" && selectedCourse && <ManageCourseTab />}
+        {view === "manage" && selectedCourse && (
+          <ManageCourseTab course={selectedCourse} />
+        )}
       </div>
-
-      <DashboardModals />
     </div>
-  );
-};
-
-const TeacherDashboard = () => {
-  return (
-    <TeacherDashboardProvider>
-      <DashboardContent />
-    </TeacherDashboardProvider>
   );
 };
 
