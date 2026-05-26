@@ -1,11 +1,13 @@
 package com.learnspace.learnspacebackend.dtos;
 
+import com.drew.lang.annotations.NotNull;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -18,6 +20,9 @@ public record ChapterDto(
         @Pattern(regexp = "^[^<>]*$", message = "Tên chương không hợp lệ")
         @Size(max = 255, message = "Tên chương vượt quá độ dài cho phép")
         String name,
+
+        @NotNull @Positive(message = "Thứ tự chương không hợp lệ")
+        Integer order,
 
         Boolean free,
 

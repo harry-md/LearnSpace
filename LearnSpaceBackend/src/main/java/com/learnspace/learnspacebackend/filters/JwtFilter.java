@@ -11,6 +11,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,9 @@ import java.io.IOException;
 import java.util.List;
 
 public class JwtFilter implements Filter {
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -30,7 +34,7 @@ public class JwtFilter implements Filter {
             String token = header.substring(7);
 
             try {
-                JWTClaimsSet claims = JwtUtils.validateTokenAndGetClaims(token);
+                JWTClaimsSet claims = jwtUtils.validateTokenAndGetClaims(token);
 
                 if (claims != null) {
                     Integer userId = claims.getIntegerClaim("userId");

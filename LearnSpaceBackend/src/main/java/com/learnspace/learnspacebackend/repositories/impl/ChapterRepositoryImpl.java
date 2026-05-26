@@ -78,7 +78,7 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     public Integer getMaxOrder(int courseId) {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery(
-                        "SELECT COALESE(MAX(c.order), 0) FROM Chapter c WHERE c.course.id ="
+                        "SELECT COALESCE(MAX(c.order), 0) FROM Chapter c WHERE c.course.id ="
                                 + " :courseId",
                         Integer.class)
                 .setParameter("courseId", courseId)

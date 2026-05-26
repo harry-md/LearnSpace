@@ -18,6 +18,8 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource("classpath:database.properties")
+@PropertySource("classpath:configs.properties")
+@PropertySource("classpath:env.properties")
 public class HibernateConfigs {
 
     @Autowired

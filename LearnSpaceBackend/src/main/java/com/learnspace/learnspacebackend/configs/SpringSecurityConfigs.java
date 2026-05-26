@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -20,6 +19,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -29,6 +31,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 
 import java.net.URI;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -43,7 +46,6 @@ import java.net.URI;
             "com.learnspace.learnspacebackend.filters",
             "com.learnspace.learnspacebackend.utils",
         })
-@PropertySource("classpath:env.properties")
 public class SpringSecurityConfigs {
 
     @Autowired
@@ -53,7 +55,7 @@ public class SpringSecurityConfigs {
     private UserDetailsService userDetailsService;
 
     @Bean
-    public static BCryptPasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -77,7 +79,8 @@ public class SpringSecurityConfigs {
 
     @Bean
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(c -> c.disable())
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // .csrf(c -> c.disable())
                 .authorizeHttpRequests(
                         requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
                                 .permitAll()
@@ -96,6 +99,19 @@ public class SpringSecurityConfigs {
                         .permitAll())
                 .logout(logout -> logout.logoutSuccessUrl("/login").permitAll());
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOriginPatterns(List.of("https://dreaded-chain-securely.ngrok-free.dev"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     @Bean
