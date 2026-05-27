@@ -39,6 +39,8 @@ public class Review {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    public Review() {}
+
     public Integer getId() {
         return id;
     }

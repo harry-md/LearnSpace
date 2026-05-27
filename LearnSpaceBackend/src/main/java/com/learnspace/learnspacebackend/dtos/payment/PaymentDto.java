@@ -1,4 +1,4 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.payment;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,9 +14,6 @@ public record PaymentDto(
         Integer enrollmentId,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String courseName,
-
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         String paypalOrderId,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -26,13 +23,13 @@ public record PaymentDto(
         PaymentStatus status,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        BigDecimal amount,
+        BigDecimal usdAmount,
+
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        BigDecimal vndAmount,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         String currency,
-
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        BigDecimal originalAmount,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         String originalCurrency,

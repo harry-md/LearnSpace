@@ -1,8 +1,8 @@
 package com.learnspace.learnspacebackend.mappers;
 
-import com.learnspace.learnspacebackend.dtos.LessonDto;
-import com.learnspace.learnspacebackend.dtos.LessonListDto;
-import com.learnspace.learnspacebackend.dtos.LessonPatchDto;
+import com.learnspace.learnspacebackend.dtos.lesson.LessonDto;
+import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
+import com.learnspace.learnspacebackend.dtos.lesson.LessonPatchDto;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 
 import org.mapstruct.BeanMapping;

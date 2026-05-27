@@ -20,6 +20,12 @@ public class Lesson {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "chapter_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Chapter chapter;
+
     @Size(max = 255)
     @NotNull
     @Column(name = "title", nullable = false)
@@ -50,11 +56,7 @@ public class Lesson {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "chapter_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Chapter chapter;
+    public Lesson() {}
 
     public Integer getId() {
         return id;

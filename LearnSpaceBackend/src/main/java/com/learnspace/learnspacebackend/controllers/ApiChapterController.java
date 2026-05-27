@@ -1,7 +1,7 @@
 package com.learnspace.learnspacebackend.controllers;
 
-import com.learnspace.learnspacebackend.dtos.ChapterDto;
-import com.learnspace.learnspacebackend.dtos.ChapterPatchDto;
+import com.learnspace.learnspacebackend.dtos.chapter.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.chapter.ChapterPatchDto;
 import com.learnspace.learnspacebackend.services.ChapterService;
 
 import jakarta.validation.Valid;

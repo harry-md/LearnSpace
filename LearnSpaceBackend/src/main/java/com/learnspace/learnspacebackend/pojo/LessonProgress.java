@@ -1,8 +1,8 @@
 package com.learnspace.learnspacebackend.pojo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -42,6 +42,8 @@ public class LessonProgress {
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public LessonProgress() {}
 
     public Integer getId() {
         return id;
@@ -97,5 +99,9 @@ public class LessonProgress {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Boolean getCompleted() {
+        return completed;
     }
 }

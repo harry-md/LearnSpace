@@ -1,8 +1,8 @@
 package com.learnspace.learnspacebackend.mappers;
 
-import com.learnspace.learnspacebackend.dtos.SimpleUserDto;
-import com.learnspace.learnspacebackend.dtos.UserProfileDto;
-import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
+import com.learnspace.learnspacebackend.dtos.user.SimpleUserDto;
+import com.learnspace.learnspacebackend.dtos.user.UserProfileDto;
+import com.learnspace.learnspacebackend.dtos.user.UserRegisterDto;
 import com.learnspace.learnspacebackend.pojo.User;
 
 import org.mapstruct.Mapper;
