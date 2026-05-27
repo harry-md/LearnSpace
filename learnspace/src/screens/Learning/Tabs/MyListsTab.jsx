@@ -16,8 +16,6 @@ const MyListsTab = () => {
       const res = await authApis(user.token).get(endpoints.enrolled_courses);
       const courses = res.data;
 
-      console.log("courses", courses);
-
       const coursesWithProgress = await Promise.all(
         courses.map(async (c) => {
           try {

@@ -27,6 +27,8 @@ const CoursesTab = ({ onManageCourse }) => {
     handleLoadCourseOfTeacher,
     handleUpdateCourse,
     handleDeleteCourse,
+    handleLoadCategories,
+    categories,
   } = useTeacherDashBoard();
 
   const countChap = (course) => course?.chapters?.length || 0;
@@ -34,6 +36,7 @@ const CoursesTab = ({ onManageCourse }) => {
 
   useEffect(() => {
     handleLoadCourseOfTeacher();
+    handleLoadCategories();
   }, []);
 
   return (
@@ -195,10 +198,7 @@ const CoursesTab = ({ onManageCourse }) => {
       <CreateCourseModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        categories={[
-          { id: 1, name: "Lập trình" },
-          { id: 2, name: "Thiết kế" },
-        ]}
+        categories={categories}
         onSuccess={() => {
           handleLoadCourseOfTeacher();
           setShowCreateModal(false);

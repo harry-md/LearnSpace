@@ -18,10 +18,12 @@ import {
 import Apis, { authApis, endpoints } from "@/configs/Apis";
 import { UIContext, UserContext } from "@/configs/Context";
 import ProtectLessonDisplay from "./ProtectLessonDisplay/ProtectLessonDisplay";
+import useLessonProcess from "@/hooks/useLessonProcess";
 
 const CourseDetailPage = () => {
   const { id } = useParams();
   const [user] = useContext(UserContext);
+  const { lessonProgress, getLessonProgress } = useLessonProcess();
 
   const [courseDetails, setCourseDetails] = useState({ chapters: [] });
   const [notFound, setNotFound] = useState(false);
@@ -46,7 +48,21 @@ const CourseDetailPage = () => {
               const lessonRes = await Apis.get(
                 endpoints.chapter_lesson(chapter.id),
               );
-              return { ...chapter, lessons: lessonRes.data || [] };
+              const lessons = lessonRes.data || [];
+              const lessonsWithProgress = await Promise.all(
+                lessons.map(async (lesson) => {
+                  if (user && user.token) {
+                    try {
+                      const progress = await getLessonProgress(lesson.id);
+                      return { ...lesson, progress };
+                    } catch (e) {
+                      return { ...lesson, progress: null };
+                    }
+                  }
+                  return { ...lesson, progress: null };
+                }),
+              );
+              return { ...chapter, lessons: lessonsWithProgress };
             } catch (err) {
               uiDispatch({
                 type: "SHOW_DIALOG",
@@ -65,10 +81,6 @@ const CourseDetailPage = () => {
 
         // 3. Set courseDetails with nested chapters and lessons
         setCourseDetails({
-          ...course,
-          chapters: chaptersWithLessons,
-        });
-        console.log({
           ...course,
           chapters: chaptersWithLessons,
         });
@@ -308,6 +320,22 @@ const CourseDetailPage = () => {
                               {String(lesson.videoLength % 60).padStart(2, "0")}
                             </span>
                           ) : null}
+
+                          {lesson.progress.completed ? (
+                            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                              Hoàn thành
+                            </span>
+                          ) : (
+                            <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 shrink-0">
+                              Hoàn thành{" "}
+                              {Math.round(
+                                (lesson.progress.watchedSec /
+                                  lesson.videoLength) *
+                                  100,
+                              )}
+                              %
+                            </span>
+                          )}
                         </div>
                       ))
                     ) : (
@@ -658,7 +686,10 @@ const CourseDetailPage = () => {
       <ProtectLessonDisplay
         isShow={showLessonModal}
         lessonId={selectedLessonId}
-        onClose={() => setShowLessonModal(false)}
+        onClose={() => {
+          setShowLessonModal(false);
+          loadCourseDetails();
+        }}
       />
 
       <style>{`

@@ -7,17 +7,17 @@ const useLessonProcess = () => {
   const [lessonProgress, setLessonProgress] = useState(null);
 
   const getLessonProgress = async (lessonId) => {
+    setLessonProgress(null);
     try {
       const res = await authApis(user.token).get(
         endpoints.lesson_progress(lessonId),
       );
       if (res.status === 200) {
-        console.log("GET progress success:", res.data);
         setLessonProgress(res.data);
+        return res.data;
       }
     } catch (err) {
-      console.log("GET progress failed, creating new progress...", err);
-      await createLessonProgress(lessonId);
+      return await createLessonProgress(lessonId);
     }
   };
 
@@ -29,13 +29,12 @@ const useLessonProcess = () => {
           watchedSec: 0,
         },
       );
-      console.log(
-        "POST create progress success:",
-        res.data || { watchedSec: 0 },
-      );
-      setLessonProgress(res.data || { watchedSec: 0 });
+      const data = res.data || { watchedSec: 0 };
+      setLessonProgress(data);
+      return data;
     } catch (err) {
       console.log("POST create progress failed:", err);
+      return null;
     }
   };
 
@@ -44,7 +43,6 @@ const useLessonProcess = () => {
       await authApis(user.token).patch(endpoints.lesson_progress(lessonId), {
         watchedSec: sec,
       });
-      console.log("PATCH update progress success to", sec, "seconds");
       setLessonProgress((prev) =>
         prev ? { ...prev, watchedSec: sec } : { watchedSec: sec },
       );

@@ -51,6 +51,17 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
     await updateLessonProgress(lessonId, currentTime);
   };
 
+  const handleLoadedMetadata = (e) => {
+    if (
+      lessonProgress &&
+      lessonProgress.watchedSec &&
+      !hasSeeked.current
+    ) {
+      e.target.currentTime = lessonProgress.watchedSec;
+      hasSeeked.current = true;
+    }
+  };
+
   useEffect(() => {
     if (!isShow || !lessonId) return;
 
@@ -107,7 +118,7 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
 
   useEffect(() => {
     hasSeeked.current = false;
-  }, [lessonId]);
+  }, [lessonId, isShow]);
 
   useEffect(() => {
     if (
@@ -119,7 +130,7 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
       videoRef.current.currentTime = lessonProgress.watchedSec;
       hasSeeked.current = true;
     }
-  }, [lessonProgress]);
+  }, [lessonProgress, lesson]);
 
   if (!isShow) return null;
 
@@ -197,6 +208,7 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                     src={lesson.video}
                     onPause={handlePause}
                     onSeeked={handleSeeked}
+                    onLoadedMetadata={handleLoadedMetadata}
                     controls
                     controlsList="nodownload"
                     onTimeUpdate={handleTimeUpdate}
