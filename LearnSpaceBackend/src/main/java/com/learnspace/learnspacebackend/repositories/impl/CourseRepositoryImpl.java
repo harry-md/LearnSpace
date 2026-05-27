@@ -86,8 +86,8 @@ public class CourseRepositoryImpl implements CourseRepository {
         Root<Course> root = q.from(Course.class);
 
         if (fetchRelationship) {
-            root.fetch("category", jakarta.persistence.criteria.JoinType.INNER);
-            root.fetch("teacher", jakarta.persistence.criteria.JoinType.INNER);
+            root.fetch("category", JoinType.INNER);
+            root.fetch("teacher", JoinType.INNER);
         }
 
         q.select(root);

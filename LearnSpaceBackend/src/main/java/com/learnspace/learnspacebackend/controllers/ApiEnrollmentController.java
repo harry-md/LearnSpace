@@ -1,5 +1,6 @@
 package com.learnspace.learnspacebackend.controllers;
 
+import com.learnspace.learnspacebackend.dtos.course.CourseDto;
 import com.learnspace.learnspacebackend.dtos.enrollment.EnrollmentDto;
 import com.learnspace.learnspacebackend.services.EnrollmentService;
 
@@ -27,7 +28,7 @@ public class ApiEnrollmentController {
     }
 
     @GetMapping("/enrollments/my-courses")
-    public ResponseEntity<List<EnrollmentDto>> getMyEnrollments() {
+    public ResponseEntity<List<CourseDto>> getMyEnrollments() {
         return ResponseEntity.ok(enrollmentService.getMyEnrollments());
     }
 

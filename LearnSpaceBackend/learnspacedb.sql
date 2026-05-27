@@ -21,7 +21,7 @@ SET @@SESSION.SQL_LOG_BIN= 0;
 -- GTID state at the beginning of the backup 
 --
 
--- SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '00546850-b2fe-11f0-8147-f26f4349a4ff:1-11531';
+-- SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '00546850-b2fe-11f0-8147-f26f4349a4ff:1-11546';
 
 --
 -- Table structure for table `category`
@@ -76,8 +76,39 @@ CREATE TABLE `chapter` (
 
 LOCK TABLES `chapter` WRITE;
 /*!40000 ALTER TABLE `chapter` DISABLE KEYS */;
-INSERT INTO `chapter` VALUES (1,'Chương 1: Giới thiệu ReactJS',1000,0,1,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(2,'Chương 2: Components & Props',2000,0,1,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(3,'Chương 1: Setup Môi trường Node',1000,1,2,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(4,'Chương 2: Express Framework',2000,0,2,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(5,'Chương 1: Dart Cơ bản',1000,1,3,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(6,'Chương 1: Pandas và Numpy',1000,1,4,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(7,'Chương 1: Regression Models',1000,0,5,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(8,'Chương 1: Các công cụ trong Figma',1000,1,6,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(9,'Chương 1: Setup Tài khoản Quảng cáo',1000,1,7,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(10,'Chương 1: Phát âm cơ bản',1000,1,8,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(11,'Chương 3: React Hooks',3000,1,1,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(12,'Chương 4: useReducer, useState',4000,0,1,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(13,'Chương 3: Setup Môi trường Node',3000,1,2,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(14,'Chương 4',4000,0,2,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(15,'Chương 2',2000,1,3,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(16,'Chương 2',2000,1,4,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(17,'Chương 2',2000,0,5,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(18,'Chương 2',2000,1,6,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(19,'Chương 2',2000,1,7,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(20,'Chương 2',2000,1,8,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(22,'chapter test upload video',1000,0,107,'2026-05-22 15:00:28','2026-05-22 15:00:28');
+INSERT INTO `chapter` VALUES (1,'Chương 1: Giới thiệu ReactJS',1000,0,1,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(2,'Chương 2: Components & Props',2000,0,1,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(3,'Chương 1: Setup Môi trường Node',1000,1,2,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(4,'Chương 2: Express Framework',2000,0,2,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(5,'Chương 1: Dart Cơ bản',1000,1,3,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(6,'Chương 1: Pandas và Numpy',1000,1,4,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(7,'Chương 1: Regression Models',1000,0,5,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(8,'Chương 1: Các công cụ trong Figma',1000,1,6,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(9,'Chương 1: Setup Tài khoản Quảng cáo',1000,1,7,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(10,'Chương 1: Phát âm cơ bản',1000,1,8,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(11,'Chương 3: React Hooks',3000,1,1,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(12,'Chương 4: useReducer, useState',4000,0,1,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(13,'Chương 3: Setup Môi trường Node',3000,1,2,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(14,'Chương 4',4000,0,2,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(15,'Chương 2',2000,1,3,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(16,'Chương 2',2000,1,4,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(17,'Chương 2',2000,0,5,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(18,'Chương 2',2000,1,6,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(19,'Chương 2',2000,1,7,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(20,'Chương 2',2000,1,8,'2026-04-04 08:58:37','2026-04-04 08:58:37'),(22,'chapter test upload video',1000,1,107,'2026-05-22 15:00:28','2026-05-26 13:45:37');
 /*!40000 ALTER TABLE `chapter` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `comment`
+--
+
+DROP TABLE IF EXISTS `comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `comment` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `lesson_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `lesson_id` (`lesson_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`lesson_id`) REFERENCES `lesson` (`id`),
+  CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `comment`
+--
+
+LOCK TABLES `comment` WRITE;
+/*!40000 ALTER TABLE `comment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `comment` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -147,7 +178,7 @@ CREATE TABLE `enrollment` (
 
 LOCK TABLES `enrollment` WRITE;
 /*!40000 ALTER TABLE `enrollment` DISABLE KEYS */;
-INSERT INTO `enrollment` VALUES (1,4,1,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(2,4,2,'COMPLETED','2026-04-04 14:07:01','2026-04-04 14:07:01'),(3,5,1,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(4,5,3,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(5,6,4,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(6,7,5,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(7,8,6,'COMPLETED','2026-04-04 14:07:01','2026-04-04 14:07:01'),(8,9,7,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(9,10,8,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(10,12,10,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(11,12,1,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(14,12,107,'PENDING','2026-05-26 10:33:47','2026-05-26 10:33:47');
+INSERT INTO `enrollment` VALUES (1,4,1,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(2,4,2,'COMPLETED','2026-04-04 14:07:01','2026-04-04 14:07:01'),(3,5,1,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(4,5,3,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(5,6,4,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(6,7,5,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(7,8,6,'COMPLETED','2026-04-04 14:07:01','2026-04-04 14:07:01'),(8,9,7,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(9,10,8,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(10,12,10,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(11,12,1,'ACTIVE','2026-04-04 14:07:01','2026-04-04 14:07:01'),(14,12,107,'PENDING','2026-05-26 10:33:47','2026-05-26 13:37:46');
 /*!40000 ALTER TABLE `enrollment` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -226,26 +257,19 @@ DROP TABLE IF EXISTS `payment`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `payment` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `student_id` int NOT NULL,
-  `course_id` int NOT NULL,
-  `amount` decimal(19,2) NOT NULL DEFAULT '0.00',
-  `status` enum('PENDING','COMPLETED','CANCELLED') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'PENDING',
-  `paypal_order_id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `enrollment_id` int NOT NULL,
+  `usd_amount` decimal(19,2) NOT NULL DEFAULT '0.00',
+  `vnd_amount` decimal(19,2) NOT NULL DEFAULT '0.00',
+  `currency` varchar(3) COLLATE utf8mb4_unicode_ci DEFAULT 'USD',
+  `original_currency` varchar(3) COLLATE utf8mb4_unicode_ci DEFAULT 'VND',
+  `status` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'PENDING',
+  `paypal_order_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `paypal_capture_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `paypal_capture_id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `currency` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'USD',
-  `enrollment_id` int NOT NULL,
-  `original_amount` decimal(19,2) NOT NULL DEFAULT '0.00',
-  `original_currency` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'VND',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `paypal_order_id_UNIQUE` (`paypal_order_id`),
-  KEY `fk_payment_student_idx` (`student_id`),
-  KEY `fk_payment_course_idx` (`course_id`),
-  KEY `fk_payment_enrollment_idx` (`enrollment_id`),
-  CONSTRAINT `fk_payment_course` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`),
-  CONSTRAINT `fk_payment_enrollment` FOREIGN KEY (`enrollment_id`) REFERENCES `enrollment` (`id`),
-  CONSTRAINT `fk_payment_student` FOREIGN KEY (`student_id`) REFERENCES `user` (`id`)
+  KEY `fk_payment_enrollment` (`enrollment_id`),
+  CONSTRAINT `fk_payment_enrollment` FOREIGN KEY (`enrollment_id`) REFERENCES `enrollment` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -335,4 +359,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-26 16:40:25
+-- Dump completed on 2026-05-27 11:20:10
