@@ -60,4 +60,9 @@ public class ApiCourseController {
         courseService.deleteCourse(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/my-courses")
+    public ResponseEntity<List<CourseDto>> getEnrolledCourses() {
+        return ResponseEntity.ok(courseService.getEnrolledCourses());
+    }
 }
