@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
         basePackages = {
             "com.learnspace.learnspacebackend.controllers",
             "com.learnspace.learnspacebackend.repositories",
+            "com.learnspace.learnspacebackend.configs",
             "com.learnspace.learnspacebackend.services",
             "com.learnspace.learnspacebackend.mappers",
             "com.learnspace.learnspacebackend.exceptions",
@@ -58,9 +59,9 @@ public class WebAppContextConfigs implements WebMvcConfigurer {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager =
-                new CaffeineCacheManager("paypalAccessTokenCache", "exchangeRateCache");
+                new CaffeineCacheManager("paypalAccessToken", "exchangeRate");
         cacheManager.setCaffeine(
-                Caffeine.newBuilder().expireAfterWrite(9, TimeUnit.HOURS).maximumSize(500));
+                Caffeine.newBuilder().expireAfterWrite(9, TimeUnit.HOURS).maximumSize(1));
         return cacheManager;
     }
 }

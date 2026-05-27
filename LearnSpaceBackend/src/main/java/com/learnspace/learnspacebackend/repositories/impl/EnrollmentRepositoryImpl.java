@@ -123,4 +123,15 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
                 .setParameter("id", enrollmentId)
                 .getSingleResultOrNull();
     }
+
+    @Override
+    public Long countEnrollmentsByCourseId(int courseId) {
+        Session session = factory.getObject().getCurrentSession();
+        return session.createQuery(
+                        "SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId"
+                                + " AND e.status IN ('ACTIVE', 'COMPLETED')",
+                        Long.class)
+                .setParameter("courseId", courseId)
+                .getSingleResultOrNull();
+    }
 }

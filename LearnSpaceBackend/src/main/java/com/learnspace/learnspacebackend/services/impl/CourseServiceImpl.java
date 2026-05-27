@@ -6,14 +6,17 @@ import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
+import com.learnspace.learnspacebackend.mappers.LessonMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
+import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
+import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.CloudinaryService;
 import com.learnspace.learnspacebackend.services.CourseService;
@@ -44,10 +47,22 @@ public class CourseServiceImpl implements CourseService {
     private CourseMapper courseMapper;
 
     @Autowired
+    private ChapterRepository chapterRepository;
+
+    @Autowired
+    private LessonRepository lessonRepository;
+
+    @Autowired
+    private LessonMapper lessonMapper;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Autowired
     private CloudinaryService cloudinaryService;
@@ -55,20 +70,25 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private R2Service r2Service;
 
-    @Autowired
-    private LessonRepository lessonRepository;
-
-    @Override
-    public List<CourseDto> getAllCoursesWithDetail(Map<String, String> params) {
-        return courseRepository.getAllCourses(params, true).stream()
-                .map(courseMapper::toDto)
-                .toList();
-    }
-
     @Override
     public List<CourseListDto> getCourses(Map<String, String> params) {
-        return courseRepository.getAllCourses(params, false).stream()
-                .map(courseMapper::toListDto)
+        return courseRepository.getAllCourses(params).stream()
+                .map(row -> {
+                    Course course = (Course) row[0];
+                    Double avgRating = (Double) row[1];
+                    Long enrollCount = (Long) row[2];
+
+                    CourseListDto base = courseMapper.toListDto(course);
+                    return new CourseListDto(
+                            base.id(),
+                            base.name(),
+                            base.image(),
+                            base.price(),
+                            base.category(),
+                            base.teacher(),
+                            avgRating,
+                            enrollCount);
+                })
                 .toList();
     }
 
@@ -78,7 +98,28 @@ public class CourseServiceImpl implements CourseService {
         if (course == null) {
             throw new ResourceNotFoundException("Không tìm thấy khóa học");
         }
-        return courseMapper.toDto(course);
+
+        CourseDto dto = courseMapper.toDto(course);
+        Double avgRating = reviewRepository.getAverageRatingByCourseId(id);
+        Long enrollCount = enrollmentRepository.countEnrollmentsByCourseId(id);
+
+        return new CourseDto(
+                dto.id(),
+                dto.name(),
+                dto.description(),
+                dto.image(),
+                dto.introVideo(),
+                dto.price(),
+                dto.categoryId(),
+                avgRating,
+                enrollCount,
+                dto.chapters(),
+                dto.category(),
+                dto.teacher(),
+                dto.createdAt(),
+                dto.updatedAt(),
+                dto.imageFile(),
+                dto.introVideoFile());
     }
 
     @Override

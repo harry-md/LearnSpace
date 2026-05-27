@@ -23,7 +23,6 @@ public record CoursePatchDto(
         BigDecimal price,
 
         Integer categoryId,
-        Boolean active,
 
         @JsonIgnore MultipartFile imageFile,
         @JsonIgnore MultipartFile introVideoFile) {}

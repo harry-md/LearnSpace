@@ -43,13 +43,6 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                  <select class="form-select" name="active">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="1" th:selected="${param.active != null and param.active[0] == '1'}">Đang mở</option>
-                    <option value="0" th:selected="${param.active != null and param.active[0] == '0'}">Đã đóng</option>
-                  </select>
-                </div>
-                <div class="col-md-2">
                   <button type="submit" class="btn btn-secondary w-100">Lọc dữ liệu</button>
                 </div>
               </form>

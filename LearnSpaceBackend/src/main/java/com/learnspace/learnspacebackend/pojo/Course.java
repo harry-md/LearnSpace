@@ -59,14 +59,8 @@ public class Course {
     @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    @Column(name = "enrollments")
-    private Set<Enrollment> enrollments;
-
-    @NotNull
-    @ColumnDefault("1")
-    @Column(name = "active", nullable = false)
-    private boolean active = true;
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Chapter> chapters;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -142,14 +136,6 @@ public class Course {
         this.teacher = teacher;
     }
 
-    public boolean getActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -166,7 +152,11 @@ public class Course {
         this.updatedAt = updatedAt;
     }
 
-    public void setEnrollments(Set<Enrollment> enrollments) {
-        this.enrollments = enrollments;
+    public Set<Chapter> getChapters() {
+        return chapters;
+    }
+
+    public void setChapters(Set<Chapter> chapters) {
+        this.chapters = chapters;
     }
 }

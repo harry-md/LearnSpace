@@ -1,202 +1,178 @@
 package com.learnspace.learnspacebackend.configs;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.learnspace.learnspacebackend.dtos.payment.PaypalOrderRequestDto;
-import com.learnspace.learnspacebackend.dtos.payment.PaypalOrderResponseDto;
-import com.learnspace.learnspacebackend.dtos.payment.PaypalWebhookEventDto;
+import com.learnspace.learnspacebackend.services.ExternalApiClient;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Configuration
 public class PaypalConfigs {
 
-    @Value("${paypal.client_id}")
-    private String clientId;
-
-    @Value("${paypal.client_secret}")
-    private String clientSecret;
-
     @Value("${paypal.webhook_id}")
-    private String webhookId;
+    private String PAYPAL_WEBHOOK_ID;
 
     @Value("${paypal.return_url}")
-    private String returnUrl;
+    private String PAYPAL_RETURN_URL;
 
     @Value("${paypal.cancel_url}")
-    private String cancelUrl;
+    private String PAYPAL_CANCEL_URL;
 
-    @Value("${exhangerate_api.api_key}")
-    private String exchangeRateApiKey;
-
-    private final String baseUrl = "https://api-m.sandbox.paypal.com";
+    private final String PAYPAL_BASE_URL = "https://api-m.sandbox.paypal.com";
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private record PaypalAccessTokenResponse(
-            @JsonProperty("access_token") String accessToken,
-            @JsonProperty("expires_in") Integer expiresIn) {}
+    @Autowired
+    private ExternalApiClient externalApiClient;
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private record ExchangeRateResponseDto(
-            String result, @JsonProperty("conversion_rate") BigDecimal conversionRate) {
-
-        boolean isSuccess() {
-            return "success".equals(result);
-        }
-    }
-
-    private record WebhookVerifyRequest(
-            @JsonProperty("auth_algo") String authAlgo,
-            @JsonProperty("cert_url") String certUrl,
-            @JsonProperty("transmission_id") String transmissionId,
-            @JsonProperty("transmission_sig") String transmissionSig,
-            @JsonProperty("transmission_time") String transmissionTime,
-            @JsonProperty("webhook_id") String webhookId,
-            @JsonProperty("webhook_event") JsonNode webhookEvent) {}
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private record WebhookVerifyResponse(
-            @JsonProperty("verification_status") String verificationStatus) {
-
-        boolean isSuccess() {
-            return "SUCCESS".equals(verificationStatus);
-        }
-    }
-
-    @Cacheable(value = "paypalAccessTokenCache", key = "'paypalAccessToken'")
-    private String getAccessToken() {
-        String credentials = clientId + ":" + clientSecret;
-        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
-
-        PaypalAccessTokenResponse response = RestClient.create()
-                .post()
-                .uri(baseUrl + "/v1/oauth2/token")
-                .header("Authorization", "Basic " + encoded)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body("grant_type=client_credentials")
-                .retrieve()
-                .body(PaypalAccessTokenResponse.class);
-
-        if (response == null || response.accessToken() == null) {
-            throw new RuntimeException("Không lấy được access token của PayPal");
-        }
-
-        String accessToken = response.accessToken();
-        return accessToken;
-    }
-
-    private synchronized BigDecimal getConversionRate() {
-        ExchangeRateResponseDto response = RestClient.create()
-                .get()
-                .uri("https://v6.exchangerate-api.com/v6/" + exchangeRateApiKey + "/pair/VND/USD")
-                .retrieve()
-                .body(ExchangeRateResponseDto.class);
-
-        if (response == null || !response.isSuccess()) {
-            throw new RuntimeException("Lỗi chuyển đổi đơn vị tiền tệ");
-        }
-
-        return response.conversionRate();
-    }
-
-    public PaypalOrderResponseDto createOrder(BigDecimal usdAmount, String description) {
-        String accessToken = getAccessToken();
+    public Map<String, String> createOrder(BigDecimal usdAmount, String description) {
+        String accessToken = externalApiClient.getPaypalAccessToken();
         String usdValue = usdAmount.setScale(2, RoundingMode.HALF_UP).toPlainString();
 
-        PaypalOrderRequestDto request = new PaypalOrderRequestDto(
-                "CAPTURE",
-                List.of(new PaypalOrderRequestDto.PurchaseUnitDto(
-                        new PaypalOrderRequestDto.AmountDto("USD", usdValue), description)),
-                new PaypalOrderRequestDto.ApplicationContextDto(
-                        returnUrl, cancelUrl, "PAY_NOW", "LearnSpace"));
+        Map<String, Object> req = Map.of(
+                "intent", "CAPTURE",
+                "purchase_units",
+                        List.of(Map.of(
+                                "amount",
+                                Map.of("currency_code", "USD", "value", usdValue),
+                                "description",
+                                description)),
+                "application_context",
+                        Map.of(
+                                "return_url",
+                                PAYPAL_RETURN_URL,
+                                "cancel_url",
+                                PAYPAL_CANCEL_URL,
+                                "user_action",
+                                "PAY_NOW",
+                                "brand_name",
+                                "LearnSpace"));
 
-        PaypalOrderResponseDto orderResponse = RestClient.create()
+        Map<String, Object> res = RestClient.create()
                 .post()
-                .uri(baseUrl + "/v2/checkout/orders")
+                .uri(PAYPAL_BASE_URL + "/v2/checkout/orders")
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(request)
+                .body(req)
                 .retrieve()
-                .body(PaypalOrderResponseDto.class);
+                .body(Map.class);
 
-        if (orderResponse == null || orderResponse.id() == null) {
+        if (res == null || !res.containsKey("id")) {
             throw new RuntimeException("Lỗi tạo PayPal order");
         }
-        return orderResponse;
+
+        String orderId = (String) res.get("id").toString();
+
+        List<Map<String, String>> links = (List<Map<String, String>>) res.get("links");
+        for (Map<String, String> link : links) {
+            if (link.get("rel").equals("approve")) {
+                return Map.of("orderId", orderId, "approvalUrl", link.get("href"));
+            }
+        }
+
+        return null;
     }
 
-    public PaypalOrderResponseDto captureOrder(String paypalOrderId) {
-        String accessToken = getAccessToken();
+    public Map<String, String> captureOrder(String paypalOrderId) {
+        String accessToken = externalApiClient.getPaypalAccessToken();
 
-        PaypalOrderResponseDto captureResponse = RestClient.create()
+        Map response = RestClient.create()
                 .post()
-                .uri(baseUrl + "/v2/checkout/orders/" + paypalOrderId + "/capture")
+                .uri(PAYPAL_BASE_URL + "/v2/checkout/orders/" + paypalOrderId + "/capture")
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .body(PaypalOrderResponseDto.class);
+                .body(Map.class);
 
-        if (captureResponse == null) {
+        if (response == null) {
             throw new RuntimeException("Lỗi capture PayPal order");
         }
-        return captureResponse;
+
+        String captureId = "";
+        List<Map<String, Object>> purchaseUnits =
+                (List<Map<String, Object>>) response.get("purchase_units");
+
+        Map<String, Object> payments =
+                (Map<String, Object>) purchaseUnits.get(0).get("payments");
+
+        List<Map<String, String>> captures = (List<Map<String, String>>) payments.get("captures");
+
+        return Map.of(
+                "captureId", captures.get(0).get("id"), "status", (String) response.get("status"));
     }
 
     public boolean verifyPaypalWebhook(String payload, Map<String, String> headers) {
-        String accessToken = getAccessToken();
+        String accessToken = externalApiClient.getPaypalAccessToken();
 
         try {
-            WebhookVerifyRequest request = new WebhookVerifyRequest(
-                    headers.getOrDefault("paypal-auth-algo", ""),
-                    headers.getOrDefault("paypal-cert-url", ""),
-                    headers.getOrDefault("paypal-transmission-id", ""),
-                    headers.getOrDefault("paypal-transmission-sig", ""),
-                    headers.getOrDefault("paypal-transmission-time", ""),
-                    webhookId,
-                    objectMapper.readTree(payload));
+            Map<String, Object> request = Map.of(
+                    "auth_algo", headers.getOrDefault("paypal-auth-algo", ""),
+                    "cert_url", headers.getOrDefault("paypal-cert-url", ""),
+                    "transmission_id", headers.getOrDefault("paypal-transmission-id", ""),
+                    "transmission_sig", headers.getOrDefault("paypal-transmission-sig", ""),
+                    "transmission_time", headers.getOrDefault("paypal-transmission-time", ""),
+                    "webhook_id", PAYPAL_WEBHOOK_ID,
+                    "webhook_event", objectMapper.readTree(payload));
 
-            WebhookVerifyResponse response = RestClient.create()
+            Map<String, Object> response = RestClient.create()
                     .post()
-                    .uri(baseUrl + "/v1/notifications/verify-webhook-signature")
+                    .uri(PAYPAL_BASE_URL + "/v1/notifications/verify-webhook-signature")
                     .header("Authorization", "Bearer " + accessToken)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(request)
                     .retrieve()
-                    .body(WebhookVerifyResponse.class);
+                    .body(Map.class);
 
-            return response != null && response.isSuccess();
+            return response.get("verification_status").equals("SUCCESS");
         } catch (Exception e) {
             System.err.println("Lỗi verify webhook: " + e.getMessage());
             return false;
         }
     }
 
-    public PaypalWebhookEventDto parseWebhookEvent(String payload) {
+    public Map<String, String> parseWebhookEvent(String payload) {
         try {
-            return objectMapper.readValue(payload, PaypalWebhookEventDto.class);
+            Map<String, Object> event = objectMapper.readValue(payload, Map.class);
+            String eventType = (String) event.get("event_type");
+            String orderId = null;
+            String captureId = null;
+
+            Map<String, Object> resource = (Map<String, Object>) event.get("resource");
+            if (resource != null) {
+                captureId = (String) resource.get("id");
+                Map<String, Object> supplementaryData =
+                        (Map<String, Object>) resource.get("supplementary_data");
+                if (supplementaryData != null) {
+                    Map<String, String> relatedIds =
+                            (Map<String, String>) supplementaryData.get("related_ids");
+                    if (relatedIds != null) {
+                        orderId = relatedIds.get("order_id");
+                    }
+                }
+            }
+
+            Map<String, String> result = new HashMap<>();
+            result.put("eventType", eventType);
+            result.put("orderId", orderId);
+            result.put("captureId", captureId);
+            return result;
         } catch (Exception ex) {
             throw new RuntimeException("Lỗi webhook event");
         }
     }
 
     public BigDecimal convertVndToUsd(BigDecimal vndAmount) {
-        BigDecimal rate = getConversionRate();
+        BigDecimal rate = externalApiClient.getVndToUsdRate();
         return vndAmount.multiply(rate).setScale(2, RoundingMode.HALF_UP);
     }
 }

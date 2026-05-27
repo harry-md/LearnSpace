@@ -1,6 +1,8 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.pojo.Enrollment;
+import com.learnspace.learnspacebackend.pojo.Review;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 
 import jakarta.persistence.Query;
@@ -9,6 +11,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,32 +73,39 @@ public class CourseRepositoryImpl implements CourseRepository {
             }
         }
 
-        String active = params.get("active");
-        if (active != null && !active.isBlank()) {
-            predicates.add(builder.equal(root.get("active"), active.equals("1")));
-        }
-
         return predicates;
     }
 
     @Override
-    public List<Course> getAllCourses(Map<String, String> params, boolean fetchRelationship) {
+    public List<Object[]> getAllCourses(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
+
         CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Course> q = builder.createQuery(Course.class);
+        CriteriaQuery<Object[]> q = builder.createQuery(Object[].class);
+
         Root<Course> root = q.from(Course.class);
+        root.fetch("category", JoinType.INNER);
+        root.fetch("teacher", JoinType.INNER);
 
-        if (fetchRelationship) {
-            root.fetch("category", JoinType.INNER);
-            root.fetch("teacher", JoinType.INNER);
-        }
+        Subquery<Double> avgRatingSub = q.subquery(Double.class);
+        Root<Review> reviewRoot = avgRatingSub.from(Review.class);
+        avgRatingSub
+                .select(builder.avg(reviewRoot.get("rating")))
+                .where(builder.equal(reviewRoot.get("course"), root));
 
-        q.select(root);
+        Subquery<Long> enrollCountSub = q.subquery(Long.class);
+        Root<Enrollment> enrollRoot = enrollCountSub.from(Enrollment.class);
+        enrollCountSub
+                .select(builder.count(enrollRoot))
+                .where(
+                        builder.equal(enrollRoot.get("course"), root),
+                        enrollRoot.get("status").in("ACTIVE", "COMPLETED"));
+
+        q.multiselect(root, avgRatingSub.getSelection(), enrollCountSub.getSelection());
 
         if (params != null) {
             q.where(filter(builder, root, params).toArray(Predicate[]::new));
         }
-
         q.orderBy(builder.desc(root.get("id")));
 
         Query query = session.createQuery(q);
@@ -143,17 +153,17 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Override
     public Course getCourseById(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Course> q = builder.createQuery(Course.class);
-
-        Root<Course> root = q.from(Course.class);
-        root.fetch("category", JoinType.INNER);
-        root.fetch("teacher", JoinType.INNER);
-
-        q.select(root).where(builder.equal(root.get("id"), courseId));
-
-        return session.createQuery(q).getSingleResultOrNull();
+        return session.createQuery(
+                        "SELECT DISTINCT c FROM Course c"
+                                + " JOIN FETCH c.category"
+                                + " JOIN FETCH c.teacher"
+                                + " LEFT JOIN FETCH c.chapters ch"
+                                + " LEFT JOIN FETCH ch.lessons l"
+                                + " WHERE c.id = :courseId"
+                                + " ORDER BY ch.order, l.order",
+                        Course.class)
+                .setParameter("courseId", courseId)
+                .getSingleResultOrNull();
     }
 
     @Override
