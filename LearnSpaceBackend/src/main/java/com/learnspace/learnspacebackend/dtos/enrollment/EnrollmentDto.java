@@ -1,24 +1,24 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.enrollment;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 
 import java.time.LocalDateTime;
 
-public record LessonProgressDto(
-        @NotNull @PositiveOrZero(message = "Số giây đã xem không hợp lệ")
-        Integer watchedSec,
+public record EnrollmentDto(
+        @NotNull @JsonProperty(access = Access.WRITE_ONLY) Integer courseId,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        Boolean completed,
-
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        LocalDateTime updatedAt,
+        EnrollmentStatus status,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        LocalDateTime createdAt) {}
+        LocalDateTime createdAt,
+
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime updatedAt) {}

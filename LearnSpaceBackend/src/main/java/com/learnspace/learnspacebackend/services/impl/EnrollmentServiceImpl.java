@@ -1,7 +1,7 @@
 package com.learnspace.learnspacebackend.services.impl;
 
-import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
-import com.learnspace.learnspacebackend.dtos.EnrollmentDto;
+import com.learnspace.learnspacebackend.dtos.enrollment.EnrollmentDto;
+import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.EnrollmentMapper;
 import com.learnspace.learnspacebackend.pojo.Course;

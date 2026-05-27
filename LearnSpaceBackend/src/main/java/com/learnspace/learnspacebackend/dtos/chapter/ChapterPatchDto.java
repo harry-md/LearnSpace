@@ -1,4 +1,4 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.chapter;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

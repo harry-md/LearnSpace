@@ -1,6 +1,6 @@
 package com.learnspace.learnspacebackend.controllers;
 
-import com.learnspace.learnspacebackend.dtos.CategoryDto;
+import com.learnspace.learnspacebackend.dtos.category.CategoryDto;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.services.CategoryService;
 

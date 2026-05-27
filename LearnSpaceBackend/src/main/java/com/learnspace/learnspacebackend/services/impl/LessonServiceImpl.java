@@ -1,9 +1,9 @@
 package com.learnspace.learnspacebackend.services.impl;
 
-import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
-import com.learnspace.learnspacebackend.dtos.LessonDto;
-import com.learnspace.learnspacebackend.dtos.LessonListDto;
-import com.learnspace.learnspacebackend.dtos.LessonPatchDto;
+import com.learnspace.learnspacebackend.dtos.lesson.LessonDto;
+import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
+import com.learnspace.learnspacebackend.dtos.lesson.LessonPatchDto;
+import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.LessonMapper;
 import com.learnspace.learnspacebackend.pojo.Chapter;

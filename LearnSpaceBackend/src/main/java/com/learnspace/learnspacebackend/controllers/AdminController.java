@@ -1,6 +1,6 @@
 package com.learnspace.learnspacebackend.controllers;
 
-import com.learnspace.learnspacebackend.dtos.AdminUserUpdateDto;
+import com.learnspace.learnspacebackend.dtos.user.AdminUserUpdateDto;
 import com.learnspace.learnspacebackend.services.CategoryService;
 import com.learnspace.learnspacebackend.services.CourseService;
 import com.learnspace.learnspacebackend.services.UserService;

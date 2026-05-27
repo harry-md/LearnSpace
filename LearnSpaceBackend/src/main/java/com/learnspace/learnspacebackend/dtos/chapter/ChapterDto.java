@@ -1,4 +1,4 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.chapter;
 
 import com.drew.lang.annotations.NotNull;
 import com.fasterxml.jackson.annotation.JsonFormat;

@@ -1,11 +1,6 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.category;
 
-import com.drew.lang.annotations.NotNull;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public record CategoryDto(
         @NotNull @Positive(message = "Id danh mục không hợp lệ")

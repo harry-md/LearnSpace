@@ -1,4 +1,4 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -7,7 +7,7 @@ import java.util.Collection;
 
 public class CustomUserDetails extends User {
 
-    private Integer id;
+    private final Integer id;
 
     public CustomUserDetails(
             String username,

@@ -1,6 +1,6 @@
 package com.learnspace.learnspacebackend.services;
 
-import com.learnspace.learnspacebackend.dtos.CategoryDto;
+import com.learnspace.learnspacebackend.dtos.category.CategoryDto;
 
 import java.util.List;
 

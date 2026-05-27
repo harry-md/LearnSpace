@@ -1,4 +1,6 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.course;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Pattern;
@@ -22,5 +24,6 @@ public record CoursePatchDto(
 
         Integer categoryId,
         Boolean active,
-        MultipartFile imageFile,
-        MultipartFile introVideoFile) {}
+
+        @JsonIgnore MultipartFile imageFile,
+        @JsonIgnore MultipartFile introVideoFile) {}

@@ -71,6 +71,8 @@ public class Course {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public Course() {}
+
     public Integer getId() {
         return id;
     }

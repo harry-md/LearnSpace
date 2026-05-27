@@ -1,7 +1,7 @@
 package com.learnspace.learnspacebackend.mappers;
 
-import com.learnspace.learnspacebackend.dtos.ChapterDto;
-import com.learnspace.learnspacebackend.dtos.ChapterPatchDto;
+import com.learnspace.learnspacebackend.dtos.chapter.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.chapter.ChapterPatchDto;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 
 import org.mapstruct.BeanMapping;

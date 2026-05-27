@@ -1,6 +1,6 @@
 package com.learnspace.learnspacebackend.mappers;
 
-import com.learnspace.learnspacebackend.dtos.EnrollmentDto;
+import com.learnspace.learnspacebackend.dtos.enrollment.EnrollmentDto;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 
 import org.mapstruct.Mapper;

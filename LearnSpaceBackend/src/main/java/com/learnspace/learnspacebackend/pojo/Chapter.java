@@ -48,6 +48,8 @@ public class Chapter {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public Chapter() {}
+
     public Integer getId() {
         return id;
     }

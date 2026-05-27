@@ -1,4 +1,4 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.learnspace.learnspacebackend.pojo.UserRole;
