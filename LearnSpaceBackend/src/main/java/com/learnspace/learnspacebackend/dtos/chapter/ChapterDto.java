@@ -19,9 +19,9 @@ public record ChapterDto(
         @Size(max = 255, message = "Tên chương vượt quá độ dài cho phép")
         String name,
 
-        @JsonProperty(access = Access.READ_ONLY) Integer order,
-
         Boolean free,
+
+        @JsonProperty(access = Access.READ_ONLY) Integer order,
 
         @JsonProperty(access = Access.READ_ONLY)
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

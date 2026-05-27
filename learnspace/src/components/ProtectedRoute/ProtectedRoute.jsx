@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { UserContext } from "../configs/Context";
+import { UserContext } from "../../configs/Context";
 import { jwtDecode } from "jwt-decode";
 import Error403 from "@/screens/Error/Error403";
 import RequiredLogin from "@/screens/Error/RequiredLogin";
+import "./ProtectedRoute.css";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const [user] = useContext(UserContext);
@@ -45,14 +46,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   if (isAuthorized === null) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
+      <div className="protected-route-loading">
         <h4>Đang kiểm tra quyền truy cập...</h4>
       </div>
     );
