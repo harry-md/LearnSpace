@@ -9,8 +9,6 @@ import java.util.Map;
 
 public interface CourseService {
 
-    List<CourseDto> getAllCoursesWithDetail(Map<String, String> params);
-
     List<CourseListDto> getCourses(Map<String, String> params);
 
     Long countCourses(Map<String, String> params);

@@ -50,9 +50,9 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
         root.fetch("student");
 
         q.select(root)
-                .where(builder.and(
+                .where(
                         builder.equal(root.get("id"), id),
-                        root.get("status").in("ACTIVE", "COMPLETED")));
+                        root.get("status").in("ACTIVE", "COMPLETED"));
         return session.createQuery(q).getSingleResultOrNull();
     }
 
@@ -121,6 +121,17 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
                                 + " WHERE e.id = :id",
                         Enrollment.class)
                 .setParameter("id", enrollmentId)
+                .getSingleResultOrNull();
+    }
+
+    @Override
+    public Long countEnrollmentsByCourseId(int courseId) {
+        Session session = factory.getObject().getCurrentSession();
+        return session.createQuery(
+                        "SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId"
+                                + " AND e.status IN ('ACTIVE', 'COMPLETED')",
+                        Long.class)
+                .setParameter("courseId", courseId)
                 .getSingleResultOrNull();
     }
 }

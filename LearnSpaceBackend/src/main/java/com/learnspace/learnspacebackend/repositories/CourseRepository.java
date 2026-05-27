@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface CourseRepository {
 
-    List<Course> getAllCourses(Map<String, String> params, boolean fetchRelationship);
+    List<Object[]> getAllCourses(Map<String, String> params);
 
     Long countCourses(Map<String, String> params);
 

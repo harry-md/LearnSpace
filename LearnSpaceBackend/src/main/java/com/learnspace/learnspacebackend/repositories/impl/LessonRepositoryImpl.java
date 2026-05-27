@@ -108,8 +108,8 @@ public class LessonRepositoryImpl implements LessonRepository {
         CriteriaQuery<Long> q = builder.createQuery(Long.class);
 
         Root<Lesson> root = q.from(Lesson.class);
-        q.select(builder.count(root));
-        q.where(builder.equal(root.get("chapter").get("course").get("id"), courseId));
+        q.select(builder.count(root))
+                .where(builder.equal(root.get("chapter").get("course").get("id"), courseId));
 
         Long result = session.createQuery(q).getSingleResult();
         return result == null ? 0 : result.intValue();

@@ -19,4 +19,6 @@ public interface EnrollmentRepository {
     List<Enrollment> getEnrollmentsByStudentId(int studentId);
 
     Enrollment getEnrollmentByIdAllStatus(int enrollmentId);
+
+    Long countEnrollmentsByCourseId(int courseId);
 }

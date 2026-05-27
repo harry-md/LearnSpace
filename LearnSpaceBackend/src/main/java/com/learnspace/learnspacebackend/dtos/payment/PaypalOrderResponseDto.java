@@ -16,7 +16,7 @@ public record PaypalOrderResponseDto(
 
     public String approvalUrl() {
         return links.stream()
-                .filter(link -> "approve".equals(link.rel()))
+                .filter(link -> link.rel().equals("approve"))
                 .map(PaypalLinkDto::href)
                 .findFirst()
                 .orElse(null);

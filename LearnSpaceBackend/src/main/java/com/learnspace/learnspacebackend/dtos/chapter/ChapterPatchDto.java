@@ -8,6 +8,8 @@ public record ChapterPatchDto(
         @Size(min = 1, max = 255, message = "Tên chương không hợp lệ")
         String name,
 
+        String description,
+
         Boolean free,
 
         Integer frontChapterId,

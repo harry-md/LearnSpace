@@ -10,9 +10,12 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {LessonMapper.class})
 public interface ChapterMapper {
 
+    @Mapping(target = "lessons", source = "lessons")
     ChapterDto toDto(Chapter c);
 
     @Mapping(target = "id", ignore = true)

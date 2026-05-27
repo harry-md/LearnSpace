@@ -13,9 +13,13 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(
         componentModel = "spring",
-        uses = {UserMapper.class, CategoryMapper.class})
+        uses = {UserMapper.class, CategoryMapper.class, ChapterMapper.class})
 public interface CourseMapper {
 
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "teacher", source = "teacher")
+    @Mapping(target = "avgRating", ignore = true)
+    @Mapping(target = "enrollmentCount", ignore = true)
     CourseListDto toListDto(Course course);
 
     @Mapping(target = "category", source = "category")
@@ -25,6 +29,9 @@ public interface CourseMapper {
     @Mapping(target = "introVideo", source = "introVideo")
     @Mapping(target = "introVideoFile", ignore = true)
     @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "avgRating", ignore = true)
+    @Mapping(target = "enrollmentCount", ignore = true)
+    @Mapping(target = "chapters", source = "chapters")
     CourseDto toDto(Course course);
 
     @Mapping(target = "id", ignore = true)

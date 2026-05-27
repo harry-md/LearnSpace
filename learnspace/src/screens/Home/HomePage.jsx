@@ -43,21 +43,21 @@ const HomePage = () => {
         <SectionContainer className="justify-between flex-wrap gap-y-6">
           <div className="flex items-center gap-5">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-tr from-purple-600 to-blue-500 text-white flex items-center justify-center text-3xl font-bold shadow-md shrink-0">
-              {user.avatar ? (
+              {user?.avatar ? (
                 <img
-                  src={user.avatar}
+                  src={user?.avatar}
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />
-              ) : user.firstName ? (
-                user.firstName.charAt(0).toUpperCase()
+              ) : user?.firstName ? (
+                user?.firstName.charAt(0).toUpperCase()
               ) : (
                 "U"
               )}
             </div>
             <div>
               <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
-                Chào mừng {user.firstName} {user.lastName}!
+                Chào mừng {user?.firstName} {user?.lastName}!
               </h2>
               <p className="text-sm text-gray-500 mt-1 font-medium">
                 Chúc bạn một ngày học tập hiệu quả! Tiếp tục chinh phục kiến
@@ -67,35 +67,35 @@ const HomePage = () => {
           </div>
           <div className="flex flex-col items-end text-right border-l border-gray-200 pl-6 hidden sm:flex shrink-0">
             <div className="flex items-center gap-1.5 mb-1.5">
-              {user.verified && (
+              {user?.verified && (
                 <span className="text-[9px] font-extrabold text-white bg-blue-500 px-1.5 py-0.5 rounded-full uppercase shrink-0">
                   Đã xác minh
                 </span>
               )}
               <span
                 className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md border shrink-0 ${
-                  user.role === "STUDENT"
+                  user?.role === "STUDENT"
                     ? "text-purple-600 bg-purple-50 border-purple-100"
-                    : user.role === "TEACHER"
+                    : user?.role === "TEACHER"
                       ? "text-blue-600 bg-blue-50 border-blue-100"
                       : "text-amber-600 bg-amber-50 border-amber-100"
                 }`}
               >
-                {user.role === "STUDENT"
+                {user?.role === "STUDENT"
                   ? "Học viên"
-                  : user.role === "TEACHER"
+                  : user?.role === "TEACHER"
                     ? "Giảng viên"
                     : "Quản trị"}
               </span>
             </div>
             <div className="text-xs font-bold text-gray-750 mb-0.5">
-              {user.email}
+              {user?.email}
             </div>
-            {user.createdAt && (
+            {user?.createdAt && (
               <div className="text-[11px] text-gray-400 font-semibold">
                 Thành viên từ:{" "}
                 {(() => {
-                  const date = new Date(user.createdAt);
+                  const date = new Date(user?.createdAt);
                   return `${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
                 })()}
               </div>
