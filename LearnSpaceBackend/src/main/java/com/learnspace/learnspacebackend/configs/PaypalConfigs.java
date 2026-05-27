@@ -10,6 +10,7 @@ import com.learnspace.learnspacebackend.dtos.payment.PaypalWebhookEventDto;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
@@ -78,7 +79,8 @@ public class PaypalConfigs {
         }
     }
 
-    public String getAccessToken() {
+    @Cacheable(value = "paypalAccessTokenCache", key = "'paypalAccessToken'")
+    private String getAccessToken() {
         String credentials = clientId + ":" + clientSecret;
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
 
@@ -94,7 +96,23 @@ public class PaypalConfigs {
         if (response == null || response.accessToken() == null) {
             throw new RuntimeException("Không lấy được access token của PayPal");
         }
-        return response.accessToken();
+
+        String accessToken = response.accessToken();
+        return accessToken;
+    }
+
+    private synchronized BigDecimal getConversionRate() {
+        ExchangeRateResponseDto response = RestClient.create()
+                .get()
+                .uri("https://v6.exchangerate-api.com/v6/" + exchangeRateApiKey + "/pair/VND/USD")
+                .retrieve()
+                .body(ExchangeRateResponseDto.class);
+
+        if (response == null || !response.isSuccess()) {
+            throw new RuntimeException("Lỗi chuyển đổi đơn vị tiền tệ");
+        }
+
+        return response.conversionRate();
     }
 
     public PaypalOrderResponseDto createOrder(BigDecimal usdAmount, String description) {
@@ -108,7 +126,7 @@ public class PaypalConfigs {
                 new PaypalOrderRequestDto.ApplicationContextDto(
                         returnUrl, cancelUrl, "PAY_NOW", "LearnSpace"));
 
-        PaypalOrderResponseDto response = RestClient.create()
+        PaypalOrderResponseDto orderResponse = RestClient.create()
                 .post()
                 .uri(baseUrl + "/v2/checkout/orders")
                 .header("Authorization", "Bearer " + accessToken)
@@ -117,16 +135,16 @@ public class PaypalConfigs {
                 .retrieve()
                 .body(PaypalOrderResponseDto.class);
 
-        if (response == null || response.id() == null) {
+        if (orderResponse == null || orderResponse.id() == null) {
             throw new RuntimeException("Lỗi tạo PayPal order");
         }
-        return response;
+        return orderResponse;
     }
 
     public PaypalOrderResponseDto captureOrder(String paypalOrderId) {
         String accessToken = getAccessToken();
 
-        PaypalOrderResponseDto response = RestClient.create()
+        PaypalOrderResponseDto captureResponse = RestClient.create()
                 .post()
                 .uri(baseUrl + "/v2/checkout/orders/" + paypalOrderId + "/capture")
                 .header("Authorization", "Bearer " + accessToken)
@@ -134,13 +152,13 @@ public class PaypalConfigs {
                 .retrieve()
                 .body(PaypalOrderResponseDto.class);
 
-        if (response == null) {
+        if (captureResponse == null) {
             throw new RuntimeException("Lỗi capture PayPal order");
         }
-        return response;
+        return captureResponse;
     }
 
-    public boolean verifyWebhookSignature(String payload, Map<String, String> headers) {
+    public boolean verifyPaypalWebhook(String payload, Map<String, String> headers) {
         String accessToken = getAccessToken();
 
         try {
@@ -178,15 +196,7 @@ public class PaypalConfigs {
     }
 
     public BigDecimal convertVndToUsd(BigDecimal vndAmount) {
-        ExchangeRateResponseDto response = RestClient.create()
-                .get()
-                .uri("https://v6.exchangerate-api.com/v6/" + exchangeRateApiKey + "/pair/VND/USD")
-                .retrieve()
-                .body(ExchangeRateResponseDto.class);
-
-        if (response == null || !response.isSuccess()) {
-            throw new RuntimeException("Lỗi chuyển đổi đơn vị tiền tệ");
-        }
-        return vndAmount.multiply(response.conversionRate()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal rate = getConversionRate();
+        return vndAmount.multiply(rate).setScale(2, RoundingMode.HALF_UP);
     }
 }

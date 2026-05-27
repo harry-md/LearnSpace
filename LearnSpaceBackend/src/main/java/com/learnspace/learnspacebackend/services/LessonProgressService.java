@@ -5,7 +5,7 @@ import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 
 public interface LessonProgressService {
 
-    LessonProgressDto getLessonProgress(int courseId);
+    LessonProgressDto getLessonProgress(int lessonId);
 
     LessonProgressDto addLessonProgress(int lessonId, LessonProgressDto lessonProgressDto);
 

@@ -16,9 +16,9 @@ public class ApiLessonProgressController {
     @Autowired
     private LessonProgressService lessonProgressService;
 
-    @GetMapping("/lesson-progress/{progressId}")
-    public ResponseEntity<LessonProgressDto> retrieve(@PathVariable("progressId") int progressId) {
-        return ResponseEntity.ok(lessonProgressService.getLessonProgress(progressId));
+    @GetMapping("/lessons/{lessonId}/lesson-progress")
+    public ResponseEntity<LessonProgressDto> retrieve(@PathVariable("lessonId") int lessonId) {
+        return ResponseEntity.ok(lessonProgressService.getLessonProgress(lessonId));
     }
 
     @PostMapping("/lessons/{lessonId}/lesson-progress")

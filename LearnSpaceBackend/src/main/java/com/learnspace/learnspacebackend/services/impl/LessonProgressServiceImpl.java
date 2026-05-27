@@ -40,9 +40,9 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     }
 
     @Override
-    public LessonProgressDto getLessonProgress(int progressId) {
-
-        LessonProgress lessonProgress = lessonProgressRepository.getLessonProgressById(progressId);
+    public LessonProgressDto getLessonProgress(int lessonId) {
+        LessonProgress lessonProgress =
+                lessonProgressRepository.getLessonProgressByLesson(lessonId);
         if (lessonProgress == null) {
             throw new ResourceNotFoundException("Không tìm thấy tiến độ học tập");
         }
