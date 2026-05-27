@@ -12,6 +12,8 @@ public record PaypalOrderResponseDto(
         List<PaypalLinkDto> links,
         @JsonProperty("purchase_units") List<PurchaseUnitResponse> purchaseUnits) {
 
+    public record PaypalLinkDto(String href, String rel, String method) {}
+
     public String approvalUrl() {
         return links.stream()
                 .filter(link -> "approve".equals(link.rel()))

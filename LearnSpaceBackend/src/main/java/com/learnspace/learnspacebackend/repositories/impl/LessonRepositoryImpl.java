@@ -28,7 +28,9 @@ public class LessonRepositoryImpl implements LessonRepository {
     @Override
     public List<Lesson> getLessons(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery("FROM Lesson l WHERE l.chapter.id = :chapterId ORDER BY l.order", Lesson.class)
+        return session.createQuery(
+                        "FROM Lesson l WHERE l.chapter.id = :chapterId ORDER BY l.order",
+                        Lesson.class)
                 .setParameter("chapterId", chapterId)
                 .getResultList();
     }
@@ -48,7 +50,6 @@ public class LessonRepositoryImpl implements LessonRepository {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Lesson> q = builder.createQuery(Lesson.class);
-
         Root<Lesson> root = q.from(Lesson.class);
 
         Fetch<Lesson, Chapter> chapterFetch = root.fetch("chapter", JoinType.INNER);
@@ -71,7 +72,9 @@ public class LessonRepositoryImpl implements LessonRepository {
     @Override
     public List<String> getVideoUrlsByChapterId(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery("SELECT l.video FROM Lesson l WHERE l.chapter.id = :chapterId", String.class)
+        return session.createQuery(
+                        "SELECT l.video FROM Lesson l WHERE l.chapter.id = :chapterId",
+                        String.class)
                 .setParameter("chapterId", chapterId)
                 .getResultList();
     }
@@ -80,7 +83,8 @@ public class LessonRepositoryImpl implements LessonRepository {
     public List<String> getVideoUrlsByCourseId(int courseId) {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery(
-                        "SELECT l.video FROM Lesson l JOIN l.chapter c WHERE c.course.id =" + " :courseId",
+                        "SELECT l.video FROM Lesson l JOIN l.chapter c WHERE c.course.id ="
+                                + " :courseId",
                         String.class)
                 .setParameter("courseId", courseId)
                 .getResultList();

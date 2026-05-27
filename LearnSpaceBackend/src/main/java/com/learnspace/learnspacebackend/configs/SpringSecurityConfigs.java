@@ -78,18 +78,18 @@ public class SpringSecurityConfigs {
 
     @Bean
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(c -> c.disable())
-                .authorizeHttpRequests(requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
-                        .permitAll()
-                        .requestMatchers("/login")
-                        .permitAll()
-                        .requestMatchers("/register")
-                        .hasRole(UserRole.ADMIN.name())
-                        .requestMatchers("/")
-                        .hasRole(UserRole.ADMIN.name())
-                        .anyRequest()
-                        .authenticated())
+        http.cors(cors -> cors.configurationSource(webCorsConfigurationSource()))
+                .authorizeHttpRequests(
+                        requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
+                                .permitAll()
+                                .requestMatchers("/login")
+                                .permitAll()
+                                .requestMatchers("/register")
+                                .hasRole(UserRole.ADMIN.name())
+                                .requestMatchers("/")
+                                .hasRole(UserRole.ADMIN.name())
+                                .anyRequest()
+                                .authenticated())
                 .formLogin(form -> form.loginPage("/login")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
@@ -100,7 +100,7 @@ public class SpringSecurityConfigs {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource webCorsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of("https://dreaded-chain-securely.ngrok-free.dev"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

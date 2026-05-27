@@ -16,7 +16,6 @@ import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -48,12 +47,12 @@ public class PaypalConfigs {
     private ObjectMapper objectMapper;
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record AccessTokenResponse(
+    private record PaypalAccessTokenResponse(
             @JsonProperty("access_token") String accessToken,
             @JsonProperty("expires_in") Integer expiresIn) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private record ExchangeRateResponse(
+    private record ExchangeRateResponseDto(
             String result, @JsonProperty("conversion_rate") BigDecimal conversionRate) {
 
         boolean isSuccess() {
@@ -81,17 +80,16 @@ public class PaypalConfigs {
 
     public String getAccessToken() {
         String credentials = clientId + ":" + clientSecret;
-        String encoded =
-                Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+        String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
 
-        AccessTokenResponse response = RestClient.create()
+        PaypalAccessTokenResponse response = RestClient.create()
                 .post()
                 .uri(baseUrl + "/v1/oauth2/token")
                 .header("Authorization", "Basic " + encoded)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body("grant_type=client_credentials")
                 .retrieve()
-                .body(AccessTokenResponse.class);
+                .body(PaypalAccessTokenResponse.class);
 
         if (response == null || response.accessToken() == null) {
             throw new RuntimeException("Không lấy được access token của PayPal");
@@ -105,9 +103,9 @@ public class PaypalConfigs {
 
         PaypalOrderRequestDto request = new PaypalOrderRequestDto(
                 "CAPTURE",
-                List.of(new PaypalOrderRequestDto.PurchaseUnit(
-                        new PaypalOrderRequestDto.Amount("USD", usdValue), description)),
-                new PaypalOrderRequestDto.ApplicationContext(
+                List.of(new PaypalOrderRequestDto.PurchaseUnitDto(
+                        new PaypalOrderRequestDto.AmountDto("USD", usdValue), description)),
+                new PaypalOrderRequestDto.ApplicationContextDto(
                         returnUrl, cancelUrl, "PAY_NOW", "LearnSpace"));
 
         PaypalOrderResponseDto response = RestClient.create()
@@ -180,11 +178,11 @@ public class PaypalConfigs {
     }
 
     public BigDecimal convertVndToUsd(BigDecimal vndAmount) {
-        ExchangeRateResponse response = RestClient.create()
+        ExchangeRateResponseDto response = RestClient.create()
                 .get()
                 .uri("https://v6.exchangerate-api.com/v6/" + exchangeRateApiKey + "/pair/VND/USD")
                 .retrieve()
-                .body(ExchangeRateResponse.class);
+                .body(ExchangeRateResponseDto.class);
 
         if (response == null || !response.isSuccess()) {
             throw new RuntimeException("Lỗi chuyển đổi đơn vị tiền tệ");

@@ -6,14 +6,14 @@ import java.util.List;
 
 public record PaypalOrderRequestDto(
         String intent,
-        @JsonProperty("purchase_units") List<PurchaseUnit> purchaseUnits,
-        @JsonProperty("application_context") ApplicationContext applicationContext) {
+        @JsonProperty("purchase_units") List<PurchaseUnitDto> purchaseUnitDtos,
+        @JsonProperty("application_context") ApplicationContextDto applicationContextDto) {
 
-    public record Amount(@JsonProperty("currency_code") String currencyCode, String value) {}
+    public record AmountDto(@JsonProperty("currency_code") String currencyCode, String value) {}
 
-    public record PurchaseUnit(Amount amount, String description) {}
+    public record PurchaseUnitDto(AmountDto amountDto, String description) {}
 
-    public record ApplicationContext(
+    public record ApplicationContextDto(
             @JsonProperty("return_url") String returnUrl,
             @JsonProperty("cancel_url") String cancelUrl,
             @JsonProperty("user_action") String userAction,
