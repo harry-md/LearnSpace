@@ -9,20 +9,35 @@ import ProfilePage from "./screens/Profile/ProfilePage";
 import CourseDetailPage from "./screens/CourseDetail/CourseDetailPage";
 import TeacherDashboard from "./screens/Teacher/TeacherDashboard";
 import MainLayout from "./components/Layout/MainLayout";
-import { UserContext } from "./configs/Context";
+import { UserContext, UIContext } from "./configs/Context";
 import { useReducer } from "react";
 import UserReducer from "./reducers/UserReducer";
+import UIReducer, { initialUIState } from "./reducers/UIReducer";
 import cookies from "react-cookies";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import GlobalLoading from "./components/GlobalLoading/GlobalLoading";
+import GlobalDialog from "./components/GlobalDialog/GlobalDialog";
 
 function App() {
   const [user, dispatch] = useReducer(
     UserReducer,
     cookies.load("user") || null,
   );
+  const [uiState, uiDispatch] = useReducer(UIReducer, initialUIState);
+
   return (
-    <UserContext.Provider value={[user, dispatch]}>
-      <BrowserRouter>
+    <UIContext.Provider value={[uiState, uiDispatch]}>
+      <UserContext.Provider value={[user, dispatch]}>
+        <GlobalLoading show={uiState.loading} />
+        <GlobalDialog
+          show={uiState.dialog.show}
+          title={uiState.dialog.title}
+          message={uiState.dialog.message}
+          type={uiState.dialog.type}
+          onConfirm={uiState.dialog.onConfirm}
+          onClose={() => uiDispatch({ type: "HIDE_DIALOG" })}
+        />
+        <BrowserRouter>
         <Routes>
           {/* Routes without shared Header/Footer */}
           <Route path="/login" element={<Login />} />
@@ -63,6 +78,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </UserContext.Provider>
+  </UIContext.Provider>
   );
 }
 

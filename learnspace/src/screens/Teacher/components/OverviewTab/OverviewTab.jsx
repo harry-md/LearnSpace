@@ -90,7 +90,7 @@ const OverviewTab = ({ onManageCourse }) => {
               key={course.id}
               className="course-row-item"
               style={{ borderBottom: "1px solid #f9fafb" }}
-              onClick={() => onManageCourse({ id: 1 })}
+              onClick={() => onManageCourse(course)}
             >
               <img
                 src={

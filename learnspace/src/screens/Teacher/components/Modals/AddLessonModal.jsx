@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { PlusCircle, Video } from "lucide-react";
 import { Modal, Field, inputCls, inputStyle } from "../UIComponent";
+import useTeacherDashBoard from "@/hooks/useTeacherDashBoard";
+import { UIContext } from "@/configs/Context";
 
 const AddLessonModal = ({ open, onClose, onSubmit }) => {
+  const [, uiDispatch] = useContext(UIContext);
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -16,9 +19,38 @@ const AddLessonModal = ({ open, onClose, onSubmit }) => {
   }, [open]);
 
   const handleAdd = () => {
-    if (!form.title.trim()) return;
+    if (!form.title.trim()) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          show: true,
+          title: "Lỗi",
+          message: "Vui lòng nhập tiêu đề bài học.",
+          actions: [
+            {
+              label: "Đóng",
+              onClick: () => uiDispatch({ type: "HIDE_DIALOG" }),
+            },
+          ],
+        },
+      });
+      return;
+    }
     if (!form.videoFile) {
-      alert("Vui lòng chọn file video cho bài học.");
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          show: true,
+          title: "Lỗi",
+          message: "Vui lòng chọn file video cho bài học.",
+          actions: [
+            {
+              label: "Đóng",
+              onClick: () => uiDispatch({ type: "HIDE_DIALOG" }),
+            },
+          ],
+        },
+      });
       return;
     }
     onSubmit(form); // gửi toàn bộ form lên hook xử lý

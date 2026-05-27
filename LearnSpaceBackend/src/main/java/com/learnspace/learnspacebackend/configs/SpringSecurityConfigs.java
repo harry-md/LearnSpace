@@ -66,8 +66,7 @@ public class SpringSecurityConfigs {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider =
-                new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }
@@ -133,8 +132,7 @@ public class SpringSecurityConfigs {
         String secretKey = env.getProperty("r2.secret_key");
         return S3Client.builder()
                 .endpointOverride(URI.create("https://" + accountId + ".r2.cloudflarestorage.com"))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
                 .region(Region.of("auto"))
                 .serviceConfiguration(
                         S3Configuration.builder().chunkedEncodingEnabled(false).build())

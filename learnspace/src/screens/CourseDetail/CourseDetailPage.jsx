@@ -16,45 +16,64 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
-import { UserContext } from "@/configs/Context";
-import ProtectLessonDisplay from "./ProtectLessonDisplay";
+import { UIContext, UserContext } from "@/configs/Context";
+import ProtectLessonDisplay from "./ProtectLessonDisplay/ProtectLessonDisplay";
+import useLessonProcess from "@/hooks/useLessonProcess";
 
 const CourseDetailPage = () => {
   const { id } = useParams();
   const [user] = useContext(UserContext);
+  const { lessonProgress, getLessonProgress } = useLessonProcess();
 
   const [courseDetails, setCourseDetails] = useState({ chapters: [] });
-  const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState(null);
   const [showLessonModal, setShowLessonModal] = useState(false);
+  const [, uiDispatch] = useContext(UIContext);
 
   const loadCourseDetails = async () => {
-    setLoading(true);
-    setNotFound(false);
+    uiDispatch({ type: "SHOW_LOADING" });
     try {
       const res = await Apis.get(`${endpoints.courses}/${id}`);
       if (res.data && res.data.id) {
         const course = res.data;
 
-        // 1. Fetch chapters
         const chapterRes = await Apis.get(endpoints.course_chapter(id));
         const chaptersList = chapterRes.data || [];
 
-        // 2. Fetch lessons for each chapter in parallel
         const chaptersWithLessons = await Promise.all(
           chaptersList.map(async (chapter) => {
             try {
               const lessonRes = await Apis.get(
                 endpoints.chapter_lesson(chapter.id),
               );
-              return { ...chapter, lessons: lessonRes.data || [] };
-            } catch (err) {
-              console.error(
-                `Lỗi khi tải bài học của chapter ${chapter.id}:`,
-                err,
+              const lessons = lessonRes.data || [];
+              const lessonsWithProgress = await Promise.all(
+                lessons.map(async (lesson) => {
+                  if (user && user.token) {
+                    try {
+                      const progress = await getLessonProgress(lesson.id);
+                      return { ...lesson, progress };
+                    } catch (e) {
+                      return { ...lesson, progress: null };
+                    }
+                  }
+                  return { ...lesson, progress: null };
+                }),
               );
+              return { ...chapter, lessons: lessonsWithProgress };
+            } catch (err) {
+              uiDispatch({
+                type: "SHOW_DIALOG",
+                payload: {
+                  title: "Lỗi",
+                  message:
+                    err.response?.data?.message ||
+                    `Lỗi khi tải bài học của chương ${chapter.id}`,
+                  type: "error",
+                },
+              });
               return { ...chapter, lessons: [] };
             }
           }),
@@ -62,10 +81,6 @@ const CourseDetailPage = () => {
 
         // 3. Set courseDetails with nested chapters and lessons
         setCourseDetails({
-          ...course,
-          chapters: chaptersWithLessons,
-        });
-        console.log({
           ...course,
           chapters: chaptersWithLessons,
         });
@@ -77,7 +92,7 @@ const CourseDetailPage = () => {
               endpoints.enrolled_courses,
             );
             const enrolledList = enrollRes.data;
-            const enrolled = enrolledList.some((c) => c.courseId == id);
+            const enrolled = enrolledList.some((c) => c.id == id);
             setIsEnrolled(enrolled);
           } catch (enrollErr) {
             console.error("Lỗi khi check enroll:", enrollErr);
@@ -90,24 +105,24 @@ const CourseDetailPage = () => {
         setNotFound(true);
       }
     } catch (error) {
-      console.error("Lỗi khi load chi tiết khóa học:", error);
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message:
+            error.response?.data?.message || "Lỗi khi tải chi tiết khóa học",
+          type: "error",
+        },
+      });
       setNotFound(true);
     } finally {
-      setLoading(false);
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 
   useEffect(() => {
     loadCourseDetails();
   }, [id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#5624d0]"></div>
-      </div>
-    );
-  }
 
   if (notFound) {
     return (
@@ -224,10 +239,10 @@ const CourseDetailPage = () => {
 
               <div className="relative rounded-xl overflow-hidden shadow-lg aspect-video bg-black border border-gray-200">
                 <video
-                  src="https://www.w3schools.com/html/mov_bbb.mp4"
+                  src={courseDetails.introVideo}
                   controls
                   className="w-full h-full object-cover"
-                  poster="https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg"
+                  poster={courseDetails.image}
                 />
               </div>
             </section>
@@ -277,9 +292,16 @@ const CourseDetailPage = () => {
                               setSelectedLessonId(lesson.id);
                               setShowLessonModal(true);
                             } else {
-                              alert(
-                                "Vui lòng đăng ký khóa học để xem nội dung bài giảng!",
-                              );
+                              uiDispatch({
+                                type: "SHOW_DIALOG",
+                                payload: {
+                                  show: true,
+                                  title: "Thông báo",
+                                  message:
+                                    "Bạn cần phải đăng ký khoá học để xem nội dung chi tiết của khoá học",
+                                  type: "warning",
+                                },
+                              });
                             }
                           }}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors cursor-pointer group/lesson"
@@ -298,6 +320,22 @@ const CourseDetailPage = () => {
                               {String(lesson.videoLength % 60).padStart(2, "0")}
                             </span>
                           ) : null}
+
+                          {lesson.progress.completed ? (
+                            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                              Hoàn thành
+                            </span>
+                          ) : (
+                            <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 shrink-0">
+                              Hoàn thành{" "}
+                              {Math.round(
+                                (lesson.progress.watchedSec /
+                                  lesson.videoLength) *
+                                  100,
+                              )}
+                              %
+                            </span>
+                          )}
                         </div>
                       ))
                     ) : (
@@ -648,7 +686,10 @@ const CourseDetailPage = () => {
       <ProtectLessonDisplay
         isShow={showLessonModal}
         lessonId={selectedLessonId}
-        onClose={() => setShowLessonModal(false)}
+        onClose={() => {
+          setShowLessonModal(false);
+          loadCourseDetails();
+        }}
       />
 
       <style>{`

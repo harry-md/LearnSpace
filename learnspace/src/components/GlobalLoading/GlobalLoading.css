@@ -1,0 +1,72 @@
+/* From Uiverse.io by Cksunandh */
+
+.global-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 10, 30, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  animation: gl-fade-in 0.2s ease;
+}
+
+@keyframes gl-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cssloader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.triangle1 {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 50px 50px 0 0;
+  border-color: #5624d0 transparent transparent transparent;
+  margin: 0 auto;
+  animation: shk1 1s ease-in-out infinite normal;
+}
+
+.triangle2 {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 50px 50px;
+  border-color: transparent transparent #a855f7aa transparent;
+  margin: -50px auto 0;
+  animation: shk2 1s ease-in-out infinite alternate;
+}
+@keyframes shk1 {
+  0% {
+    transform: rotate(-360deg);
+  }
+
+  100% {
+  }
+}
+
+@keyframes shk2 {
+  0% {
+    transform: rotate(360deg);
+  }
+  100% {
+  }
+}
+
+.text {
+  color: rgba(255, 255, 255, 0.75);
+  margin: 30px auto;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 4px;
+}

@@ -1,0 +1,86 @@
+.global-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.global-dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.global-dialog-container {
+  position: relative;
+  background: white;
+  border-radius: 1.25rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 28rem;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  text-align: center;
+}
+
+.global-dialog-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.global-dialog-title {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1c1d1f;
+}
+
+.global-dialog-message {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.global-dialog-actions {
+  display: flex;
+  width: 100%;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.global-dialog-btn-cancel {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  color: #4b5563;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.global-dialog-btn-confirm {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
