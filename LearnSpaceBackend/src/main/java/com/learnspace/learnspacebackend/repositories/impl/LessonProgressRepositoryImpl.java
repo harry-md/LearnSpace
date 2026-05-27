@@ -1,6 +1,5 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
-import com.learnspace.learnspacebackend.pojo.Lesson;
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 
@@ -21,7 +20,7 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
     private LocalSessionFactoryBean factory;
 
     @Override
-    public LessonProgress getLessonProgressById(int progressId) {
+    public LessonProgress getLessonProgressByLesson(int lessonId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<LessonProgress> q = builder.createQuery(LessonProgress.class);
@@ -30,7 +29,7 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
         root.fetch("lesson");
         root.fetch("enrollment").fetch("student");
 
-        q.select(root).where(builder.equal(root.get("id"), progressId));
+        q.select(root).where(builder.equal(root.get("lesson").get("id"), lessonId));
         return session.createQuery(q).getSingleResultOrNull();
     }
 

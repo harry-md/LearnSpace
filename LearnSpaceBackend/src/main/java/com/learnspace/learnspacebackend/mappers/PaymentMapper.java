@@ -4,9 +4,13 @@ import com.learnspace.learnspacebackend.dtos.payment.PaymentDto;
 import com.learnspace.learnspacebackend.pojo.Payment;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface PaymentMapper {
+
+    @Mapping(target = "enrollmentId", source = "enrollment.id")
+    @Mapping(target = "approvalUrl", ignore = true)
     PaymentDto toDto(Payment payment);
 
     Payment toEntity(PaymentDto paymentDto);
