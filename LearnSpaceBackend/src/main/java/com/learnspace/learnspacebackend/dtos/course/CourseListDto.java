@@ -1,4 +1,4 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.course;
 
 import java.math.BigDecimal;
 

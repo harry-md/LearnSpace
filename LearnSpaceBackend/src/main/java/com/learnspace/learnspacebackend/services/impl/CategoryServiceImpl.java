@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.services.impl;
 
-import com.learnspace.learnspacebackend.pojo.Category;
+import com.learnspace.learnspacebackend.dtos.category.CategoryDto;
+import com.learnspace.learnspacebackend.mappers.CategoryMapper;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.services.CategoryService;
 
@@ -15,23 +16,27 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private CategoryMapper categoryMapper;
+
     @Override
-    public List<Category> getCategories() {
-        return categoryRepository.getCates();
+    public List<CategoryDto> getCategories() {
+        return categoryRepository.getCates().stream().map(categoryMapper::toDto).toList();
     }
 
     @Override
-    public Category getCategory(int id) {
-        return categoryRepository.getCateById(id);
+    public CategoryDto getCategory(int cateId) {
+        return categoryMapper.toDto(categoryRepository.getCateById(cateId));
     }
 
     @Override
-    public Category createOrUpdate(Category category) {
-        return categoryRepository.createOrUpdate(category);
+    public CategoryDto createOrUpdate(CategoryDto categoryDto) {
+        return categoryMapper.toDto(
+                categoryRepository.createOrUpdate(categoryMapper.toEntity(categoryDto)));
     }
 
     @Override
-    public void deleteCate(int id) {
-        categoryRepository.deleteCate(id);
+    public void deleteCate(int cateId) {
+        categoryRepository.deleteCate(cateId);
     }
 }

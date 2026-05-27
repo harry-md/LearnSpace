@@ -105,4 +105,15 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
             session.remove(enrollment);
         }
     }
+
+    @Override
+    public Enrollment getEnrollmentByIdAllStatus(int enrollmentId) {
+        Session session = factory.getObject().getCurrentSession();
+        return session.createQuery(
+                        "FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.course"
+                                + " WHERE e.id = :id",
+                        Enrollment.class)
+                .setParameter("id", enrollmentId)
+                .getSingleResultOrNull();
+    }
 }

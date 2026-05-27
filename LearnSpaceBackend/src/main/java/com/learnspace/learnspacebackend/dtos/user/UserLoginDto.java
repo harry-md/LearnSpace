@@ -1,4 +1,4 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

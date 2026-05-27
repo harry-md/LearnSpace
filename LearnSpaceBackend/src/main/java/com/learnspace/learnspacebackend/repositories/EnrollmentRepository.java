@@ -17,4 +17,6 @@ public interface EnrollmentRepository {
     Enrollment getEnrollmentByStudentAndCourse(int studentId, int courseId);
 
     List<Enrollment> getEnrollmentsByStudentId(int studentId);
+
+    Enrollment getEnrollmentByIdAllStatus(int enrollmentId);
 }

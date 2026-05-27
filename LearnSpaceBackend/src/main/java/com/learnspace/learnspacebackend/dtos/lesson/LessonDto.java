@@ -1,4 +1,4 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.lesson;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;

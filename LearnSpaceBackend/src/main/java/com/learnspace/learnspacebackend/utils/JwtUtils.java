@@ -10,19 +10,19 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 @Component
 public class JwtUtils {
-    private static String SECRET;
-    private static final long EXPIRATION_MS = 86400000;
+    @Value("${jwt.secret}")
+    private String SECRET;
 
-    public static String generateToken(Integer userId, String username, UserRole role)
-            throws Exception {
+    private final long EXPIRATION_MS = 86400000;
+
+    public String generateToken(Integer userId, String username, UserRole role) throws Exception {
         JWSSigner signer = new MACSigner(SECRET);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -40,7 +40,7 @@ public class JwtUtils {
         return signedJWT.serialize();
     }
 
-    private static JWTClaimsSet validateToken(String token) throws Exception {
+    private JWTClaimsSet validateToken(String token) throws Exception {
         SignedJWT signedJWT = SignedJWT.parse(token);
         JWSVerifier verifier = new MACVerifier(SECRET);
 
@@ -53,7 +53,7 @@ public class JwtUtils {
         return null;
     }
 
-    public static String validateTokenAndGetUsername(String token) throws Exception {
+    public String validateTokenAndGetUsername(String token) throws Exception {
         JWTClaimsSet claims = validateToken(token);
         if (claims != null) {
             return claims.getSubject();
@@ -61,7 +61,7 @@ public class JwtUtils {
         return null;
     }
 
-    public static Integer validateTokenAndGetUserId(String token) throws Exception {
+    public Integer validateTokenAndGetUserId(String token) throws Exception {
         JWTClaimsSet claims = validateToken(token);
         if (claims != null && claims.getClaim("userId") != null) {
             return Integer.parseInt(claims.getClaim("userId").toString());
@@ -69,12 +69,7 @@ public class JwtUtils {
         return null;
     }
 
-    public static JWTClaimsSet validateTokenAndGetClaims(String token) throws Exception {
+    public JWTClaimsSet validateTokenAndGetClaims(String token) throws Exception {
         return validateToken(token);
-    }
-
-    @Autowired
-    public void setSecret(Environment env) {
-        JwtUtils.SECRET = env.getProperty("jwt.secret");
     }
 }

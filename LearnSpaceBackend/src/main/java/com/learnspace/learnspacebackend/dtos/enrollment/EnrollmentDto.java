@@ -1,20 +1,16 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.enrollment;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
+
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
 public record EnrollmentDto(
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String studentName,
-
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String courseName,
-
-        @NotNull Integer courseId,
+        @NotNull @JsonProperty(access = Access.WRITE_ONLY) Integer courseId,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         EnrollmentStatus status,

@@ -61,7 +61,7 @@ public class Course {
     @NotNull
     @ColumnDefault("1")
     @Column(name = "active", nullable = false)
-    private boolean active;
+    private boolean active = true;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -70,6 +70,8 @@ public class Course {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Course() {}
 
     public Integer getId() {
         return id;

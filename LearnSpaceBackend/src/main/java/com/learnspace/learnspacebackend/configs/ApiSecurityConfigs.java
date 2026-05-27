@@ -59,10 +59,18 @@ public class ApiSecurityConfigs {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/chapters/*/lessons")
                         .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook")
+                        .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/courses/*/enrollments")
                         .authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/enrollments/*")
                         .authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/enrollments/*/payments")
+                        .authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/*/capture")
+                        .authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/paypal/webhook")
+                        .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/lessons/*")
                         .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/categories")
@@ -91,7 +99,7 @@ public class ApiSecurityConfigs {
                         .hasRole(UserRole.VERIFIED_TEACHER.name())
                         .anyRequest()
                         .authenticated())
-                .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -110,5 +118,10 @@ public class ApiSecurityConfigs {
         source.registerCorsConfiguration("/**", config);
 
         return source;
+    }
+
+    @Bean
+    public JwtFilter jwtFilter() {
+        return new JwtFilter();
     }
 }

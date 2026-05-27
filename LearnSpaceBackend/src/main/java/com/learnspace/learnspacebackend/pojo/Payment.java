@@ -22,28 +22,41 @@ public class Payment {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "student_id", nullable = false)
-    private User student;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "enrollment_id", nullable = false)
+    private Enrollment enrollment;
 
     @NotNull
     @ColumnDefault("0.00")
-    @Column(name = "amount", nullable = false, precision = 19, scale = 2)
-    private BigDecimal amount;
+    @Column(name = "usd_amount", nullable = false, precision = 19, scale = 2)
+    private BigDecimal usdAmount;
+
+    @NotNull
+    @ColumnDefault("0.00")
+    @Column(name = "vnd_amount", nullable = false, precision = 19, scale = 2)
+    private BigDecimal vndAmount;
+
+    @Size(max = 3)
+    @ColumnDefault("'USD'")
+    @Column(name = "currency", length = 10)
+    private String currency = "USD";
+
+    @Size(max = 3)
+    @ColumnDefault("'VND'")
+    @Column(name = "original_currency", length = 10)
+    private String originalCurrency = "VND";
 
     @ColumnDefault("'PENDING'")
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private PaymentStatus status;
 
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "vnp_txn_ref", nullable = false, length = 50)
-    private String vnpTxnRef;
+    @Size(max = 100)
+    @Column(name = "paypal_order_id", length = 100)
+    private String paypalOrderId;
+
+    @Size(max = 100)
+    @Column(name = "paypal_capture_id", length = 100)
+    private String paypalCaptureId;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -53,6 +66,8 @@ public class Payment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public Payment() {}
+
     public Integer getId() {
         return id;
     }
@@ -61,28 +76,44 @@ public class Payment {
         this.id = id;
     }
 
-    public User getStudent() {
-        return student;
+    public Enrollment getEnrollment() {
+        return enrollment;
     }
 
-    public void setStudent(User student) {
-        this.student = student;
+    public void setEnrollment(Enrollment enrollment) {
+        this.enrollment = enrollment;
     }
 
-    public Course getCourse() {
-        return course;
+    public BigDecimal getUsdAmount() {
+        return usdAmount;
     }
 
-    public void setCourse(Course course) {
-        this.course = course;
+    public void setUsdAmount(BigDecimal usdAmount) {
+        this.usdAmount = usdAmount;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public BigDecimal getVndAmount() {
+        return vndAmount;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
+    public void setVndAmount(BigDecimal vndAmount) {
+        this.vndAmount = vndAmount;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getOriginalCurrency() {
+        return originalCurrency;
+    }
+
+    public void setOriginalCurrency(String originalCurrency) {
+        this.originalCurrency = originalCurrency;
     }
 
     public PaymentStatus getStatus() {
@@ -93,12 +124,20 @@ public class Payment {
         this.status = status;
     }
 
-    public String getVnpTxnRef() {
-        return vnpTxnRef;
+    public String getPaypalOrderId() {
+        return paypalOrderId;
     }
 
-    public void setVnpTxnRef(String vnpTxnRef) {
-        this.vnpTxnRef = vnpTxnRef;
+    public void setPaypalOrderId(String paypalOrderId) {
+        this.paypalOrderId = paypalOrderId;
+    }
+
+    public String getPaypalCaptureId() {
+        return paypalCaptureId;
+    }
+
+    public void setPaypalCaptureId(String paypalCaptureId) {
+        this.paypalCaptureId = paypalCaptureId;
     }
 
     public LocalDateTime getCreatedAt() {

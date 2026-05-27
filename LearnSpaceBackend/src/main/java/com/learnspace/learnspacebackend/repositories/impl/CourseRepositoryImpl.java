@@ -12,8 +12,7 @@ import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,14 +24,13 @@ import java.util.Map;
 
 @Repository
 @Transactional
-@PropertySource("classpath:configs.properties")
 public class CourseRepositoryImpl implements CourseRepository {
 
     @Autowired
     private LocalSessionFactoryBean factory;
 
-    @Autowired
-    private Environment env;
+    @Value("${course.pageSize}")
+    private int COURSE_PAGE_SIZE_KEY;
 
     private List<Predicate> filter(
             CriteriaBuilder builder, Root<Course> root, Map<String, String> params) {
@@ -103,7 +101,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         Query query = session.createQuery(q);
         if (params != null && params.containsKey("page")) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
-            int pageSize = env.getProperty("course.pageSize", Integer.class);
+            int pageSize = COURSE_PAGE_SIZE_KEY;
             int start = (page - 1) * pageSize;
             query.setFirstResult(start);
             query.setMaxResults(pageSize);

@@ -1,6 +1,6 @@
 package com.learnspace.learnspacebackend.controllers;
 
-import com.learnspace.learnspacebackend.dtos.EnrollmentDto;
+import com.learnspace.learnspacebackend.dtos.enrollment.EnrollmentDto;
 import com.learnspace.learnspacebackend.services.EnrollmentService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,8 @@ public class ApiEnrollmentController {
     @GetMapping("/enrollments/my-courses")
     public ResponseEntity<List<EnrollmentDto>> getMyEnrollments() {
         return ResponseEntity.ok(enrollmentService.getMyEnrollments());
-        }
+    }
+
     @PostMapping("/courses/{courseId}/enrollments")
     public ResponseEntity<EnrollmentDto> create(@PathVariable("courseId") int courseId) {
         return new ResponseEntity<>(

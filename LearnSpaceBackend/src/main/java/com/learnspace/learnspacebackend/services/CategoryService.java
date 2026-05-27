@@ -1,16 +1,16 @@
 package com.learnspace.learnspacebackend.services;
 
-import com.learnspace.learnspacebackend.pojo.Category;
+import com.learnspace.learnspacebackend.dtos.category.CategoryDto;
 
 import java.util.List;
 
 public interface CategoryService {
 
-    List<Category> getCategories();
+    List<CategoryDto> getCategories();
 
-    Category getCategory(int id);
+    CategoryDto getCategory(int cateId);
 
-    Category createOrUpdate(Category category);
+    CategoryDto createOrUpdate(CategoryDto category);
 
-    void deleteCate(int id);
+    void deleteCate(int cateId);
 }

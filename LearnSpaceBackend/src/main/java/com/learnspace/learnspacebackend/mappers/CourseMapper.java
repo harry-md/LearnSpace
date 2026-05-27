@@ -1,8 +1,8 @@
 package com.learnspace.learnspacebackend.mappers;
 
-import com.learnspace.learnspacebackend.dtos.CourseDto;
-import com.learnspace.learnspacebackend.dtos.CourseListDto;
-import com.learnspace.learnspacebackend.dtos.CoursePatchDto;
+import com.learnspace.learnspacebackend.dtos.course.CourseDto;
+import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
+import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.pojo.Course;
 
 import org.mapstruct.BeanMapping;
@@ -11,13 +11,15 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {UserMapper.class, CategoryMapper.class})
 public interface CourseMapper {
 
     CourseListDto toListDto(Course course);
 
-    @Mapping(target = "categoryName", source = "category.name")
-    @Mapping(target = "teacherName", source = "teacher.fullName")
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "teacher", source = "teacher")
     @Mapping(target = "image", source = "image")
     @Mapping(target = "imageFile", ignore = true)
     @Mapping(target = "introVideo", source = "introVideo")

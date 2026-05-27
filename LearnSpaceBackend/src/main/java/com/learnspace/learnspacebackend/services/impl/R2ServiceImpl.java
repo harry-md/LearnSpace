@@ -6,8 +6,7 @@ import com.drew.metadata.mp4.Mp4Directory;
 import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -26,20 +25,19 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@PropertySource("classpath:env.properties")
 public class R2ServiceImpl implements R2Service {
 
     @Autowired
     private S3Client r2Client;
 
-    @Autowired
-    private Environment env;
+    @Value("${r2.bucket_name}")
+    private String bucketName;
+
+    @Value("${r2.public_url}")
+    private String publicUrl;
 
     @Override
     public String uploadVideo(File video, String contentType, String folder) {
-        String bucketName = env.getProperty("r2.bucket_name");
-        String publicUrl = env.getProperty("r2.public_url");
-
         String originFileName = video.getName();
         String extension = "";
         if (originFileName != null && originFileName.contains(".")) {
@@ -82,9 +80,6 @@ public class R2ServiceImpl implements R2Service {
 
     @Override
     public void deleteVideo(String videoUrl) {
-        String bucketName = env.getProperty("r2.bucket_name");
-        String publicUrl = env.getProperty("r2.public_url");
-
         String key = videoUrl.replace(publicUrl + "/", "");
 
         try {
@@ -99,9 +94,6 @@ public class R2ServiceImpl implements R2Service {
 
     @Override
     public void deleteVideos(List<String> videoUrls) {
-        String bucketName = env.getProperty("r2.bucket_name");
-        String publicUrl = env.getProperty("r2.public_url");
-
         List<ObjectIdentifier> keys = videoUrls.stream()
                 .filter(url -> !url.isBlank())
                 .map(url -> ObjectIdentifier.builder()

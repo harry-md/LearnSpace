@@ -1,11 +1,11 @@
 package com.learnspace.learnspacebackend.services.impl;
 
-import com.learnspace.learnspacebackend.dtos.AdminUserUpdateDto;
-import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
-import com.learnspace.learnspacebackend.dtos.UserLoginDto;
-import com.learnspace.learnspacebackend.dtos.UserProfileDto;
-import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
-import com.learnspace.learnspacebackend.dtos.UserUpdateDto;
+import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
+import com.learnspace.learnspacebackend.dtos.user.AdminUserUpdateDto;
+import com.learnspace.learnspacebackend.dtos.user.UserLoginDto;
+import com.learnspace.learnspacebackend.dtos.user.UserProfileDto;
+import com.learnspace.learnspacebackend.dtos.user.UserRegisterDto;
+import com.learnspace.learnspacebackend.dtos.user.UserUpdateDto;
 import com.learnspace.learnspacebackend.exceptions.DuplicateResourceException;
 import com.learnspace.learnspacebackend.exceptions.InvalidLoginException;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
@@ -41,6 +41,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @Autowired
     private UserMapper userMapper;
@@ -117,7 +120,7 @@ public class UserServiceImpl implements UserService {
                     .orElse("ROLE_STUDENT")
                     .replace("ROLE_", "");
 
-            return JwtUtils.generateToken(
+            return jwtUtils.generateToken(
                     principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
         } catch (AuthenticationException ex) {
             System.err.println(ex.getMessage());

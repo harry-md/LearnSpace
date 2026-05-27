@@ -1,12 +1,9 @@
-package com.learnspace.learnspacebackend.dtos;
+package com.learnspace.learnspacebackend.dtos.user;
 
-import com.drew.lang.annotations.NotNull;
+
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import org.springframework.web.multipart.MultipartFile;
 
