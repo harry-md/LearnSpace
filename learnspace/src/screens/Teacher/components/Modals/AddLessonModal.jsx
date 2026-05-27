@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PlusCircle, Video } from "lucide-react";
 import { Modal, Field, inputCls, inputStyle } from "../UIComponent";
+import useTeacherDashBoard from "@/hooks/useTeacherDashBoard";
 
 const AddLessonModal = ({ open, onClose, onSubmit }) => {
   const [form, setForm] = useState({

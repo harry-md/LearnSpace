@@ -19,7 +19,7 @@ public record ChapterDto(
 
         Boolean free,
 
-        @NotNull @Positive Integer order,
+        @JsonProperty(access = Access.READ_ONLY) Integer order,
 
         @JsonProperty(access = Access.READ_ONLY)
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

@@ -1,13 +1,61 @@
 import { useState, useContext } from "react";
-import { UserContext } from "@/configs/Context";
+import { UIContext, UserContext } from "@/configs/Context";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
 
 const useTeacherDashBoard = () => {
   const [teacherCourses, setTeacherCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [user] = useContext(UserContext);
+  const [_, uiDispatch] = useContext(UIContext);
+
+  const handleCreateLesson = async (chapterId, formData) => {
+    uiDispatch({ type: "SHOW_LOADING" });
+    try {
+      const res = await authApis(user.token).post(
+        endpoints.add_lesson(chapterId),
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      if (res.status === 201) {
+        const newLesson = res.data;
+        setTeacherCourses((prev) =>
+          prev.map((c) => ({
+            ...c,
+            chapters: (c.chapters || []).map((ch) => {
+              if (ch.id === chapterId) {
+                return {
+                  ...ch,
+                  lessons: [...(ch.lessons || []), newLesson],
+                };
+              }
+              return ch;
+            }),
+          })),
+        );
+        console.log("Thêm bài học thành công!");
+        return newLesson;
+      }
+    } catch (err) {
+      uiDispatch({ type: "HIDE_LOADING" });
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || err.message,
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
+  };
 
   const handleCreateChapter = async (courseId, chapterData) => {
+    uiDispatch({ type: "SHOW_LOADING" });
     try {
       const res = await authApis(user.token).post(
         endpoints.add_chapter(courseId),
@@ -34,8 +82,17 @@ const useTeacherDashBoard = () => {
       console.log("Thêm chương mới thành công!");
       return newChapter;
     } catch (err) {
-      console.error("Lỗi API thêm chương:", err.response?.data || err.message);
-      throw err;
+      uiDispatch({ type: "HIDE_LOADING" });
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || err.message,
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 
@@ -158,6 +215,7 @@ const useTeacherDashBoard = () => {
     handleLoadCategories,
     handleDeleteCourse,
     handleCreateChapter,
+    handleCreateLesson,
   };
 };
 

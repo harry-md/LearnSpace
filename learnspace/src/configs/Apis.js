@@ -8,6 +8,7 @@ export const endpoints = {
   chapter_lesson: (chapterId) => `/chapters/${chapterId}/lessons`,
   course_chapter: (courseId) => `/courses/${courseId}/chapters`,
   lessons: "/lessons",
+  add_lesson: (chapterId) => `/chapters/${chapterId}/lessons`,
   register: "/users",
   login: "/login",
   current_user: "/current-user",

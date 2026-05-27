@@ -29,13 +29,14 @@ const ManageCourseTab = ({ course }) => {
     user,
     handleLoadCourseOfTeacher,
     handleCreateChapter,
+    handleCreateLesson,
   } = useTeacherDashBoard();
 
   const [openSections, setOpenSections] = useState({ 1: true });
 
   const [showAddChapter, setShowAddChapter] = useState(false);
   const [showEditChapter, setShowEditChapter] = useState(false);
-  const [showAddLesson, setShowAddLesson] = useState(false);
+  const [showAddLesson, setShowAddLesson] = useState(null);
   const [showEditLesson, setShowEditLesson] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
 
@@ -135,6 +136,30 @@ const ManageCourseTab = ({ course }) => {
       (count, chapter) => count + (chapter?.lessons?.length || 0),
       0,
     ) || 0;
+
+  const submitChapter = async (chapterData) => {
+    await handleCreateChapter(course?.id, {
+      name: chapterData.title,
+      free: false,
+    });
+    setShowAddChapter(false);
+  };
+
+  const submitLesson = async (lessonData) => {
+    if (!showAddLesson) return;
+    const formData = new FormData();
+    formData.append("title", lessonData.title);
+    formData.append("content", lessonData.content || "");
+    if (lessonData.videoFile) {
+      formData.append("videoFile", lessonData.videoFile);
+    }
+    try {
+      await handleCreateLesson(showAddLesson, formData);
+      setShowAddLesson(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     handleLoadCourseOfTeacher();
@@ -272,7 +297,7 @@ const ManageCourseTab = ({ course }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setShowAddLesson(true);
+                      setShowAddLesson(chapter.id);
                     }}
                     className="btn-add-lesson"
                   >
@@ -309,6 +334,7 @@ const ManageCourseTab = ({ course }) => {
                         style={{ cursor: "grab" }}
                         draggable
                         onDragStart={(e) => {
+                          e.stopPropagation();
                           setDraggedLessonInfo({
                             chapterId: chapter.id,
                             index: lessonIdx,
@@ -318,6 +344,7 @@ const ManageCourseTab = ({ course }) => {
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           if (
                             draggedLessonInfo &&
                             draggedLessonInfo.chapterId === chapter.id &&
@@ -371,14 +398,7 @@ const ManageCourseTab = ({ course }) => {
       <AddChapterModal
         open={showAddChapter}
         onClose={() => setShowAddChapter(false)}
-        onSubmit={async (chapterData) => {
-          await handleCreateChapter(course?.id, {
-            name: chapterData.title,
-            order: totalChapters + 1,
-            free: false,
-          });
-          setShowAddChapter(false);
-        }}
+        onSubmit={submitChapter}
         course={course}
       />
 
@@ -390,9 +410,9 @@ const ManageCourseTab = ({ course }) => {
       />
 
       <AddLessonModal
-        open={showAddLesson}
-        onClose={() => setShowAddLesson(false)}
-        onSubmit={() => setShowAddLesson(false)}
+        open={showAddLesson !== null}
+        onClose={() => setShowAddLesson(null)}
+        onSubmit={submitLesson}
       />
 
       <EditLessonModal
