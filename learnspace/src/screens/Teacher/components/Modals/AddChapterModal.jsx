@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FolderPlus } from "lucide-react";
 import { Modal, Field, inputCls, inputStyle } from "../UIComponent";
 
-const AddChapterModal = ({ open, onClose, onSubmit }) => {
+const AddChapterModal = ({ open, onClose, onSubmit, course }) => {
   const [chapterForm, setChapterForm] = useState({
     title: "",
     description: "",

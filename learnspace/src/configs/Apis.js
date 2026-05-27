@@ -4,6 +4,7 @@ export const endpoints = {
   categories: "/categories",
   courses: "/courses",
   chapters: "/chapters",
+  add_chapter: (courseId) => `/courses/${courseId}/chapters`,
   chapter_lesson: (chapterId) => `/chapters/${chapterId}/lessons`,
   course_chapter: (courseId) => `/courses/${courseId}/chapters`,
   lessons: "/lessons",

@@ -2,6 +2,8 @@ package com.learnspace.learnspacebackend.repositories;
 
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 
+import java.util.List;
+
 public interface EnrollmentRepository {
 
     boolean checkValidEnrollment(int studentId, int courseId);

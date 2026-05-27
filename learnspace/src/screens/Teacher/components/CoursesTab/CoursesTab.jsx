@@ -21,10 +21,12 @@ import useTeacherDashBoard from "@/hooks/useTeacherDashBoard";
 const CoursesTab = ({ onManageCourse }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const {
     teacherCourses,
     handleLoadCourseOfTeacher,
-    handleUpdateCourseStatus,
+    handleUpdateCourse,
+    handleDeleteCourse,
   } = useTeacherDashBoard();
 
   const countChap = (course) => course?.chapters?.length || 0;
@@ -83,7 +85,7 @@ const CoursesTab = ({ onManageCourse }) => {
           <tbody>
             {teacherCourses.map((course) => {
               return (
-                <tr className="courses-tr">
+                <tr key={course.id} className="courses-tr">
                   <td className="courses-td">
                     <div className="course-info">
                       <img
@@ -125,7 +127,9 @@ const CoursesTab = ({ onManageCourse }) => {
                       <button
                         className="status-badge active"
                         onClick={() => {
-                          handleUpdateCourseStatus(course.id, false);
+                          const form = new FormData();
+                          form.append("active", false);
+                          handleUpdateCourse(course.id, form);
                         }}
                       >
                         <CheckCircle size={12} />
@@ -135,7 +139,9 @@ const CoursesTab = ({ onManageCourse }) => {
                       <button
                         className="status-badge inactive"
                         onClick={() => {
-                          handleUpdateCourseStatus(course.id, true);
+                          const form = new FormData();
+                          form.append("active", true);
+                          handleUpdateCourse(course.id, form);
                         }}
                       >
                         <Clock size={12} />
@@ -146,21 +152,24 @@ const CoursesTab = ({ onManageCourse }) => {
                   <td className="courses-td">
                     <div className="action-buttons-group">
                       <button
-                        onClick={() => setShowEditModal(true)}
+                        onClick={() => {
+                          setShowEditModal(true);
+                          setSelectedCourse(course);
+                        }}
                         title="Chỉnh sửa thông tin khóa học"
                         className="action-icon-btn edit"
                       >
                         <Pencil size={15} />
                       </button>
                       <button
-                        onClick={() => onManageCourse({ id: 1 })}
+                        onClick={() => onManageCourse(course)}
                         title="Quản lý chương/bài học"
                         className="action-icon-btn manage"
                       >
                         <Layers size={15} />
                       </button>
                       <Link
-                        to="/course/1"
+                        to={`/course/${course.id}`}
                         title="Xem trang chi tiết"
                         className="action-icon-btn view"
                       >
@@ -169,6 +178,7 @@ const CoursesTab = ({ onManageCourse }) => {
                       <button
                         title="Xóa khóa học"
                         className="action-icon-btn delete"
+                        onClick={() => handleDeleteCourse(course.id)}
                       >
                         <Trash2 size={15} />
                       </button>
@@ -189,20 +199,24 @@ const CoursesTab = ({ onManageCourse }) => {
           { id: 1, name: "Lập trình" },
           { id: 2, name: "Thiết kế" },
         ]}
-        user={{}}
-        onSuccess={() => setShowCreateModal(false)}
+        onSuccess={() => {
+          handleLoadCourseOfTeacher();
+          setShowCreateModal(false);
+        }}
       />
 
       <EditCourseModal
         open={showEditModal}
         onClose={() => setShowEditModal(false)}
-        course={{}}
+        course={selectedCourse}
         categories={[
           { id: 1, name: "Lập trình" },
           { id: 2, name: "Thiết kế" },
         ]}
-        user={{}}
-        onSuccess={() => setShowEditModal(false)}
+        onSuccess={() => {
+          handleLoadCourseOfTeacher();
+          setShowEditModal(false);
+        }}
       />
     </div>
   );

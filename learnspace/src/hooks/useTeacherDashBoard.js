@@ -1,20 +1,95 @@
 import { useState, useContext } from "react";
 import { UserContext } from "@/configs/Context";
-import { authApis, endpoints } from "@/configs/Apis";
+import Apis, { authApis, endpoints } from "@/configs/Apis";
 
 const useTeacherDashBoard = () => {
   const [teacherCourses, setTeacherCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [user] = useContext(UserContext);
 
-  const handleUpdateCourseStatus = async (courseId, status) => {
+  const handleCreateChapter = async (courseId, chapterData) => {
     try {
-      await authApis(user.token).patch(`${endpoints.courses}/${courseId}`, {
-        active: status,
-      });
+      const res = await authApis(user.token).post(
+        endpoints.add_chapter(courseId),
+        chapterData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const newChapter = res.data;
+
       setTeacherCourses((prev) =>
-        prev.map((course) =>
-          course.id === courseId ? { ...course, active: status } : course,
-        ),
+        prev.map((c) => {
+          if (c.id === courseId) {
+            return {
+              ...c,
+              chapters: [...(c.chapters || []), { ...newChapter, lessons: [] }],
+            };
+          }
+          return c;
+        }),
+      );
+      console.log("Thêm chương mới thành công!");
+      return newChapter;
+    } catch (err) {
+      console.error("Lỗi API thêm chương:", err.response?.data || err.message);
+      throw err;
+    }
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    try {
+      await authApis(user.token).delete(`${endpoints.courses}/${courseId}`);
+      setTeacherCourses((prev) =>
+        prev.filter((course) => course.id !== courseId),
+      );
+      console.log("Xóa thành công!");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleLoadCategories = () => {
+    try {
+      const res = Apis.get(endpoints.categories);
+      setCategories(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleUpdateCourse = async (courseId, formData) => {
+    try {
+      const res = await authApis(user.token).patch(
+        `${endpoints.courses}/${courseId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      const activeVal = formData.get("active");
+      const updatedData = res.data || {};
+
+      setTeacherCourses((prev) =>
+        prev.map((course) => {
+          if (course.id === courseId) {
+            const nextActive =
+              activeVal !== null
+                ? activeVal === "true" || activeVal === true
+                : course.active;
+            return {
+              ...course,
+              ...updatedData,
+              active: nextActive,
+            };
+          }
+          return course;
+        }),
       );
       console.log("Thay đổi thành công!");
     } catch (err) {
@@ -75,8 +150,14 @@ const useTeacherDashBoard = () => {
 
   return {
     teacherCourses,
+    setTeacherCourses,
+    categories,
+    user,
     handleLoadCourseOfTeacher,
-    handleUpdateCourseStatus,
+    handleUpdateCourse,
+    handleLoadCategories,
+    handleDeleteCourse,
+    handleCreateChapter,
   };
 };
 

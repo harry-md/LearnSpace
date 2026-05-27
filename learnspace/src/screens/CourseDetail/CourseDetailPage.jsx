@@ -224,10 +224,10 @@ const CourseDetailPage = () => {
 
               <div className="relative rounded-xl overflow-hidden shadow-lg aspect-video bg-black border border-gray-200">
                 <video
-                  src="https://www.w3schools.com/html/mov_bbb.mp4"
+                  src={courseDetails.introVideo}
                   controls
                   className="w-full h-full object-cover"
-                  poster="https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg"
+                  poster={courseDetails.image}
                 />
               </div>
             </section>

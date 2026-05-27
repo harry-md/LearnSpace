@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Image, Video, PlusCircle } from "lucide-react";
 import { Modal, Field, inputCls, inputStyle } from "../UIComponent";
 import { authApis, endpoints } from "@/configs/Apis";
-import { toast } from "@heroui/react";
+import { UserContext } from "@/configs/Context";
 
-const CreateCourseModal = ({ open, onClose, categories, user, onSuccess }) => {
+const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
+  const [user] = useContext(UserContext);
   const [courseForm, setCourseForm] = useState({
     name: "",
     description: "",
@@ -24,10 +25,10 @@ const CreateCourseModal = ({ open, onClose, categories, user, onSuccess }) => {
     }
   }, [categories]);
 
-  const handleCreateCourse = () => {
+  const handleCreateCourse = async () => {
     if (!courseForm.name.trim()) return;
 
-    const createPromise = async () => {
+    try {
       const formData = new FormData();
       formData.append("name", courseForm.name);
       formData.append("description", courseForm.description);
@@ -36,10 +37,10 @@ const CreateCourseModal = ({ open, onClose, categories, user, onSuccess }) => {
       formData.append("active", false);
 
       if (courseForm.image) {
-        formData.append("image", courseForm.image);
+        formData.append("imageFile", courseForm.image);
       }
       if (courseForm.introVideo) {
-        formData.append("introVideo", courseForm.introVideo);
+        formData.append("introVideoFile", courseForm.introVideo);
       }
 
       const res = await authApis(user.token).post(endpoints.courses, formData, {
@@ -48,29 +49,22 @@ const CreateCourseModal = ({ open, onClose, categories, user, onSuccess }) => {
         },
       });
 
-      return res.data;
-    };
-
-    toast.promise(createPromise(), {
-      loading: "Đang tạo khóa học...",
-      success: (data) => {
-        onSuccess(data);
-        setCourseForm({
-          name: "",
-          description: "",
-          categoryId: categories[0]?.id || 1,
-          price: "",
-          image: null,
-          introVideo: null,
-        });
-        onClose();
-        return `Khóa học ${data.name || courseForm.name} đã được tạo thành công!`;
-      },
-      error: (err) => {
-        console.error("Lỗi tạo khóa học:", err.message);
-        return `Tạo khóa học thất bại: ${err.response?.data?.message || err.message}`;
-      },
-    });
+      onSuccess(res.data);
+      setCourseForm({
+        name: "",
+        description: "",
+        categoryId: categories[0]?.id || 1,
+        price: "",
+        imageFile: null,
+        introVideoFile: null,
+      });
+      onClose();
+    } catch (err) {
+      console.error("Lỗi tạo khóa học:", err.message);
+      alert(
+        `Tạo khóa học thất bại: ${err.response?.data?.message || err.message}`,
+      );
+    }
   };
 
   return (
@@ -175,7 +169,7 @@ const CreateCourseModal = ({ open, onClose, categories, user, onSuccess }) => {
               accept="image/*"
               style={{ display: "none" }}
               onChange={(e) =>
-                setCourseForm({ ...courseForm, image: e.target.files[0] })
+                setCourseForm({ ...courseForm, imageFile: e.target.files[0] })
               }
             />
             <div
@@ -194,8 +188,8 @@ const CreateCourseModal = ({ open, onClose, categories, user, onSuccess }) => {
             <span
               style={{ fontSize: "12px", color: "#6b7280", fontWeight: 600 }}
             >
-              {courseForm.image
-                ? courseForm.image.name
+              {courseForm.imageFile
+                ? courseForm.imageFile.name
                 : "Click để upload ảnh"}
             </span>
           </label>
@@ -223,7 +217,7 @@ const CreateCourseModal = ({ open, onClose, categories, user, onSuccess }) => {
               onChange={(e) =>
                 setCourseForm({
                   ...courseForm,
-                  introVideo: e.target.files[0],
+                  introVideoFile: e.target.files[0],
                 })
               }
             />
@@ -243,8 +237,8 @@ const CreateCourseModal = ({ open, onClose, categories, user, onSuccess }) => {
             <span
               style={{ fontSize: "12px", color: "#6b7280", fontWeight: 600 }}
             >
-              {courseForm.introVideo
-                ? courseForm.introVideo.name
+              {courseForm.introVideoFile
+                ? courseForm.introVideoFile.name
                 : "Click chọn file .mp4"}
             </span>
           </label>

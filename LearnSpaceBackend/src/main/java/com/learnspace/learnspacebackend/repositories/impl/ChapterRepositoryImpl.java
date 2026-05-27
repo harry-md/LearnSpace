@@ -26,8 +26,7 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     @Override
     public List<Chapter> getChaptersByCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        Query q = session.createQuery(
-                "FROM Chapter c WHERE c.course.id = :courseId ORDER BY c.order", Chapter.class);
+        Query q = session.createQuery("FROM Chapter c WHERE c.course.id = :courseId ORDER BY c.order", Chapter.class);
         q.setParameter("courseId", courseId);
         return q.getResultList();
     }
@@ -78,8 +77,7 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     public Integer getMaxOrder(int courseId) {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery(
-                        "SELECT COALESE(MAX(c.order), 0) FROM Chapter c WHERE c.course.id ="
-                                + " :courseId",
+                        "SELECT COALESCE(MAX(c.order), 0) FROM Chapter c WHERE c.course.id =" + " :courseId",
                         Integer.class)
                 .setParameter("courseId", courseId)
                 .getSingleResult();
