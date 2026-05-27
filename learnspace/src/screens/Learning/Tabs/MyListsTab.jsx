@@ -110,12 +110,12 @@ const MyListsTab = () => {
                 ></div>
               </div>
 
-              <div className="p-5 flex-1 flex flex-col">
-                <h4 className="font-bold text-[15px] text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-3">
+              <div className="p-4 flex-1 flex flex-col">
+                <h4 className="font-bold text-[15px] text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-2">
                   {course.name}
                 </h4>
 
-                <div className="flex items-center gap-2 mb-4 mt-auto">
+                <div className="flex items-center gap-2 mb-3">
                   <img
                     src={
                       course.teacher?.avatar ||
@@ -124,12 +124,17 @@ const MyListsTab = () => {
                     alt="Teacher"
                     className="w-6 h-6 rounded-full object-cover border border-gray-100"
                   />
-                  <p className="text-xs text-gray-600 font-medium line-clamp-1">
-                    {course.teacher?.fullName || "Giảng viên"}
-                  </p>
+                  <div className="flex flex-col">
+                    <p className="text-sm text-gray-600 font-bold line-clamp-1 m-0">
+                      {course.teacher?.fullName || "Giảng viên"}
+                    </p>
+                    <p className="text-xs text-gray-600 font-medium line-clamp-1 m-0">
+                      {course.teacher?.email || "Email"}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-4 pt-4 border-t border-gray-100">
+                <div className="space-y-3 pt-3 mt-auto border-t border-gray-100">
                   <div className="flex justify-between items-center text-xs text-gray-600 font-semibold">
                     <div className="flex items-center gap-1.5">
                       <div

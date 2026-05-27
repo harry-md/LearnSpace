@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Modal, Field, inputCls, inputStyle } from "../UIComponent";
 import { authApis, endpoints } from "@/configs/Apis";
-import { UserContext } from "@/configs/Context";
+import { UIContext, UserContext } from "@/configs/Context";
 
 const EditCourseModal = ({ open, onClose, course, categories, onSuccess }) => {
   const [user] = useContext(UserContext);
+  const [, uiDispatch] = useContext(UIContext);
   const [editCourseForm, setEditCourseForm] = useState({
     name: "",
     description: "",
@@ -73,10 +74,20 @@ const EditCourseModal = ({ open, onClose, course, categories, onSuccess }) => {
       onSuccess(res.data);
       onClose();
     } catch (err) {
-      console.error("Lỗi cập nhật khóa học:", err.message);
-      alert(
-        `Cập nhật khóa học thất bại: ${err.response?.data?.message || err.message}`,
-      );
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          show: true,
+          title: "Lỗi",
+          message: `Cập nhật khóa học thất bại: ${err.response?.data?.message || err.message}`,
+          actions: [
+            {
+              label: "Đóng",
+              onClick: () => uiDispatch({ type: "HIDE_DIALOG" }),
+            },
+          ],
+        },
+      });
     }
   };
 

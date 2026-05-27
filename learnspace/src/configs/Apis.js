@@ -12,8 +12,9 @@ export const endpoints = {
   register: "/users",
   login: "/login",
   current_user: "/current-user",
-  enrolled_courses: "/enrollments/my-courses",
+  enrolled_courses: "/courses/my-courses",
   course_progress: (courseId) => `/courses/${courseId}/progress`,
+  lesson_progress: (lessonId) => `/lessons/${lessonId}/lesson-progress`,
 };
 
 export const authApis = (token) => {

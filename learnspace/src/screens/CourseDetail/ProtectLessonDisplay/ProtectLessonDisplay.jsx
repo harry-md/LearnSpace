@@ -1,26 +1,63 @@
 import { useState, useEffect, useRef, useContext } from "react";
-import { X, Lock, FileText, Clock, BookOpen, ShieldCheck } from "lucide-react";
+import {
+  X,
+  Lock,
+  FileText,
+  Clock,
+  BookOpen,
+  ShieldCheck,
+  MessageSquare,
+  ThumbsUp,
+  MessageCircle,
+  VideoOff,
+} from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
-import { UserContext } from "@/configs/Context";
+import { UserContext, UIContext } from "@/configs/Context";
+import Comments from "./Comments/Comments";
+import useLessonProcess from "@/hooks/useLessonProcess";
 
 const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
   const [user] = useContext(UserContext);
+  const [_, uiDispatch] = useContext(UIContext);
   const [lesson, setLesson] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isBlurred, setIsBlurred] = useState(false);
+
+  const { lessonProgress, getLessonProgress, updateLessonProgress } =
+    useLessonProcess();
 
   const videoRef = useRef(null);
+  const lastTriggeredTime = useRef(0);
+  const hasSeeked = useRef(false);
 
-  // Load lesson details
+  const handleTimeUpdate = (e) => {
+    const currentTime = Math.floor(e.target.currentTime);
+    if (
+      currentTime > 0 &&
+      currentTime % 10 === 0 &&
+      currentTime !== lastTriggeredTime.current
+    ) {
+      lastTriggeredTime.current = currentTime;
+      updateLessonProgress(lessonId, currentTime);
+    }
+  };
+
+  const handleSeeked = async (e) => {
+    const currentTime = e.target.currentTime;
+    await updateLessonProgress(lessonId, currentTime);
+  };
+
+  const handlePause = async () => {
+    const currentTime = videoRef.current.currentTime;
+    await updateLessonProgress(lessonId, currentTime);
+  };
+
   useEffect(() => {
     if (!isShow || !lessonId) return;
 
     const fetchLesson = async () => {
-      setLoading(true);
+      uiDispatch({ type: "SHOW_LOADING" });
       setError("");
       setLesson(null);
-      setIsBlurred(false);
       try {
         let res;
         if (user && user.token) {
@@ -37,40 +74,13 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
           "Không thể tải thông tin bài học hoặc bạn không có quyền truy cập.",
         );
       } finally {
-        setLoading(false);
+        uiDispatch({ type: "HIDE_LOADING" });
       }
     };
 
     fetchLesson();
   }, [isShow, lessonId, user]);
 
-  // Window Focus Blur protection
-  useEffect(() => {
-    if (!isShow) return;
-
-    const handleBlur = () => {
-      setIsBlurred(true);
-      if (videoRef.current && !videoRef.current.paused) {
-        videoRef.current.pause();
-      }
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        handleBlur();
-      }
-    };
-
-    window.addEventListener("blur", handleBlur);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener("blur", handleBlur);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [isShow]);
-
-  // Prevent keyboard shortcuts
   useEffect(() => {
     if (!isShow) return;
 
@@ -91,30 +101,33 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isShow]);
 
-  if (!isShow) return null;
+  useEffect(() => {
+    if (isShow && lessonId) getLessonProgress(lessonId);
+  }, [isShow, lessonId]);
 
-  const handleResumePlay = () => {
-    setIsBlurred(false);
-    if (videoRef.current) {
-      videoRef.current
-        .play()
-        .catch((err) => console.log("Play interrupted:", err));
+  useEffect(() => {
+    hasSeeked.current = false;
+  }, [lessonId]);
+
+  useEffect(() => {
+    if (
+      videoRef.current &&
+      lessonProgress &&
+      lessonProgress.watchedSec &&
+      !hasSeeked.current
+    ) {
+      videoRef.current.currentTime = lessonProgress.watchedSec;
+      hasSeeked.current = true;
     }
-  };
+  }, [lessonProgress]);
+
+  if (!isShow) return null;
 
   const formatDuration = (seconds) => {
     if (!seconds) return "—";
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins} phút${secs > 0 ? ` ${secs} giây` : ""}`;
-  };
-
-  const resolveVideoUrl = (videoField) => {
-    if (!videoField) return "";
-    if (videoField.startsWith("http://") || videoField.startsWith("https://")) {
-      return videoField;
-    }
-    return `http://localhost:8080/LearnSpaceBackend/uploads/${videoField}`;
   };
 
   return (
@@ -139,11 +152,6 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
               <h3 className="font-extrabold text-sm text-[#1c1d1f] truncate max-w-md lg:max-w-lg">
                 {lesson ? lesson.title : "Đang tải bài học..."}
               </h3>
-              {lesson?.order && (
-                <p className="text-[11px] text-gray-500 font-medium">
-                  Bài {lesson.order}
-                </p>
-              )}
             </div>
           </div>
           <button
@@ -159,13 +167,6 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
-          {/* Loading state */}
-          {loading && (
-            <div className="aspect-video w-full flex items-center justify-center bg-gray-100">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5624d0]"></div>
-            </div>
-          )}
-
           {/* Error state */}
           {error && (
             <div className="aspect-video w-full flex flex-col items-center justify-center bg-gray-50 text-center p-6">
@@ -186,38 +187,33 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
           )}
 
           {/* Lesson content */}
-          {lesson && !loading && !error && (
+          {lesson && !error && (
             <>
               {/* Video container */}
               <div className="relative bg-[#1c1d1f]">
-                <video
-                  ref={videoRef}
-                  src={resolveVideoUrl(lesson.video)}
-                  controls
-                  controlsList="nodownload"
-                  disablePictureInPicture
-                  className={`w-full aspect-video object-contain transition-all duration-300 ${
-                    isBlurred
-                      ? "blur-xl brightness-50 select-none pointer-events-none"
-                      : ""
-                  }`}
-                  onContextMenu={(e) => e.preventDefault()}
-                />
-
-                {/* Blurred overlay */}
-                {isBlurred && (
-                  <div
-                    onClick={handleResumePlay}
-                    className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 cursor-pointer z-10 animate-[fadeIn_0.15s_ease-out]"
-                  >
-                    <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 border border-white/20">
-                      <Lock className="text-white" size={28} />
+                {lesson.video ? (
+                  <video
+                    ref={videoRef}
+                    src={lesson.video}
+                    onPause={handlePause}
+                    onSeeked={handleSeeked}
+                    controls
+                    controlsList="nodownload"
+                    onTimeUpdate={handleTimeUpdate}
+                    disablePictureInPicture
+                    className="w-full aspect-video object-contain transition-all duration-300"
+                    onContextMenu={(e) => e.preventDefault()}
+                  />
+                ) : (
+                  <div className="w-full aspect-video flex flex-col items-center justify-center bg-[#151515] border-b border-gray-800">
+                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                      <VideoOff className="text-white/40" size={28} />
                     </div>
-                    <p className="text-sm font-bold text-white max-w-xs leading-relaxed">
-                      Video đã tạm dừng để bảo vệ bản quyền
+                    <p className="text-sm font-bold text-white max-w-xs leading-relaxed text-center">
+                      Bài học này không có video!
                     </p>
-                    <p className="text-xs text-white/60 mt-2">
-                      Nhấp chuột để tiếp tục xem
+                    <p className="text-xs text-white/40 mt-2 text-center">
+                      Vui lòng xem nội dung văn bản chi tiết ở bên dưới.
                     </p>
                   </div>
                 )}
@@ -256,6 +252,9 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                   </div>
                 </div>
               </div>
+
+              {/* Comment Section Mockup */}
+              <Comments />
             </>
           )}
         </div>

@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
 import { UIContext, UserContext } from "@/configs/Context";
-import ProtectLessonDisplay from "./ProtectLessonDisplay";
+import ProtectLessonDisplay from "./ProtectLessonDisplay/ProtectLessonDisplay";
 
 const CourseDetailPage = () => {
   const { id } = useParams();
@@ -28,7 +28,7 @@ const CourseDetailPage = () => {
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState(null);
   const [showLessonModal, setShowLessonModal] = useState(false);
-  const [_, uiDispatch] = useContext(UIContext);
+  const [, uiDispatch] = useContext(UIContext);
 
   const loadCourseDetails = async () => {
     uiDispatch({ type: "SHOW_LOADING" });
@@ -80,7 +80,7 @@ const CourseDetailPage = () => {
               endpoints.enrolled_courses,
             );
             const enrolledList = enrollRes.data;
-            const enrolled = enrolledList.some((c) => c.courseId == id);
+            const enrolled = enrolledList.some((c) => c.id == id);
             setIsEnrolled(enrolled);
           } catch (enrollErr) {
             console.error("Lỗi khi check enroll:", enrollErr);
