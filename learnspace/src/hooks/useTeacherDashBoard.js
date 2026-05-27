@@ -8,6 +8,92 @@ const useTeacherDashBoard = () => {
   const [user] = useContext(UserContext);
   const [_, uiDispatch] = useContext(UIContext);
 
+  const handleDeleteLesson = async (lessonId) => {
+    uiDispatch({ type: "SHOW_LOADING" });
+    try {
+      await authApis(user.token).delete(`${endpoints.lessons}/${lessonId}`);
+      setTeacherCourses((prev) =>
+        prev.map((course) => ({
+          ...course,
+          chapters: (course.chapters || []).map((chapter) => ({
+            ...chapter,
+            lessons: (chapter.lessons || []).filter(
+              (lesson) => lesson.id !== lessonId,
+            ),
+          })),
+        })),
+      );
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Thành công",
+          message: "Xóa bài học thành công!",
+          type: "success",
+        },
+      });
+    } catch (err) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Không thể xóa bài học",
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
+  };
+  const handleUpdateLesson = async (lessonId, formData) => {
+    try {
+      uiDispatch({ type: "SHOW_LOADING" });
+      const res = await authApis(user.token).patch(
+        `${endpoints.lessons}/${lessonId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      if (res.status === 200) {
+        const updatedLesson = res.data;
+        setTeacherCourses((prev) =>
+          prev.map((course) => ({
+            ...course,
+            chapters: (course.chapters || []).map((chapter) => ({
+              ...chapter,
+              lessons: (chapter.lessons || []).map((lesson) =>
+                lesson.id === lessonId ? updatedLesson : lesson,
+              ),
+            })),
+          })),
+        );
+        uiDispatch({
+          type: "SHOW_DIALOG",
+          payload: {
+            title: "Thành công",
+            message: "Cập nhật bài học thành công!",
+            type: "success",
+          },
+        });
+        return updatedLesson;
+      }
+    } catch (err) {
+      uiDispatch({ type: "HIDE_LOADING" });
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || err.message,
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
+  };
+
   const handleCreateLesson = async (chapterId, formData) => {
     uiDispatch({ type: "SHOW_LOADING" });
     try {
@@ -46,6 +132,38 @@ const useTeacherDashBoard = () => {
         payload: {
           title: "Lỗi",
           message: err.response?.data?.message || err.message,
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
+  };
+
+  const handleDeleteChapter = async (chapterId) => {
+    uiDispatch({ type: "SHOW_LOADING" });
+    try {
+      await authApis(user.token).delete(`${endpoints.chapters}/${chapterId}`);
+      setTeacherCourses((prev) =>
+        prev.map((course) => ({
+          ...course,
+          chapters: (course.chapters || []).filter((ch) => ch.id !== chapterId),
+        })),
+      );
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Thành công",
+          message: "Xóa chương thành công!",
+          type: "success",
+        },
+      });
+    } catch (err) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Không thể xóa chương",
           type: "error",
         },
       });
@@ -97,27 +215,52 @@ const useTeacherDashBoard = () => {
   };
 
   const handleDeleteCourse = async (courseId) => {
+    uiDispatch({ type: "SHOW_LOADING" });
     try {
       await authApis(user.token).delete(`${endpoints.courses}/${courseId}`);
       setTeacherCourses((prev) =>
         prev.filter((course) => course.id !== courseId),
       );
-      console.log("Xóa thành công!");
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Thành công",
+          message: "Xóa khóa học thành công!",
+          type: "success",
+        },
+      });
     } catch (err) {
-      console.error(err);
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Không thể xóa khóa học",
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 
-  const handleLoadCategories = () => {
+  const handleLoadCategories = async () => {
     try {
-      const res = Apis.get(endpoints.categories);
+      const res = await Apis.get(endpoints.categories);
       setCategories(res.data);
     } catch (err) {
-      console.log(err);
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Không thể tải danh mục",
+          type: "error",
+        },
+      });
     }
   };
 
   const handleUpdateCourse = async (courseId, formData) => {
+    uiDispatch({ type: "SHOW_LOADING" });
     try {
       const res = await authApis(user.token).patch(
         `${endpoints.courses}/${courseId}`,
@@ -148,9 +291,25 @@ const useTeacherDashBoard = () => {
           return course;
         }),
       );
-      console.log("Thay đổi thành công!");
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Thành công",
+          message: "Cập nhật khóa học thành công!",
+          type: "success",
+        },
+      });
     } catch (err) {
-      console.error(err);
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Lỗi cập nhật khóa học",
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 
@@ -159,6 +318,7 @@ const useTeacherDashBoard = () => {
       if (!user || !user.token) {
         return;
       }
+      uiDispatch({ type: "SHOW_LOADING" });
       const res = await authApis(user.token).get(
         `${endpoints.courses}?teacherId=${user.id}`,
       );
@@ -201,7 +361,17 @@ const useTeacherDashBoard = () => {
         setTeacherCourses(coursesWithFullDetails);
       }
     } catch (error) {
-      console.error(error);
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message:
+            error.response?.data?.message || "Lỗi tải danh sách khóa học",
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 
@@ -215,7 +385,10 @@ const useTeacherDashBoard = () => {
     handleLoadCategories,
     handleDeleteCourse,
     handleCreateChapter,
+    handleDeleteChapter,
     handleCreateLesson,
+    handleUpdateLesson,
+    handleDeleteLesson,
   };
 };
 

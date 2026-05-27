@@ -2,10 +2,11 @@ import React, { useState, useEffect, useContext } from "react";
 import { Image, Video, PlusCircle } from "lucide-react";
 import { Modal, Field, inputCls, inputStyle } from "../UIComponent";
 import { authApis, endpoints } from "@/configs/Apis";
-import { UserContext } from "@/configs/Context";
+import { UserContext, UIContext } from "@/configs/Context";
 
 const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
   const [user] = useContext(UserContext);
+  const [_, uiDispatch] = useContext(UIContext);
   const [courseForm, setCourseForm] = useState({
     name: "",
     description: "",
@@ -28,6 +29,7 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
   const handleCreateCourse = async () => {
     if (!courseForm.name.trim()) return;
 
+    uiDispatch({ type: "SHOW_LOADING" });
     try {
       const formData = new FormData();
       formData.append("name", courseForm.name);
@@ -55,15 +57,30 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
         description: "",
         categoryId: categories[0]?.id || 1,
         price: "",
-        imageFile: null,
-        introVideoFile: null,
+        image: null,
+        introVideo: null,
       });
       onClose();
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Thành công",
+          message: "Tạo khóa học thành công!",
+          type: "success",
+        },
+      });
     } catch (err) {
       console.error("Lỗi tạo khóa học:", err.message);
-      alert(
-        `Tạo khóa học thất bại: ${err.response?.data?.message || err.message}`,
-      );
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Lỗi tạo khóa học",
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 
@@ -169,7 +186,7 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
               accept="image/*"
               style={{ display: "none" }}
               onChange={(e) =>
-                setCourseForm({ ...courseForm, imageFile: e.target.files[0] })
+                setCourseForm({ ...courseForm, image: e.target.files[0] })
               }
             />
             <div
@@ -188,9 +205,7 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
             <span
               style={{ fontSize: "12px", color: "#6b7280", fontWeight: 600 }}
             >
-              {courseForm.imageFile
-                ? courseForm.imageFile.name
-                : "Click để upload ảnh"}
+              {courseForm.image ? courseForm.image.name : "Click để upload ảnh"}
             </span>
           </label>
         </Field>
@@ -217,7 +232,7 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
               onChange={(e) =>
                 setCourseForm({
                   ...courseForm,
-                  introVideoFile: e.target.files[0],
+                  introVideo: e.target.files[0],
                 })
               }
             />
@@ -237,8 +252,8 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
             <span
               style={{ fontSize: "12px", color: "#6b7280", fontWeight: 600 }}
             >
-              {courseForm.introVideoFile
-                ? courseForm.introVideoFile.name
+              {courseForm.introVideo
+                ? courseForm.introVideo.name
                 : "Click chọn file .mp4"}
             </span>
           </label>

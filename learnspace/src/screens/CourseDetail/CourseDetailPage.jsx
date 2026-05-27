@@ -16,7 +16,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
-import { UserContext } from "@/configs/Context";
+import { UIContext, UserContext } from "@/configs/Context";
 import ProtectLessonDisplay from "./ProtectLessonDisplay";
 
 const CourseDetailPage = () => {
@@ -24,25 +24,22 @@ const CourseDetailPage = () => {
   const [user] = useContext(UserContext);
 
   const [courseDetails, setCourseDetails] = useState({ chapters: [] });
-  const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState(null);
   const [showLessonModal, setShowLessonModal] = useState(false);
+  const [_, uiDispatch] = useContext(UIContext);
 
   const loadCourseDetails = async () => {
-    setLoading(true);
-    setNotFound(false);
+    uiDispatch({ type: "SHOW_LOADING" });
     try {
       const res = await Apis.get(`${endpoints.courses}/${id}`);
       if (res.data && res.data.id) {
         const course = res.data;
 
-        // 1. Fetch chapters
         const chapterRes = await Apis.get(endpoints.course_chapter(id));
         const chaptersList = chapterRes.data || [];
 
-        // 2. Fetch lessons for each chapter in parallel
         const chaptersWithLessons = await Promise.all(
           chaptersList.map(async (chapter) => {
             try {
@@ -51,10 +48,16 @@ const CourseDetailPage = () => {
               );
               return { ...chapter, lessons: lessonRes.data || [] };
             } catch (err) {
-              console.error(
-                `Lỗi khi tải bài học của chapter ${chapter.id}:`,
-                err,
-              );
+              uiDispatch({
+                type: "SHOW_DIALOG",
+                payload: {
+                  title: "Lỗi",
+                  message:
+                    err.response?.data?.message ||
+                    `Lỗi khi tải bài học của chương ${chapter.id}`,
+                  type: "error",
+                },
+              });
               return { ...chapter, lessons: [] };
             }
           }),
@@ -90,24 +93,24 @@ const CourseDetailPage = () => {
         setNotFound(true);
       }
     } catch (error) {
-      console.error("Lỗi khi load chi tiết khóa học:", error);
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message:
+            error.response?.data?.message || "Lỗi khi tải chi tiết khóa học",
+          type: "error",
+        },
+      });
       setNotFound(true);
     } finally {
-      setLoading(false);
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 
   useEffect(() => {
     loadCourseDetails();
   }, [id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#5624d0]"></div>
-      </div>
-    );
-  }
 
   if (notFound) {
     return (

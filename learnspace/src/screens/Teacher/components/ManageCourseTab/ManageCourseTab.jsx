@@ -29,7 +29,10 @@ const ManageCourseTab = ({ course }) => {
     user,
     handleLoadCourseOfTeacher,
     handleCreateChapter,
+    handleDeleteChapter,
     handleCreateLesson,
+    handleUpdateLesson,
+    handleDeleteLesson,
   } = useTeacherDashBoard();
 
   const [openSections, setOpenSections] = useState({ 1: true });
@@ -39,6 +42,8 @@ const ManageCourseTab = ({ course }) => {
   const [showAddLesson, setShowAddLesson] = useState(null);
   const [showEditLesson, setShowEditLesson] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
+
+  const [selectedLesson, setSelectedLesson] = useState(null);
 
   const toggleSection = (sectionId) => {
     setOpenSections((prev) => ({ ...prev, [sectionId]: !prev[sectionId] }));
@@ -90,10 +95,9 @@ const ManageCourseTab = ({ course }) => {
     const [moved] = lessons.splice(fromIndex, 1);
     lessons.splice(toIndex, 0, moved);
 
-    const updatedLessons = lessons.map((ls, idx) => ({
-      ...ls,
-      order: idx + 1,
-    }));
+    const prevId = toIndex > 0 ? lessons[toIndex - 1].id : null;
+    const nextId =
+      toIndex < lessons.length - 1 ? lessons[toIndex + 1].id : null;
 
     setTeacherCourses((prev) =>
       prev.map((c) => {
@@ -102,7 +106,7 @@ const ManageCourseTab = ({ course }) => {
             ...c,
             chapters: c.chapters.map((ch) => {
               if (ch.id === chapterId) {
-                return { ...ch, lessons: updatedLessons };
+                return { ...ch, lessons };
               }
               return ch;
             }),
@@ -113,13 +117,13 @@ const ManageCourseTab = ({ course }) => {
     );
 
     try {
-      await Promise.all(
-        updatedLessons.map((ls) =>
-          authApis(user.token).patch(`${endpoints.lessons}/${ls.id}`, {
-            title: ls.title,
-            order: ls.order,
-          }),
-        ),
+      const formData = new FormData();
+      if (prevId) formData.append("frontLessonId", prevId);
+      if (nextId) formData.append("behindLessonId", nextId);
+
+      await authApis(user.token).patch(
+        `${endpoints.lessons}/${moved.id}`,
+        formData,
       );
       console.log("Cập nhật thứ tự bài học thành công!");
     } catch (err) {
@@ -156,6 +160,21 @@ const ManageCourseTab = ({ course }) => {
     try {
       await handleCreateLesson(showAddLesson, formData);
       setShowAddLesson(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const updateLesson = async (lessonData) => {
+    if (!showEditLesson) return;
+    const formData = new FormData();
+    formData.append("title", lessonData.title);
+    formData.append("content", lessonData.content || "");
+    if (lessonData.videoFile) {
+      formData.append("videoFile", lessonData.videoFile);
+    }
+    try {
+      await handleUpdateLesson(selectedLesson.id, formData);
+      setShowEditLesson(false);
     } catch (err) {
       console.error(err);
     }
@@ -313,7 +332,12 @@ const ManageCourseTab = ({ course }) => {
                   >
                     <Pencil size={14} />
                   </button>
-                  <button className="btn-chapter-delete">
+                  <button
+                    onClick={() => {
+                      handleDeleteChapter(chapter.id);
+                    }}
+                    className="btn-chapter-delete"
+                  >
                     <Trash2 size={14} />
                   </button>
                   {isOpen ? (
@@ -376,12 +400,18 @@ const ManageCourseTab = ({ course }) => {
                           </span>
                         )}
                         <button
-                          onClick={() => setShowEditLesson(true)}
+                          onClick={() => {
+                            setShowEditLesson(true);
+                            setSelectedLesson(lesson);
+                          }}
                           className="btn-lesson-edit"
                         >
                           <Pencil size={13} />
                         </button>
-                        <button className="btn-lesson-delete">
+                        <button
+                          onClick={() => handleDeleteLesson(lesson.id)}
+                          className="btn-lesson-delete"
+                        >
                           <Trash2 size={13} />
                         </button>
                       </div>
@@ -418,8 +448,8 @@ const ManageCourseTab = ({ course }) => {
       <EditLessonModal
         open={showEditLesson}
         onClose={() => setShowEditLesson(false)}
-        lesson={{ title: "Bài học mẫu" }}
-        onSubmit={() => setShowEditLesson(false)}
+        lesson={selectedLesson}
+        onSubmit={(formData) => updateLesson(formData)}
       />
 
       <EditCourseModal
