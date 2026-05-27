@@ -22,4 +22,6 @@ public interface CourseService {
     CourseDto updateCourse(int id, CoursePatchDto courseDto);
 
     void deleteCourse(int id);
+
+    List<CourseDto> getEnrolledCourses();
 }
