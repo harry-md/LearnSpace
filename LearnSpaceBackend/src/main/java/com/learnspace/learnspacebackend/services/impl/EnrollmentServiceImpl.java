@@ -1,8 +1,10 @@
 package com.learnspace.learnspacebackend.services.impl;
 
+import com.learnspace.learnspacebackend.dtos.course.CourseDto;
 import com.learnspace.learnspacebackend.dtos.enrollment.EnrollmentDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
+import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.mappers.EnrollmentMapper;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,6 +40,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Autowired
     private EnrollmentMapper enrollmentMapper;
+
+    @Autowired
+    private CourseMapper courseMapper;
 
     private CustomUserDetails getLoggedInPrincipal() {
         return (CustomUserDetails)
@@ -58,11 +64,15 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public List<EnrollmentDto> getMyEnrollments() {
+    public List<CourseDto> getMyEnrollments() {
         CustomUserDetails principal = getLoggedInPrincipal();
         List<Enrollment> enrollments =
                 enrollmentRepository.getEnrollmentsByStudentId(principal.getId());
-        return enrollments.stream().map(enrollmentMapper::toDto).toList();
+        List<CourseDto> courses = new ArrayList<>();
+        for (Enrollment enrollment : enrollments) {
+            courses.add(courseMapper.toDto(enrollment.getCourse()));
+        }
+        return courses;
     }
 
     @Override

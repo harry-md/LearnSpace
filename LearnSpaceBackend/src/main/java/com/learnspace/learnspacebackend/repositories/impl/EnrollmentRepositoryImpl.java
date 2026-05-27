@@ -1,10 +1,12 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -77,9 +79,14 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
+
         Root<Enrollment> root = q.from(Enrollment.class);
-        root.fetch("course");
         root.fetch("student");
+
+        Fetch<Enrollment, Course> fetchCourse = root.fetch("course");
+        fetchCourse.fetch("category");
+        fetchCourse.fetch("teacher");
+
         q.select(root)
                 .where(builder.and(
                         builder.equal(root.get("student").get("id"), studentId),
