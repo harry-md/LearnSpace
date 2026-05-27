@@ -8,9 +8,11 @@ import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
+import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.CloudinaryService;
@@ -43,6 +45,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     @Autowired
     private CloudinaryService cloudinaryService;
@@ -183,5 +188,18 @@ public class CourseServiceImpl implements CourseService {
         }
 
         courseRepository.deleteCourse(id);
+    }
+
+    @Override
+    public List<CourseDto> getEnrolledCourses() {
+        CustomUserDetails principal = (CustomUserDetails)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        List<Enrollment> enrollments =
+                enrollmentRepository.getEnrollmentsByStudentId(principal.getId());
+
+        return enrollments.stream()
+                .map(enrollment -> courseMapper.toDto(enrollment.getCourse()))
+                .toList();
     }
 }
