@@ -1,20 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ShoppingCart, BookOpen } from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
 import { useNavigate } from "react-router-dom";
+import { UIContext } from "@/configs/Context";
 
 const AllCoursesTab = () => {
   const [course, setCourse] = useState([]);
+  const [, uiDispatch] = useContext(UIContext);
   const navigate = useNavigate();
 
   const loadAllCourse = async () => {
+    uiDispatch({ type: "SHOW_LOADING" });
     try {
       const res = await Apis.get(endpoints.courses);
       if (res.status === 200) {
         setCourse(res.data);
       }
     } catch (err) {
-      console.log(err);
+      uiDispatch({
+        type: "SHOW_TOAST",
+        message: "Lỗi hệ thống",
+        type: "error",
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 

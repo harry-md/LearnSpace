@@ -280,9 +280,16 @@ const CourseDetailPage = () => {
                               setSelectedLessonId(lesson.id);
                               setShowLessonModal(true);
                             } else {
-                              alert(
-                                "Vui lòng đăng ký khóa học để xem nội dung bài giảng!",
-                              );
+                              uiDispatch({
+                                type: "SHOW_DIALOG",
+                                payload: {
+                                  show: true,
+                                  title: "Thông báo",
+                                  message:
+                                    "Bạn cần phải đăng ký khoá học để xem nội dung chi tiết của khoá học",
+                                  type: "warning",
+                                },
+                              });
                             }
                           }}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors cursor-pointer group/lesson"
