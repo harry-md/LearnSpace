@@ -41,19 +41,13 @@ public class LessonProgressServiceImpl implements LessonProgressService {
 
     @Override
     public LessonProgressDto getLessonProgress(int lessonId) {
+        CustomUserDetails principal = getLoggedInPrincipal();
+        int userId = principal.getId();
+
         LessonProgress lessonProgress =
-                lessonProgressRepository.getLessonProgressByLesson(lessonId);
+                lessonProgressRepository.getLessonProgressByLessonAndStudent(lessonId, userId);
         if (lessonProgress == null) {
             throw new ResourceNotFoundException("Không tìm thấy tiến độ học tập");
-        }
-
-        Enrollment enrollment = lessonProgress.getEnrollment();
-        if (enrollment == null) {
-            throw new ResourceNotFoundException("Không tìm thấy enrollment");
-        }
-
-        if (!getLoggedInPrincipal().getId().equals(enrollment.getStudent().getId())) {
-            throw new AccessDeniedException("Bạn không có quyền truy cập tiến độ học tập này");
         }
 
         return lessonProgressMapper.toDto(lessonProgress);
@@ -140,7 +134,7 @@ public class LessonProgressServiceImpl implements LessonProgressService {
         }
 
         int completed =
-                lessonProgressRepository.countCompletedLessonsByStudentAndCourse(userId, courseId);
+                lessonProgressRepository.countCompletedLessonsByEnrollment(enrollment.getId());
         int total = lessonRepository.countLessonsByCourseId(courseId);
         int percent = 0;
         if (total > 0) {

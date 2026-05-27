@@ -1,10 +1,12 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -20,16 +22,21 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
     private LocalSessionFactoryBean factory;
 
     @Override
-    public LessonProgress getLessonProgressByLesson(int lessonId) {
+    public LessonProgress getLessonProgressByLessonAndStudent(int lessonId, int studentId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<LessonProgress> q = builder.createQuery(LessonProgress.class);
 
         Root<LessonProgress> root = q.from(LessonProgress.class);
         root.fetch("lesson");
-        root.fetch("enrollment").fetch("student");
 
-        q.select(root).where(builder.equal(root.get("lesson").get("id"), lessonId));
+        Fetch<LessonProgress, Enrollment> enrollmentFetch = root.fetch("enrollment");
+        enrollmentFetch.fetch("student");
+
+        q.select(root)
+                .where(builder.and(
+                        builder.equal(root.get("lesson").get("id"), lessonId),
+                        builder.equal(root.get("enrollment").get("student").get("id"), studentId)));
         return session.createQuery(q).getSingleResultOrNull();
     }
 
@@ -61,7 +68,7 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
     }
 
     @Override
-    public int countCompletedLessonsByStudentAndCourse(int studentId, int courseId) {
+    public int countCompletedLessonsByEnrollment(int enrollmentId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Long> q = builder.createQuery(Long.class);
@@ -70,11 +77,10 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
 
         q.select(builder.count(root));
         q.where(builder.and(
-                builder.equal(root.get("enrollment").get("student").get("id"), studentId),
-                builder.equal(root.get("lesson").get("chapter").get("course").get("id"), courseId),
+                builder.equal(root.get("enrollment").get("id"), enrollmentId),
                 builder.equal(root.get("completed"), true)));
-
         Long result = session.createQuery(q).getSingleResult();
+
         return result == null ? 0 : result.intValue();
     }
 }

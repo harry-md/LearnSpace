@@ -50,9 +50,9 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
         root.fetch("student");
 
         q.select(root)
-                .where(builder.and(
+                .where(
                         builder.equal(root.get("id"), id),
-                        root.get("status").in("ACTIVE", "COMPLETED")));
+                        root.get("status").in("ACTIVE", "COMPLETED"));
         return session.createQuery(q).getSingleResultOrNull();
     }
 
