@@ -31,6 +31,7 @@ public class Chapter {
     private String description;
 
     @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OrderBy("order ASC")
     @Column(name = "lessons")
     private Set<Lesson> lessons;
 

@@ -6,6 +6,7 @@ import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -26,7 +27,8 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     @Override
     public List<Chapter> getChaptersByCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        Query q = session.createQuery("FROM Chapter c WHERE c.course.id = :courseId ORDER BY c.order", Chapter.class);
+        Query q = session.createQuery(
+                "FROM Chapter c WHERE c.course.id = :courseId ORDER BY c.order", Chapter.class);
         q.setParameter("courseId", courseId);
         return q.getResultList();
     }
@@ -39,6 +41,8 @@ public class ChapterRepositoryImpl implements ChapterRepository {
 
         Root<Chapter> root = q.from(Chapter.class);
         root.fetch("course");
+        root.fetch("lessons", JoinType.LEFT);
+
         q.select(root).where(builder.equal(root.get("id"), chapterId));
 
         return session.createQuery(q).getSingleResultOrNull();

@@ -1,5 +1,6 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.Review;
@@ -8,6 +9,7 @@ import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -153,17 +155,18 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Override
     public Course getCourseById(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "SELECT DISTINCT c FROM Course c"
-                                + " JOIN FETCH c.category"
-                                + " JOIN FETCH c.teacher"
-                                + " LEFT JOIN FETCH c.chapters ch"
-                                + " LEFT JOIN FETCH ch.lessons l"
-                                + " WHERE c.id = :courseId"
-                                + " ORDER BY ch.order, l.order",
-                        Course.class)
-                .setParameter("courseId", courseId)
-                .getSingleResultOrNull();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Course> q = builder.createQuery(Course.class);
+
+        Root<Course> root = q.from(Course.class);
+        root.fetch("category", JoinType.INNER);
+        root.fetch("teacher", JoinType.INNER);
+
+        Fetch<Course, Chapter> chaptersFetch = root.fetch("chapters", JoinType.LEFT);
+        chaptersFetch.fetch("lessons", JoinType.LEFT);
+
+        q.select(root).where(builder.equal(root.get("id"), courseId));
+        return session.createQuery(q).getSingleResultOrNull();
     }
 
     @Override

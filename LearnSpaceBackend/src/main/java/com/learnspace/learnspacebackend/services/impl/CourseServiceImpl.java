@@ -76,7 +76,7 @@ public class CourseServiceImpl implements CourseService {
                 .map(row -> {
                     Course course = (Course) row[0];
                     Double avgRating = (Double) row[1];
-                    Long enrollCount = (Long) row[2];
+                    Long enrollmentCount = (Long) row[2];
 
                     CourseListDto base = courseMapper.toListDto(course);
                     return new CourseListDto(
@@ -87,21 +87,21 @@ public class CourseServiceImpl implements CourseService {
                             base.category(),
                             base.teacher(),
                             avgRating,
-                            enrollCount);
+                            enrollmentCount);
                 })
                 .toList();
     }
 
     @Override
-    public CourseDto getCourse(int id) {
-        Course course = courseRepository.getCourseById(id);
+    public CourseDto getCourse(int courseId) {
+        Course course = courseRepository.getCourseById(courseId);
         if (course == null) {
             throw new ResourceNotFoundException("Không tìm thấy khóa học");
         }
 
         CourseDto dto = courseMapper.toDto(course);
-        Double avgRating = reviewRepository.getAverageRatingByCourseId(id);
-        Long enrollCount = enrollmentRepository.countEnrollmentsByCourseId(id);
+        Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
+        Long enrollCount = enrollmentRepository.countEnrollmentsByCourseId(courseId);
 
         return new CourseDto(
                 dto.id(),

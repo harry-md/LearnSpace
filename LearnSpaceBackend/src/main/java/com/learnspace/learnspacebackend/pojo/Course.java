@@ -60,6 +60,7 @@ public class Course {
     private User teacher;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OrderBy("order ASC")
     private Set<Chapter> chapters;
 
     @Column(name = "created_at", updatable = false)
