@@ -15,6 +15,8 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 @Transactional
 public class LessonProgressRepositoryImpl implements LessonProgressRepository {
@@ -82,5 +84,18 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
         Long result = session.createQuery(q).getSingleResult();
 
         return result == null ? 0 : result.intValue();
+    }
+
+    @Override
+    public List<LessonProgress> getLessonProgressByEnrollment(int enrollmentId) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<LessonProgress> q = builder.createQuery(LessonProgress.class);
+
+        Root<LessonProgress> root = q.from(LessonProgress.class);
+        root.fetch("lesson");
+
+        q.select(root).where(builder.equal(root.get("enrollment").get("id"), enrollmentId));
+        return session.createQuery(q).getResultList();
     }
 }

@@ -52,6 +52,8 @@ public class LessonRepositoryImpl implements LessonRepository {
         CriteriaQuery<Lesson> q = builder.createQuery(Lesson.class);
         Root<Lesson> root = q.from(Lesson.class);
 
+        root.join("progresses", JoinType.LEFT);
+
         Fetch<Lesson, Chapter> chapterFetch = root.fetch("chapter", JoinType.INNER);
         chapterFetch.fetch("course", JoinType.INNER);
 
