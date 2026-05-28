@@ -2,6 +2,8 @@ package com.learnspace.learnspacebackend.repositories;
 
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
 
+import java.util.List;
+
 public interface LessonProgressRepository {
 
     LessonProgress getLessonProgressByLessonAndStudent(int lessonId, int student);
@@ -11,4 +13,6 @@ public interface LessonProgressRepository {
     LessonProgress getLessonProgressByEnrollmentAndLesson(int enrollmentId, int lessonId);
 
     int countCompletedLessonsByEnrollment(int enrollmentId);
+
+    List<LessonProgress> getLessonProgressByEnrollment(int enrollmentId);
 }

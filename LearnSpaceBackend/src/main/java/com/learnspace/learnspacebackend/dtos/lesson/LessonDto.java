@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -26,6 +27,8 @@ public record LessonDto(
         @JsonProperty(access = Access.READ_ONLY) String video,
         @JsonProperty(access = Access.READ_ONLY) Integer videoLength,
         @JsonProperty(access = Access.READ_ONLY) Integer order,
+
+        @JsonProperty(access = Access.READ_ONLY) LessonProgressDto progress,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
