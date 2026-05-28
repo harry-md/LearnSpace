@@ -13,6 +13,7 @@ import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
+import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
@@ -52,6 +53,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private LessonProgressRepository lessonProgressRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;

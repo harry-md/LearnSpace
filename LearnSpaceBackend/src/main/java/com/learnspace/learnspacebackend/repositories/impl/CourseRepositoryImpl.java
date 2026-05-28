@@ -116,11 +116,11 @@ public class CourseRepositoryImpl implements CourseRepository {
                 .otherwise(0L);
 
         q.multiselect(
-                root.alias("course"),
-                builder.avg(reviewJoin.get("rating")).alias("avgRating"),
-                builder.sum(enrollmentExpr).alias("enrollmentCount"),
-                builder.countDistinct(chapterJoin.get("id")).alias("chapterCount"),
-                builder.countDistinct(lessonJoin.get("id")).alias("lessonCount"));
+                root,
+                builder.avg(reviewJoin.get("rating")),
+                builder.sum(enrollmentExpr),
+                builder.countDistinct(chapterJoin.get("id")),
+                builder.countDistinct(lessonJoin.get("id")));
 
         List<Predicate> predicates = buildPredicates(params, builder, root);
         if (!predicates.isEmpty()) {

@@ -10,6 +10,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "lesson")
@@ -25,6 +26,9 @@ public class Lesson {
     @JoinColumn(name = "chapter_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Chapter chapter;
+
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<LessonProgress> progresses;
 
     @Size(max = 255)
     @NotNull
