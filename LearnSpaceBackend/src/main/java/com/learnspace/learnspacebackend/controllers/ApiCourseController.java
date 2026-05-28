@@ -28,9 +28,9 @@ public class ApiCourseController {
         return ResponseEntity.ok(courseService.getCourses(params));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CourseDto> retrieve(@PathVariable("id") int id) {
-        return ResponseEntity.ok(courseService.getCourse(id));
+    @GetMapping("/{courseId}")
+    public ResponseEntity<CourseDto> retrieve(@PathVariable("courseId") int courseId) {
+        return ResponseEntity.ok(courseService.getCourse(courseId));
     }
 
     @PostMapping(
@@ -44,20 +44,21 @@ public class ApiCourseController {
     }
 
     @PatchMapping(
-            value = "/{id}",
+            value = "/{courseId}",
             consumes = {
                 MediaType.MULTIPART_FORM_DATA_VALUE,
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
     public ResponseEntity<CourseDto> update(
-            @PathVariable("id") int id, @Valid @ModelAttribute CoursePatchDto courseDto) {
-        CourseDto updated = courseService.updateCourse(id, courseDto);
+            @PathVariable("courseId") int courseId,
+            @Valid @ModelAttribute CoursePatchDto courseDto) {
+        CourseDto updated = courseService.updateCourse(courseId, courseDto);
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "id") int id) {
-        courseService.deleteCourse(id);
+    @DeleteMapping("/{courseId}")
+    public ResponseEntity<Void> delete(@PathVariable(value = "courseId") int courseId) {
+        courseService.deleteCourse(courseId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

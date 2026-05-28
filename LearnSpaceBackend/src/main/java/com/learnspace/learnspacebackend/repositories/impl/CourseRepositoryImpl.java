@@ -2,20 +2,17 @@ package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.Enrollment;
-import com.learnspace.learnspacebackend.pojo.Review;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 
-import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -82,42 +79,32 @@ public class CourseRepositoryImpl implements CourseRepository {
     public List<Object[]> getAllCourses(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
 
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Object[]> q = builder.createQuery(Object[].class);
+        String jpql = """
+            SELECT c,
+                   AVG(r.rating),
+                   SUM(CASE WHEN e.status IN ('ACTIVE', 'COMPLETED') THEN 1L ELSE 0L END),
+                   COUNT(DISTINCT ch.id),
+                   COUNT(DISTINCT l.id)
+            FROM Course c
+            JOIN FETCH c.category
+            JOIN FETCH c.teacher
+            LEFT JOIN Review r ON r.course = c
+            LEFT JOIN Enrollment e ON e.course = c
+            LEFT JOIN Chapter ch ON ch.course = c
+            LEFT JOIN Lesson l ON l.chapter.course = c
+            GROUP BY c
+            ORDER BY c.id DESC
+            """;
 
-        Root<Course> root = q.from(Course.class);
-        root.fetch("category", JoinType.INNER);
-        root.fetch("teacher", JoinType.INNER);
+        Query<Object[]> query = session.createQuery(jpql, Object[].class);
 
-        Subquery<Double> avgRatingSub = q.subquery(Double.class);
-        Root<Review> reviewRoot = avgRatingSub.from(Review.class);
-        avgRatingSub
-                .select(builder.avg(reviewRoot.get("rating")))
-                .where(builder.equal(reviewRoot.get("course"), root));
-
-        Subquery<Long> enrollCountSub = q.subquery(Long.class);
-        Root<Enrollment> enrollRoot = enrollCountSub.from(Enrollment.class);
-        enrollCountSub
-                .select(builder.count(enrollRoot))
-                .where(
-                        builder.equal(enrollRoot.get("course"), root),
-                        enrollRoot.get("status").in("ACTIVE", "COMPLETED"));
-
-        q.multiselect(root, avgRatingSub.getSelection(), enrollCountSub.getSelection());
-
-        if (params != null) {
-            q.where(filter(builder, root, params).toArray(Predicate[]::new));
-        }
-        q.orderBy(builder.desc(root.get("id")));
-
-        Query query = session.createQuery(q);
         if (params != null && params.containsKey("page")) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
-            int pageSize = COURSE_PAGE_SIZE_KEY;
-            int start = (page - 1) * pageSize;
+            int start = (page - 1) * COURSE_PAGE_SIZE_KEY;
             query.setFirstResult(start);
-            query.setMaxResults(pageSize);
+            query.setMaxResults(COURSE_PAGE_SIZE_KEY);
         }
+
         return query.getResultList();
     }
 

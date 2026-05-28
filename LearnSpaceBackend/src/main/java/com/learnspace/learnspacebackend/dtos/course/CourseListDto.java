@@ -13,4 +13,6 @@ public record CourseListDto(
         CategoryDto category,
         SimpleUserDto teacher,
         Double avgRating,
-        Long enrollmentCount) {}
+        Long enrollmentCount,
+        Long chapterCount,
+        Long lessonCount) {}

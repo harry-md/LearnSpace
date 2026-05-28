@@ -6,13 +6,11 @@ import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
-import com.learnspace.learnspacebackend.mappers.LessonMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
-import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
@@ -47,13 +45,7 @@ public class CourseServiceImpl implements CourseService {
     private CourseMapper courseMapper;
 
     @Autowired
-    private ChapterRepository chapterRepository;
-
-    @Autowired
     private LessonRepository lessonRepository;
-
-    @Autowired
-    private LessonMapper lessonMapper;
 
     @Autowired
     private UserRepository userRepository;
@@ -77,6 +69,8 @@ public class CourseServiceImpl implements CourseService {
                     Course course = (Course) row[0];
                     Double avgRating = (Double) row[1];
                     Long enrollmentCount = (Long) row[2];
+                    Long chapterCount = (Long) row[3];
+                    Long lessonCount = (Long) row[4];
 
                     CourseListDto base = courseMapper.toListDto(course);
                     return new CourseListDto(
@@ -87,7 +81,9 @@ public class CourseServiceImpl implements CourseService {
                             base.category(),
                             base.teacher(),
                             avgRating,
-                            enrollmentCount);
+                            enrollmentCount,
+                            chapterCount,
+                            lessonCount);
                 })
                 .toList();
     }
