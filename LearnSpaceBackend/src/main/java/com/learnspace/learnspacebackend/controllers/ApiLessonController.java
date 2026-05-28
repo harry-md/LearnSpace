@@ -1,7 +1,6 @@
 package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.lesson.LessonDto;
-import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonPatchDto;
 import com.learnspace.learnspacebackend.services.LessonService;
 
@@ -13,19 +12,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api")
 public class ApiLessonController {
 
     @Autowired
     private LessonService lessonService;
-
-    @GetMapping("/chapters/{chapterId}/lessons")
-    public ResponseEntity<List<LessonListDto>> list(@PathVariable("chapterId") int chapterId) {
-        return ResponseEntity.ok(lessonService.getLessons(chapterId));
-    }
 
     @GetMapping("/lessons/{id}")
     public ResponseEntity<LessonDto> retrieve(@PathVariable("id") int lessonId) {

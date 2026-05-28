@@ -141,18 +141,18 @@ public class CourseRepositoryImpl implements CourseRepository {
 
     public Long countCourses(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-        Root<Course> root = cq.from(Course.class);
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = builder.createQuery(Long.class);
+        Root<Course> root = q.from(Course.class);
 
-        cq.select(cb.countDistinct(root));
+        q.select(builder.countDistinct(root));
 
-        List<Predicate> predicates = buildPredicates(params, cb, root);
+        List<Predicate> predicates = buildPredicates(params, builder, root);
         if (!predicates.isEmpty()) {
-            cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            q.where(builder.and(predicates.toArray(Predicate[]::new)));
         }
 
-        Query<Long> query = session.createQuery(cq);
+        Query<Long> query = session.createQuery(q);
         return query.getSingleResultOrNull();
     }
 
