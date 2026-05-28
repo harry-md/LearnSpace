@@ -46,25 +46,6 @@ public class ChapterServiceImpl implements ChapterService {
     @Autowired
     private R2Service r2Service;
 
-    @Override
-    public List<ChapterDto> getChapters(int courseId) {
-        if (!courseRepository.existCourse(courseId)) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học");
-        }
-        return chapterRepository.getChaptersByCourse(courseId).stream()
-                .map(chapterMapper::toDto)
-                .toList();
-    }
-
-    @Override
-    public ChapterDto getChapter(int chapterId) {
-        Chapter chapter = chapterRepository.getChapterById(chapterId);
-        if (chapter == null) {
-            throw new ResourceNotFoundException("Không tìm thấy chương học");
-        }
-        return chapterMapper.toDto(chapter);
-    }
-
     private User getLoggedInTeacher() {
         CustomUserDetails principal = (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
