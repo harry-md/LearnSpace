@@ -39,51 +39,7 @@ const CourseDetailPage = () => {
       if (res.data && res.data.id) {
         const course = res.data;
 
-        const chapterRes = await Apis.get(endpoints.course_chapter(id));
-        const chaptersList = chapterRes.data || [];
-
-        const chaptersWithLessons = await Promise.all(
-          chaptersList.map(async (chapter) => {
-            try {
-              const lessonRes = await Apis.get(
-                endpoints.chapter_lesson(chapter.id),
-              );
-              const lessons = lessonRes.data || [];
-              const lessonsWithProgress = await Promise.all(
-                lessons.map(async (lesson) => {
-                  if (user && user.token) {
-                    try {
-                      const progress = await getLessonProgress(lesson.id);
-                      return { ...lesson, progress };
-                    } catch (e) {
-                      return { ...lesson, progress: null };
-                    }
-                  }
-                  return { ...lesson, progress: null };
-                }),
-              );
-              return { ...chapter, lessons: lessonsWithProgress };
-            } catch (err) {
-              uiDispatch({
-                type: "SHOW_DIALOG",
-                payload: {
-                  title: "Lỗi",
-                  message:
-                    err.response?.data?.message ||
-                    `Lỗi khi tải bài học của chương ${chapter.id}`,
-                  type: "error",
-                },
-              });
-              return { ...chapter, lessons: [] };
-            }
-          }),
-        );
-
-        // 3. Set courseDetails with nested chapters and lessons
-        setCourseDetails({
-          ...course,
-          chapters: chaptersWithLessons,
-        });
+        setCourseDetails(course);
 
         // 4. Check enrollment status
         if (user && user.token) {
@@ -206,7 +162,7 @@ const CourseDetailPage = () => {
             <p className="text-sm text-gray-300 mb-2">
               Tạo bởi{" "}
               <span className="text-purple-400 underline cursor-pointer hover:text-purple-300 transition-colors">
-                {courseDetails.teacherName}
+                {courseDetails.teacher?.fullName}
               </span>
             </p>
 
@@ -321,11 +277,11 @@ const CourseDetailPage = () => {
                             </span>
                           ) : null}
 
-                          {lesson.progress.completed ? (
+                          {lesson.progress?.completed ? (
                             <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 shrink-0">
                               Hoàn thành
                             </span>
-                          ) : (
+                          ) : lesson.progress ? (
                             <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 shrink-0">
                               Hoàn thành{" "}
                               {Math.round(
@@ -335,7 +291,7 @@ const CourseDetailPage = () => {
                               )}
                               %
                             </span>
-                          )}
+                          ) : null}
                         </div>
                       ))
                     ) : (

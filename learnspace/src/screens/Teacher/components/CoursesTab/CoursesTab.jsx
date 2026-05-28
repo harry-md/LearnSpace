@@ -31,9 +31,6 @@ const CoursesTab = ({ onManageCourse }) => {
     categories,
   } = useTeacherDashBoard();
 
-  const countChap = (course) => course?.chapters?.length || 0;
-  const countLessons = (chapter) => chapter?.lessons?.length || 0;
-
   useEffect(() => {
     handleLoadCourseOfTeacher();
     handleLoadCategories();
@@ -108,15 +105,13 @@ const CoursesTab = ({ onManageCourse }) => {
                   <td className="courses-td">
                     <div className="meta-info-badge">
                       <Layers size={14} className="text-[#9ca3af]" />
-                      <span className="meta-count">{countChap(course)}</span>
+                      <span className="meta-count">{course.chapterCount}</span>
                     </div>
                   </td>
                   <td className="courses-td">
                     <div className="meta-info-badge">
                       <ListVideo size={14} className="text-[#9ca3af]" />
-                      <span className="meta-count">
-                        {countLessons(course.chapters)}
-                      </span>
+                      <span className="meta-count">{course.lessonCount}</span>
                     </div>
                   </td>
                   <td className="courses-td">

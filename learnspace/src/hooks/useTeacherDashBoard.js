@@ -323,43 +323,7 @@ const useTeacherDashBoard = () => {
         `${endpoints.courses}?teacherId=${user.id}`,
       );
 
-      if (Array.isArray(res.data)) {
-        const courses = res.data;
-
-        const coursesWithFullDetails = await Promise.all(
-          courses.map(async (course) => {
-            try {
-              const chapterRes = await authApis(user.token).get(
-                endpoints.course_chapter(course.id),
-              );
-              const chaptersList = chapterRes.data || [];
-              const chaptersWithLessons = await Promise.all(
-                chaptersList.map(async (chapter) => {
-                  try {
-                    const lessonRes = await authApis(user.token).get(
-                      endpoints.chapter_lesson(chapter.id),
-                    );
-                    return { ...chapter, lessons: lessonRes.data || [] };
-                  } catch (err) {
-                    console.error(
-                      `Lỗi tải lessons của chapter ${chapter.id}:`,
-                      err,
-                    );
-                    return { ...chapter, lessons: [] };
-                  }
-                }),
-              );
-
-              return { ...course, chapters: chaptersWithLessons };
-            } catch (err) {
-              console.error(`Lỗi tải chapters của course ${course.id}:`, err);
-              return { ...course, chapters: [] };
-            }
-          }),
-        );
-        console.log("coursesWithFullDetails", coursesWithFullDetails);
-        setTeacherCourses(coursesWithFullDetails);
-      }
+      setTeacherCourses(res.data);
     } catch (error) {
       uiDispatch({
         type: "SHOW_DIALOG",

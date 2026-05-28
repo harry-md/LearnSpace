@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
-import { Search, ShoppingCart, Menu, Globe, User } from "lucide-react";
+import React, { useContext, useEffect, useState } from "react";
+import { Search, ShoppingCart, Menu, Home, GraduationCap } from "lucide-react";
 import { Chip } from "@heroui/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   HoverCard,
   HoverCardTrigger,
@@ -42,13 +42,38 @@ const categories = [
 
 import { useLocation } from "react-router-dom";
 import AvatarMenu from "../AvatarMenu/AvatarMenu";
-import { UserContext } from "@/configs/Context";
+import { UIContext, UserContext } from "@/configs/Context";
+import Apis, { endpoints } from "@/configs/Apis";
 
 const Header = () => {
-  const location = useLocation();
-  const showCategories = location.pathname === "/home";
+  const nav = useNavigate();
   const [user] = useContext(UserContext);
+  const [, uiDispatch] = useContext(UIContext);
+  const [openAvatarMenu, setOpenAvatarMenu] = useState(false);
+  const [categories, setCategories] = useState([]);
 
+  const loadCategories = async () => {
+    try {
+      uiDispatch({ type: "SHOW_LOADING" });
+      const res = await Apis.get(endpoints.categories);
+      setCategories(res.data);
+    } catch (err) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Không thể tải danh mục",
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm w-full">
       <div className="flex items-center justify-between px-6 h-16 gap-4">
@@ -64,16 +89,59 @@ const Header = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-3xl hidden md:block relative">
-          <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder="Tìm kiếm nội dung bất kỳ"
-            className="w-full pl-11 pr-4 py-3 bg-gray-100 border-transparent rounded-full text-sm focus:outline-none focus:bg-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
-          />
+        <div className="flex-1 flex gap-4 min-w-0">
+          <div className="flex items-center min-w-0 flex-1">
+            <nav className="flex items-center gap-1 ms-2">
+              <Link
+                to="/"
+                className="group !no-underline flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 text-gray-600 hover:bg-purple-600 hover:text-white hover:shadow-md hover:shadow-purple-200"
+              >
+                <Home
+                  size={15}
+                  strokeWidth={2.2}
+                  className="transition-colors duration-200 group-hover:text-white"
+                />
+                <span className="transition-colors duration-200 group-hover:text-white">
+                  Trang chủ
+                </span>
+              </Link>
+              <Link
+                to="/learning"
+                className="group !no-underline flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 text-gray-600 hover:bg-purple-600 hover:text-white hover:shadow-md hover:shadow-purple-200"
+              >
+                <GraduationCap
+                  size={15}
+                  strokeWidth={2.2}
+                  className="transition-colors duration-200 group-hover:text-white"
+                />
+                <span className="transition-colors duration-200 group-hover:text-white">
+                  Học tập
+                </span>
+              </Link>
+            </nav>
+            <div className="flex-1 overflow-hidden min-w-0 ml-3">
+              <marquee behavior="scroll" direction="left" scrollamount="4">
+                <span className="text-xs font-medium text-[#1e1e1e] tracking-wide">
+                  Khám phá hàng nghìn khóa học chất lượng cao &nbsp;·&nbsp; Học
+                  từ các chuyên gia hàng đầu &nbsp;·&nbsp; Nâng cao kỹ năng,
+                  thay đổi sự nghiệp &nbsp;·&nbsp; Ưu đãi đặc biệt dành cho
+                  thành viên mới — Đăng ký ngay hôm nay! &nbsp;·&nbsp; Hơn
+                  10.000 học viên đang học cùng LearnSpace
+                </span>
+              </marquee>
+            </div>
+          </div>
+          <div className="max-w-3xl hidden md:block relative ml-auto">
+            <Search
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              size={18}
+            />
+            <input
+              type="text"
+              placeholder="Tìm kiếm nội dung bất kỳ"
+              className="w-full pl-11 pr-4 py-2 bg-gray-100 border-transparent rounded-full text-sm focus:outline-none focus:bg-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+            />
+          </div>
         </div>
 
         {/* Action Icons */}
@@ -152,36 +220,26 @@ const Header = () => {
           </HoverCard>
 
           {user ? (
-            <>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <Link className="!no-underline" to={"/profile"}>
-                    {user.avatar ? (
-                      <img
-                        src={user.avatar}
-                        className="w-9 h-9 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-purple-500 hover:ring-offset-2 transition-all"
-                        alt="Avatar"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-500 hover:ring-offset-2 transition-all">
-                        {(
-                          (user.firstName && user.firstName[0]) ||
-                          (user.username && user.username[0]) ||
-                          "U"
-                        ).toUpperCase()}
-                      </div>
-                    )}
-                  </Link>
-                </HoverCardTrigger>
-                <HoverCardContent
-                  className="w-[280px] p-0 bg-white border border-gray-200 rounded-lg shadow-xl"
-                  side="bottom"
-                  align="end"
-                >
-                  <AvatarMenu />
-                </HoverCardContent>
-              </HoverCard>
-            </>
+            <div className="relative w-10 h-10">
+              <div onClick={() => setOpenAvatarMenu(!openAvatarMenu)}>
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    className="w-9 h-9 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-purple-500 hover:ring-offset-2 transition-all"
+                    alt="Avatar"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-500 hover:ring-offset-2 transition-all">
+                    {(
+                      (user.firstName && user.firstName[0]) ||
+                      (user.username && user.username[0]) ||
+                      "U"
+                    ).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              {openAvatarMenu && <AvatarMenu />}
+            </div>
           ) : (
             <div className="flex items-center gap-3">
               <Link
@@ -201,16 +259,23 @@ const Header = () => {
         </div>
       </div>
 
-      {showCategories && (
-        <div className="hidden lg:flex items-center gap-3 py-3 border-t border-gray-100 bg-white overflow-x-auto px-6 scrollbar-hide">
-          {categories.map((category, index) => (
-            <Chip
-              key={index}
-              className="cursor-pointer whitespace-nowrap px-4 py-2 border border-gray-200 rounded-full text-gray-700 bg-white transition-all duration-300 hover:!bg-purple-600 hover:!border-purple-600 hover:!text-white hover:shadow-md hover:-translate-y-1"
-            >
-              {category}
-            </Chip>
-          ))}
+      {categories.length > 0 && (
+        <div className="border-t border-gray-100 bg-gray-50/60">
+          <div className="flex items-center justify-center gap-0.5 overflow-x-auto scrollbar-hide px-6 py-1.5">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() =>
+                  nav("/courses", {
+                    state: { categoryId: cat.id, categoryName: cat.name },
+                  })
+                }
+                className="!no-underline flex-shrink-0 px-3 py-1 !text-xs !font-medium text-gray-500 hover:text-purple-600 transition-colors duration-150 whitespace-nowrap rounded hover:bg-purple-50"
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </header>

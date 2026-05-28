@@ -20,7 +20,7 @@ const AvatarMenu = () => {
   };
 
   return (
-    <>
+    <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
       <div className="flex items-center gap-3 px-4 py-3 text-gray-900">
         {user && user.avatar ? (
           <img
@@ -115,7 +115,7 @@ const AvatarMenu = () => {
           Đăng xuất
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
