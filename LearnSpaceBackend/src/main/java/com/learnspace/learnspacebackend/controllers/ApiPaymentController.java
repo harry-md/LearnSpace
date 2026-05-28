@@ -34,7 +34,7 @@ public class ApiPaymentController {
         return ResponseEntity.ok(paymentService.capturePayment(paypalOrderId));
     }
 
-    @PostMapping("/payments/paypal/webhook")
+    @PostMapping("/payments/webhook")
     public ResponseEntity<Void> webhook(
             @RequestBody String payload, @RequestHeader Map<String, String> headers) {
         paymentService.handleWebhookEvent(payload, headers);

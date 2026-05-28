@@ -62,7 +62,7 @@ public class ApiSecurityConfigs {
                         .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/payments/*/capture")
                         .authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/payments/paypal/webhook")
+                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/lessons/*")
                         .authenticated()

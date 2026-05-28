@@ -49,7 +49,8 @@ public class CourseRepositoryImpl implements CourseRepository {
         String kw = params.get("kw");
         if (kw != null && !kw.isBlank()) {
             predicates.add(builder.like(
-                    builder.lower(root.get("name")), "%" + kw.trim().toLowerCase() + "%"));
+                    builder.lower(root.get("name")),
+                    String.format("%%%s%%", kw.trim().toLowerCase())));
         }
 
         String fromPrice = params.get("fromPrice");
@@ -90,7 +91,8 @@ public class CourseRepositoryImpl implements CourseRepository {
                     builder.concat(root.get("teacher").get("firstName"), " "),
                     root.get("teacher").get("lastName"));
             predicates.add(builder.like(
-                    builder.lower(fullName), "%" + teacherName.trim().toLowerCase() + "%"));
+                    builder.lower(fullName),
+                    String.format("%%%s%%", teacherName.trim().toLowerCase())));
         }
 
         return predicates;
