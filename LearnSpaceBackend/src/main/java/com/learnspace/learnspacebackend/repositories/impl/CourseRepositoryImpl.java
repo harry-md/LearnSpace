@@ -2,11 +2,16 @@ package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.pojo.Enrollment;
+import com.learnspace.learnspacebackend.pojo.Lesson;
+import com.learnspace.learnspacebackend.pojo.Review;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -34,14 +39,19 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Value("${course.pageSize}")
     private int COURSE_PAGE_SIZE_KEY;
 
-    private List<Predicate> filter(
-            CriteriaBuilder builder, Root<Course> root, Map<String, String> params) {
+    private List<Predicate> buildPredicates(
+            Map<String, String> params, CriteriaBuilder builder, Root<Course> root) {
         List<Predicate> predicates = new ArrayList<>();
+        if (params == null) {
+            return predicates;
+        }
 
         String kw = params.get("kw");
         if (kw != null && !kw.isBlank()) {
-            predicates.add(builder.like(root.get("name"), String.format("%%%s%%", kw)));
+            predicates.add(builder.like(
+                    builder.lower(root.get("name")), "%" + kw.trim().toLowerCase() + "%"));
         }
+
         String fromPrice = params.get("fromPrice");
         if (fromPrice != null && !fromPrice.isBlank()) {
             BigDecimal price = parsePrice(fromPrice);
@@ -57,6 +67,7 @@ public class CourseRepositoryImpl implements CourseRepository {
                 predicates.add(builder.lessThanOrEqualTo(root.get("price"), price));
             }
         }
+
         String categoryId = params.get("categoryId");
         if (categoryId != null && !categoryId.isBlank()) {
             Integer id = parseId(categoryId);
@@ -64,12 +75,14 @@ public class CourseRepositoryImpl implements CourseRepository {
                 predicates.add(builder.equal(root.get("category").get("id"), id));
             }
         }
-        String teacherId = params.get("teacherId");
-        if (teacherId != null && !teacherId.isBlank()) {
-            Integer id = parseId(teacherId);
-            if (id != null) {
-                predicates.add(builder.equal(root.get("teacher").as(Integer.class), id));
-            }
+
+        String teacherName = params.get("teacherName");
+        if (teacherName != null && !teacherName.isBlank()) {
+            Expression<String> fullName = builder.concat(
+                    builder.concat(root.get("teacher").get("firstName"), " "),
+                    root.get("teacher").get("lastName"));
+            predicates.add(builder.like(
+                    builder.lower(fullName), "%" + teacherName.trim().toLowerCase() + "%"));
         }
 
         return predicates;
@@ -78,49 +91,64 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Override
     public List<Object[]> getAllCourses(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = builder.createQuery(Object[].class);
+        Root<Course> root = q.from(Course.class);
 
-        String jpql = """
-            SELECT c,
-                   AVG(r.rating),
-                   SUM(CASE WHEN e.status IN ('ACTIVE', 'COMPLETED') THEN 1L ELSE 0L END),
-                   COUNT(DISTINCT ch.id),
-                   COUNT(DISTINCT l.id)
-            FROM Course c
-            JOIN FETCH c.category
-            JOIN FETCH c.teacher
-            LEFT JOIN Review r ON r.course = c
-            LEFT JOIN Enrollment e ON e.course = c
-            LEFT JOIN Chapter ch ON ch.course = c
-            LEFT JOIN Lesson l ON l.chapter.course = c
-            GROUP BY c
-            ORDER BY c.id DESC
-            """;
+        root.fetch("category", JoinType.INNER);
+        root.fetch("teacher", JoinType.INNER);
 
-        Query<Object[]> query = session.createQuery(jpql, Object[].class);
+        Join<Course, Enrollment> enrollmentJoin = root.join("enrollments", JoinType.LEFT);
+        Join<Course, Review> reviewJoin = root.join("reviews", JoinType.LEFT);
+        Join<Course, Chapter> chapterJoin = root.join("chapters", JoinType.LEFT);
+        Join<Chapter, Lesson> lessonJoin = chapterJoin.join("lessons", JoinType.LEFT);
 
-        if (params != null && params.containsKey("page")) {
+        Expression<Long> enrollmentExpr = builder.<Long>selectCase()
+                .when(enrollmentJoin.get("status").in("ACTIVE", "COMPLETED"), 1L)
+                .otherwise(0L);
+
+        q.multiselect(
+                root.alias("course"),
+                builder.avg(reviewJoin.get("rating")).alias("avgRating"),
+                builder.sum(enrollmentExpr).alias("enrollmentCount"),
+                builder.countDistinct(chapterJoin.get("id")).alias("chapterCount"),
+                builder.countDistinct(lessonJoin.get("id")).alias("lessonCount"));
+
+        List<Predicate> predicates = buildPredicates(params, builder, root);
+        if (!predicates.isEmpty()) {
+            q.where(builder.and(predicates.toArray(Predicate[]::new)));
+        }
+
+        q.groupBy(root);
+        q.orderBy(
+                builder.desc(builder.avg(reviewJoin.get("rating"))),
+                builder.desc(builder.sum(enrollmentExpr)));
+
+        Query<Object[]> query = session.createQuery(q);
+        if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
             int start = (page - 1) * COURSE_PAGE_SIZE_KEY;
             query.setFirstResult(start);
             query.setMaxResults(COURSE_PAGE_SIZE_KEY);
         }
-
         return query.getResultList();
     }
 
     public Long countCourses(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Long> q = builder.createQuery(Long.class);
-        Root<Course> root = q.from(Course.class);
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<Course> root = cq.from(Course.class);
 
-        q.select(builder.count(root));
+        cq.select(cb.countDistinct(root));
 
-        if (params != null) {
-            q.where(filter(builder, root, params).toArray(Predicate[]::new));
+        List<Predicate> predicates = buildPredicates(params, cb, root);
+        if (!predicates.isEmpty()) {
+            cq.where(cb.and(predicates.toArray(new Predicate[0])));
         }
 
-        return session.createQuery(q).getSingleResultOrNull();
+        Query<Long> query = session.createQuery(cq);
+        return query.getSingleResultOrNull();
     }
 
     private BigDecimal parsePrice(String price) {
