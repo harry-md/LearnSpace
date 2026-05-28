@@ -1,6 +1,5 @@
 package com.learnspace.learnspacebackend.configs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import org.springframework.cache.CacheManager;
@@ -49,11 +48,6 @@ public class WebAppContextConfigs implements WebMvcConfigurer {
     @Bean
     public StandardServletMultipartResolver multipartResolver() {
         return new StandardServletMultipartResolver();
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
     }
 
     @Bean
