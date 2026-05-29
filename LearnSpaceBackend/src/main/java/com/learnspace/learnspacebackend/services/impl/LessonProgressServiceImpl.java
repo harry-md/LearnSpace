@@ -7,6 +7,7 @@ import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
+import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
@@ -62,8 +63,8 @@ public class LessonProgressServiceImpl implements LessonProgressService {
 
         Course course = lesson.getChapter().getCourse();
         int userId = getLoggedInPrincipal().getId();
-        Enrollment enrollment =
-                enrollmentRepository.getEnrollmentByStudentAndCourse(userId, course.getId());
+        Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
+                userId, course.getId(), EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED);
 
         if (enrollment == null) {
             throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
@@ -94,8 +95,8 @@ public class LessonProgressServiceImpl implements LessonProgressService {
 
         Course course = lesson.getChapter().getCourse();
         int userId = getLoggedInPrincipal().getId();
-        Enrollment enrollment =
-                enrollmentRepository.getEnrollmentByStudentAndCourse(userId, course.getId());
+        Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
+                userId, course.getId(), EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED);
 
         if (enrollment == null) {
             throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
@@ -127,8 +128,8 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     public CourseProgressDto getCourseProgress(int courseId) {
         int userId = getLoggedInPrincipal().getId();
 
-        Enrollment enrollment =
-                enrollmentRepository.getEnrollmentByStudentAndCourse(userId, courseId);
+        Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
+                userId, courseId, EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED);
         if (enrollment == null) {
             throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
         }

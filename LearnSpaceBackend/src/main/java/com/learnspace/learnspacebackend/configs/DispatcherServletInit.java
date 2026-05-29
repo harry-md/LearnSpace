@@ -29,8 +29,8 @@ public class DispatcherServletInit extends AbstractAnnotationConfigDispatcherSer
     @Override
     protected void customizeRegistration(ServletRegistration.Dynamic registration) {
         String location = "/tmp";
-        long maxFileSize = 500 * 1024 * 1024;
-        long maxRequestSize = 500 * 1024 * 1024;
+        long maxFileSize = 1000 * 1024 * 1024;
+        long maxRequestSize = 1000 * 1024 * 1024;
         int fileSizeThreshold = 0;
         registration.setMultipartConfig(new MultipartConfigElement(
                 location, maxFileSize, maxRequestSize, fileSizeThreshold));

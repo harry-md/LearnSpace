@@ -83,7 +83,7 @@ public class Chapter {
         this.order = order;
     }
 
-    public boolean getFree() {
+    public boolean isFree() {
         return free;
     }
 
@@ -129,9 +129,5 @@ public class Chapter {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public boolean isFree() {
-        return free;
     }
 }

@@ -1,12 +1,12 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
-import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
+import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -15,6 +15,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -57,7 +58,8 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     }
 
     @Override
-    public Enrollment getEnrollmentByStudentAndCourse(int studentId, int courseId) {
+    public Enrollment getEnrollmentByStudentAndCourse(
+            int studentId, int courseId, EnrollmentStatus... statuses) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
@@ -66,32 +68,20 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
         root.fetch("course");
         root.fetch("student");
 
-        q.select(root)
-                .where(builder.and(
-                        builder.equal(root.get("student").get("id"), studentId),
-                        builder.equal(root.get("course").get("id"), courseId),
-                        root.get("status").in("ACTIVE", "COMPLETED")));
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(builder.equal(root.get("student").get("id"), studentId));
+        predicates.add(builder.equal(root.get("course").get("id"), courseId));
+
+        if (statuses != null && statuses.length > 0) {
+            CriteriaBuilder.In<EnrollmentStatus> inClause = builder.in(root.get("status"));
+            for (EnrollmentStatus status : statuses) {
+                inClause.value(status);
+            }
+            predicates.add(inClause);
+        }
+
+        q.select(root).where(builder.and(predicates.toArray(Predicate[]::new)));
         return session.createQuery(q).getSingleResultOrNull();
-    }
-
-    @Override
-    public List<Enrollment> getEnrollmentsByStudentId(int studentId) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
-
-        Root<Enrollment> root = q.from(Enrollment.class);
-        root.fetch("student");
-
-        Fetch<Enrollment, Course> fetchCourse = root.fetch("course");
-        fetchCourse.fetch("category");
-        fetchCourse.fetch("teacher");
-
-        q.select(root)
-                .where(builder.and(
-                        builder.equal(root.get("student").get("id"), studentId),
-                        root.get("status").in("ACTIVE", "COMPLETED")));
-        return session.createQuery(q).getResultList();
     }
 
     @Override
@@ -114,18 +104,7 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     }
 
     @Override
-    public Enrollment getEnrollmentByIdAllStatus(int enrollmentId) {
-        Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.course"
-                                + " WHERE e.id = :id",
-                        Enrollment.class)
-                .setParameter("id", enrollmentId)
-                .getSingleResultOrNull();
-    }
-
-    @Override
-    public Long countEnrollmentsByCourseId(int courseId) {
+    public Long countEnrollmentsByCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery(
                         "SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId"
