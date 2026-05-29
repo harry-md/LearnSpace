@@ -3,6 +3,7 @@ package com.learnspace.learnspacebackend.controllers;
 import com.learnspace.learnspacebackend.dtos.course.CourseDto;
 import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
+import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.services.CourseService;
 
 import jakarta.validation.Valid;
@@ -63,7 +64,7 @@ public class ApiCourseController {
     }
 
     @GetMapping("/my-courses")
-    public ResponseEntity<List<CourseDto>> getEnrolledCourses() {
+    public ResponseEntity<List<MyCourseListDto>> getEnrolledCourses() {
         return ResponseEntity.ok(courseService.getEnrolledCourses());
     }
 }

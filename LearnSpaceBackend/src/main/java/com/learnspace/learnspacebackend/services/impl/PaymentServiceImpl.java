@@ -51,8 +51,8 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public CheckoutResponseDto checkout(List<CartDto> cartItems) {
-        if (cartItems == null || cartItems.isEmpty()) {
+    public CheckoutResponseDto checkout(List<CartDto> carts) {
+        if (carts == null || carts.isEmpty()) {
             throw new IllegalArgumentException("Giỏ hàng trống");
         }
 
@@ -65,10 +65,10 @@ public class PaymentServiceImpl implements PaymentService {
         BigDecimal totalVnd = BigDecimal.ZERO;
         List<Payment> payments = new ArrayList<>();
 
-        for (CartDto item : cartItems) {
-            Course course = courseRepository.getCourseById(item.courseId());
+        for (CartDto c : carts) {
+            Course course = courseRepository.getCourseById(c.courseId());
             if (course == null) {
-                throw new ResourceNotFoundException("Không tìm thấy khóa học #" + item.courseId());
+                throw new ResourceNotFoundException("Không tìm thấy khóa học #" + c.courseId());
             }
 
             if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
@@ -76,19 +76,35 @@ public class PaymentServiceImpl implements PaymentService {
                         "Khóa học " + course.getName() + " miễn phí, không cần thanh toán");
             }
 
-            if (enrollmentRepository.checkValidEnrollment(student.getId(), course.getId())) {
-                throw new IllegalArgumentException(
-                        "Bạn đã đăng ký khóa học " + course.getName() + " rồi");
+            Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
+                    student.getId(), course.getId());
+
+            Payment payment = null;
+
+            if (enrollment != null) {
+                if (enrollment.getStatus() == EnrollmentStatus.ACTIVE
+                        || enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
+                    throw new IllegalArgumentException(
+                            "Bạn đã đăng ký khóa học " + course.getName() + " rồi");
+                }
+
+                enrollment.setStatus(EnrollmentStatus.PENDING);
+                enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
+
+                payment = paymentRepository.getPaymentByEnrollmentId(enrollment.getId());
+            } else {
+                enrollment = new Enrollment();
+                enrollment.setStudent(student);
+                enrollment.setCourse(course);
+                enrollment.setStatus(EnrollmentStatus.PENDING);
+                enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
             }
 
-            Enrollment enrollment = new Enrollment();
-            enrollment.setStudent(student);
-            enrollment.setCourse(course);
-            enrollment.setStatus(EnrollmentStatus.PENDING);
-            enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
+            if (payment == null) {
+                payment = new Payment();
+                payment.setEnrollment(enrollment);
+            }
 
-            Payment payment = new Payment();
-            payment.setEnrollment(enrollment);
             payment.setVndAmount(course.getPrice());
             payment.setStatus(PaymentStatus.PENDING);
 
@@ -109,7 +125,7 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setUsdAmount(usdForThis);
         }
 
-        String description = "Thanh toán " + cartItems.size() + " khóa học trên LearnSpace";
+        String description = "Thanh toán " + carts.size() + " khóa học trên LearnSpace";
         Map<String, String> orderResponse = paypalService.createOrder(totalUsd, description);
         String orderId = orderResponse.get("orderId");
         String approvalUrl = orderResponse.get("approvalUrl");
