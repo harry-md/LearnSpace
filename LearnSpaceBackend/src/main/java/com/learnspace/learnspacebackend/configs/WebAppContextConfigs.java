@@ -1,7 +1,10 @@
 package com.learnspace.learnspacebackend.configs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -12,13 +15,17 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.concurrent.TimeUnit;
+
 @Configuration
-@EnableWebMvc
 @EnableTransactionManagement
+@EnableWebMvc
+@EnableCaching
 @ComponentScan(
         basePackages = {
             "com.learnspace.learnspacebackend.controllers",
             "com.learnspace.learnspacebackend.repositories",
+            "com.learnspace.learnspacebackend.configs",
             "com.learnspace.learnspacebackend.services",
             "com.learnspace.learnspacebackend.mappers",
             "com.learnspace.learnspacebackend.exceptions",
@@ -44,7 +51,11 @@ public class WebAppContextConfigs implements WebMvcConfigurer {
     }
 
     @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+    public CacheManager cacheManager() {
+        CaffeineCacheManager cacheManager =
+                new CaffeineCacheManager("paypalAccessToken", "exchangeRate");
+        cacheManager.setCaffeine(
+                Caffeine.newBuilder().expireAfterWrite(9, TimeUnit.HOURS).maximumSize(1));
+        return cacheManager;
     }
 }

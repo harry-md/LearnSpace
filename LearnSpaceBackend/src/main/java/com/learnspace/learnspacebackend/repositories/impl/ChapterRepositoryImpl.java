@@ -3,9 +3,9 @@ package com.learnspace.learnspacebackend.repositories.impl;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 
-import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -24,15 +24,6 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     private LocalSessionFactoryBean factory;
 
     @Override
-    public List<Chapter> getChaptersByCourse(int courseId) {
-        Session session = factory.getObject().getCurrentSession();
-        Query q = session.createQuery(
-                "FROM Chapter c WHERE c.course.id = :courseId ORDER BY c.order", Chapter.class);
-        q.setParameter("courseId", courseId);
-        return q.getResultList();
-    }
-
-    @Override
     public Chapter getChapterById(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -40,6 +31,8 @@ public class ChapterRepositoryImpl implements ChapterRepository {
 
         Root<Chapter> root = q.from(Chapter.class);
         root.fetch("course");
+        root.fetch("lessons", JoinType.LEFT);
+
         q.select(root).where(builder.equal(root.get("id"), chapterId));
 
         return session.createQuery(q).getSingleResultOrNull();
@@ -72,6 +65,21 @@ public class ChapterRepositoryImpl implements ChapterRepository {
         if (chapter != null) {
             session.remove(chapter);
         }
+    }
+
+    @Override
+    public List<Chapter> getChaptersByCourse(int courseId) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Chapter> q = builder.createQuery(Chapter.class);
+
+        Root<Chapter> root = q.from(Chapter.class);
+
+        q.select(root)
+                .where(builder.equal(root.get("course").get("id"), courseId))
+                .orderBy(builder.asc(root.get("order")));
+
+        return session.createQuery(q).getResultList();
     }
 
     @Override

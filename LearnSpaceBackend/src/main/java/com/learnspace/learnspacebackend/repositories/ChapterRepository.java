@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface ChapterRepository {
 
-    List<Chapter> getChaptersByCourse(int courseId);
-
     Chapter getChapterById(int chapterId);
 
     boolean existChapter(int chapterId);
@@ -15,6 +13,8 @@ public interface ChapterRepository {
     Chapter createOrUpdate(Chapter chapter);
 
     void deleteChapter(int chapterId);
+
+    List<Chapter> getChaptersByCourse(int courseId);
 
     Integer getMaxOrder(int courseId);
 }

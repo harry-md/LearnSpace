@@ -41,6 +41,8 @@ public class Enrollment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public Enrollment() {}
+
     public Integer getId() {
         return id;
     }

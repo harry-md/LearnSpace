@@ -10,17 +10,18 @@ import {
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const AvatarMenu = () => {
+const AvatarMenu = ({ onClose }) => {
   const [user, userDispatcher] = useContext(UserContext);
   const nav = useNavigate();
 
   const handleLogout = () => {
     userDispatcher({ type: "LOGOUT", payload: null });
     nav("/");
+    onClose?.();
   };
 
   return (
-    <>
+    <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
       <div className="flex items-center gap-3 px-4 py-3 text-gray-900">
         {user && user.avatar ? (
           <img
@@ -54,6 +55,7 @@ const AvatarMenu = () => {
         <div className="py-1.5 font-normal">
           <Link
             to="/teacher"
+            onClick={onClose}
             className="flex items-center gap-3 py-2.5 px-4 text-[13px] !text-[#2d2f31] hover:!bg-gray-50 hover:!text-purple-600 transition-colors !no-underline cursor-pointer"
           >
             <GraduationCap size={16} />
@@ -65,6 +67,7 @@ const AvatarMenu = () => {
       <div className="py-1.5 font-normal">
         <Link
           to="/learning"
+          onClick={onClose}
           className="flex items-center gap-3 py-2.5 px-4 text-[13px] !text-[#2d2f31] hover:!bg-gray-50 hover:!text-purple-600 transition-colors !no-underline cursor-pointer"
         >
           <BookOpen size={16} />
@@ -73,7 +76,8 @@ const AvatarMenu = () => {
         <hr className="border-gray-150 m-0" />
         <Link
           to={"/cart"}
-          className="flex items-center gap-3 py-2.5 px-4 text-[13px] !text-purple-600 bg-purple-50/30 hover:!bg-purple-50 hover:!text-purple-700 transition-colors font-medium !no-underline"
+          onClick={onClose}
+          className="flex items-center gap-3 py-2.5 px-4 text-[13px] !text-[#2d2f31] hover:!bg-gray-50 hover:!text-purple-600 transition-colors !no-underline cursor-pointer"
         >
           <ShoppingCart size={16} />
           Giỏ hàng của tôi
@@ -85,6 +89,7 @@ const AvatarMenu = () => {
       <div className="py-1.5 font-normal">
         <Link
           to="#"
+          onClick={onClose}
           className="flex items-center gap-3 py-2.5 px-4 text-[13px] !text-[#2d2f31] hover:!bg-gray-50 hover:!text-purple-600 transition-colors !no-underline"
         >
           <History size={16} />
@@ -97,14 +102,13 @@ const AvatarMenu = () => {
       <div className="py-1.5 font-normal">
         <Link
           to="/profile"
+          onClick={onClose}
           className="flex items-center cursor-pointer gap-3 py-2.5 px-4 text-[13px] !text-[#2d2f31] hover:!bg-gray-50 hover:!text-purple-600 transition-colors !no-underline"
         >
           <User size={16} />
           Hồ sơ công khai
         </Link>
       </div>
-
-      <hr className="border-gray-150 m-0" />
 
       <div className="py-1.5 font-normal">
         <div
@@ -115,7 +119,7 @@ const AvatarMenu = () => {
           Đăng xuất
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

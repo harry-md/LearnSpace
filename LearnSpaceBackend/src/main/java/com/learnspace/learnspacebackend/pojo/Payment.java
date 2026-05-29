@@ -27,20 +27,20 @@ public class Payment {
 
     @NotNull
     @ColumnDefault("0.00")
-    @Column(name = "amount", nullable = false, precision = 19, scale = 2)
-    private BigDecimal amount;
+    @Column(name = "usd_amount", nullable = false, precision = 19, scale = 2)
+    private BigDecimal usdAmount;
 
     @NotNull
     @ColumnDefault("0.00")
-    @Column(name = "original_amount", nullable = false, precision = 19, scale = 2)
-    private BigDecimal originalAmount;
+    @Column(name = "vnd_amount", nullable = false, precision = 19, scale = 2)
+    private BigDecimal vndAmount;
 
-    @Size(max = 10)
+    @Size(max = 3)
     @ColumnDefault("'USD'")
     @Column(name = "currency", length = 10)
     private String currency = "USD";
 
-    @Size(max = 10)
+    @Size(max = 3)
     @ColumnDefault("'VND'")
     @Column(name = "original_currency", length = 10)
     private String originalCurrency = "VND";
@@ -66,6 +66,8 @@ public class Payment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public Payment() {}
+
     public Integer getId() {
         return id;
     }
@@ -74,12 +76,28 @@ public class Payment {
         this.id = id;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public Enrollment getEnrollment() {
+        return enrollment;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
+    public void setEnrollment(Enrollment enrollment) {
+        this.enrollment = enrollment;
+    }
+
+    public BigDecimal getUsdAmount() {
+        return usdAmount;
+    }
+
+    public void setUsdAmount(BigDecimal usdAmount) {
+        this.usdAmount = usdAmount;
+    }
+
+    public BigDecimal getVndAmount() {
+        return vndAmount;
+    }
+
+    public void setVndAmount(BigDecimal vndAmount) {
+        this.vndAmount = vndAmount;
     }
 
     public String getCurrency() {
@@ -88,14 +106,6 @@ public class Payment {
 
     public void setCurrency(String currency) {
         this.currency = currency;
-    }
-
-    public BigDecimal getOriginalAmount() {
-        return originalAmount;
-    }
-
-    public void setOriginalAmount(BigDecimal originalAmount) {
-        this.originalAmount = originalAmount;
     }
 
     public String getOriginalCurrency() {
@@ -144,13 +154,5 @@ public class Payment {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public Enrollment getEnrollment() {
-        return enrollment;
-    }
-
-    public void setEnrollment(Enrollment enrollment) {
-        this.enrollment = enrollment;
     }
 }

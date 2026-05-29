@@ -51,7 +51,7 @@
   cursor: pointer;
   text-align: left;
   width: 100%;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   transition: all 0.15s;
 }
 
@@ -83,7 +83,7 @@
   border-radius: 14px;
   border: 1px solid #e5e7eb;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: opacity 0.2s;
 }
 
@@ -192,7 +192,9 @@
   gap: 12px;
   padding: 12px 20px 12px 28px;
   border-bottom: 1px solid #f9fafb;
-  transition: background 0.15s, opacity 0.2s;
+  transition:
+    background 0.15s,
+    opacity 0.2s;
   background: transparent;
 }
 
@@ -251,9 +253,8 @@
   background: transparent;
   cursor: pointer;
   color: #3b82f6;
-  opacity: 0.4;
   border-radius: 4px;
-  transition: opacity 0.15s, background 0.15s;
+  transition: background 0.15s;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -261,7 +262,6 @@
 }
 
 .btn-lesson-edit:hover {
-  opacity: 1;
   background: rgba(59, 130, 246, 0.1);
 }
 
@@ -271,9 +271,8 @@
   background: transparent;
   cursor: pointer;
   color: #ef4444;
-  opacity: 0.4;
   border-radius: 4px;
-  transition: opacity 0.15s, background 0.15s;
+  transition: background 0.15s;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -281,7 +280,6 @@
 }
 
 .btn-lesson-delete:hover {
-  opacity: 1;
   background: rgba(239, 68, 68, 0.1);
 }
 
@@ -316,7 +314,9 @@
   color: #6b7280;
   opacity: 0.4;
   border-radius: 4px;
-  transition: opacity 0.15s, background 0.15s;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
   flex-shrink: 0;
   display: flex;
   align-items: center;

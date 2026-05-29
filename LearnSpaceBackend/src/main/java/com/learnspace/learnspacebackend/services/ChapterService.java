@@ -1,15 +1,9 @@
 package com.learnspace.learnspacebackend.services;
 
-import com.learnspace.learnspacebackend.dtos.ChapterDto;
-import com.learnspace.learnspacebackend.dtos.ChapterPatchDto;
-
-import java.util.List;
+import com.learnspace.learnspacebackend.dtos.chapter.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.chapter.ChapterPatchDto;
 
 public interface ChapterService {
-
-    List<ChapterDto> getChapters(int courseId);
-
-    ChapterDto getChapter(int chapterId);
 
     ChapterDto createChapter(int courseId, ChapterDto chapterDto);
 

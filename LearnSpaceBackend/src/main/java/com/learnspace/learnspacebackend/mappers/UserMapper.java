@@ -1,7 +1,8 @@
 package com.learnspace.learnspacebackend.mappers;
 
-import com.learnspace.learnspacebackend.dtos.UserProfileDto;
-import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
+import com.learnspace.learnspacebackend.dtos.user.SimpleUserDto;
+import com.learnspace.learnspacebackend.dtos.user.UserProfileDto;
+import com.learnspace.learnspacebackend.dtos.user.UserRegisterDto;
 import com.learnspace.learnspacebackend.pojo.User;
 
 import org.mapstruct.Mapper;
@@ -14,4 +15,9 @@ public interface UserMapper {
 
     @Mapping(target = "avatar", ignore = true)
     User toEntity(UserRegisterDto dto);
+
+    @Mapping(target = "fullName", expression = "java(teacher.getFullName())")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "avatar", source = "avatar")
+    SimpleUserDto toSimpleUserDto(User teacher);
 }

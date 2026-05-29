@@ -1,8 +1,7 @@
 package com.learnspace.learnspacebackend.repositories;
 
 import com.learnspace.learnspacebackend.pojo.Enrollment;
-
-import java.util.List;
+import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 
 public interface EnrollmentRepository {
 
@@ -14,9 +13,8 @@ public interface EnrollmentRepository {
 
     void deleteEnrollment(int enrollmentId);
 
-    Enrollment getEnrollmentByStudentAndCourse(int studentId, int courseId);
+    Enrollment getEnrollmentByStudentAndCourse(
+            int studentId, int courseId, EnrollmentStatus... statuses);
 
-    List<Enrollment> getEnrollmentsByStudentId(int studentId);
-
-    Enrollment getEnrollmentByIdAllStatus(int enrollmentId);
+    Long countEnrollmentsByCourse(int courseId);
 }

@@ -1,7 +1,7 @@
 package com.learnspace.learnspacebackend.services.impl;
 
-import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
-import com.learnspace.learnspacebackend.dtos.EnrollmentDto;
+import com.learnspace.learnspacebackend.dtos.enrollment.EnrollmentDto;
+import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.EnrollmentMapper;
 import com.learnspace.learnspacebackend.pojo.Course;
@@ -17,12 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
 @Service
+@Transactional
 public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Autowired
@@ -57,19 +57,12 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public List<EnrollmentDto> getMyEnrollments() {
-        CustomUserDetails principal = getLoggedInPrincipal();
-        List<Enrollment> enrollments = enrollmentRepository.getEnrollmentsByStudentId(principal.getId());
-        return enrollments.stream().map(enrollmentMapper::toDto).toList();
-    }
-
-    @Override
     public EnrollmentDto createEnrollment(int courseId) {
         CustomUserDetails principal = getLoggedInPrincipal();
         User student = userRepository.getUserById(principal.getId());
 
         if (student == null) {
-            throw new ResourceNotFoundException("Không tìm thấy thông tin tài khoản của bạn.");
+            throw new ResourceNotFoundException("Không tìm thấy thông tin tài khoản của bạn");
         }
 
         Course course = courseRepository.getCourseById(courseId);
@@ -87,7 +80,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
             enrollment.setStatus(EnrollmentStatus.ACTIVE);
         } else {
-            enrollment.setStatus(EnrollmentStatus.PENDING);
+            throw new RuntimeException(
+                    "Khóa học có phí. Vui lòng thêm vào giỏ hàng và thanh toán để học");
         }
 
         return enrollmentMapper.toDto(enrollmentRepository.addOrUpdateEnrollment(enrollment));

@@ -1,6 +1,6 @@
 package com.learnspace.learnspacebackend.filters;
 
-import com.learnspace.learnspacebackend.dtos.CustomUserDetails;
+import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.utils.JwtUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 

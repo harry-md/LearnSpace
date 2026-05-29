@@ -73,6 +73,8 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public User() {}
+
     public Integer getId() {
         return id;
     }

@@ -1,79 +1,132 @@
-import { Star, StarHalf } from "lucide-react";
+import { ShoppingCart, Star, Users, BookOpen } from "lucide-react";
+
+import { Link } from "react-router-dom";
 import {
   HoverCard,
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
+import { useContext } from "react";
+import { CartContext, UIContext } from "@/configs/Context";
+import CourseHoverDetail from "../CourseHoverDetail/CourseHoverDetail";
 
-const CourseCard = ({ course, children }) => {
-  return (
-    <HoverCard className="flex h-full">
-      <HoverCardTrigger asChild>
-        <div className="min-w-[280px] w-[280px] h-full cursor-pointer snap-start flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-          <div className="w-full h-[155px] overflow-hidden relative">
+const CourseCard = ({ course }) => {
+  const [uiState] = useContext(UIContext);
+  const [cart, cartDispatch] = useContext(CartContext);
+
+  const handleAddToCart = (course) => {
+    cartDispatch({ type: "ADD_COURSE", payload: course });
+  };
+  const displayPrice =
+    course.price != null
+      ? course.price === 0
+        ? "Miễn phí"
+        : `${Number(course.price).toLocaleString("vi-VN")} VNĐ`
+      : "";
+
+  const cardContent = (
+    <Link
+      to={`/course/${course.id}`}
+      className="!no-underline min-w-[280px] w-[280px] h-full cursor-pointer snap-start flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group/card"
+    >
+      <div className="w-full h-[155px] overflow-hidden relative bg-slate-100 shrink-0">
+        <img
+          src={course.image}
+          alt={course.name}
+          className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500"
+        />
+        {course.category && (
+          <span className="absolute top-2.5 left-2.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-600/90 text-white">
+            {course.category.name}
+          </span>
+        )}
+      </div>
+
+      <div className="p-4 flex flex-col flex-1 gap-2">
+        <div className="font-extrabold text-gray-900 text-[14px] leading-snug line-clamp-2 group-hover/card:text-purple-700 transition-colors">
+          {course.name}
+        </div>
+
+        {course.teacher && (
+          <div className="flex items-center gap-2">
             <img
-              src={course.image}
-              alt={course.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              src={course.teacher.avatar}
+              alt={course.teacher.fullName}
+              className="w-5 h-5 rounded-full object-cover border border-gray-200"
             />
-            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </div>
-
-          <div className="p-3 flex flex-col flex-1">
-            <div className="font-bold text-gray-900 text-base leading-snug line-clamp-2 mb-2 group-hover:text-purple-700 transition-colors">
-              {course.title}
-            </div>
-
-            <span className="text-xs text-gray-500 mb-3 font-medium cursor-pointer hover:underline hover:text-purple-600 w-fit">
-              {course.author}
+            <span className="text-xs text-gray-500 truncate">
+              {course.teacher.fullName}
             </span>
+          </div>
+        )}
 
-            <div className="flex items-center gap-1.5 mb-3">
-              <span className="font-bold text-orange-700 text-sm">
-                {course.rating}
-              </span>
-              <div className="flex text-orange-400">
-                <Star size={14} fill="currentColor" />
-                <Star size={14} fill="currentColor" />
-                <Star size={14} fill="currentColor" />
-                <Star size={14} fill="currentColor" />
-                <StarHalf size={14} fill="currentColor" />
-              </div>
-              <span className="text-xs text-gray-400 font-medium">
-                ({course.reviews})
-              </span>
-            </div>
-
-            <div className="mt-auto">
-              <div className="flex items-end gap-2 mb-3">
-                <span className="font-extrabold text-lg text-gray-900">
-                  {course.price}
-                </span>
-                {course.originalPrice && (
-                  <span className="text-sm text-gray-400 line-through mb-0.5">
-                    {course.originalPrice}
+        <div className="flex items-center gap-3 text-[11px] text-gray-400">
+          <span className="flex items-center gap-1">
+            <Users size={11} />
+            {(course.enrollmentCount ?? 0).toLocaleString()} học viên
+          </span>
+          <span className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
+              {course.avgRating != null ? (
+                <>
+                  <span className="text-xs font-bold text-amber-600">
+                    {Number(course.avgRating).toFixed(1)}
                   </span>
-                )}
-              </div>
-
-              {course.badges && course.badges.length > 0 && (
-                <div className="flex gap-2">
-                  {course.badges.map((badge, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 bg-[#eceb98] text-[#3d3c0a] text-xs font-bold rounded-md tracking-tight"
-                    >
-                      {badge}
-                    </span>
-                  ))}
-                </div>
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        size={11}
+                        className={
+                          s <= Math.round(course.avgRating)
+                            ? "text-amber-400 fill-amber-400"
+                            : "text-gray-200 fill-gray-200"
+                        }
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <span className="text-[11px] text-gray-400 italic">
+                  Chưa có đánh giá
+                </span>
               )}
             </div>
-          </div>
+          </span>
         </div>
-      </HoverCardTrigger>
-      <HoverCardContent side="right" align="center" className="w-[360px] p-4">
-        {children}
+
+        <div className="mt-auto flex items-center justify-between pt-1">
+          <span
+            className={`font-black text-[17px] ${
+              course.price === 0 ? "text-emerald-600" : "text-orange-600"
+            }`}
+          >
+            {displayPrice}
+          </span>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleAddToCart(course);
+            }}
+            className="p-2 bg-purple-50 hover:bg-purple-100 text-[#5624d0] hover:text-[#4712c4] rounded-lg transition-colors border border-purple-100 flex items-center justify-center cursor-pointer shadow-sm active:scale-95 shrink-0"
+          >
+            <ShoppingCart size={16} />
+          </button>
+        </div>
+      </div>
+    </Link>
+  );
+
+  return (
+    <HoverCard>
+      <HoverCardTrigger asChild>{cardContent}</HoverCardTrigger>
+      <HoverCardContent
+        className="w-auto p-0 border-0 shadow-none bg-transparent"
+        side="right"
+        align="start"
+      >
+        <CourseHoverDetail course={course} />
       </HoverCardContent>
     </HoverCard>
   );

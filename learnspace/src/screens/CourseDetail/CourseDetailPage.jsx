@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   ChevronDown,
@@ -14,70 +14,74 @@ import {
   Clock,
   Heart,
   ShoppingCart,
+  GraduationCap,
 } from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
-import { UserContext } from "@/configs/Context";
-import ProtectLessonDisplay from "./ProtectLessonDisplay";
+import { UIContext, UserContext } from "@/configs/Context";
+import ProtectLessonDisplay from "./ProtectLessonDisplay/ProtectLessonDisplay";
+import useLessonProcess from "@/hooks/useLessonProcess";
 
 const CourseDetailPage = () => {
   const { id } = useParams();
   const [user] = useContext(UserContext);
+  const { lessonProgress, getLessonProgress } = useLessonProcess();
 
   const [courseDetails, setCourseDetails] = useState({ chapters: [] });
-  const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState(null);
   const [showLessonModal, setShowLessonModal] = useState(false);
+  const [, uiDispatch] = useContext(UIContext);
+  const nav = useNavigate();
+
+  const enrollFreeCourse = async () => {
+    try {
+      uiDispatch({ type: "SHOW_LOADING" });
+      const res = await authApis(user.token).post(
+        endpoints.enrollFreeCourse(id),
+      );
+      if (res.data && res.data.id) {
+        uiDispatch({
+          type: "SHOW_DIALOG",
+          payload: {
+            title: "Thành công",
+            message: "Đã đăng ký khóa học thành công",
+            type: "success",
+          },
+        });
+      }
+    } catch (err) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Lỗi khi đăng ký khóa học",
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
+  };
 
   const loadCourseDetails = async () => {
-    setLoading(true);
-    setNotFound(false);
+    uiDispatch({ type: "SHOW_LOADING" });
     try {
       const res = await Apis.get(`${endpoints.courses}/${id}`);
       if (res.data && res.data.id) {
         const course = res.data;
 
-        // 1. Fetch chapters
-        const chapterRes = await Apis.get(endpoints.course_chapter(id));
-        const chaptersList = chapterRes.data || [];
-
-        // 2. Fetch lessons for each chapter in parallel
-        const chaptersWithLessons = await Promise.all(
-          chaptersList.map(async (chapter) => {
-            try {
-              const lessonRes = await Apis.get(
-                endpoints.chapter_lesson(chapter.id),
-              );
-              return { ...chapter, lessons: lessonRes.data || [] };
-            } catch (err) {
-              console.error(
-                `Lỗi khi tải bài học của chapter ${chapter.id}:`,
-                err,
-              );
-              return { ...chapter, lessons: [] };
-            }
-          }),
-        );
-
-        // 3. Set courseDetails with nested chapters and lessons
-        setCourseDetails({
-          ...course,
-          chapters: chaptersWithLessons,
-        });
-        console.log({
-          ...course,
-          chapters: chaptersWithLessons,
-        });
+        setCourseDetails(course);
+        console.log(course);
 
         // 4. Check enrollment status
         if (user && user.token) {
           try {
             const enrollRes = await authApis(user.token).get(
-              endpoints.enrolled_courses,
+              endpoints.enrolledCourses,
             );
             const enrolledList = enrollRes.data;
-            const enrolled = enrolledList.some((c) => c.courseId == id);
+            const enrolled = enrolledList.some((c) => c.id == id);
             setIsEnrolled(enrolled);
           } catch (enrollErr) {
             console.error("Lỗi khi check enroll:", enrollErr);
@@ -90,24 +94,24 @@ const CourseDetailPage = () => {
         setNotFound(true);
       }
     } catch (error) {
-      console.error("Lỗi khi load chi tiết khóa học:", error);
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message:
+            error.response?.data?.message || "Lỗi khi tải chi tiết khóa học",
+          type: "error",
+        },
+      });
       setNotFound(true);
     } finally {
-      setLoading(false);
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 
   useEffect(() => {
     loadCourseDetails();
   }, [id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#5624d0]"></div>
-      </div>
-    );
-  }
 
   if (notFound) {
     return (
@@ -191,7 +195,7 @@ const CourseDetailPage = () => {
             <p className="text-sm text-gray-300 mb-2">
               Tạo bởi{" "}
               <span className="text-purple-400 underline cursor-pointer hover:text-purple-300 transition-colors">
-                {courseDetails.teacherName}
+                {courseDetails.teacher?.fullName}
               </span>
             </p>
 
@@ -224,10 +228,10 @@ const CourseDetailPage = () => {
 
               <div className="relative rounded-xl overflow-hidden shadow-lg aspect-video bg-black border border-gray-200">
                 <video
-                  src="https://www.w3schools.com/html/mov_bbb.mp4"
+                  src={courseDetails.introVideo}
                   controls
                   className="w-full h-full object-cover"
-                  poster="https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg"
+                  poster={courseDetails.image}
                 />
               </div>
             </section>
@@ -266,6 +270,9 @@ const CourseDetailPage = () => {
                     <div className="text-xs text-gray-500 shrink-0 text-right">
                       {chapter.lessons?.length || 0} bài giảng
                     </div>
+                    <div className="text-xs text-gray-500 shrink-0 text-left ml-5 whitespace-pre-wrap">
+                      {chapter.description}
+                    </div>
                   </summary>
                   <div className="divide-y divide-gray-100 border-t border-gray-200">
                     {chapter.lessons && chapter.lessons.length > 0 ? (
@@ -277,9 +284,16 @@ const CourseDetailPage = () => {
                               setSelectedLessonId(lesson.id);
                               setShowLessonModal(true);
                             } else {
-                              alert(
-                                "Vui lòng đăng ký khóa học để xem nội dung bài giảng!",
-                              );
+                              uiDispatch({
+                                type: "SHOW_DIALOG",
+                                payload: {
+                                  show: true,
+                                  title: "Thông báo",
+                                  message:
+                                    "Bạn cần phải đăng ký khoá học để xem nội dung chi tiết của khoá học",
+                                  type: "warning",
+                                },
+                              });
                             }
                           }}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors cursor-pointer group/lesson"
@@ -296,6 +310,22 @@ const CourseDetailPage = () => {
                             <span className="text-xs text-gray-400 shrink-0 font-medium">
                               {Math.floor(lesson.videoLength / 60)}:
                               {String(lesson.videoLength % 60).padStart(2, "0")}
+                            </span>
+                          ) : null}
+
+                          {lesson.progress?.completed ? (
+                            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 shrink-0">
+                              Hoàn thành
+                            </span>
+                          ) : lesson.progress ? (
+                            <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 shrink-0">
+                              Hoàn thành{" "}
+                              {Math.round(
+                                (lesson.progress.watchedSec /
+                                  lesson.videoLength) *
+                                  100,
+                              )}
+                              %
                             </span>
                           ) : null}
                         </div>
@@ -628,17 +658,35 @@ const CourseDetailPage = () => {
                 </div>
 
                 {/* Buttons */}
-                <button className="w-full py-2.5 rounded-lg font-extrabold text-sm mb-2 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer bg-[#5624d0] hover:bg-[#4712c4] text-white">
-                  <ShoppingCart size={16} />
-                  Thêm vào giỏ hàng
-                </button>
-                <button className="w-full py-2.5 border-2 border-[#1c1d1f] hover:bg-gray-50 text-[#1c1d1f] font-extrabold rounded-lg text-sm mb-3 transition-all active:scale-95 cursor-pointer">
-                  Mua ngay
-                </button>
 
-                <p className="text-center text-[11px] text-gray-500 mb-1">
-                  Đảm bảo hoàn tiền 100% trong 30 ngày
-                </p>
+                {courseDetails.price !== 0 ? (
+                  <>
+                    <button className="w-full py-2.5 rounded-lg font-extrabold text-sm mb-2 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer bg-[#5624d0] hover:bg-[#4712c4] text-white">
+                      <ShoppingCart size={16} />
+                      Thêm vào giỏ hàng
+                    </button>
+                    <button className="w-full py-2.5 border-2 border-[#1c1d1f] hover:bg-gray-50 text-[#1c1d1f] font-extrabold rounded-lg text-sm mb-3 transition-all active:scale-95 cursor-pointer">
+                      Mua ngay
+                    </button>
+
+                    <p className="text-center text-[11px] text-gray-500 mb-1">
+                      Đảm bảo hoàn tiền 100% trong 30 ngày
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        enrollFreeCourse();
+                        nav("/learning");
+                      }}
+                      className="w-full py-2.5 rounded-lg font-extrabold text-sm mb-2 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer bg-[#11ac4f] hover:bg-[#0a6d32] text-white"
+                    >
+                      <GraduationCap size={16} />
+                      Bắt đầu học
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -648,7 +696,10 @@ const CourseDetailPage = () => {
       <ProtectLessonDisplay
         isShow={showLessonModal}
         lessonId={selectedLessonId}
-        onClose={() => setShowLessonModal(false)}
+        onClose={() => {
+          setShowLessonModal(false);
+          loadCourseDetails();
+        }}
       />
 
       <style>{`

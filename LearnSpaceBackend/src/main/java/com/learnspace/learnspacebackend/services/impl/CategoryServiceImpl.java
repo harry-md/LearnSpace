@@ -1,6 +1,6 @@
 package com.learnspace.learnspacebackend.services.impl;
 
-import com.learnspace.learnspacebackend.dtos.CategoryDto;
+import com.learnspace.learnspacebackend.dtos.category.CategoryDto;
 import com.learnspace.learnspacebackend.mappers.CategoryMapper;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.services.CategoryService;

@@ -54,7 +54,10 @@ const TeacherDashboard = () => {
         )}
 
         {view === "manage" && selectedCourse && (
-          <ManageCourseTab course={selectedCourse} />
+          <ManageCourseTab
+            course={selectedCourse}
+            onCourseUpdate={(updatedCourse) => setSelectedCourse(updatedCourse)}
+          />
         )}
       </div>
     </div>

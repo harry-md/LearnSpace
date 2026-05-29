@@ -1,8 +1,9 @@
 package com.learnspace.learnspacebackend.mappers;
 
-import com.learnspace.learnspacebackend.dtos.LessonDto;
-import com.learnspace.learnspacebackend.dtos.LessonListDto;
-import com.learnspace.learnspacebackend.dtos.LessonPatchDto;
+import com.learnspace.learnspacebackend.dtos.lesson.LessonDto;
+import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
+import com.learnspace.learnspacebackend.dtos.lesson.LessonPatchDto;
+import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 
 import org.mapstruct.BeanMapping;
@@ -11,13 +12,21 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {LessonProgressMapper.class})
 public interface LessonMapper {
 
     LessonListDto toListDto(Lesson lesson);
 
     @Mapping(target = "videoFile", ignore = true)
     LessonDto toDto(Lesson lesson);
+
+    @Mapping(target = "videoFile", ignore = true)
+    @Mapping(source = "progressDto", target = "progress")
+    @Mapping(source = "lesson.createdAt", target = "createdAt")
+    @Mapping(source = "lesson.updatedAt", target = "updatedAt")
+    LessonDto toDtoWithProgress(Lesson lesson, LessonProgressDto progressDto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "video", ignore = true)

@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,30 @@ public class R2ServiceImpl implements R2Service {
 
     @Value("${r2.public_url}")
     private String publicUrl;
+
+    @Override
+    public void validateMp4File(File file) {
+        if (file.length() < 8) {
+            throw new RuntimeException("File quá nhỏ");
+        }
+
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            byte[] header = new byte[8];
+            if (fileInputStream.read(header) < 8) {
+                throw new IllegalArgumentException("Không thể đọc header file");
+            }
+
+            boolean isMp4 =
+                    header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p';
+
+            if (!isMp4) {
+                throw new IllegalArgumentException("Chỉ chấp nhận upload file mp4");
+            }
+        } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+            throw new RuntimeException("Lỗi khi đọc file video");
+        }
+    }
 
     @Override
     public String uploadVideo(File video, String contentType, String folder) {

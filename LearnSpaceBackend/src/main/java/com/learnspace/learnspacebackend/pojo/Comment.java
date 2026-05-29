@@ -41,6 +41,8 @@ public class Comment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public Comment() {}
+
     public Integer getId() {
         return id;
     }
@@ -89,3 +91,4 @@ public class Comment {
         this.updatedAt = updatedAt;
     }
 }
+

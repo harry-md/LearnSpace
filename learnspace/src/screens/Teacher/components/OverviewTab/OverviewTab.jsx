@@ -8,17 +8,12 @@ const OverviewTab = ({ onManageCourse }) => {
 
   const countChapter = () =>
     teacherCourses.reduce(
-      (count, course) => count + (course?.chapters?.length || 0),
+      (count, course) => count + (course?.chapterCount || 0),
       0,
     );
   const countLesson = () =>
     teacherCourses.reduce(
-      (count, course) =>
-        count +
-        (course?.chapters?.reduce(
-          (c, ch) => c + (ch?.lessons?.length || 0),
-          0,
-        ) || 0),
+      (count, course) => count + (course?.lessonCount || 0),
       0,
     );
 
@@ -90,7 +85,7 @@ const OverviewTab = ({ onManageCourse }) => {
               key={course.id}
               className="course-row-item"
               style={{ borderBottom: "1px solid #f9fafb" }}
-              onClick={() => onManageCourse({ id: 1 })}
+              onClick={() => onManageCourse(course)}
             >
               <img
                 src={

@@ -1,6 +1,6 @@
 package com.learnspace.learnspacebackend.controllers;
 
-import com.learnspace.learnspacebackend.dtos.AdminUserUpdateDto;
+import com.learnspace.learnspacebackend.dtos.user.AdminUserUpdateDto;
 import com.learnspace.learnspacebackend.services.CategoryService;
 import com.learnspace.learnspacebackend.services.CourseService;
 import com.learnspace.learnspacebackend.services.UserService;
@@ -55,7 +55,7 @@ public class AdminController {
     @GetMapping("/courses")
     public String course(Model model, @RequestParam Map<String, String> params) {
         model.addAttribute("categories", categoryService.getCategories());
-        model.addAttribute("courses", courseService.getAllCoursesWithDetail(params));
+        model.addAttribute("courses", courseService.getCourses(params));
 
         int pageSize = env.getProperty("course.pageSize", Integer.class);
         long totalCourse = courseService.countCourses(params);

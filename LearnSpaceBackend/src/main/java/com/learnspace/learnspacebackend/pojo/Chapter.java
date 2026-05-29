@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "chapter")
@@ -25,6 +26,14 @@ public class Chapter {
     @NotNull
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "description")
+    private String description;
+
+    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OrderBy("order ASC")
+    @Column(name = "lessons")
+    private Set<Lesson> lessons;
 
     @NotNull
     @Column(name = "`order`", nullable = false)
@@ -47,6 +56,8 @@ public class Chapter {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Chapter() {}
 
     public Integer getId() {
         return id;
@@ -72,7 +83,7 @@ public class Chapter {
         this.order = order;
     }
 
-    public boolean getFree() {
+    public boolean isFree() {
         return free;
     }
 
@@ -102,5 +113,21 @@ public class Chapter {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Set<Lesson> getLessons() {
+        return lessons;
+    }
+
+    public void setLessons(Set<Lesson> lessons) {
+        this.lessons = lessons;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

@@ -26,7 +26,7 @@ public class ApiSecurityConfigs {
     @Bean
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/api/**")
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(apiCorsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -54,17 +54,16 @@ public class ApiSecurityConfigs {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/courses", "/api/courses/*")
                         .permitAll()
-                        .requestMatchers(
-                                HttpMethod.GET, "/api/courses/*/chapters", "/api/chapters/*")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/chapters/*/lessons")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook")
-                        .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/courses/*/enrollments")
                         .authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/enrollments/*")
                         .authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/checkout")
+                        .authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/*/capture")
+                        .authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook")
+                        .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/lessons/*")
                         .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/categories")
@@ -99,9 +98,8 @@ public class ApiSecurityConfigs {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource apiCorsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
         config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));

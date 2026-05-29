@@ -1,13 +1,21 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.Payment;
 import com.learnspace.learnspacebackend.repositories.PaymentRepository;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Repository
 @Transactional
@@ -27,30 +35,27 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public Payment getPaymentByPaypalOrderId(String paypalOrderId) {
+    public List<Payment> getPaymentsByPaypalOrderId(String paypalOrderId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "FROM Payment p"
-                                + " JOIN FETCH p.enrollment e"
-                                + " JOIN FETCH e.student"
-                                + " JOIN FETCH e.course"
-                                + " WHERE p.paypalOrderId = :orderId",
-                        Payment.class)
-                .setParameter("orderId", paypalOrderId)
-                .getSingleResultOrNull();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Payment> q = builder.createQuery(Payment.class);
+        Root<Payment> root = q.from(Payment.class);
+
+        Fetch<Payment, Enrollment> fetchEnrollment = root.fetch("enrollment");
+        fetchEnrollment.fetch("student");
+        fetchEnrollment.fetch("course");
+
+        q.select(root).where(builder.equal(root.get("paypalOrderId"), paypalOrderId));
+        return session.createQuery(q).getResultList();
     }
 
     @Override
-    public Payment getPaymentById(int id) {
+    public Payment getPaymentByEnrollmentId(int enrollmentId) {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery(
-                        "FROM Payment p"
-                                + " JOIN FETCH p.enrollment e"
-                                + " JOIN FETCH e.student"
-                                + " JOIN FETCH e.course"
-                                + " WHERE p.id = :id",
-                        Payment.class)
-                .setParameter("id", id)
+                        "FROM Payment p WHERE p.enrollment.id = :enrollmentId", Payment.class)
+                .setParameter("enrollmentId", enrollmentId)
+                .setMaxResults(1)
                 .getSingleResultOrNull();
     }
 }

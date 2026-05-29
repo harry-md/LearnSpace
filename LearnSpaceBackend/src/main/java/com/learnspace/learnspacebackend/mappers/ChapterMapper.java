@@ -1,7 +1,7 @@
 package com.learnspace.learnspacebackend.mappers;
 
-import com.learnspace.learnspacebackend.dtos.ChapterDto;
-import com.learnspace.learnspacebackend.dtos.ChapterPatchDto;
+import com.learnspace.learnspacebackend.dtos.chapter.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.chapter.ChapterPatchDto;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 
 import org.mapstruct.BeanMapping;
@@ -10,9 +10,12 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {LessonMapper.class})
 public interface ChapterMapper {
 
+    @Mapping(target = "lessons", source = "lessons")
     ChapterDto toDto(Chapter c);
 
     @Mapping(target = "id", ignore = true)

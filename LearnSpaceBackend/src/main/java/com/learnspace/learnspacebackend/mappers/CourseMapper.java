@@ -1,11 +1,9 @@
 package com.learnspace.learnspacebackend.mappers;
 
-import com.learnspace.learnspacebackend.dtos.CourseDto;
-import com.learnspace.learnspacebackend.dtos.CourseListDto;
-import com.learnspace.learnspacebackend.dtos.CoursePatchDto;
-import com.learnspace.learnspacebackend.dtos.TeacherDto;
+import com.learnspace.learnspacebackend.dtos.course.CourseDto;
+import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
+import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.User;
 
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -13,9 +11,15 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {UserMapper.class, CategoryMapper.class, ChapterMapper.class})
 public interface CourseMapper {
 
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "teacher", source = "teacher")
+    @Mapping(target = "avgRating", ignore = true)
+    @Mapping(target = "enrollmentCount", ignore = true)
     CourseListDto toListDto(Course course);
 
     @Mapping(target = "category", source = "category")
@@ -25,12 +29,10 @@ public interface CourseMapper {
     @Mapping(target = "introVideo", source = "introVideo")
     @Mapping(target = "introVideoFile", ignore = true)
     @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "avgRating", ignore = true)
+    @Mapping(target = "enrollmentCount", ignore = true)
+    @Mapping(target = "chapters", source = "chapters")
     CourseDto toDto(Course course);
-
-    @Mapping(target = "fullName", expression = "java(teacher.getFullName())")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "avatar", source = "avatar")
-    TeacherDto toTeacherDto(User teacher);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)

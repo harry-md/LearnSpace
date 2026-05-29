@@ -10,6 +10,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "lesson")
@@ -19,6 +20,15 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "chapter_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Chapter chapter;
+
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<LessonProgress> progresses;
 
     @Size(max = 255)
     @NotNull
@@ -50,11 +60,7 @@ public class Lesson {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "chapter_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Chapter chapter;
+    public Lesson() {}
 
     public Integer getId() {
         return id;

@@ -2,8 +2,10 @@ package com.learnspace.learnspacebackend.configs;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -79,8 +81,7 @@ public class SpringSecurityConfigs {
 
     @Bean
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // .csrf(c -> c.disable())
+        http.cors(cors -> cors.configurationSource(webCorsConfigurationSource()))
                 .authorizeHttpRequests(
                         requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
                                 .permitAll()
@@ -102,7 +103,7 @@ public class SpringSecurityConfigs {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource webCorsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of("https://dreaded-chain-securely.ngrok-free.dev"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -128,6 +129,11 @@ public class SpringSecurityConfigs {
     }
 
     @Bean
+    public Tika tika() {
+        return new Tika();
+    }
+
+    @Bean
     public S3Client r2Client() {
         String accountId = env.getProperty("r2.account_id");
         String accessKey = env.getProperty("r2.access_key");
@@ -140,5 +146,10 @@ public class SpringSecurityConfigs {
                 .serviceConfiguration(
                         S3Configuration.builder().chunkedEncodingEnabled(false).build())
                 .build();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }

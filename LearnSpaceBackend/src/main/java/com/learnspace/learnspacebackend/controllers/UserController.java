@@ -1,6 +1,6 @@
 package com.learnspace.learnspacebackend.controllers;
 
-import com.learnspace.learnspacebackend.dtos.UserRegisterDto;
+import com.learnspace.learnspacebackend.dtos.user.UserRegisterDto;
 import com.learnspace.learnspacebackend.services.UserService;
 
 import jakarta.validation.Valid;

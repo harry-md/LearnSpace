@@ -21,17 +21,19 @@ import useTeacherDashBoard from "@/hooks/useTeacherDashBoard";
 const CoursesTab = ({ onManageCourse }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
   const {
     teacherCourses,
     handleLoadCourseOfTeacher,
-    handleUpdateCourseStatus,
+    handleUpdateCourse,
+    handleDeleteCourse,
+    handleLoadCategories,
+    categories,
   } = useTeacherDashBoard();
-
-  const countChap = (course) => course?.chapters?.length || 0;
-  const countLessons = (chapter) => chapter?.lessons?.length || 0;
 
   useEffect(() => {
     handleLoadCourseOfTeacher();
+    handleLoadCategories();
   }, []);
 
   return (
@@ -76,14 +78,13 @@ const CoursesTab = ({ onManageCourse }) => {
               <th className="courses-th">Chương</th>
               <th className="courses-th">Bài học</th>
               <th className="courses-th">Giá</th>
-              <th className="courses-th">Trạng thái</th>
               <th className="courses-th"></th>
             </tr>
           </thead>
           <tbody>
             {teacherCourses.map((course) => {
               return (
-                <tr className="courses-tr">
+                <tr key={course.id} className="courses-tr">
                   <td className="courses-td">
                     <div className="course-info">
                       <img
@@ -103,15 +104,13 @@ const CoursesTab = ({ onManageCourse }) => {
                   <td className="courses-td">
                     <div className="meta-info-badge">
                       <Layers size={14} className="text-[#9ca3af]" />
-                      <span className="meta-count">{countChap(course)}</span>
+                      <span className="meta-count">{course.chapterCount}</span>
                     </div>
                   </td>
                   <td className="courses-td">
                     <div className="meta-info-badge">
                       <ListVideo size={14} className="text-[#9ca3af]" />
-                      <span className="meta-count">
-                        {countLessons(course.chapters)}
-                      </span>
+                      <span className="meta-count">{course.lessonCount}</span>
                     </div>
                   </td>
                   <td className="courses-td">
@@ -120,47 +119,28 @@ const CoursesTab = ({ onManageCourse }) => {
                       <span className="price-text">{course.price} VNĐ</span>
                     </div>
                   </td>
-                  <td className="courses-td">
-                    {course.active ? (
-                      <button
-                        className="status-badge active"
-                        onClick={() => {
-                          handleUpdateCourseStatus(course.id, false);
-                        }}
-                      >
-                        <CheckCircle size={12} />
-                        Đã xuất bản
-                      </button>
-                    ) : (
-                      <button
-                        className="status-badge inactive"
-                        onClick={() => {
-                          handleUpdateCourseStatus(course.id, true);
-                        }}
-                      >
-                        <Clock size={12} />
-                        Chưa xuất bản
-                      </button>
-                    )}
-                  </td>
+
                   <td className="courses-td">
                     <div className="action-buttons-group">
                       <button
-                        onClick={() => setShowEditModal(true)}
+                        onClick={() => {
+                          setShowEditModal(true);
+                          setSelectedCourse(course);
+                        }}
                         title="Chỉnh sửa thông tin khóa học"
                         className="action-icon-btn edit"
                       >
                         <Pencil size={15} />
                       </button>
                       <button
-                        onClick={() => onManageCourse({ id: 1 })}
+                        onClick={() => onManageCourse(course)}
                         title="Quản lý chương/bài học"
                         className="action-icon-btn manage"
                       >
                         <Layers size={15} />
                       </button>
                       <Link
-                        to="/course/1"
+                        to={`/course/${course.id}`}
                         title="Xem trang chi tiết"
                         className="action-icon-btn view"
                       >
@@ -169,6 +149,7 @@ const CoursesTab = ({ onManageCourse }) => {
                       <button
                         title="Xóa khóa học"
                         className="action-icon-btn delete"
+                        onClick={() => handleDeleteCourse(course.id)}
                       >
                         <Trash2 size={15} />
                       </button>
@@ -185,24 +166,25 @@ const CoursesTab = ({ onManageCourse }) => {
       <CreateCourseModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        categories={[
-          { id: 1, name: "Lập trình" },
-          { id: 2, name: "Thiết kế" },
-        ]}
-        user={{}}
-        onSuccess={() => setShowCreateModal(false)}
+        categories={categories}
+        onSuccess={() => {
+          handleLoadCourseOfTeacher();
+          setShowCreateModal(false);
+        }}
       />
 
       <EditCourseModal
         open={showEditModal}
         onClose={() => setShowEditModal(false)}
-        course={{}}
+        course={selectedCourse}
         categories={[
           { id: 1, name: "Lập trình" },
           { id: 2, name: "Thiết kế" },
         ]}
-        user={{}}
-        onSuccess={() => setShowEditModal(false)}
+        onSuccess={() => {
+          handleLoadCourseOfTeacher();
+          setShowEditModal(false);
+        }}
       />
     </div>
   );
