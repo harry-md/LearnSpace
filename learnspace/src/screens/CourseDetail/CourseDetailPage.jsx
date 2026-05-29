@@ -270,10 +270,8 @@ const CourseDetailPage = () => {
                     <div className="text-xs text-gray-500 shrink-0 text-right">
                       {chapter.lessons?.length || 0} bài giảng
                     </div>
-                    <div className="text-xs text-gray-500 shrink-0 text-right ml-5">
-                      <span className="text-xs text-gray-500">
-                        {chapter.description}
-                      </span>
+                    <div className="text-xs text-gray-500 shrink-0 text-left ml-5 whitespace-pre-wrap">
+                      {chapter.description}
                     </div>
                   </summary>
                   <div className="divide-y divide-gray-100 border-t border-gray-200">
