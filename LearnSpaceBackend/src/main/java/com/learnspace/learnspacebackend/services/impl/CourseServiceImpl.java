@@ -11,7 +11,7 @@ import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.Enrollment;
+import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
@@ -110,15 +110,16 @@ public class CourseServiceImpl implements CourseService {
         Long enrollCount = enrollmentRepository.countEnrollmentsByCourse(courseId);
         LessonProgressDto latestProgress = null;
 
-        CustomUserDetails principal = (CustomUserDetails)
-                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication() != null
+                ? SecurityContextHolder.getContext().getAuthentication().getPrincipal()
+                : null;
 
-        if (principal != null) {
-            Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
-                    principal.getId(), courseId);
-            if (enrollment != null) {
-                latestProgress = progressMapper.toDto(
-                        progressRepository.getLatestLessonProgressByEnrollment(enrollment.getId()));
+        if (principal instanceof CustomUserDetails userDetails) {
+            LessonProgress l = progressRepository.getLessonProgressByStudentAndCourse(
+                    userDetails.getId(), courseId);
+
+            if (latestProgress == null) {
+                latestProgress = progressMapper.toDto(l);
             }
         }
 
