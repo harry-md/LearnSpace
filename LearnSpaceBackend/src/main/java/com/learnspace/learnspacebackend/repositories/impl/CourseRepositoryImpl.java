@@ -78,7 +78,7 @@ public class CourseRepositoryImpl implements CourseRepository {
             }
         }
 
-        String teacherId = params.get("categoryId");
+        String teacherId = params.get("teacherId");
         if (teacherId != null && !teacherId.isBlank()) {
             Integer id = parseId(teacherId);
             if (id != null) {

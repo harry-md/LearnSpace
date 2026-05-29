@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronLeft, ArrowRight } from "lucide-react";
 import SectionContainer from "../../components/SectionContainer/SectionContainer";
 import CourseCard from "../../components/CourseCard/CourseCard";
 import { UIContext, UserContext } from "@/configs/Context";
@@ -10,6 +10,11 @@ const HomePage = () => {
   const [user] = useContext(UserContext);
   const [, uiDispatch] = useContext(UIContext);
   const [courses, setCourses] = useState([]);
+  const scrollRef = React.useRef(null);
+
+  const scroll = (dir) => {
+    scrollRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+  };
 
   const handleLoadCourses = async () => {
     try {
@@ -104,20 +109,39 @@ const HomePage = () => {
         </SectionContainer>
 
         <section>
-          <div className="mb-8">
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-3xl font-extrabold text-gray-900">
               Tất cả khóa học
             </h2>
+            <Link
+              to="/courses"
+              className="!no-underline flex items-center gap-1 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors"
+            >
+              Xem tất cả
+              <ArrowRight size={15} />
+            </Link>
           </div>
 
           <div className="relative group">
-            <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x">
+            <div
+              ref={scrollRef}
+              className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x"
+            >
               {courses.map((course) => (
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
 
-            <button className="absolute right-0 top-[40%] -translate-y-1/2 translate-x-4 w-12 h-12 bg-white rounded-full border border-gray-200 shadow-lg flex items-center justify-center hover:bg-gray-50 hover:scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 text-gray-700">
+            <button
+              onClick={() => scroll(-1)}
+              className="absolute -left-5 top-[calc(50%-16px)] -translate-y-1/2 w-12 h-12 bg-[#ffffffbd] backdrop-blur-sm !text-black hover:!text-white !rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center justify-center hover:bg-purple-600 hover:scale-110 transition-all duration-300 z-20 cursor-pointer"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              onClick={() => scroll(1)}
+              className="absolute -right-5 top-[calc(50%-16px)] -translate-y-1/2 w-12 h-12 bg-[#ffffffbd] backdrop-blur-sm !text-black hover:!text-white !rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] flex items-center justify-center hover:bg-purple-600 hover:scale-110 transition-all duration-300 z-20 cursor-pointer"
+            >
               <ChevronRight size={24} />
             </button>
           </div>

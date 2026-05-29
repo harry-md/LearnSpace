@@ -10,7 +10,7 @@ const useLessonProcess = () => {
     setLessonProgress(null);
     try {
       const res = await authApis(user.token).get(
-        endpoints.lesson_progress(lessonId),
+        endpoints.lessonProgress(lessonId),
       );
       if (res.status === 200) {
         setLessonProgress(res.data);
@@ -24,7 +24,7 @@ const useLessonProcess = () => {
   const createLessonProgress = async (lessonId) => {
     try {
       const res = await authApis(user.token).post(
-        endpoints.lesson_progress(lessonId),
+        endpoints.lessonProgress(lessonId),
         {
           watchedSec: 0,
         },
@@ -40,7 +40,7 @@ const useLessonProcess = () => {
 
   const updateLessonProgress = async (lessonId, sec) => {
     try {
-      await authApis(user.token).patch(endpoints.lesson_progress(lessonId), {
+      await authApis(user.token).patch(endpoints.lessonProgress(lessonId), {
         watchedSec: sec,
       });
       setLessonProgress((prev) =>

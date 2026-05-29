@@ -93,7 +93,7 @@ const Login = () => {
   };
   const currentUser = async (token) => {
     try {
-      const res = await authApis(token).get(endpoints.current_user);
+      const res = await authApis(token).get(endpoints.currentUser);
       return res.data;
     } catch (err) {
       console.log(err);

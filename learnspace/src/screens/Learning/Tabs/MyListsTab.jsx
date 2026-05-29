@@ -13,14 +13,14 @@ const MyListsTab = () => {
   const loadMyCourse = async () => {
     uiDispatch({ type: "SHOW_LOADING" });
     try {
-      const res = await authApis(user.token).get(endpoints.enrolled_courses);
+      const res = await authApis(user.token).get(endpoints.enrolledCourses);
       const courses = res.data;
 
       const coursesWithProgress = await Promise.all(
         courses.map(async (c) => {
           try {
             const progressRes = await authApis(user.token).get(
-              endpoints.course_progress(c.id),
+              endpoints.courseProgress(c.id),
             );
             return { ...c, progress: progressRes.data };
           } catch (e) {

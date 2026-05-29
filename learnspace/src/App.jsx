@@ -17,6 +17,7 @@ import cookies from "react-cookies";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import GlobalLoading from "./components/GlobalLoading/GlobalLoading";
 import GlobalDialog from "./components/GlobalDialog/GlobalDialog";
+import SearchResult from "./screens/SearchResult/SearchResult";
 
 function App() {
   const [user, dispatch] = useReducer(
@@ -38,47 +39,48 @@ function App() {
           onClose={() => uiDispatch({ type: "HIDE_DIALOG" })}
         />
         <BrowserRouter>
-        <Routes>
-          {/* Routes without shared Header/Footer */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Routes>
+            {/* Routes without shared Header/Footer */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Protected Teacher Route */}
-          <Route
-            path="/teacher"
-            element={
-              <ProtectedRoute allowedRoles={["TEACHER", "VERIFIED_TEACHER"]}>
-                <TeacherDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Routes with shared Header/Footer */}
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<HomePage />} />
+            {/* Protected Teacher Route */}
             <Route
-              path="/learning"
+              path="/teacher"
               element={
-                <ProtectedRoute
-                  allowedRoles={[
-                    "STUDENT",
-                    "TEACHER",
-                    "VERIFIED_TEACHER",
-                    "ADMIN",
-                  ]}
-                >
-                  <LearningPage />
+                <ProtectedRoute allowedRoles={["TEACHER", "VERIFIED_TEACHER"]}>
+                  <TeacherDashboard />
                 </ProtectedRoute>
               }
             />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/course/:id" element={<CourseDetailPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </UserContext.Provider>
-  </UIContext.Provider>
+
+            {/* Routes with shared Header/Footer */}
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route
+                path="/learning"
+                element={
+                  <ProtectedRoute
+                    allowedRoles={[
+                      "STUDENT",
+                      "TEACHER",
+                      "VERIFIED_TEACHER",
+                      "ADMIN",
+                    ]}
+                  >
+                    <LearningPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/course/:id" element={<CourseDetailPage />} />
+              <Route path="/courses" element={<SearchResult />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </UserContext.Provider>
+    </UIContext.Provider>
   );
 }
 

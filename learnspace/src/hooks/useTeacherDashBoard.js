@@ -98,7 +98,7 @@ const useTeacherDashBoard = () => {
     uiDispatch({ type: "SHOW_LOADING" });
     try {
       const res = await authApis(user.token).post(
-        endpoints.add_lesson(chapterId),
+        endpoints.addLesson(chapterId),
         formData,
         {
           headers: {
@@ -144,6 +144,7 @@ const useTeacherDashBoard = () => {
     uiDispatch({ type: "SHOW_LOADING" });
     try {
       await authApis(user.token).delete(`${endpoints.chapters}/${chapterId}`);
+      console.log(`${endpoints.chapters}/${chapterId}`);
       setTeacherCourses((prev) =>
         prev.map((course) => ({
           ...course,
@@ -176,7 +177,7 @@ const useTeacherDashBoard = () => {
     uiDispatch({ type: "SHOW_LOADING" });
     try {
       const res = await authApis(user.token).post(
-        endpoints.add_chapter(courseId),
+        endpoints.addChapter(courseId),
         chapterData,
         {
           headers: {
@@ -271,40 +272,48 @@ const useTeacherDashBoard = () => {
           },
         },
       );
-
-      const activeVal = formData.get("active");
-      const updatedData = res.data || {};
-
-      setTeacherCourses((prev) =>
-        prev.map((course) => {
-          if (course.id === courseId) {
-            const nextActive =
-              activeVal !== null
-                ? activeVal === "true" || activeVal === true
-                : course.active;
-            return {
-              ...course,
-              ...updatedData,
-              active: nextActive,
-            };
-          }
-          return course;
-        }),
-      );
-      uiDispatch({
-        type: "SHOW_DIALOG",
-        payload: {
-          title: "Thành công",
-          message: "Cập nhật khóa học thành công!",
-          type: "success",
-        },
-      });
+      if (res.status === 200) {
+        uiDispatch({
+          type: "SHOW_DIALOG",
+          payload: {
+            title: "Thành công",
+            message: "Cập nhật khóa học thành công!",
+            type: "success",
+          },
+        });
+      }
     } catch (err) {
       uiDispatch({
         type: "SHOW_DIALOG",
         payload: {
           title: "Lỗi",
           message: err.response?.data?.message || "Lỗi cập nhật khóa học",
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
+  };
+  const loadCourseDetails = async (courseId) => {
+    uiDispatch({ type: "SHOW_LOADING" });
+    try {
+      const res = await authApis(user.token).get(
+        `${endpoints.courses}/${courseId}`,
+      );
+      setTeacherCourses((prev) => {
+        const exists = prev.some((c) => c.id === courseId);
+        if (exists) {
+          return prev.map((c) => (c.id === courseId ? res.data : c));
+        }
+        return [...prev, res.data];
+      });
+    } catch (err) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Lỗi tải chi tiết khóa học",
           type: "error",
         },
       });
@@ -323,43 +332,7 @@ const useTeacherDashBoard = () => {
         `${endpoints.courses}?teacherId=${user.id}`,
       );
 
-      if (Array.isArray(res.data)) {
-        const courses = res.data;
-
-        const coursesWithFullDetails = await Promise.all(
-          courses.map(async (course) => {
-            try {
-              const chapterRes = await authApis(user.token).get(
-                endpoints.course_chapter(course.id),
-              );
-              const chaptersList = chapterRes.data || [];
-              const chaptersWithLessons = await Promise.all(
-                chaptersList.map(async (chapter) => {
-                  try {
-                    const lessonRes = await authApis(user.token).get(
-                      endpoints.chapter_lesson(chapter.id),
-                    );
-                    return { ...chapter, lessons: lessonRes.data || [] };
-                  } catch (err) {
-                    console.error(
-                      `Lỗi tải lessons của chapter ${chapter.id}:`,
-                      err,
-                    );
-                    return { ...chapter, lessons: [] };
-                  }
-                }),
-              );
-
-              return { ...course, chapters: chaptersWithLessons };
-            } catch (err) {
-              console.error(`Lỗi tải chapters của course ${course.id}:`, err);
-              return { ...course, chapters: [] };
-            }
-          }),
-        );
-        console.log("coursesWithFullDetails", coursesWithFullDetails);
-        setTeacherCourses(coursesWithFullDetails);
-      }
+      setTeacherCourses(res.data);
     } catch (error) {
       uiDispatch({
         type: "SHOW_DIALOG",
@@ -381,6 +354,7 @@ const useTeacherDashBoard = () => {
     categories,
     user,
     handleLoadCourseOfTeacher,
+    loadCourseDetails,
     handleUpdateCourse,
     handleLoadCategories,
     handleDeleteCourse,
