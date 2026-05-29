@@ -39,8 +39,7 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Value("${course.pageSize}")
     private int COURSE_PAGE_SIZE_KEY;
 
-    private List<Predicate> buildPredicates(
-            Map<String, String> params, CriteriaBuilder builder, Root<Course> root) {
+    private List<Predicate> buildPredicates(Map<String, String> params, CriteriaBuilder builder, Root<Course> root) {
         List<Predicate> predicates = new ArrayList<>();
         if (params == null) {
             return predicates;
@@ -77,7 +76,7 @@ public class CourseRepositoryImpl implements CourseRepository {
             }
         }
 
-        String teacherId = params.get("categoryId");
+        String teacherId = params.get("teacherId");
         if (teacherId != null && !teacherId.isBlank()) {
             Integer id = parseId(teacherId);
             if (id != null) {
@@ -130,9 +129,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         }
 
         q.groupBy(root);
-        q.orderBy(
-                builder.desc(builder.avg(reviewJoin.get("rating"))),
-                builder.desc(builder.sum(enrollmentExpr)));
+        q.orderBy(builder.desc(builder.avg(reviewJoin.get("rating"))), builder.desc(builder.sum(enrollmentExpr)));
 
         Query<Object[]> query = session.createQuery(q);
         if (params != null) {

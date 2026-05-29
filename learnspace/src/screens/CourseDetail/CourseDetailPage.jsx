@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   ChevronDown,
@@ -14,6 +14,7 @@ import {
   Clock,
   Heart,
   ShoppingCart,
+  GraduationCap,
 } from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
 import { UIContext, UserContext } from "@/configs/Context";
@@ -31,6 +32,37 @@ const CourseDetailPage = () => {
   const [selectedLessonId, setSelectedLessonId] = useState(null);
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [, uiDispatch] = useContext(UIContext);
+  const nav = useNavigate();
+
+  const enrollFreeCourse = async () => {
+    try {
+      uiDispatch({ type: "SHOW_LOADING" });
+      const res = await authApis(user.token).post(
+        endpoints.enrollFreeCourse(id),
+      );
+      if (res.data && res.data.id) {
+        uiDispatch({
+          type: "SHOW_DIALOG",
+          payload: {
+            title: "Thành công",
+            message: "Đã đăng ký khóa học thành công",
+            type: "success",
+          },
+        });
+      }
+    } catch (err) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || "Lỗi khi đăng ký khóa học",
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
+  };
 
   const loadCourseDetails = async () => {
     uiDispatch({ type: "SHOW_LOADING" });
@@ -39,57 +71,14 @@ const CourseDetailPage = () => {
       if (res.data && res.data.id) {
         const course = res.data;
 
-        const chapterRes = await Apis.get(endpoints.course_chapter(id));
-        const chaptersList = chapterRes.data || [];
-
-        const chaptersWithLessons = await Promise.all(
-          chaptersList.map(async (chapter) => {
-            try {
-              const lessonRes = await Apis.get(
-                endpoints.chapter_lesson(chapter.id),
-              );
-              const lessons = lessonRes.data || [];
-              const lessonsWithProgress = await Promise.all(
-                lessons.map(async (lesson) => {
-                  if (user && user.token) {
-                    try {
-                      const progress = await getLessonProgress(lesson.id);
-                      return { ...lesson, progress };
-                    } catch (e) {
-                      return { ...lesson, progress: null };
-                    }
-                  }
-                  return { ...lesson, progress: null };
-                }),
-              );
-              return { ...chapter, lessons: lessonsWithProgress };
-            } catch (err) {
-              uiDispatch({
-                type: "SHOW_DIALOG",
-                payload: {
-                  title: "Lỗi",
-                  message:
-                    err.response?.data?.message ||
-                    `Lỗi khi tải bài học của chương ${chapter.id}`,
-                  type: "error",
-                },
-              });
-              return { ...chapter, lessons: [] };
-            }
-          }),
-        );
-
-        // 3. Set courseDetails with nested chapters and lessons
-        setCourseDetails({
-          ...course,
-          chapters: chaptersWithLessons,
-        });
+        setCourseDetails(course);
+        console.log(course);
 
         // 4. Check enrollment status
         if (user && user.token) {
           try {
             const enrollRes = await authApis(user.token).get(
-              endpoints.enrolled_courses,
+              endpoints.enrolledCourses,
             );
             const enrolledList = enrollRes.data;
             const enrolled = enrolledList.some((c) => c.id == id);
@@ -206,7 +195,7 @@ const CourseDetailPage = () => {
             <p className="text-sm text-gray-300 mb-2">
               Tạo bởi{" "}
               <span className="text-purple-400 underline cursor-pointer hover:text-purple-300 transition-colors">
-                {courseDetails.teacherName}
+                {courseDetails.teacher?.fullName}
               </span>
             </p>
 
@@ -281,6 +270,9 @@ const CourseDetailPage = () => {
                     <div className="text-xs text-gray-500 shrink-0 text-right">
                       {chapter.lessons?.length || 0} bài giảng
                     </div>
+                    <div className="text-xs text-gray-500 shrink-0 text-left ml-5 whitespace-pre-wrap">
+                      {chapter.description}
+                    </div>
                   </summary>
                   <div className="divide-y divide-gray-100 border-t border-gray-200">
                     {chapter.lessons && chapter.lessons.length > 0 ? (
@@ -321,11 +313,11 @@ const CourseDetailPage = () => {
                             </span>
                           ) : null}
 
-                          {lesson.progress.completed ? (
+                          {lesson.progress?.completed ? (
                             <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 shrink-0">
                               Hoàn thành
                             </span>
-                          ) : (
+                          ) : lesson.progress ? (
                             <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 shrink-0">
                               Hoàn thành{" "}
                               {Math.round(
@@ -335,7 +327,7 @@ const CourseDetailPage = () => {
                               )}
                               %
                             </span>
-                          )}
+                          ) : null}
                         </div>
                       ))
                     ) : (
@@ -666,17 +658,35 @@ const CourseDetailPage = () => {
                 </div>
 
                 {/* Buttons */}
-                <button className="w-full py-2.5 rounded-lg font-extrabold text-sm mb-2 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer bg-[#5624d0] hover:bg-[#4712c4] text-white">
-                  <ShoppingCart size={16} />
-                  Thêm vào giỏ hàng
-                </button>
-                <button className="w-full py-2.5 border-2 border-[#1c1d1f] hover:bg-gray-50 text-[#1c1d1f] font-extrabold rounded-lg text-sm mb-3 transition-all active:scale-95 cursor-pointer">
-                  Mua ngay
-                </button>
 
-                <p className="text-center text-[11px] text-gray-500 mb-1">
-                  Đảm bảo hoàn tiền 100% trong 30 ngày
-                </p>
+                {courseDetails.price !== 0 ? (
+                  <>
+                    <button className="w-full py-2.5 rounded-lg font-extrabold text-sm mb-2 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer bg-[#5624d0] hover:bg-[#4712c4] text-white">
+                      <ShoppingCart size={16} />
+                      Thêm vào giỏ hàng
+                    </button>
+                    <button className="w-full py-2.5 border-2 border-[#1c1d1f] hover:bg-gray-50 text-[#1c1d1f] font-extrabold rounded-lg text-sm mb-3 transition-all active:scale-95 cursor-pointer">
+                      Mua ngay
+                    </button>
+
+                    <p className="text-center text-[11px] text-gray-500 mb-1">
+                      Đảm bảo hoàn tiền 100% trong 30 ngày
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        enrollFreeCourse();
+                        nav("/learning");
+                      }}
+                      className="w-full py-2.5 rounded-lg font-extrabold text-sm mb-2 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer bg-[#11ac4f] hover:bg-[#0a6d32] text-white"
+                    >
+                      <GraduationCap size={16} />
+                      Bắt đầu học
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

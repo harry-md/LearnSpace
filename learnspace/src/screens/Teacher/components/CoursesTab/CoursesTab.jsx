@@ -31,9 +31,6 @@ const CoursesTab = ({ onManageCourse }) => {
     categories,
   } = useTeacherDashBoard();
 
-  const countChap = (course) => course?.chapters?.length || 0;
-  const countLessons = (chapter) => chapter?.lessons?.length || 0;
-
   useEffect(() => {
     handleLoadCourseOfTeacher();
     handleLoadCategories();
@@ -81,7 +78,6 @@ const CoursesTab = ({ onManageCourse }) => {
               <th className="courses-th">Chương</th>
               <th className="courses-th">Bài học</th>
               <th className="courses-th">Giá</th>
-              <th className="courses-th">Trạng thái</th>
               <th className="courses-th"></th>
             </tr>
           </thead>
@@ -108,15 +104,13 @@ const CoursesTab = ({ onManageCourse }) => {
                   <td className="courses-td">
                     <div className="meta-info-badge">
                       <Layers size={14} className="text-[#9ca3af]" />
-                      <span className="meta-count">{countChap(course)}</span>
+                      <span className="meta-count">{course.chapterCount}</span>
                     </div>
                   </td>
                   <td className="courses-td">
                     <div className="meta-info-badge">
                       <ListVideo size={14} className="text-[#9ca3af]" />
-                      <span className="meta-count">
-                        {countLessons(course.chapters)}
-                      </span>
+                      <span className="meta-count">{course.lessonCount}</span>
                     </div>
                   </td>
                   <td className="courses-td">
@@ -125,33 +119,7 @@ const CoursesTab = ({ onManageCourse }) => {
                       <span className="price-text">{course.price} VNĐ</span>
                     </div>
                   </td>
-                  <td className="courses-td">
-                    {course.active ? (
-                      <button
-                        className="status-badge active"
-                        onClick={() => {
-                          const form = new FormData();
-                          form.append("active", false);
-                          handleUpdateCourse(course.id, form);
-                        }}
-                      >
-                        <CheckCircle size={12} />
-                        Đã xuất bản
-                      </button>
-                    ) : (
-                      <button
-                        className="status-badge inactive"
-                        onClick={() => {
-                          const form = new FormData();
-                          form.append("active", true);
-                          handleUpdateCourse(course.id, form);
-                        }}
-                      >
-                        <Clock size={12} />
-                        Chưa xuất bản
-                      </button>
-                    )}
-                  </td>
+
                   <td className="courses-td">
                     <div className="action-buttons-group">
                       <button
