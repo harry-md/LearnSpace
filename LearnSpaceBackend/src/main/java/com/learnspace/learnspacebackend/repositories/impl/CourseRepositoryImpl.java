@@ -207,7 +207,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         root.fetch("teacher", JoinType.INNER);
 
         Fetch<Course, Chapter> chaptersFetch = root.fetch("chapters", JoinType.LEFT);
-        chaptersFetch.fetch("lessons", JoinType.LEFT);
+        Fetch<Chapter, Lesson> lessonFetch = chaptersFetch.fetch("lessons", JoinType.LEFT);
 
         q.select(root).where(builder.equal(root.get("id"), courseId));
         return session.createQuery(q).getSingleResultOrNull();

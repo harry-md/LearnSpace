@@ -3,19 +3,15 @@ package com.learnspace.learnspacebackend.services.impl;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonDto;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonPatchDto;
-import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.LessonMapper;
-import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Lesson;
-import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
-import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.LessonService;
@@ -50,13 +46,7 @@ public class LessonServiceImpl implements LessonService {
     private UserRepository userRepository;
 
     @Autowired
-    private LessonProgressRepository progressRepository;
-
-    @Autowired
     private LessonMapper lessonMapper;
-
-    @Autowired
-    private LessonProgressMapper progressMapper;
 
     @Autowired
     private R2Service r2Service;
@@ -114,16 +104,7 @@ public class LessonServiceImpl implements LessonService {
 
         verifyLessonAccess(lesson);
 
-        CustomUserDetails principal = getLoggedInPrincipal();
-
-        LessonProgress progress =
-                progressRepository.getLessonProgressByLessonAndStudent(lessonId, principal.getId());
-
-        LessonProgressDto progressDto = null;
-        if (progress != null) {
-            progressDto = progressMapper.toDto(progress);
-        }
-        return lessonMapper.toDtoWithProgress(lesson, progressDto);
+        return lessonMapper.toDto(lesson);
     }
 
     @Override
