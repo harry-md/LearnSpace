@@ -4,6 +4,7 @@ import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.Lesson;
+import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.pojo.Review;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 
@@ -267,7 +268,19 @@ public class CourseRepositoryImpl implements CourseRepository {
                 .select(builder.count(lessonRoot))
                 .where(builder.equal(lessonJoin.get("course"), root));
 
-        q.multiselect(root, chapterCountSubquery.getSelection(), lessonCountSubquery.getSelection())
+        Subquery<Long> completedLessonCount = q.subquery(Long.class);
+        Root<LessonProgress> progressRoot = completedLessonCount.from(LessonProgress.class);
+        completedLessonCount
+                .select(builder.count(progressRoot))
+                .where(builder.and(
+                        builder.equal(progressRoot.get("enrollment"), enrollmentJoin),
+                        builder.equal(progressRoot.get("completed"), true)));
+
+        q.multiselect(
+                        root,
+                        chapterCountSubquery.getSelection(),
+                        lessonCountSubquery.getSelection(),
+                        completedLessonCount.getSelection())
                 .where(builder.equal(enrollmentJoin.get("student").get("id"), studentId));
 
         q.orderBy(builder.desc(enrollmentJoin.get("createdAt")));
