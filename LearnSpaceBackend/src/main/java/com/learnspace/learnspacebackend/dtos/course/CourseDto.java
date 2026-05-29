@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.learnspace.learnspacebackend.dtos.category.CategoryDto;
 import com.learnspace.learnspacebackend.dtos.chapter.ChapterDto;
+import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.dtos.user.SimpleUserDto;
 import com.learnspace.learnspacebackend.utils.NotHtml;
 
@@ -47,6 +48,8 @@ public record CourseDto(
 
         @JsonProperty(access = Access.READ_ONLY) CategoryDto category,
         @JsonProperty(access = Access.READ_ONLY) SimpleUserDto teacher,
+
+        @JsonProperty(access = Access.READ_ONLY) LessonProgressDto latestProgress,
 
         @JsonProperty(access = Access.READ_ONLY)
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")

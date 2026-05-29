@@ -4,15 +4,19 @@ import com.learnspace.learnspacebackend.dtos.course.CourseDto;
 import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
+import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
+import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
+import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
@@ -46,6 +50,12 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private LessonRepository lessonRepository;
+
+    @Autowired
+    private LessonProgressRepository progressRepository;
+
+    @Autowired
+    private LessonProgressMapper progressMapper;
 
     @Autowired
     private UserRepository userRepository;
@@ -98,6 +108,19 @@ public class CourseServiceImpl implements CourseService {
         CourseDto dto = courseMapper.toDto(course);
         Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
         Long enrollCount = enrollmentRepository.countEnrollmentsByCourse(courseId);
+        LessonProgressDto latestProgress = null;
+
+        CustomUserDetails principal = (CustomUserDetails)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal != null) {
+            Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
+                    principal.getId(), courseId);
+            if (enrollment != null) {
+                latestProgress = progressMapper.toDto(
+                        progressRepository.getLatestLessonProgressByEnrollment(enrollment.getId()));
+            }
+        }
 
         return new CourseDto(
                 dto.id(),
@@ -112,6 +135,7 @@ public class CourseServiceImpl implements CourseService {
                 dto.chapters(),
                 dto.category(),
                 dto.teacher(),
+                latestProgress,
                 dto.createdAt(),
                 dto.updatedAt(),
                 dto.imageFile(),
