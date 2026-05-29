@@ -6,9 +6,7 @@ import java.util.List;
 
 public interface PaymentRepository {
 
-    Payment getPaymentById(int id);
-
-    Payment getPaymentByPaypalOrderId(String paypalOrderId);
+    Payment getPaymentByEnrollmentId(int enrollmentId);
 
     List<Payment> getPaymentsByPaypalOrderId(String paypalOrderId);
 

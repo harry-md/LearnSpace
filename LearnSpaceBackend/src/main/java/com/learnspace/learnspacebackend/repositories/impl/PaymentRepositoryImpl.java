@@ -35,21 +35,6 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public Payment getPaymentByPaypalOrderId(String paypalOrderId) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Payment> q = builder.createQuery(Payment.class);
-        Root<Payment> root = q.from(Payment.class);
-
-        Fetch<Payment, Enrollment> fetchEnrollment = root.fetch("enrollment");
-        fetchEnrollment.fetch("student");
-        fetchEnrollment.fetch("course");
-
-        q.select(root).where(builder.equal(root.get("paypalOrderId"), paypalOrderId));
-        return session.createQuery(q).setMaxResults(1).getSingleResultOrNull();
-    }
-
-    @Override
     public List<Payment> getPaymentsByPaypalOrderId(String paypalOrderId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -65,10 +50,12 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public Payment getPaymentById(int id) {
+    public Payment getPaymentByEnrollmentId(int enrollmentId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery("FROM Payment p WHERE p.id = :id", Payment.class)
-                .setParameter("id", id)
+        return session.createQuery(
+                        "FROM Payment p WHERE p.enrollment.id = :enrollmentId", Payment.class)
+                .setParameter("enrollmentId", enrollmentId)
+                .setMaxResults(1)
                 .getSingleResultOrNull();
     }
 }

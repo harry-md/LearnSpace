@@ -18,4 +18,6 @@ public interface CourseRepository {
     Course createOrUpdate(Course course);
 
     void deleteCourse(int courseId);
+
+    List<Object[]> getEnrolledCoursesByStudent(int studentId);
 }

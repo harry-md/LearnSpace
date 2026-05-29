@@ -130,8 +130,8 @@ public class CourseRepositoryImpl implements CourseRepository {
                 .where(builder.equal(chapterRoot.get("course"), root));
 
         Subquery<Long> lessonCountSubquery = q.subquery(Long.class);
-        Root<Chapter> lessonRoot = lessonCountSubquery.from(Chapter.class);
-        Join<Chapter, Lesson> lessonJoin = lessonRoot.join("chapter", JoinType.LEFT);
+        Root<Lesson> lessonRoot = lessonCountSubquery.from(Lesson.class);
+        Join<Lesson, Chapter> lessonJoin = lessonRoot.join("chapter");
         lessonCountSubquery
                 .select(builder.count(lessonRoot))
                 .where(builder.equal(lessonJoin.get("course"), root));
@@ -240,5 +240,38 @@ public class CourseRepositoryImpl implements CourseRepository {
         if (c != null) {
             session.remove(c);
         }
+    }
+
+    @Override
+    public List<Object[]> getEnrolledCoursesByStudent(int studentId) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = builder.createQuery(Object[].class);
+
+        Root<Course> root = q.from(Course.class);
+        root.fetch("category", JoinType.INNER);
+        root.fetch("teacher", JoinType.INNER);
+
+        Join<Course, Enrollment> enrollmentJoin = root.join("enrollments", JoinType.INNER);
+
+        Subquery<Long> chapterCountSubquery = q.subquery(Long.class);
+        Root<Chapter> chapterRoot = chapterCountSubquery.from(Chapter.class);
+        chapterCountSubquery
+                .select(builder.count(chapterRoot))
+                .where(builder.equal(chapterRoot.get("course"), root));
+
+        Subquery<Long> lessonCountSubquery = q.subquery(Long.class);
+        Root<Lesson> lessonRoot = lessonCountSubquery.from(Lesson.class);
+        Join<Lesson, Chapter> lessonJoin = lessonRoot.join("chapter");
+        lessonCountSubquery
+                .select(builder.count(lessonRoot))
+                .where(builder.equal(lessonJoin.get("course"), root));
+
+        q.multiselect(root, chapterCountSubquery.getSelection(), lessonCountSubquery.getSelection())
+                .where(builder.equal(enrollmentJoin.get("student").get("id"), studentId));
+
+        q.orderBy(builder.desc(enrollmentJoin.get("createdAt")));
+
+        return session.createQuery(q).getResultList();
     }
 }

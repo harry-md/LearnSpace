@@ -3,12 +3,12 @@ package com.learnspace.learnspacebackend.services.impl;
 import com.learnspace.learnspacebackend.dtos.course.CourseDto;
 import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
+import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
@@ -71,8 +71,8 @@ public class CourseServiceImpl implements CourseService {
                     Long enrollmentCount = (Long) row[2];
                     Long chapterCount = (Long) row[3];
                     Long lessonCount = (Long) row[4];
-
                     CourseListDto base = courseMapper.toListDto(course);
+
                     return new CourseListDto(
                             base.id(),
                             base.name(),
@@ -97,7 +97,7 @@ public class CourseServiceImpl implements CourseService {
 
         CourseDto dto = courseMapper.toDto(course);
         Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
-        Long enrollCount = enrollmentRepository.countEnrollmentsByCourseId(courseId);
+        Long enrollCount = enrollmentRepository.countEnrollmentsByCourse(courseId);
 
         return new CourseDto(
                 dto.id(),
@@ -244,15 +244,27 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseDto> getEnrolledCourses() {
+    public List<MyCourseListDto> getEnrolledCourses() {
         CustomUserDetails principal = (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<Enrollment> enrollments =
-                enrollmentRepository.getEnrollmentsByStudentId(principal.getId());
+        return courseRepository.getEnrolledCoursesByStudent(principal.getId()).stream()
+                .map(row -> {
+                    Course course = (Course) row[0];
+                    Long chapterCount = (Long) row[1];
+                    Long lessonCount = (Long) row[2];
+                    CourseListDto base = courseMapper.toListDto(course);
 
-        return enrollments.stream()
-                .map(enrollment -> courseMapper.toDto(enrollment.getCourse()))
+                    return new MyCourseListDto(
+                            base.id(),
+                            base.name(),
+                            base.image(),
+                            base.price(),
+                            base.category(),
+                            base.teacher(),
+                            chapterCount,
+                            lessonCount);
+                })
                 .toList();
     }
 }
