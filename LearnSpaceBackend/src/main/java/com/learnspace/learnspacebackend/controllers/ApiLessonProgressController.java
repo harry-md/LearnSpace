@@ -1,6 +1,5 @@
 package com.learnspace.learnspacebackend.controllers;
 
-import com.learnspace.learnspacebackend.dtos.progress.CourseProgressDto;
 import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.services.LessonProgressService;
 
@@ -15,11 +14,6 @@ public class ApiLessonProgressController {
 
     @Autowired
     private LessonProgressService lessonProgressService;
-
-    @GetMapping("/lessons/{lessonId}/lesson-progress")
-    public ResponseEntity<LessonProgressDto> retrieve(@PathVariable("lessonId") int lessonId) {
-        return ResponseEntity.ok(lessonProgressService.getLessonProgress(lessonId));
-    }
 
     @PostMapping("/lessons/{lessonId}/lesson-progress")
     public ResponseEntity<LessonProgressDto> create(
@@ -37,11 +31,5 @@ public class ApiLessonProgressController {
         return new ResponseEntity<>(
                 lessonProgressService.updateLessonProgress(lessonId, lessonProgressDto),
                 HttpStatus.OK);
-    }
-
-    @GetMapping("/courses/{courseId}/progress")
-    public ResponseEntity<CourseProgressDto> getCourseProgress(
-            @PathVariable("courseId") int courseId) {
-        return ResponseEntity.ok(lessonProgressService.getCourseProgress(courseId));
     }
 }
