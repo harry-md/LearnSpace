@@ -97,8 +97,8 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setRole(UserRole.STUDENT);
 
-        if (dto != null && !dto.avatar().isEmpty()) {
-            user.setAvatar(cloudinaryService.uploadImage(dto.avatar()));
+        if (dto.avatarFile() != null && !dto.avatarFile().isEmpty()) {
+            user.setAvatar(cloudinaryService.uploadImage(dto.avatarFile()));
         }
 
         return userMapper.toProfileDto(userRepository.register(user));

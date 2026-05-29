@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -127,26 +126,6 @@ public class LessonServiceImpl implements LessonService {
         return lessonMapper.toDtoWithProgress(lesson, progressDto);
     }
 
-    private void validateMp4File(File file) throws IOException {
-        if (file.length() < 8) {
-            throw new RuntimeException("File quá nhỏ");
-        }
-
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            byte[] header = new byte[8];
-            if (fileInputStream.read(header) < 8) {
-                throw new IllegalArgumentException("Không thể đọc header file");
-            }
-
-            boolean isMp4 =
-                    header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p';
-
-            if (!isMp4) {
-                throw new RuntimeException("Chỉ chấp nhận upload file mp4");
-            }
-        }
-    }
-
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public LessonDto createLesson(int chapterId, LessonDto lessonDto) {
@@ -157,17 +136,17 @@ public class LessonServiceImpl implements LessonService {
 
         verifyCourseOwner(chapter.getCourse());
 
-        MultipartFile videoFile = lessonDto.videoFile();
-        if (videoFile.isEmpty()) {
-            throw new RuntimeException("File không được trống");
+        if (lessonDto.videoFile() == null || lessonDto.videoFile().isEmpty()) {
+            throw new IllegalArgumentException("Tạo bài học phải có video");
         }
 
+        MultipartFile videoFile = lessonDto.videoFile();
         File tmpFile = null;
         try {
             tmpFile = File.createTempFile("video-", ".mp4");
             videoFile.transferTo(tmpFile);
 
-            validateMp4File(tmpFile);
+            r2Service.validateMp4File(tmpFile);
 
             String videoUrl = r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");
             int videoLength = r2Service.getVideoLength(tmpFile);
@@ -249,7 +228,8 @@ public class LessonServiceImpl implements LessonService {
             try {
                 tmpFile = File.createTempFile("video-", ".mp4");
                 videoFile.transferTo(tmpFile);
-                validateMp4File(tmpFile);
+
+                r2Service.validateMp4File(tmpFile);
 
                 String videoUrl =
                         r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");

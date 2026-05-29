@@ -122,4 +122,12 @@ public class Chapter {
     public void setLessons(Set<Lesson> lessons) {
         this.lessons = lessons;
     }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

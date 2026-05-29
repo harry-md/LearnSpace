@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -125,6 +126,11 @@ public class SpringSecurityConfigs {
                 env.getProperty("cloudinary.api_secret"),
                 "secure",
                 true));
+    }
+
+    @Bean
+    public Tika tika() {
+        return new Tika();
     }
 
     @Bean

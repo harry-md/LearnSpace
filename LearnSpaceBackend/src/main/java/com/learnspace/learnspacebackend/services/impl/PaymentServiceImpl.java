@@ -68,8 +68,7 @@ public class PaymentServiceImpl implements PaymentService {
         for (CartDto item : cartItems) {
             Course course = courseRepository.getCourseById(item.courseId());
             if (course == null) {
-                throw new ResourceNotFoundException(
-                        "Không tìm thấy khóa học có ID: " + item.courseId());
+                throw new ResourceNotFoundException("Không tìm thấy khóa học #" + item.courseId());
             }
 
             if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
@@ -79,7 +78,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             if (enrollmentRepository.checkValidEnrollment(student.getId(), course.getId())) {
                 throw new IllegalArgumentException(
-                        "Bạn đã đăng ký khóa học \"" + course.getName() + "\" rồi");
+                        "Bạn đã đăng ký khóa học " + course.getName() + " rồi");
             }
 
             Enrollment enrollment = new Enrollment();
@@ -180,7 +179,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public void handleWebhookEvent(String payload, Map<String, String> headers) {
         if (!paypalService.verifyPaypalWebhook(payload, headers)) {
-            System.err.println("Webhook verification failed");
+            System.err.println("Không xác thực được webhook từ PayPal");
             return;
         }
 
@@ -212,7 +211,6 @@ public class PaymentServiceImpl implements PaymentService {
                     enrollmentRepository.addOrUpdateEnrollment(enrollment);
                 }
             }
-            default -> System.out.println("Unhandled webhook event: " + eventType);
         }
     }
 }
