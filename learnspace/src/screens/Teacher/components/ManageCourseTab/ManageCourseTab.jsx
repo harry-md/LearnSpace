@@ -22,12 +22,13 @@ import "./ManageCourseTab.css";
 import useTeacherDashBoard from "@/hooks/useTeacherDashBoard";
 import { authApis, endpoints } from "@/configs/Apis";
 
-const ManageCourseTab = ({ course }) => {
+const ManageCourseTab = ({ course, onCourseUpdate }) => {
   const {
     teacherCourses,
     setTeacherCourses,
     user,
     handleLoadCourseOfTeacher,
+    loadCourseDetails,
     handleCreateChapter,
     handleDeleteChapter,
     handleCreateLesson,
@@ -181,8 +182,10 @@ const ManageCourseTab = ({ course }) => {
   };
 
   useEffect(() => {
-    handleLoadCourseOfTeacher();
-  }, []);
+    if (course?.id) {
+      loadCourseDetails(course.id);
+    }
+  }, [course?.id]);
 
   return (
     <div className="manage-course-container">
@@ -460,7 +463,17 @@ const ManageCourseTab = ({ course }) => {
           { id: 1, name: "Lập trình" },
           { id: 2, name: "Thiết kế" },
         ]}
-        onSuccess={() => setShowEditCourse(false)}
+        onSuccess={(updatedCourse) => {
+          setTeacherCourses((prev) =>
+            prev.map((c) =>
+              c.id === course?.id ? { ...c, ...updatedCourse } : c,
+            ),
+          );
+          if (onCourseUpdate) {
+            onCourseUpdate({ ...currentCourse, ...updatedCourse });
+          }
+          setShowEditCourse(false);
+        }}
       />
     </div>
   );

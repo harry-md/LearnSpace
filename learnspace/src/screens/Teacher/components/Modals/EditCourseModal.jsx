@@ -65,12 +65,21 @@ const EditCourseModal = ({ open, onClose, course, categories, onSuccess }) => {
       if (editCourseForm.introVideoFile instanceof File) {
         formData.append("introVideoFile", editCourseForm.introVideoFile);
       }
+      uiDispatch({ type: "SHOW_LOADING" });
 
       const res = await authApis(user.token).patch(
         `${endpoints.courses}/${course.id}`,
         formData,
       );
 
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Thành công",
+          message: "Cập nhật khóa học thành công!",
+          type: "success",
+        },
+      });
       onSuccess(res.data);
       onClose();
     } catch (err) {
@@ -88,6 +97,8 @@ const EditCourseModal = ({ open, onClose, course, categories, onSuccess }) => {
           ],
         },
       });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
     }
   };
 

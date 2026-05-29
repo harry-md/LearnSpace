@@ -1,16 +1,22 @@
 export const initialUIState = {
   loading: false,
+  compareMode: false,
   dialog: {
     show: false,
     title: "",
     message: "",
-    type: "info", // 'info' | 'success' | 'warning' | 'error'
+    type: "info",
     onConfirm: null,
   },
 };
 
 const UIReducer = (state, action) => {
   switch (action.type) {
+    case "COMPARE_COURSE_MODE":
+      return {
+        ...state,
+        compareMode: action.payload,
+      };
     case "SHOW_LOADING":
       return {
         ...state,

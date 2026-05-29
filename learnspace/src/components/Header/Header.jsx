@@ -27,20 +27,6 @@ const cartItems = [
   },
 ];
 
-const categories = [
-  "Phát triển",
-  "Kinh doanh",
-  "Tài chính & Kế toán",
-  "CNTT & Phần mềm",
-  "Năng suất văn phòng",
-  "Phát triển cá nhân",
-  "Thiết kế",
-  "Marketing",
-  "Sức khỏe & Thể dục",
-  "Âm nhạc",
-];
-
-import { useLocation } from "react-router-dom";
 import AvatarMenu from "../AvatarMenu/AvatarMenu";
 import { UIContext, UserContext } from "@/configs/Context";
 import Apis, { endpoints } from "@/configs/Apis";
@@ -51,6 +37,30 @@ const Header = () => {
   const [, uiDispatch] = useContext(UIContext);
   const [openAvatarMenu, setOpenAvatarMenu] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchData, setSearchData] = useState([]);
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  const loadSearchResults = async (keyword) => {
+    try {
+      const res = await Apis.get(`${endpoints.courses}?kw=${keyword}`);
+      setSearchData(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!searchKeyword.trim()) {
+      setSearchData([]);
+      return;
+    }
+    const delayDebounceFn = setTimeout(() => {
+      loadSearchResults(searchKeyword);
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchKeyword]);
 
   const loadCategories = async () => {
     try {
@@ -118,6 +128,7 @@ const Header = () => {
                   Học tập
                 </span>
               </Link>
+
             </nav>
             <div className="flex-1 overflow-hidden min-w-0 ml-3">
               <marquee behavior="scroll" direction="left" scrollamount="4">
@@ -139,8 +150,75 @@ const Header = () => {
             <input
               type="text"
               placeholder="Tìm kiếm nội dung bất kỳ"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
               className="w-full pl-11 pr-4 py-2 bg-gray-100 border-transparent rounded-full text-sm focus:outline-none focus:bg-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all"
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
             />
+            {isSearchFocused && (
+              <div className="absolute right-0 top-full mt-2 w-[400px] bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 p-4 animate-[fadeIn_0.15s_ease-out]">
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+                  Gợi ý kết quả tìm kiếm
+                </div>
+                {!searchKeyword.trim() ? (
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    Nhập từ khóa để tìm kiếm khóa học...
+                  </div>
+                ) : !searchData || searchData.length === 0 ? (
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    Không tìm thấy khóa học phù hợp
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {searchData.slice(0, 5).map((course) => (
+                      <Link
+                        key={course.id}
+                        to={`/course/${course.id}`}
+                        className="flex gap-3 p-2 hover:bg-gray-50 rounded-xl transition-colors !no-underline"
+                      >
+                        <img
+                          src={
+                            course.image ||
+                            "https://placehold.co/320x180/5624d0/ffffff?text=Course"
+                          }
+                          alt={course.name}
+                          className="w-16 h-10 object-cover rounded-lg border border-gray-100 shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-bold text-[#1c1d1f] truncate">
+                            {course.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {course.teacher?.fullName || "Chưa có giáo viên"}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="text-sm font-bold text-[#1c1d1f]">
+                            {course.price
+                              ? `${Number(course.price).toLocaleString("vi-VN")} ₫`
+                              : "Miễn phí"}
+                          </div>
+                          {course.avgRating && (
+                            <div className="text-[10px] text-amber-500 font-semibold flex items-center justify-end gap-0.5">
+                              ★ {Number(course.avgRating).toFixed(1)}
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+                <div className="border-t border-gray-100 mt-3 pt-3 text-center">
+                  <Link
+                    to={`/courses?kw=${encodeURIComponent(searchKeyword)}`}
+                    className="text-xs font-bold text-purple-600 hover:text-purple-800 transition-colors !no-underline"
+                  >
+                    Xem tất cả kết quả
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -238,7 +316,7 @@ const Header = () => {
                   </div>
                 )}
               </div>
-              {openAvatarMenu && <AvatarMenu />}
+              {openAvatarMenu && <AvatarMenu onClose={() => setOpenAvatarMenu(false)} />}
             </div>
           ) : (
             <div className="flex items-center gap-3">
