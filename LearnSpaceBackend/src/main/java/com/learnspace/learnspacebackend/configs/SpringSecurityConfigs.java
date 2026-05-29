@@ -2,8 +2,10 @@ package com.learnspace.learnspacebackend.configs;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -66,7 +68,8 @@ public class SpringSecurityConfigs {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider authenticationProvider =
+                new DaoAuthenticationProvider(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }
@@ -126,16 +129,27 @@ public class SpringSecurityConfigs {
     }
 
     @Bean
+    public Tika tika() {
+        return new Tika();
+    }
+
+    @Bean
     public S3Client r2Client() {
         String accountId = env.getProperty("r2.account_id");
         String accessKey = env.getProperty("r2.access_key");
         String secretKey = env.getProperty("r2.secret_key");
         return S3Client.builder()
                 .endpointOverride(URI.create("https://" + accountId + ".r2.cloudflarestorage.com"))
-                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
                 .region(Region.of("auto"))
                 .serviceConfiguration(
                         S3Configuration.builder().chunkedEncodingEnabled(false).build())
                 .build();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }

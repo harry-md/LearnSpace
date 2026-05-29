@@ -1,5 +1,8 @@
 package com.learnspace.learnspacebackend.dtos.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -31,8 +34,10 @@ public record UserRegisterDto(
                 message = "Họ và tên lót không được chứa ký tự đặc biệt")
         String lastName,
 
+        @JsonProperty(access = Access.READ_ONLY) String avatar,
+
         @NotBlank(message = "Email không được để trống")
         @Email(message = "Định dạng email không hợp lệ")
         String email,
 
-        MultipartFile avatar) {}
+        @JsonProperty(access = Access.WRITE_ONLY) MultipartFile avatarFile) {}

@@ -13,7 +13,6 @@ import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
-import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
@@ -53,9 +52,6 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private LessonProgressRepository lessonProgressRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;
@@ -157,10 +153,18 @@ public class CourseServiceImpl implements CourseService {
 
         MultipartFile imageFile = courseDto.imageFile();
         if (imageFile != null && !imageFile.isEmpty()) {
-            course.setImage(cloudinaryService.uploadImage(imageFile));
+            cloudinaryService.validateImageFile(imageFile);
         }
 
         MultipartFile introVideoFile = courseDto.introVideoFile();
+        if (introVideoFile != null && !introVideoFile.isEmpty()) {
+            cloudinaryService.validateVideoFile(introVideoFile);
+        }
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            course.setImage(cloudinaryService.uploadImage(imageFile));
+        }
+
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             course.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
@@ -193,11 +197,19 @@ public class CourseServiceImpl implements CourseService {
 
         MultipartFile imageFile = courseDto.imageFile();
         if (imageFile != null && !imageFile.isEmpty()) {
+            cloudinaryService.validateImageFile(imageFile);
+        }
+
+        MultipartFile introVideoFile = courseDto.introVideoFile();
+        if (introVideoFile != null && !introVideoFile.isEmpty()) {
+            cloudinaryService.validateVideoFile(introVideoFile);
+        }
+
+        if (imageFile != null && !imageFile.isEmpty()) {
             cloudinaryService.deleteImage(existCourse.getImage());
             existCourse.setImage(cloudinaryService.uploadImage(imageFile));
         }
 
-        MultipartFile introVideoFile = courseDto.introVideoFile();
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             cloudinaryService.deleteVideo(existCourse.getIntroVideo());
             existCourse.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));

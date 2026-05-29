@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.learnspace.learnspacebackend.services.CloudinaryService;
 
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +16,7 @@ import java.util.Map;
 @Service
 public class CloudinaryServiceImpl implements CloudinaryService {
 
-    private static final int MAX_IMAGE_SIZE = 30 * 1024 * 1024;
+    private static final int MAX_IMAGE_SIZE = 10 * 1024 * 1024;
     private static final int MAX_VIDEO_SIZE = 100 * 1024 * 1024;
 
     private static final List<String> DEFAULT_URLS = List.of(
@@ -26,19 +27,44 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     @Autowired
     private Cloudinary cloudinary;
 
+    @Autowired
+    private Tika tika;
+
     private boolean isDefaultUrl(String url) {
         return DEFAULT_URLS.contains(url);
     }
 
-    private void validateImageFile(MultipartFile file) {
+    @Override
+    public void validateImageFile(MultipartFile file) {
         if (file.getSize() > MAX_IMAGE_SIZE) {
-            throw new IllegalArgumentException("Ảnh không được vượt quá 30MB");
+            throw new IllegalArgumentException("Ảnh không được vượt quá 10MB");
+        }
+
+        try {
+            String mimeType = tika.detect(file.getInputStream());
+            if (!mimeType.startsWith("image/")) {
+                throw new IllegalArgumentException(
+                        "File tải lên không phải là định dạng ảnh hợp lệ");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi đọc dữ liệu file ảnh");
         }
     }
 
-    private void validateVideoFile(MultipartFile file) {
+    @Override
+    public void validateVideoFile(MultipartFile file) {
         if (file.getSize() > MAX_VIDEO_SIZE) {
             throw new IllegalArgumentException("Video không được vượt quá 100MB");
+        }
+
+        try {
+            String mimeType = tika.detect(file.getInputStream());
+            if (!mimeType.startsWith("video")) {
+                throw new IllegalArgumentException(
+                        "File tải lên không phải là định dạng video hợp lệ");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi đọc dữ liệu file video");
         }
     }
 

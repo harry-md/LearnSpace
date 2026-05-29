@@ -4,11 +4,12 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 public interface PaypalService {
+
     Map<String, String> createOrder(BigDecimal usdAmount, String description);
 
     Map<String, String> captureOrder(String paypalOrderId);
 
-    boolean verifyWebhookSignature(String payload, Map<String, String> headers);
+    boolean verifyPaypalWebhook(String payload, Map<String, String> headers);
 
     Map<String, String> parseWebhookEvent(String payload);
 
