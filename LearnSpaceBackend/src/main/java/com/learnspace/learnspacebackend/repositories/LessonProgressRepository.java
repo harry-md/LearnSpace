@@ -8,5 +8,5 @@ public interface LessonProgressRepository {
 
     LessonProgress getLessonProgressByEnrollmentAndLesson(int enrollmentId, int lessonId);
 
-    LessonProgress getLatestLessonProgressByEnrollment(int enrollmentId);
+    LessonProgress getLessonProgressByStudentAndCourse(int studentId, int courseId);
 }

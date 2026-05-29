@@ -9,6 +9,12 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 
 public record LessonProgressDto(
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        Integer lessonId,
+
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        String lessonTitle,
+
         @NotNull(message = "Số giây đã xem không được để trống")
         @PositiveOrZero(message = "Số giây đã xem không hợp lệ")
         Integer watchedSec,

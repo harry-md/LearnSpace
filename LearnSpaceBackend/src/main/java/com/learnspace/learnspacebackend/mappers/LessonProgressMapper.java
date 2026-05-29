@@ -8,6 +8,9 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface LessonProgressMapper {
+
+    @Mapping(target = "lessonId", source = "lesson.id")
+    @Mapping(target = "lessonTitle", source = "lesson.title")
     LessonProgressDto toDto(LessonProgress lessonProgress);
 
     @Mapping(target = "completed", ignore = true)
