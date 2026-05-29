@@ -86,7 +86,7 @@ public class LessonServiceImpl implements LessonService {
             return;
         }
 
-        if (chapter.getFree()) {
+        if (chapter.isFree()) {
             return;
         }
 

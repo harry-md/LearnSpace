@@ -15,6 +15,7 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -108,31 +109,48 @@ public class CourseRepositoryImpl implements CourseRepository {
         root.fetch("category", JoinType.INNER);
         root.fetch("teacher", JoinType.INNER);
 
-        Join<Course, Enrollment> enrollmentJoin = root.join("enrollments", JoinType.LEFT);
-        Join<Course, Review> reviewJoin = root.join("reviews", JoinType.LEFT);
-        Join<Course, Chapter> chapterJoin = root.join("chapters", JoinType.LEFT);
-        Join<Chapter, Lesson> lessonJoin = chapterJoin.join("lessons", JoinType.LEFT);
+        Subquery<Double> avgRatingSubquery = q.subquery(Double.class);
+        Root<Review> reviewRoot = avgRatingSubquery.from(Review.class);
+        avgRatingSubquery
+                .select(builder.avg(reviewRoot.get("rating")))
+                .where(builder.equal(reviewRoot.get("course"), root));
 
-        Expression<Long> enrollmentExpr = builder.<Long>selectCase()
-                .when(enrollmentJoin.get("status").in("ACTIVE", "COMPLETED"), 1L)
-                .otherwise(0L);
+        Subquery<Long> enrollmentCountSubquery = q.subquery(Long.class);
+        Root<Enrollment> enrollmentRoot = enrollmentCountSubquery.from(Enrollment.class);
+        enrollmentCountSubquery
+                .select(builder.count(enrollmentRoot))
+                .where(builder.and(
+                        builder.equal(enrollmentRoot.get("course"), root),
+                        enrollmentRoot.get("status").in("ACTIVE", "COMPLETED")));
+
+        Subquery<Long> chapterCountSubquery = q.subquery(Long.class);
+        Root<Chapter> chapterRoot = chapterCountSubquery.from(Chapter.class);
+        chapterCountSubquery
+                .select(builder.count(chapterRoot))
+                .where(builder.equal(chapterRoot.get("course"), root));
+
+        Subquery<Long> lessonCountSubquery = q.subquery(Long.class);
+        Root<Chapter> lessonRoot = lessonCountSubquery.from(Chapter.class);
+        Join<Chapter, Lesson> lessonJoin = lessonRoot.join("chapter", JoinType.LEFT);
+        lessonCountSubquery
+                .select(builder.count(lessonRoot))
+                .where(builder.equal(lessonJoin.get("course"), root));
 
         q.multiselect(
                 root,
-                builder.avg(reviewJoin.get("rating")),
-                builder.sum(enrollmentExpr),
-                builder.countDistinct(chapterJoin.get("id")),
-                builder.countDistinct(lessonJoin.get("id")));
+                avgRatingSubquery.getSelection(),
+                enrollmentCountSubquery.getSelection(),
+                chapterCountSubquery.getSelection(),
+                lessonCountSubquery.getSelection());
 
         List<Predicate> predicates = buildPredicates(params, builder, root);
         if (!predicates.isEmpty()) {
             q.where(builder.and(predicates.toArray(Predicate[]::new)));
         }
 
-        q.groupBy(root);
         q.orderBy(
-                builder.desc(builder.avg(reviewJoin.get("rating"))),
-                builder.desc(builder.sum(enrollmentExpr)));
+                builder.desc(avgRatingSubquery.getSelection()),
+                builder.desc(enrollmentCountSubquery.getSelection()));
 
         Query<Object[]> query = session.createQuery(q);
         if (params != null) {
