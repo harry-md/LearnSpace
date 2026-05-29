@@ -16,6 +16,8 @@ export const endpoints = {
   enrollFreeCourse: (courseId) => `/courses/${courseId}/enrollments`,
   courseProgress: (courseId) => `/courses/${courseId}/progress`,
   lessonProgress: (lessonId) => `/lessons/${lessonId}/lesson-progress`,
+  checkout: "/payments/checkout",
+  capturePayment: (token) => `/payments/${token}/capture`,
 };
 
 export const authApis = (token) => {

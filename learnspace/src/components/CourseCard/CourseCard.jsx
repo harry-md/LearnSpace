@@ -1,17 +1,22 @@
 import { ShoppingCart, Star, Users, BookOpen } from "lucide-react";
+
 import { Link } from "react-router-dom";
 import {
   HoverCard,
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
-import CompareCard from "@/components/CompareCard/CompareCard";
 import { useContext } from "react";
-import { UIContext } from "@/configs/Context";
+import { CartContext, UIContext } from "@/configs/Context";
 import CourseHoverDetail from "../CourseHoverDetail/CourseHoverDetail";
 
 const CourseCard = ({ course }) => {
   const [uiState] = useContext(UIContext);
+  const [cart, cartDispatch] = useContext(CartContext);
+
+  const handleAddToCart = (course) => {
+    cartDispatch({ type: "ADD_COURSE", payload: course });
+  };
   const displayPrice =
     course.price != null
       ? course.price === 0
@@ -102,6 +107,7 @@ const CourseCard = ({ course }) => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              handleAddToCart(course);
             }}
             className="p-2 bg-purple-50 hover:bg-purple-100 text-[#5624d0] hover:text-[#4712c4] rounded-lg transition-colors border border-purple-100 flex items-center justify-center cursor-pointer shadow-sm active:scale-95 shrink-0"
           >
