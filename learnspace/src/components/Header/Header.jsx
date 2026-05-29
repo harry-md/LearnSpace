@@ -28,13 +28,14 @@ const cartItems = [
 ];
 
 import AvatarMenu from "../AvatarMenu/AvatarMenu";
-import { UIContext, UserContext } from "@/configs/Context";
+import { UIContext, UserContext, CartContext } from "@/configs/Context";
 import Apis, { endpoints } from "@/configs/Apis";
 
 const Header = () => {
   const nav = useNavigate();
   const [user] = useContext(UserContext);
   const [, uiDispatch] = useContext(UIContext);
+  const [cart, cartDispatch] = useContext(CartContext);
   const [openAvatarMenu, setOpenAvatarMenu] = useState(false);
   const [categories, setCategories] = useState([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -128,7 +129,6 @@ const Header = () => {
                   Học tập
                 </span>
               </Link>
-
             </nav>
             <div className="flex-1 overflow-hidden min-w-0 ml-3">
               <marquee behavior="scroll" direction="left" scrollamount="4">
@@ -224,78 +224,15 @@ const Header = () => {
 
         {/* Action Icons */}
         <div className="flex items-center gap-4 lg:gap-6">
-          <HoverCard>
-            <HoverCardTrigger asChild>
-              <Link
-                to="/cart"
-                className="relative cursor-pointer py-2 px-1 text-gray-700 hover:text-purple-600 transition-colors flex items-center"
-              >
-                <ShoppingCart size={22} />
-                <span className="absolute -top-0.5 -right-1.5 w-4 h-4 bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
-                  2
-                </span>
-              </Link>
-            </HoverCardTrigger>
-            <HoverCardContent
-              className="w-[320px] p-0 bg-white border border-gray-200 rounded-lg shadow-xl text-left"
-              side="bottom"
-              align="end"
-            >
-              {/* Cart items */}
-              <div className="max-h-[280px] overflow-y-auto divide-y divide-gray-150">
-                {cartItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex gap-3 p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-16 h-10 object-cover rounded border border-gray-200 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        to="#"
-                        className="font-bold text-xs text-[#2d2f31] line-clamp-2 !no-underline hover:!text-purple-600 transition-colors"
-                      >
-                        {item.title}
-                      </Link>
-                      <p className="text-[10px] text-gray-500 mt-0.5">
-                        {item.author}
-                      </p>
-                      <div className="flex items-baseline gap-1.5 mt-1">
-                        <span className="font-extrabold text-sm text-[#2d2f31]">
-                          {item.price}
-                        </span>
-                        {item.originalPrice && (
-                          <span className="text-[10px] text-gray-400 line-through">
-                            {item.originalPrice}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Footer summary */}
-              <div className="p-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-                <div className="flex justify-between items-baseline mb-3">
-                  <span className="text-sm font-semibold text-gray-500">
-                    Tổng cộng:
-                  </span>
-                  <span className="text-lg font-black text-[#2d2f31]">
-                    538.000 ₫
-                  </span>
-                </div>
-                <Link to="/cart" className="w-full block no-underline">
-                  <button className="w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-lg text-sm transition-colors text-center cursor-pointer">
-                    Chuyển đến giỏ hàng
-                  </button>
-                </Link>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
+          <Link
+            to="/cart"
+            className="relative cursor-pointer py-2 px-1 text-gray-700 hover:text-purple-600 transition-colors flex items-center"
+          >
+            <ShoppingCart size={22} />
+            <span className="absolute -top-0.5 -right-1.5 w-4 h-4 bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
+              {cart.carts.length}
+            </span>
+          </Link>
 
           {user ? (
             <div className="relative w-10 h-10">
@@ -316,7 +253,9 @@ const Header = () => {
                   </div>
                 )}
               </div>
-              {openAvatarMenu && <AvatarMenu onClose={() => setOpenAvatarMenu(false)} />}
+              {openAvatarMenu && (
+                <AvatarMenu onClose={() => setOpenAvatarMenu(false)} />
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-3">
