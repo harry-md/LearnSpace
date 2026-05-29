@@ -13,4 +13,5 @@ public record MyCourseListDto(
         CategoryDto category,
         SimpleUserDto teacher,
         Long chapterCount,
-        Long lessonCount) {}
+        Long lessonCount,
+        Long completedCount) {}

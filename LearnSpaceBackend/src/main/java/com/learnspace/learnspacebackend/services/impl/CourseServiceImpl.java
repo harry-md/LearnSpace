@@ -253,6 +253,7 @@ public class CourseServiceImpl implements CourseService {
                     Course course = (Course) row[0];
                     Long chapterCount = (Long) row[1];
                     Long lessonCount = (Long) row[2];
+                    Long completedCount = (Long) row[3];
                     CourseListDto base = courseMapper.toListDto(course);
 
                     return new MyCourseListDto(
@@ -263,7 +264,8 @@ public class CourseServiceImpl implements CourseService {
                             base.category(),
                             base.teacher(),
                             chapterCount,
-                            lessonCount);
+                            lessonCount,
+                            completedCount);
                 })
                 .toList();
     }
