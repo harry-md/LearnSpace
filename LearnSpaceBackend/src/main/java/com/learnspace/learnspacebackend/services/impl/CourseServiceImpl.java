@@ -110,13 +110,12 @@ public class CourseServiceImpl implements CourseService {
         Long enrollCount = enrollmentRepository.countEnrollmentsByCourse(courseId);
         LessonProgressDto latestProgress = null;
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication() != null
-                ? SecurityContextHolder.getContext().getAuthentication().getPrincipal()
-                : null;
+        Object p = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        CustomUserDetails principal = p.equals("anonymousUser") ? null : (CustomUserDetails) p;
 
-        if (principal instanceof CustomUserDetails userDetails) {
+        if (principal != null) {
             LessonProgress l = progressRepository.getLessonProgressByStudentAndCourse(
-                    userDetails.getId(), courseId);
+                    principal.getId(), courseId);
 
             if (latestProgress == null) {
                 latestProgress = progressMapper.toDto(l);
