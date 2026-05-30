@@ -73,7 +73,7 @@ public class PaypalServiceImpl implements PaypalService {
         List<Map<String, String>> links = (List<Map<String, String>>) response.get("links");
         if (links != null) {
             for (Map<String, String> link : links) {
-                if ("approve".equals(link.get("rel"))) {
+                if (link.get("rel").equals("approve")) {
                     approvalUrl = link.get("href");
                     break;
                 }
@@ -131,7 +131,7 @@ public class PaypalServiceImpl implements PaypalService {
                     .body(request)
                     .retrieve()
                     .body(Map.class);
-            return response != null && "SUCCESS".equals(response.get("verification_status"));
+            return response != null && response.get("verification_status").equals("SUCCESS");
         } catch (Exception e) {
             System.err.println("Lỗi verify webhook: " + e.getMessage());
             return false;

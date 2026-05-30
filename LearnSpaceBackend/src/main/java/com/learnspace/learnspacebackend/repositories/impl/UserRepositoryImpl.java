@@ -1,11 +1,13 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -102,5 +104,19 @@ public class UserRepositoryImpl implements UserRepository {
     public void update(User user) {
         Session session = factory.getObject().getCurrentSession();
         session.merge(user);
+    }
+
+    @Override
+    public List<User> getTeacherEnrolledCourse(int studentId) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<User> q = builder.createQuery(User.class);
+
+        Root<User> root = q.from(User.class);
+        Join<User, Enrollment> enrollmentJoin = root.join("enrollments");
+
+        q.select(root).where(builder.equal(enrollmentJoin.get("student").get("id"), studentId));
+
+        return session.createQuery(q).getResultList();
     }
 }
