@@ -114,7 +114,6 @@ public class UserRepositoryImpl implements UserRepository {
         CriteriaQuery<User> q = builder.createQuery(User.class);
 
         Root<Enrollment> root = q.from(Enrollment.class);
-        root.fetch("student");
 
         Join<Enrollment, Course> courseJoin = root.join("course");
         Join<Course, User> teacherJoin = courseJoin.join("teacher");
