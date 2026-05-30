@@ -270,10 +270,14 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         Subquery<Long> completedLessonCount = q.subquery(Long.class);
         Root<LessonProgress> progressRoot = completedLessonCount.from(LessonProgress.class);
+        Join<LessonProgress, Lesson> progressLessonJoin = progressRoot.join("lesson");
+        Join<Lesson, Chapter> progressChapterJoin = progressLessonJoin.join("chapter");
+
         completedLessonCount
                 .select(builder.count(progressRoot))
                 .where(builder.and(
-                        builder.equal(progressRoot.get("enrollment"), enrollmentJoin),
+                        builder.equal(progressRoot.get("student").get("id"), studentId),
+                        builder.equal(progressChapterJoin.get("course"), root),
                         builder.equal(progressRoot.get("completed"), true)));
 
         q.multiselect(

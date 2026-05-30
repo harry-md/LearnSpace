@@ -19,8 +19,8 @@ public class LessonProgress {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "enrollment_id", nullable = false)
-    private Enrollment enrollment;
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -53,12 +53,12 @@ public class LessonProgress {
         this.id = id;
     }
 
-    public Enrollment getEnrollment() {
-        return enrollment;
+    public User getStudent() {
+        return student;
     }
 
-    public void setEnrollment(Enrollment enrollment) {
-        this.enrollment = enrollment;
+    public void setStudent(User student) {
+        this.student = student;
     }
 
     public Lesson getLesson() {

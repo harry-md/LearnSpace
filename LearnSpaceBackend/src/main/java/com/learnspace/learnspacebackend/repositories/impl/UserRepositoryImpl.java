@@ -60,6 +60,7 @@ public class UserRepositoryImpl implements UserRepository {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<User> q = builder.createQuery(User.class);
+
         Root<User> root = q.from(User.class);
         q.select(root);
 
