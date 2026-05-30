@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.repositories;
 
 import com.learnspace.learnspacebackend.pojo.User;
+import com.learnspace.learnspacebackend.pojo.UserRole;
 
 import java.util.List;
 import java.util.Map;
@@ -19,5 +20,5 @@ public interface UserRepository {
 
     void update(User user);
 
-    List<User> getContactsEnrolled(int userId, String role);
+    List<User> getContactsEnrolled(int userId, UserRole role);
 }
