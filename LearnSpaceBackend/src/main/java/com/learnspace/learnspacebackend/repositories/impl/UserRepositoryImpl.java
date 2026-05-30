@@ -40,7 +40,8 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean checkUsernameExist(String username) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery("SELECT 1 FROM User u WHERE u.username = :username", Integer.class)
+        return session.createQuery(
+                                "SELECT 1 FROM User u WHERE u.username = :username", Integer.class)
                         .setParameter("username", username)
                         .setMaxResults(1)
                         .getSingleResultOrNull()
@@ -107,27 +108,29 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> getContactsEnrolled(int userId, String role) {
+    public List<User> getContactsEnrolled(int userId, UserRole role) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<User> q = builder.createQuery(User.class);
 
         Root<Enrollment> root = q.from(Enrollment.class);
-
         Join<Enrollment, Course> courseJoin = root.join("course");
 
-        if (role.equals("student")) {
+        if (role == UserRole.TEACHER) {
+            Join<Enrollment, User> studentJoin = root.join("student");
+            q.select(studentJoin)
+                    .distinct(true)
+                    .where(builder.equal(courseJoin.get("teacher").get("id"), userId));
+            return session.createQuery(q).getResultList();
+        }
+
+        if (role == UserRole.STUDENT) {
             Join<Course, User> teacherJoin = courseJoin.join("teacher");
             q.select(teacherJoin)
                     .distinct(true)
                     .where(builder.equal(root.get("student").get("id"), userId));
             return session.createQuery(q).getResultList();
         }
-
-        Join<Course, User> userJoin = courseJoin.join(role);
-
-        q.select(userJoin).distinct(true).where(builder.equal(root.get(role).get("id"), userId));
-
-        return session.createQuery(q).getResultList();
+        return null;
     }
 }
