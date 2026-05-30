@@ -1,5 +1,12 @@
 import React, { useContext, useState } from "react";
-import { Trash2, ShoppingBag, Users, PlayCircle, BookOpen } from "lucide-react";
+import {
+  Trash2,
+  ShoppingBag,
+  Users,
+  PlayCircle,
+  BookOpen,
+  MessageCircle,
+} from "lucide-react";
 import { CartContext, UIContext, UserContext } from "../../configs/Context";
 import { authApis, endpoints } from "@/configs/Apis";
 
@@ -195,6 +202,26 @@ const CartPage = () => {
           >
             {isProcessing ? "Đang xử lý..." : "Thanh toán ngay"}
             {!isProcessing && <ShoppingBag size={16} />}
+          </button>
+
+          {/* Chat Support Button */}
+          <button
+            onClick={() => {
+              uiDispatch({
+                type: "SHOW_DIALOG",
+                payload: {
+                  title: "Chat Hỗ Trợ",
+                  message:
+                    "Tính năng trò chuyện trực tuyến đang được phát triển. Vui lòng quay lại sau!",
+                  type: "info",
+                  onConfirm: () => uiDispatch({ type: "HIDE_DIALOG" }),
+                },
+              });
+            }}
+            className="w-full mt-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-purple-600 hover:border-purple-200 font-bold text-sm py-2.5 px-4 rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            Cần hỗ trợ? Trò chuyện
+            <MessageCircle size={16} />
           </button>
 
           <p className="text-center text-[9px] sm:text-[10px] text-gray-500 mt-3 font-medium leading-relaxed">

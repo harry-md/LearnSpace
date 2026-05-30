@@ -19,5 +19,6 @@ public interface UserMapper {
     @Mapping(target = "fullName", expression = "java(teacher.getFullName())")
     @Mapping(target = "email", source = "email")
     @Mapping(target = "avatar", source = "avatar")
+    @Mapping(target = "id", source = "id")
     SimpleUserDto toSimpleUserDto(User teacher);
 }
