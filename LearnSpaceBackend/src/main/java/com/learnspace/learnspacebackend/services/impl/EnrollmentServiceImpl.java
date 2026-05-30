@@ -61,10 +61,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         CustomUserDetails principal = getLoggedInPrincipal();
         User student = userRepository.getUserById(principal.getId());
 
-        if (student == null) {
-            throw new ResourceNotFoundException("Không tìm thấy thông tin tài khoản của bạn");
-        }
-
         Course course = courseRepository.getCourseById(courseId);
         if (course == null) {
             throw new ResourceNotFoundException("Không tìm thấy khóa học");
