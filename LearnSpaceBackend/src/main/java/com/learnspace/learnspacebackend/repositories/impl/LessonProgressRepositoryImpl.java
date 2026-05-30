@@ -1,10 +1,12 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -47,18 +49,23 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
     }
 
     @Override
-    public LessonProgress getLatestLessonProgressByEnrollment(int enrollmentId) {
+    public LessonProgress getLessonProgressByStudentAndCourse(int studentId, int courseId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<LessonProgress> q = builder.createQuery(LessonProgress.class);
 
         Root<LessonProgress> root = q.from(LessonProgress.class);
-        root.fetch("enrollment");
+        root.fetch("lesson");
+
+        Join<LessonProgress, Enrollment> enrollmentJoin = root.join("enrollment");
 
         q.select(root)
-                .where(builder.equal(root.get("enrollment").get("id"), enrollmentId))
-                .orderBy(builder.desc(root.get("updatedAt")), builder.desc(root.get("id")));
+                .where(builder.and(
+                        builder.equal(enrollmentJoin.get("student").get("id"), studentId),
+                        builder.equal(enrollmentJoin.get("course").get("id"), courseId)));
 
-        return session.createQuery(q).setMaxResults(1).getSingleResultOrNull();
+        q.orderBy(builder.desc(root.get("updatedAt")), builder.desc(root.get("id")));
+
+        return session.createQuery(q).getSingleResultOrNull();
     }
 }
