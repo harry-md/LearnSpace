@@ -9,7 +9,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @Table(name = "user")
@@ -65,9 +64,6 @@ public class User {
     @ColumnDefault("0")
     @Column(name = "verified")
     private Boolean verified = false;
-
-    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Enrollment> enrollments;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
