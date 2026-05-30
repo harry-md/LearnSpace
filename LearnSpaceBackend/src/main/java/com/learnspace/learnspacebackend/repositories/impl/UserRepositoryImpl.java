@@ -1,5 +1,6 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
@@ -107,15 +108,20 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> getTeacherEnrolledCourse(int studentId) {
+    public List<User> getTeachersEnrolledCourse(int studentId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<User> q = builder.createQuery(User.class);
 
-        Root<User> root = q.from(User.class);
-        Join<User, Enrollment> enrollmentJoin = root.join("enrollments");
+        Root<Enrollment> root = q.from(Enrollment.class);
+        root.fetch("student");
 
-        q.select(root).where(builder.equal(enrollmentJoin.get("student").get("id"), studentId));
+        Join<Enrollment, Course> courseJoin = root.join("course");
+        Join<Course, User> teacherJoin = courseJoin.join("teacher");
+
+        q.select(teacherJoin)
+                .distinct(true)
+                .where(builder.equal(root.get("student").get("id"), studentId));
 
         return session.createQuery(q).getResultList();
     }

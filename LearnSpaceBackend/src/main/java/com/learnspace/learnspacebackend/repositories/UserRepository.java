@@ -19,5 +19,5 @@ public interface UserRepository {
 
     void update(User user);
 
-    List<User> getTeacherEnrolledCourse(int studentId);
+    List<User> getTeachersEnrolledCourse(int studentId);
 }
