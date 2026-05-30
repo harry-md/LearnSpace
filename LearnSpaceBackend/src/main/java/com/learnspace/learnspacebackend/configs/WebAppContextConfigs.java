@@ -8,12 +8,10 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -52,10 +50,14 @@ public class WebAppContextConfigs implements WebMvcConfigurer {
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager =
-                new CaffeineCacheManager("paypalAccessToken", "exchangeRate");
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("paypalAccessToken", "exchangeRate");
         cacheManager.setCaffeine(
                 Caffeine.newBuilder().expireAfterWrite(9, TimeUnit.HOURS).maximumSize(1));
         return cacheManager;
+    }
+
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        configurer.defaultContentType(MediaType.APPLICATION_JSON).ignoreAcceptHeader(true);
     }
 }
