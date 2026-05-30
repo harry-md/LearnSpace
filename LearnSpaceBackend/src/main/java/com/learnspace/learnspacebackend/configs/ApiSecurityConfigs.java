@@ -28,17 +28,21 @@ public class ApiSecurityConfigs {
         http.securityMatcher("/api/**")
                 .cors(cors -> cors.configurationSource(apiCorsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"message\": \"" + authException.getMessage() + "\"}");
+                            response.getWriter()
+                                    .write("{\"message\": \"" + authException.getMessage() + "\"}");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"message\": \"" + accessDeniedException.getMessage() + "\"}");
+                            response.getWriter()
+                                    .write("{\"message\": \"" + accessDeniedException.getMessage()
+                                            + "\"}");
                         }))
                 .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**")
                         .permitAll()
@@ -49,6 +53,8 @@ public class ApiSecurityConfigs {
                         .requestMatchers(HttpMethod.GET, "/api/categories", "/api/categories/*")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/courses", "/api/courses/*")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/courses/*/reviews")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/courses/*/enrollments")
                         .authenticated()
@@ -71,11 +77,22 @@ public class ApiSecurityConfigs {
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/*")
                         .hasRole(UserRole.ADMIN.name())
                         .requestMatchers(
-                                HttpMethod.POST, "/api/courses", "/api/courses/*/chapters", "/api/chapters/*/lessons")
+                                HttpMethod.POST,
+                                "/api/courses",
+                                "/api/courses/*/chapters",
+                                "/api/chapters/*/lessons")
                         .hasRole(UserRole.VERIFIED_TEACHER.name())
-                        .requestMatchers(HttpMethod.PATCH, "/api/courses/*", "/api/chapters/*", "/api/lessons/*")
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/courses/*",
+                                "/api/chapters/*",
+                                "/api/lessons/*")
                         .hasRole(UserRole.VERIFIED_TEACHER.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/courses/*", "/api/chapters/*", "/api/lessons/*")
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/courses/*",
+                                "/api/chapters/*",
+                                "/api/lessons/*")
                         .hasRole(UserRole.VERIFIED_TEACHER.name())
                         .anyRequest()
                         .authenticated())
