@@ -37,8 +37,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean checkUsernameExist(String username) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                                "SELECT 1 FROM User u WHERE u.username = :username", Integer.class)
+        return session.createQuery("SELECT 1 FROM User u WHERE u.username = :username", Integer.class)
                         .setParameter("username", username)
                         .setMaxResults(1)
                         .getSingleResultOrNull()
