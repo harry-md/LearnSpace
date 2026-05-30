@@ -3,6 +3,9 @@ package com.learnspace.learnspacebackend.configs;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
 import org.apache.tika.Tika;
@@ -11,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -32,6 +36,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -68,10 +73,21 @@ public class SpringSecurityConfigs {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider =
-                new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
+    }
+
+    @Bean
+    public FirebaseApp firebaseApp() throws IOException {
+        if (FirebaseApp.getApps().isEmpty()) {
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(
+                            new ClassPathResource("firebase-service-account.json").getInputStream()))
+                    .build();
+            return FirebaseApp.initializeApp(options);
+        }
+        return FirebaseApp.getInstance();
     }
 
     @Bean
@@ -82,17 +98,16 @@ public class SpringSecurityConfigs {
     @Bean
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(webCorsConfigurationSource()))
-                .authorizeHttpRequests(
-                        requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
-                                .permitAll()
-                                .requestMatchers("/login")
-                                .permitAll()
-                                .requestMatchers("/register")
-                                .hasRole(UserRole.ADMIN.name())
-                                .requestMatchers("/")
-                                .hasRole(UserRole.ADMIN.name())
-                                .anyRequest()
-                                .authenticated())
+                .authorizeHttpRequests(requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
+                        .permitAll()
+                        .requestMatchers("/login")
+                        .permitAll()
+                        .requestMatchers("/register")
+                        .hasRole(UserRole.ADMIN.name())
+                        .requestMatchers("/")
+                        .hasRole(UserRole.ADMIN.name())
+                        .anyRequest()
+                        .authenticated())
                 .formLogin(form -> form.loginPage("/login")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
@@ -140,8 +155,7 @@ public class SpringSecurityConfigs {
         String secretKey = env.getProperty("r2.secret_key");
         return S3Client.builder()
                 .endpointOverride(URI.create("https://" + accountId + ".r2.cloudflarestorage.com"))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
                 .region(Region.of("auto"))
                 .serviceConfiguration(
                         S3Configuration.builder().chunkedEncodingEnabled(false).build())

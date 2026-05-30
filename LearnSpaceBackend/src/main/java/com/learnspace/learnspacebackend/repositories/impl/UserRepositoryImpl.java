@@ -107,20 +107,26 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> getTeachersEnrolledCourse(int studentId) {
+    public List<User> getContactsEnrolled(int userId, String role) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<User> q = builder.createQuery(User.class);
 
         Root<Enrollment> root = q.from(Enrollment.class);
-        root.fetch("student");
 
         Join<Enrollment, Course> courseJoin = root.join("course");
-        Join<Course, User> teacherJoin = courseJoin.join("teacher");
 
-        q.select(teacherJoin)
-                .distinct(true)
-                .where(builder.equal(root.get("student").get("id"), studentId));
+        if (role.equals("student")) {
+            Join<Course, User> teacherJoin = courseJoin.join("teacher");
+            q.select(teacherJoin)
+                    .distinct(true)
+                    .where(builder.equal(root.get("student").get("id"), userId));
+            return session.createQuery(q).getResultList();
+        }
+
+        Join<Course, User> userJoin = courseJoin.join(role);
+
+        q.select(userJoin).distinct(true).where(builder.equal(root.get(role).get("id"), userId));
 
         return session.createQuery(q).getResultList();
     }
