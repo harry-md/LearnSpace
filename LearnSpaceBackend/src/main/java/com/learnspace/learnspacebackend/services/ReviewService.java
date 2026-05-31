@@ -1,10 +1,11 @@
 package com.learnspace.learnspacebackend.services;
 
+import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.dtos.review.ReviewDto;
 
-import java.util.List;
+import java.util.Map;
 
 public interface ReviewService {
 
-    List<ReviewDto> getReviewsByCourse(int courseId);
+    PaginatedResponseDto<ReviewDto> getReviewsByCourse(int courseId, Map<String, String> params);
 }

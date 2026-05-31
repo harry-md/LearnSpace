@@ -38,8 +38,8 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Autowired
     private LocalSessionFactoryBean factory;
 
-    @Value("${course.pageSize}")
-    private int COURSE_PAGE_SIZE_KEY;
+    @Value("${course.page_size}")
+    private int COURSE_PAGE_SIZE;
 
     private List<Predicate> buildPredicates(
             Map<String, String> params, CriteriaBuilder builder, Root<Course> root) {
@@ -156,9 +156,9 @@ public class CourseRepositoryImpl implements CourseRepository {
         Query<Object[]> query = session.createQuery(q);
         if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
-            int start = (page - 1) * COURSE_PAGE_SIZE_KEY;
+            int start = (page - 1) * COURSE_PAGE_SIZE;
             query.setFirstResult(start);
-            query.setMaxResults(COURSE_PAGE_SIZE_KEY);
+            query.setMaxResults(COURSE_PAGE_SIZE);
         }
         return query.getResultList();
     }
@@ -207,7 +207,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         root.fetch("teacher", JoinType.INNER);
 
         Fetch<Course, Chapter> chaptersFetch = root.fetch("chapters", JoinType.LEFT);
-        Fetch<Chapter, Lesson> lessonFetch = chaptersFetch.fetch("lessons", JoinType.LEFT);
+        chaptersFetch.fetch("lessons", JoinType.LEFT);
 
         q.select(root).where(builder.equal(root.get("id"), courseId));
         return session.createQuery(q).getSingleResultOrNull();

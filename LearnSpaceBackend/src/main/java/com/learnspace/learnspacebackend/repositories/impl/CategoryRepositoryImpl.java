@@ -3,8 +3,6 @@ package com.learnspace.learnspacebackend.repositories.impl;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 
-import jakarta.persistence.Query;
-
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -23,9 +21,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     @Override
     public List<Category> getCates() {
         Session session = factory.getObject().getCurrentSession();
-
-        Query q = session.createQuery("FROM Category", Category.class);
-        return q.getResultList();
+        return session.createQuery("FROM Category", Category.class).getResultList();
     }
 
     @Override
@@ -40,10 +36,9 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         Session session = factory.getObject().getCurrentSession();
         if (category.getId() == null) {
             session.persist(category);
-        } else {
-            category = session.merge(category);
+            return category;
         }
-        return category;
+        return session.merge(category);
     }
 
     @Override
