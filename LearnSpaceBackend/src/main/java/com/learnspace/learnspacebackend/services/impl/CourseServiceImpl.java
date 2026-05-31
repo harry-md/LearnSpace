@@ -4,11 +4,13 @@ import com.learnspace.learnspacebackend.dtos.course.CourseDto;
 import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
+import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
+import com.learnspace.learnspacebackend.mappers.PaginatedResponseMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
@@ -25,6 +27,7 @@ import com.learnspace.learnspacebackend.services.CourseService;
 import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,6 +44,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Value("${course.pageSize}")
+    private int COURSE_PAGE_SIZE_KEY;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -73,8 +79,8 @@ public class CourseServiceImpl implements CourseService {
     private R2Service r2Service;
 
     @Override
-    public List<CourseListDto> getCourses(Map<String, String> params) {
-        return courseRepository.getAllCourses(params).stream()
+    public PaginatedResponseDto<CourseListDto> getCourses(Map<String, String> params) {
+        List<CourseListDto> results = courseRepository.getAllCourses(params).stream()
                 .map(row -> {
                     Course course = (Course) row[0];
                     Double avgRating = (Double) row[1];
@@ -96,6 +102,11 @@ public class CourseServiceImpl implements CourseService {
                             lessonCount);
                 })
                 .toList();
+        return PaginatedResponseMapper.toPaginatedResponseDto(
+                courseRepository.countCourses(params),
+                Integer.parseInt(params.get("page")),
+                COURSE_PAGE_SIZE_KEY,
+                results);
     }
 
     @Override

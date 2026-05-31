@@ -48,16 +48,17 @@ public class WebAppContextConfigs implements WebMvcConfigurer {
         return new StandardServletMultipartResolver();
     }
 
+    @Override
+    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+        configurer.defaultContentType(MediaType.APPLICATION_JSON);
+    }
+
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("paypalAccessToken", "exchangeRate");
+        CaffeineCacheManager cacheManager =
+                new CaffeineCacheManager("paypalAccessToken", "exchangeRate");
         cacheManager.setCaffeine(
                 Caffeine.newBuilder().expireAfterWrite(9, TimeUnit.HOURS).maximumSize(1));
         return cacheManager;
-    }
-
-    @Override
-    public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-        configurer.defaultContentType(MediaType.APPLICATION_JSON).ignoreAcceptHeader(true);
     }
 }

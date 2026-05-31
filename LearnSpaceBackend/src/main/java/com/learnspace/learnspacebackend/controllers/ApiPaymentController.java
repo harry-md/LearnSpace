@@ -37,9 +37,7 @@ public class ApiPaymentController {
     @PostMapping("/payments/webhook")
     public ResponseEntity<Void> webhook(
             @RequestBody String payload, @RequestHeader Map<String, String> headers) {
-        Map<String, String> lowerCaseHeaders = new java.util.HashMap<>();
-        headers.forEach((k, v) -> lowerCaseHeaders.put(k.toLowerCase(), v));
-        paymentService.handleWebhookEvent(payload, lowerCaseHeaders);
+        paymentService.handleWebhookEvent(payload, headers);
         return ResponseEntity.ok().build();
     }
 }

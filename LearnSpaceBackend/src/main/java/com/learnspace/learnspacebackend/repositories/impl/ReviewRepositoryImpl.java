@@ -9,6 +9,7 @@ import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 
@@ -44,9 +45,9 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         CriteriaQuery<Review> q = builder.createQuery(Review.class);
 
         Root<Review> root = q.from(Review.class);
-        root.fetch("student");
+        Fetch<Review, User> userFetch = root.fetch("student");
 
-        Join<Review, User> userJoin = root.join("student");
+        Join<Review, User> userJoin = (Join<Review, User>) userFetch;
         Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollments");
         Join<Review, Course> courseJoin = root.join("course");
 

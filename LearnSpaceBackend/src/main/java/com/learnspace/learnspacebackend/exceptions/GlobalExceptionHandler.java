@@ -2,7 +2,6 @@ package com.learnspace.learnspacebackend.exceptions;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,9 +16,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFoundException(
             ResourceNotFoundException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(error);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -45,27 +42,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDuplication(
             DuplicateResourceException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return ResponseEntity.badRequest()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(error);
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(InvalidLoginException.class)
     public ResponseEntity<ErrorResponse> handleInvalidLogin(
             InvalidLoginException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return ResponseEntity.badRequest()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(error);
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(
             AccessDeniedException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(error);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -75,26 +66,20 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse("Dữ liệu đã tồn tại");
 
         System.err.println(ex.getMostSpecificCause().getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(error);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(
             IllegalArgumentException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return ResponseEntity.badRequest()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(error);
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(Exception ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse("Đã xảy ra lỗi hệ thống");
         System.err.println("Exception 500: " + ex.getMessage());
-        return ResponseEntity.internalServerError()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(error);
+        return ResponseEntity.internalServerError().body(error);
     }
 }
