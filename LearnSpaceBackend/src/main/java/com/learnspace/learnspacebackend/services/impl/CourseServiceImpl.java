@@ -45,8 +45,8 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseRepository courseRepository;
 
-    @Value("${course.pageSize}")
-    private int COURSE_PAGE_SIZE_KEY;
+    @Value("${course.page_size}")
+    private int COURSE_PAGE_SIZE;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -102,10 +102,11 @@ public class CourseServiceImpl implements CourseService {
                             lessonCount);
                 })
                 .toList();
+
         return PaginatedResponseMapper.toPaginatedResponseDto(
                 courseRepository.countCourses(params),
                 Integer.parseInt(params.get("page")),
-                COURSE_PAGE_SIZE_KEY,
+                COURSE_PAGE_SIZE,
                 results);
     }
 

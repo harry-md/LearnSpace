@@ -1,29 +1,26 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
-import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.Enrollment;
-import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 import com.learnspace.learnspacebackend.pojo.Review;
-import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Fetch;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.Query;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @Transactional
 public class ReviewRepositoryImpl implements ReviewRepository {
+
+    @Value("${review.page_size}")
+    private int REVIEW_PAGE_SIZE;
 
     @Autowired
     private LocalSessionFactoryBean factory;
@@ -39,30 +36,44 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     }
 
     @Override
-    public List<Review> getReviewsByCourse(int courseId) {
+    public List<Review> getReviewsByCourse(int courseId, Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Review> q = builder.createQuery(Review.class);
+        String hql = """
+            SELECT DISTINCT r
+            FROM Review r
+            JOIN FETCH r.student s
+            JOIN s.enrollments e
+            JOIN r.course c
+            WHERE e.status IN ('ACTIVE', 'COMPLETED') AND c.id = :courseId AND e.course.id = :courseId
+            ORDER BY r.rating, r.createdAt
+            """;
 
-        Root<Review> root = q.from(Review.class);
-        Fetch<Review, User> userFetch = root.fetch("student");
+        Query query = session.createQuery(hql, Review.class).setParameter("courseId", courseId);
 
-        Join<Review, User> userJoin = (Join<Review, User>) userFetch;
-        Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollments");
-        Join<Review, Course> courseJoin = root.join("course");
+        if (params != null) {
+            int page = Integer.parseInt(params.getOrDefault("page", "1"));
+            int start = (page - 1) * REVIEW_PAGE_SIZE;
+            query.setFirstResult(start);
+            query.setMaxResults(REVIEW_PAGE_SIZE);
+        }
 
-        q.select(root)
-                .distinct(true)
-                .where(builder.and(
-                        builder.or(
-                                builder.equal(
-                                        enrollmentJoin.get("status"), EnrollmentStatus.COMPLETED),
-                                builder.equal(
-                                        enrollmentJoin.get("status"), EnrollmentStatus.ACTIVE)),
-                        builder.equal(courseJoin.get("id"), courseId),
-                        builder.equal(enrollmentJoin.get("course").get("id"), courseId)));
+        return query.getResultList();
+    }
 
-        q.orderBy(builder.desc(root.get("rating")), builder.desc(root.get("createdAt")));
-        return session.createQuery(q).getResultList();
+    @Override
+    public Long countReviewsByCourse(int courseId, Map<String, String> params) {
+        Session session = factory.getObject().getCurrentSession();
+        String hql = """
+            SELECT COUNT(r)
+            FROM Review r
+            JOIN r.student s
+            JOIN s.enrollments e
+            JOIN r.course c
+            WHERE e.status IN ('ACTIVE', 'COMPLETED') AND c.id = :courseId AND e.course.id = :courseId
+            """;
+
+        return session.createQuery(hql, Long.class)
+                .setParameter("courseId", courseId)
+                .getSingleResultOrNull();
     }
 }
