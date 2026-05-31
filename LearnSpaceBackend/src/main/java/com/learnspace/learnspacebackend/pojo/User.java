@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "user")
@@ -60,6 +61,9 @@ public class User {
     @ColumnDefault("1")
     @Column(name = "active")
     private Boolean active = true;
+
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    Set<Enrollment> enrollments;
 
     @ColumnDefault("0")
     @Column(name = "verified")
@@ -173,5 +177,9 @@ public class User {
 
     public String getFullName() {
         return this.firstName + " " + this.lastName;
+    }
+
+    public Set<Enrollment> getEnrollments() {
+        return enrollments;
     }
 }

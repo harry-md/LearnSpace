@@ -54,8 +54,8 @@ public class LessonProgressServiceImpl implements LessonProgressService {
         if (enrollment == null) {
             throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
         }
-        LessonProgress existing = lessonProgressRepository.getLessonProgressByEnrollmentAndLesson(
-                enrollment.getId(), lessonId);
+        LessonProgress existing =
+                lessonProgressRepository.getLessonProgressByStudentAndLesson(userId, lessonId);
 
         if (existing != null) {
             existing.setWatchedSec(lessonProgressDto.watchedSec());
@@ -65,7 +65,7 @@ public class LessonProgressServiceImpl implements LessonProgressService {
 
         LessonProgress progress = lessonProgressMapper.toEntity(lessonProgressDto);
         progress.setLesson(lesson);
-        progress.setEnrollment(enrollment);
+        progress.setStudent(enrollment.getStudent());
         return lessonProgressMapper.toDto(
                 lessonProgressRepository.addOrUpdateLessonProgress(progress));
     }
@@ -86,8 +86,8 @@ public class LessonProgressServiceImpl implements LessonProgressService {
         if (enrollment == null) {
             throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
         }
-        LessonProgress existing = lessonProgressRepository.getLessonProgressByEnrollmentAndLesson(
-                enrollment.getId(), lessonId);
+        LessonProgress existing =
+                lessonProgressRepository.getLessonProgressByStudentAndLesson(userId, lessonId);
 
         if (existing != null) {
             existing.setWatchedSec(lessonProgressDto.watchedSec());

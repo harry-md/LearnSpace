@@ -1,5 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Search, ShoppingCart, Menu, Home, GraduationCap } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  Menu,
+  Home,
+  GraduationCap,
+  MessageCircle,
+} from "lucide-react";
 import { Chip } from "@heroui/react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -28,6 +35,7 @@ const cartItems = [
 ];
 
 import AvatarMenu from "../AvatarMenu/AvatarMenu";
+import ChatMenu from "./ChatArea/ChatMenu";
 import { UIContext, UserContext, CartContext } from "@/configs/Context";
 import Apis, { endpoints } from "@/configs/Apis";
 
@@ -37,6 +45,7 @@ const Header = () => {
   const [, uiDispatch] = useContext(UIContext);
   const [cart, cartDispatch] = useContext(CartContext);
   const [openAvatarMenu, setOpenAvatarMenu] = useState(false);
+  const [openChat, setOpenChat] = useState(false);
   const [categories, setCategories] = useState([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchData, setSearchData] = useState([]);
@@ -234,6 +243,19 @@ const Header = () => {
             </span>
           </Link>
 
+          <div className="relative">
+            <button
+              onClick={() => setOpenChat(!openChat)}
+              className="relative cursor-pointer py-2 px-1 text-gray-700 hover:text-purple-600 transition-colors flex items-center"
+            >
+              <MessageCircle color="#0d6efd" size={22} />
+              <span className="absolute -top-0.5 -right-1.5 w-4 h-4 bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
+                1
+              </span>
+            </button>
+            {openChat && <ChatMenu onClose={() => setOpenChat(false)} />}
+          </div>
+
           {user ? (
             <div className="relative w-10 h-10">
               <div onClick={() => setOpenAvatarMenu(!openAvatarMenu)}>
@@ -261,13 +283,13 @@ const Header = () => {
             <div className="flex items-center gap-3">
               <Link
                 to="/login"
-                className="no-underline text-[#2d2f31] hover:text-purple-600 font-extrabold text-[13px] border border-gray-300 px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="!no-underline rounded-lg text-[#2d2f31] hover:text-purple-600 font-extrabold text-[13px] border border-gray-300 px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Đăng nhập
               </Link>
               <Link
                 to="/register"
-                className="no-underline bg-gray-900 text-white font-extrabold text-[13px] px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
+                className="!no-underline rounded-lg bg-gray-900 text-white font-extrabold text-[13px] px-4 py-2 hover:bg-gray-800 transition-colors cursor-pointer"
               >
                 Đăng ký
               </Link>

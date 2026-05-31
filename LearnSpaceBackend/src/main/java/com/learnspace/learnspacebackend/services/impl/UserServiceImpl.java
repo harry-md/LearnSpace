@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
         Set<GrantedAuthority> authorities = new HashSet<>();
 
-        if (user.getRole().equals(UserRole.TEACHER) && user.getVerified()) {
+        if (user.getRole() == UserRole.TEACHER && user.getVerified()) {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + UserRole.VERIFIED_TEACHER.name()));
         } else {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));

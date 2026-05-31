@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,9 +59,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         CustomUserDetails principal = getLoggedInPrincipal();
         User student = userRepository.getUserById(principal.getId());
-        if (student == null) {
-            throw new ResourceNotFoundException("Không tìm thấy thông tin tài khoản");
-        }
 
         BigDecimal totalVnd = BigDecimal.ZERO;
         List<Payment> payments = new ArrayList<>();
@@ -182,7 +180,7 @@ public class PaymentServiceImpl implements PaymentService {
         String captureId = captureResponse.get("captureId");
         String status = captureResponse.get("status");
 
-        if ("COMPLETED".equals(status)) {
+        if (status.equals("COMPLETED")) {
             activatePayments(payments, captureId);
         }
 
@@ -194,7 +192,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void handleWebhookEvent(String payload, Map<String, String> headers) {
-        if (!paypalService.verifyPaypalWebhook(payload, headers)) {
+        Map<String, String> lowerCaseHeader = new HashMap<>();
+        headers.forEach((k, v) -> lowerCaseHeader.put(k.toLowerCase(), v.toLowerCase()));
+
+        if (!paypalService.verifyPaypalWebhook(payload, lowerCaseHeader)) {
             System.err.println("Không xác thực được webhook từ PayPal");
             return;
         }

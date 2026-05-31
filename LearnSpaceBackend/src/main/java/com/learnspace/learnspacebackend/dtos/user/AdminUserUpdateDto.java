@@ -1,6 +1,5 @@
 package com.learnspace.learnspacebackend.dtos.user;
 
-
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
 import jakarta.validation.constraints.*;

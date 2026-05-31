@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { PlayCircle, Trophy } from "lucide-react";
+import { BookOpen, PlayCircle, Trophy } from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
 import { UserContext, UIContext } from "@/configs/Context";
 import { useNavigate } from "react-router-dom";
@@ -16,23 +16,8 @@ const MyListsTab = () => {
       const res = await authApis(user.token).get(endpoints.enrolledCourses);
       const courses = res.data;
 
-      const coursesWithProgress = await Promise.all(
-        courses.map(async (c) => {
-          try {
-            const progressRes = await authApis(user.token).get(
-              endpoints.courseProgress(c.id),
-            );
-            return { ...c, progress: progressRes.data };
-          } catch (e) {
-            console.error("Lỗi khi tải progress cho khóa học:", c.id, e);
-            return {
-              ...c,
-              progress: { percent: 0, completedCount: 0, totalCount: 0 },
-            };
-          }
-        }),
-      );
-      setMyCourse(coursesWithProgress);
+      console.log("courses", courses);
+      setMyCourse(courses);
     } catch (err) {
       uiDispatch({
         type: "SHOW_DIALOG",
@@ -60,11 +45,10 @@ const MyListsTab = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {myCourses.map((course) => {
-          const progress = course.progress || {
-            percent: 0,
-            completedCount: 0,
-            totalCount: 0,
-          };
+          const completed = course.completedCount || 0;
+          const total = course.lessonCount || 0;
+          const progressPercent =
+            total > 0 ? Math.round((completed / total) * 100) : 0;
           return (
             <div
               key={course.id}
@@ -104,12 +88,12 @@ const MyListsTab = () => {
               <div className="h-1.5 w-full bg-gray-200">
                 <div
                   className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#5624d0] rounded-r-full transition-all duration-1000 ease-out"
-                  style={{ width: `${progress.percent}%` }}
+                  style={{ width: `${progressPercent}%` }}
                 ></div>
               </div>
 
               <div className="p-4 flex-1 flex flex-col">
-                <h4 className="font-bold text-[15px] text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-2">
+                <h4 className="!font-bold !text-[15px] !text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-2">
                   {course.name}
                 </h4>
 
@@ -126,10 +110,16 @@ const MyListsTab = () => {
                     <p className="text-sm text-gray-600 font-bold line-clamp-1 m-0">
                       {course.teacher?.fullName || "Giảng viên"}
                     </p>
-                    <p className="text-xs text-gray-600 font-medium line-clamp-1 m-0">
+                    <p className="text-xs text-gray-500 font-medium line-clamp-1 m-0 mt-0.5">
                       {course.teacher?.email || "Email"}
                     </p>
                   </div>
+                </div>
+                <div className="flex justify-end items-center gap-1.5 mb-2 -mt-1">
+                  <BookOpen size={14} className="text-gray-500" />
+                  <span className="text-xs text-gray-500 font-medium">
+                    {course.chapterCount || 0} chương
+                  </span>
                 </div>
 
                 <div className="space-y-3 pt-3 mt-auto border-t border-gray-100">
@@ -137,21 +127,21 @@ const MyListsTab = () => {
                     <div className="flex items-center gap-1.5">
                       <div
                         className={`w-2 h-2 rounded-full ${
-                          progress.percent > 0 ? "bg-green-500" : "bg-gray-300"
+                          progressPercent > 0 ? "bg-green-500" : "bg-gray-300"
                         }`}
                       ></div>
                       <span>
-                        {progress.completedCount}/{progress.totalCount} bài học
+                        {completed}/{total} bài học
                       </span>
                     </div>
                     <span
                       className={
-                        progress.percent === 100
+                        progressPercent === 100
                           ? "text-green-600 font-bold"
                           : "text-[#5624d0] font-bold"
                       }
                     >
-                      {progress.percent}%
+                      {progressPercent}%
                     </span>
                   </div>
 
@@ -159,7 +149,7 @@ const MyListsTab = () => {
                     onClick={() => navigate(`/course/${course.id}`)}
                     className="w-full py-2.5 bg-[#f8f9fa] hover:bg-[#5624d0] hover:text-white text-[#1c1d1f] border border-[#d1d7dc] hover:border-[#5624d0] text-[13px] font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 group/btn"
                   >
-                    {progress.percent === 100 ? (
+                    {progressPercent === 100 ? (
                       <>
                         <Trophy
                           size={16}
@@ -167,7 +157,7 @@ const MyListsTab = () => {
                         />
                         Ôn tập lại
                       </>
-                    ) : progress.percent > 0 ? (
+                    ) : progressPercent > 0 ? (
                       <>
                         <PlayCircle size={16} />
                         Tiếp tục học

@@ -57,6 +57,7 @@ public class PaypalServiceImpl implements PaypalService {
                                 "PAY_NOW",
                                 "brand_name",
                                 "LearnSpace"));
+
         Map<String, Object> response = RestClient.create()
                 .post()
                 .uri(PAYPAL_BASE_URL + "/v2/checkout/orders")
@@ -65,18 +66,19 @@ public class PaypalServiceImpl implements PaypalService {
                 .body(request)
                 .retrieve()
                 .body(Map.class);
+
         if (response == null || !response.containsKey("id")) {
             throw new RuntimeException("Lỗi tạo PayPal order");
         }
+
         String orderId = (String) response.get("id");
         String approvalUrl = null;
         List<Map<String, String>> links = (List<Map<String, String>>) response.get("links");
-        if (links != null) {
-            for (Map<String, String> link : links) {
-                if ("approve".equals(link.get("rel"))) {
-                    approvalUrl = link.get("href");
-                    break;
-                }
+
+        for (Map<String, String> link : links) {
+            if (link.get("rel").equals("approve")) {
+                approvalUrl = link.get("href");
+                break;
             }
         }
         return Map.of("orderId", orderId, "approvalUrl", approvalUrl != null ? approvalUrl : "");
@@ -116,13 +118,14 @@ public class PaypalServiceImpl implements PaypalService {
         String accessToken = externalApiClient.getPaypalAccessToken();
         try {
             Map<String, Object> request = Map.of(
-                    "auth_algo", headers.getOrDefault("paypal-auth-algo", ""),
-                    "cert_url", headers.getOrDefault("paypal-cert-url", ""),
-                    "transmission_id", headers.getOrDefault("paypal-transmission-id", ""),
-                    "transmission_sig", headers.getOrDefault("paypal-transmission-sig", ""),
-                    "transmission_time", headers.getOrDefault("paypal-transmission-time", ""),
+                    "auth_algo", headers.get("paypal-auth-algo"),
+                    "cert_url", headers.get("paypal-cert-url"),
+                    "transmission_id", headers.get("paypal-transmission-id"),
+                    "transmission_sig", headers.get("paypal-transmission-sig"),
+                    "transmission_time", headers.get("paypal-transmission-time"),
                     "webhook_id", PAYPAL_WEBHOOK_ID,
                     "webhook_event", objectMapper.readTree(payload));
+
             Map<String, Object> response = RestClient.create()
                     .post()
                     .uri(PAYPAL_BASE_URL + "/v1/notifications/verify-webhook-signature")
@@ -131,9 +134,10 @@ public class PaypalServiceImpl implements PaypalService {
                     .body(request)
                     .retrieve()
                     .body(Map.class);
-            return response != null && "SUCCESS".equals(response.get("verification_status"));
-        } catch (Exception e) {
-            System.err.println("Lỗi verify webhook: " + e.getMessage());
+
+            return response != null && response.get("verification_status").equals("SUCCESS");
+        } catch (Exception ex) {
+            System.err.println("Lỗi webhook paypal: " + ex.getMessage());
             return false;
         }
     }

@@ -4,6 +4,7 @@ import com.learnspace.learnspacebackend.dtos.course.CourseDto;
 import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
+import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.services.CourseService;
 
 import jakarta.validation.Valid;
@@ -25,7 +26,8 @@ public class ApiCourseController {
     private CourseService courseService;
 
     @GetMapping
-    public ResponseEntity<List<CourseListDto>> list(@RequestParam Map<String, String> params) {
+    public ResponseEntity<PaginatedResponseDto<CourseListDto>> list(
+            @RequestParam Map<String, String> params) {
         return ResponseEntity.ok(courseService.getCourses(params));
     }
 

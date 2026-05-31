@@ -33,3 +33,4 @@ LearnSpace/nb-configuration.xml
 .vscode
 env.properties
 deploy.sh
+firebase-service-account.json

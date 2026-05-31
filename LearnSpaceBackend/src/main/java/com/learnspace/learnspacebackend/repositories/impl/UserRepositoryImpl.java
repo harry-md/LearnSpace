@@ -1,11 +1,14 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -57,6 +60,7 @@ public class UserRepositoryImpl implements UserRepository {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<User> q = builder.createQuery(User.class);
+
         Root<User> root = q.from(User.class);
         q.select(root);
 
@@ -102,5 +106,32 @@ public class UserRepositoryImpl implements UserRepository {
     public void update(User user) {
         Session session = factory.getObject().getCurrentSession();
         session.merge(user);
+    }
+
+    @Override
+    public List<User> getContactsEnrolled(int userId, UserRole role) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<User> q = builder.createQuery(User.class);
+
+        Root<Enrollment> root = q.from(Enrollment.class);
+        Join<Enrollment, Course> courseJoin = root.join("course");
+
+        if (role == UserRole.TEACHER) {
+            Join<Enrollment, User> studentJoin = root.join("student");
+            q.select(studentJoin)
+                    .distinct(true)
+                    .where(builder.equal(courseJoin.get("teacher").get("id"), userId));
+            return session.createQuery(q).getResultList();
+        }
+
+        if (role == UserRole.STUDENT) {
+            Join<Course, User> teacherJoin = courseJoin.join("teacher");
+            q.select(teacherJoin)
+                    .distinct(true)
+                    .where(builder.equal(root.get("student").get("id"), userId));
+            return session.createQuery(q).getResultList();
+        }
+        return null;
     }
 }
