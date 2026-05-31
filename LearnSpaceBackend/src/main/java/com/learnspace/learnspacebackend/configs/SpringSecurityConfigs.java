@@ -73,7 +73,8 @@ public class SpringSecurityConfigs {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider authenticationProvider =
+                new DaoAuthenticationProvider(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }
@@ -83,7 +84,8 @@ public class SpringSecurityConfigs {
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(
-                            new ClassPathResource("firebase-service-account.json").getInputStream()))
+                            new ClassPathResource("firebase-service-account.json")
+                                    .getInputStream()))
                     .build();
             return FirebaseApp.initializeApp(options);
         }
@@ -98,16 +100,17 @@ public class SpringSecurityConfigs {
     @Bean
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(webCorsConfigurationSource()))
-                .authorizeHttpRequests(requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
-                        .permitAll()
-                        .requestMatchers("/login")
-                        .permitAll()
-                        .requestMatchers("/register")
-                        .hasRole(UserRole.ADMIN.name())
-                        .requestMatchers("/")
-                        .hasRole(UserRole.ADMIN.name())
-                        .anyRequest()
-                        .authenticated())
+                .authorizeHttpRequests(
+                        requests -> requests.requestMatchers("/js/**", "/css/**", "/image/**")
+                                .permitAll()
+                                .requestMatchers("/login")
+                                .permitAll()
+                                .requestMatchers("/register")
+                                .hasRole(UserRole.ADMIN.name())
+                                .requestMatchers("/")
+                                .hasRole(UserRole.ADMIN.name())
+                                .anyRequest()
+                                .authenticated())
                 .formLogin(form -> form.loginPage("/login")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
@@ -155,7 +158,8 @@ public class SpringSecurityConfigs {
         String secretKey = env.getProperty("r2.secret_key");
         return S3Client.builder()
                 .endpointOverride(URI.create("https://" + accountId + ".r2.cloudflarestorage.com"))
-                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
                 .region(Region.of("auto"))
                 .serviceConfiguration(
                         S3Configuration.builder().chunkedEncodingEnabled(false).build())

@@ -4,11 +4,13 @@ import com.learnspace.learnspacebackend.dtos.course.CourseDto;
 import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
+import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.services.CourseService;
 
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +26,12 @@ public class ApiCourseController {
     @Autowired
     private CourseService courseService;
 
+    @Value("${course.pageSize}")
+    private int pageSize;
+
     @GetMapping
-    public ResponseEntity<List<CourseListDto>> list(@RequestParam Map<String, String> params) {
+    public ResponseEntity<PaginatedResponseDto<CourseListDto>> list(
+            @RequestParam Map<String, String> params) {
         return ResponseEntity.ok(courseService.getCourses(params));
     }
 

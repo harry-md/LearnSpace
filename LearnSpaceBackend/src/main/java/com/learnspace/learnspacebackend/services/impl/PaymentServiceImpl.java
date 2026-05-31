@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -191,7 +192,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void handleWebhookEvent(String payload, Map<String, String> headers) {
-        if (!paypalService.verifyPaypalWebhook(payload, headers)) {
+        Map<String, String> lowerCaseHeader = new HashMap<>();
+        headers.forEach((k, v) -> lowerCaseHeader.put(k.toLowerCase(), v.toLowerCase()));
+
+        if (!paypalService.verifyPaypalWebhook(payload, lowerCaseHeader)) {
             System.err.println("Không xác thực được webhook từ PayPal");
             return;
         }

@@ -1,13 +1,12 @@
 package com.learnspace.learnspacebackend.controllers;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.dtos.user.UserProfileDto;
-import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.services.ChatService;
 import com.learnspace.learnspacebackend.services.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,18 +39,21 @@ public class ApiChatController {
         UserProfileDto currentUser = userService.getUserByUsername(auth.getName());
 
         try {
-            String firebaseToken = FirebaseAuth.getInstance().createCustomToken(String.valueOf(currentUser.id()));
+            String firebaseToken =
+                    FirebaseAuth.getInstance().createCustomToken(String.valueOf(currentUser.id()));
             Map<String, String> response = new HashMap<>();
             response.put("firebaseToken", firebaseToken);
             return ResponseEntity.ok(response);
         } catch (FirebaseAuthException e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi tạo token Firebase");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi tạo token Firebase");
         }
     }
 
     @GetMapping("/contacts")
-    public ResponseEntity<?> getChatContacts(@AuthenticationPrincipal CustomUserDetails currentUser) {
+    public ResponseEntity<?> getChatContacts(
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
         return ResponseEntity.ok(chatService.getContactsEnrolled(currentUser.getId()));
     }
 }
