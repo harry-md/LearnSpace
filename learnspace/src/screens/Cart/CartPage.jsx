@@ -6,9 +6,11 @@ import {
   PlayCircle,
   BookOpen,
   MessageCircle,
+  Phone,
 } from "lucide-react";
 import { CartContext, UIContext, UserContext } from "../../configs/Context";
 import { authApis, endpoints } from "@/configs/Apis";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
   const [cart, cartDispatch] = useContext(CartContext);
@@ -16,7 +18,7 @@ const CartPage = () => {
   const [user] = useContext(UserContext);
   const cartItems = cart?.carts || [];
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
-
+  const nav = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const removeCourseFromCart = (courseId) => {
@@ -24,6 +26,21 @@ const CartPage = () => {
   };
 
   const handleCheckout = async () => {
+    if (!user) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Thông báo",
+          message: "Vui lòng đăng nhập để thanh toán",
+          type: "info",
+          onConfirm: () => {
+            uiDispatch({ type: "HIDE_DIALOG" });
+            nav("/login");
+          },
+        },
+      });
+      return;
+    }
     if (cartItems.length === 0) {
       return;
     }
@@ -204,25 +221,14 @@ const CartPage = () => {
             {!isProcessing && <ShoppingBag size={16} />}
           </button>
 
-          {/* Chat Support Button */}
-          <button
-            onClick={() => {
-              uiDispatch({
-                type: "SHOW_DIALOG",
-                payload: {
-                  title: "Chat Hỗ Trợ",
-                  message:
-                    "Tính năng trò chuyện trực tuyến đang được phát triển. Vui lòng quay lại sau!",
-                  type: "info",
-                  onConfirm: () => uiDispatch({ type: "HIDE_DIALOG" }),
-                },
-              });
-            }}
-            className="w-full mt-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-purple-600 hover:border-purple-200 font-bold text-sm py-2.5 px-4 rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+          {/* Phone Support Button */}
+          <a
+            href="tel:0123456789"
+            className="w-full mt-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-purple-600 hover:border-purple-200 font-bold text-sm py-2.5 px-4 rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 !no-underline"
           >
-            Cần hỗ trợ? Trò chuyện
-            <MessageCircle size={16} />
-          </button>
+            <Phone size={16} />
+            Liên hệ hỗ trợ: 0123456789
+          </a>
 
           <p className="text-center text-[9px] sm:text-[10px] text-gray-500 mt-3 font-medium leading-relaxed">
             Bằng việc tiến hành thanh toán, bạn đồng ý với Điều khoản dịch vụ và

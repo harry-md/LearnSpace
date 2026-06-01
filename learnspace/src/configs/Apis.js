@@ -18,6 +18,8 @@ export const endpoints = {
   lessonProgress: (lessonId) => `/lessons/${lessonId}/lesson-progress`,
   checkout: "/payments/checkout",
   capturePayment: (token) => `/payments/${token}/capture`,
+  chatToken: "/chat/token",
+  chatContacts: "/chat/contacts",
 };
 
 export const authApis = (token) => {

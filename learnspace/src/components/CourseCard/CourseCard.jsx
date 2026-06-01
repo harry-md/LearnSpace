@@ -10,7 +10,7 @@ import { useContext } from "react";
 import { CartContext, UIContext } from "@/configs/Context";
 import CourseHoverDetail from "../CourseHoverDetail/CourseHoverDetail";
 
-const CourseCard = ({ course }) => {
+const CourseCard = ({ course, className }) => {
   const [uiState] = useContext(UIContext);
   const [cart, cartDispatch] = useContext(CartContext);
 
@@ -24,14 +24,19 @@ const CourseCard = ({ course }) => {
         : `${Number(course.price).toLocaleString("vi-VN")} VNĐ`
       : "";
 
+  const cardClass = className || "min-w-[280px] w-[280px] snap-start";
+
   const cardContent = (
     <Link
       to={`/course/${course.id}`}
-      className="!no-underline min-w-[280px] w-[280px] h-full cursor-pointer snap-start flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group/card"
+      className={`!no-underline h-full cursor-pointer flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group/card ${cardClass}`}
     >
-      <div className="w-full h-[155px] overflow-hidden relative bg-slate-100 shrink-0">
+      <div className="w-full aspect-video overflow-hidden relative bg-slate-100 shrink-0">
         <img
-          src={course.image}
+          src={
+            course.image ||
+            `https://placehold.co/400x225/7c3aed/ffffff?text=${course.name}`
+          }
           alt={course.name}
           className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500"
         />
@@ -60,12 +65,12 @@ const CourseCard = ({ course }) => {
           </div>
         )}
 
-        <div className="flex items-center gap-3 text-[11px] text-gray-400">
-          <span className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-gray-400">
+          <span className="flex items-center gap-1 whitespace-nowrap">
             <Users size={11} />
             {(course.enrollmentCount ?? 0).toLocaleString()} học viên
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1 whitespace-nowrap">
             <div className="flex items-center gap-1.5">
               {course.avgRating != null ? (
                 <>
@@ -87,7 +92,7 @@ const CourseCard = ({ course }) => {
                   </div>
                 </>
               ) : (
-                <span className="text-[11px] text-gray-400 italic">
+                <span className="text-[11px] text-gray-400 italic whitespace-nowrap">
                   Chưa có đánh giá
                 </span>
               )}
@@ -95,9 +100,9 @@ const CourseCard = ({ course }) => {
           </span>
         </div>
 
-        <div className="mt-auto flex items-center justify-between pt-1">
+        <div className="mt-auto flex items-center justify-between gap-2 pt-1">
           <span
-            className={`font-black text-[17px] ${
+            className={`font-black text-[15px] whitespace-nowrap ${
               course.price === 0 ? "text-emerald-600" : "text-orange-600"
             }`}
           >

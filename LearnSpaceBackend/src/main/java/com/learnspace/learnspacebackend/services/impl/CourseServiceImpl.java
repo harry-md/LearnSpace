@@ -104,7 +104,7 @@ public class CourseServiceImpl implements CourseService {
                 .toList();
         return PaginatedResponseMapper.toPaginatedResponseDto(
                 courseRepository.countCourses(params),
-                Integer.parseInt(params.get("page")),
+                Integer.parseInt(params.getOrDefault("page", "1")),
                 COURSE_PAGE_SIZE_KEY,
                 results);
     }

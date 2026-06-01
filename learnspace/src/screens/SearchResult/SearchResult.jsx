@@ -1,99 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Search, SlidersHorizontal, Star, ChevronDown, X } from "lucide-react";
-import { ShoppingCart } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Search,
+  SlidersHorizontal,
+  Star,
+  ChevronDown,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import Apis, { endpoints } from "@/configs/Apis";
 import CourseCard from "../../components/CourseCard/CourseCard";
-
-const mockCourses = [
-  {
-    id: 1,
-    name: "Lập Trình Python Từ Cơ Bản Đến Nâng Cao",
-    instructor: "Nguyễn Văn An",
-    price: 269000,
-    originalPrice: 1059000,
-    rating: 4.8,
-    ratingCount: 1243,
-    image: "https://placehold.co/320x180/1e3a8a/ffffff?text=Python",
-    level: "Cơ bản",
-    duration: "32 giờ",
-    students: 8421,
-    active: true,
-  },
-  {
-    id: 2,
-    name: "React & Next.js — Xây dựng ứng dụng thực tế",
-    instructor: "Trần Thị Bích",
-    price: 349000,
-    originalPrice: 1299000,
-    rating: 4.7,
-    ratingCount: 876,
-    image: "https://placehold.co/320x180/0f172a/38bdf8?text=React",
-    level: "Trung cấp",
-    duration: "48 giờ",
-    students: 5320,
-    active: true,
-  },
-  {
-    id: 3,
-    name: "AWS Cloud cho người mới bắt đầu",
-    instructor: "Linh Nguyễn",
-    price: 269000,
-    originalPrice: 1829000,
-    rating: 4.6,
-    ratingCount: 654,
-    image: "https://placehold.co/320x180/f97316/ffffff?text=AWS",
-    level: "Cơ bản",
-    duration: "24 giờ",
-    students: 3210,
-    active: false,
-  },
-  {
-    id: 4,
-    name: "Machine Learning với TensorFlow",
-    instructor: "Dr. Minh Khoa",
-    price: 0,
-    originalPrice: null,
-    rating: 4.9,
-    ratingCount: 2301,
-    image: "https://placehold.co/320x180/7c3aed/ffffff?text=ML",
-    level: "Nâng cao",
-    duration: "60 giờ",
-    students: 12500,
-    active: true,
-  },
-  {
-    id: 5,
-    name: "UI/UX Design với Figma — Từ cơ bản đến thực chiến",
-    instructor: "Phan Hà Anh",
-    price: 199000,
-    originalPrice: 899000,
-    rating: 4.5,
-    ratingCount: 432,
-    image: "https://placehold.co/320x180/ec4899/ffffff?text=Figma",
-    level: "Cơ bản",
-    duration: "28 giờ",
-    students: 2870,
-    active: true,
-  },
-  {
-    id: 6,
-    name: "Docker & Kubernetes cho Developer",
-    instructor: "Văn Hiếu",
-    price: 399000,
-    originalPrice: 1499000,
-    rating: 4.7,
-    ratingCount: 789,
-    image: "https://placehold.co/320x180/0369a1/ffffff?text=Docker",
-    level: "Trung cấp",
-    duration: "36 giờ",
-    students: 4100,
-    active: false,
-  },
-];
+import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 
 const SearchResult = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { categoryId, categoryName } = location.state || {};
 
   const queryParams = new URLSearchParams(location.search);
@@ -105,30 +27,61 @@ const SearchResult = () => {
     categoryName,
   });
   const [courses, setCourses] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const loadCourseByCategory = async (catId, keyword) => {
+  const [fromPrice, setFromPrice] = useState("");
+  const [toPrice, setToPrice] = useState("");
+  const [teacherName, setTeacherName] = useState("");
+  const [debouncedTeacherName, setDebouncedTeacherName] = useState("");
+  const [priceRange, setPriceRange] = useState({ from: "", to: "" });
+  const [priceError, setPriceError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedTeacherName(teacherName);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [teacherName]);
+
+  const loadCourseByCategory = async (
+    catId,
+    keyword,
+    page = 1,
+    priceFrom = priceRange.from,
+    priceTo = priceRange.to,
+    tName = debouncedTeacherName,
+  ) => {
     try {
-      let url = endpoints.courses;
+      setLoading(true);
+      let url = `${endpoints.courses}?page=${page}`;
       if (keyword) {
-        url = `${endpoints.courses}?kw=${encodeURIComponent(keyword)}`;
+        url += `&kw=${encodeURIComponent(keyword)}`;
       } else if (catId) {
-        url = `${endpoints.courses}?categoryId=${catId}`;
+        url += `&categoryId=${catId}`;
       }
+
+      if (priceFrom) url += `&fromPrice=${priceFrom}`;
+      if (priceTo) url += `&toPrice=${priceTo}`;
+      if (tName) url += `&teacherName=${encodeURIComponent(tName)}`;
+
       const res = await Apis.get(url);
-      setCourses(res.data);
+      scrollTo({ top: 0 });
+
+      setCourses(res.data.results);
+      setTotalCount(res.data.count);
+      setCurrentPage(page);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLoadCategories = async () => {
     const res = await Apis.get(endpoints.categories);
     setCategories(res.data);
-    console.log(res.data);
-  };
-  const displayPrice = (price) => {
-    if (price === 0) return "Miễn phí";
-    return `${Number(price).toLocaleString("vi-VN")} ₫`;
   };
 
   useEffect(() => {
@@ -141,15 +94,36 @@ const SearchResult = () => {
         categoryId: null,
         categoryName: `Kết quả tìm kiếm cho: "${kw}"`,
       });
-      loadCourseByCategory(null, kw);
+      loadCourseByCategory(
+        null,
+        kw,
+        1,
+        priceRange.from,
+        priceRange.to,
+        debouncedTeacherName,
+      );
     } else {
       setCurrentCategory({
         categoryId,
         categoryName,
       });
-      loadCourseByCategory(categoryId);
+      loadCourseByCategory(
+        categoryId,
+        null,
+        1,
+        priceRange.from,
+        priceRange.to,
+        debouncedTeacherName,
+      );
     }
-  }, [categoryId, categoryName, kw]);
+  }, [categoryId, categoryName, kw, priceRange, debouncedTeacherName]);
+
+  const handlePageChange = (page) => {
+    loadCourseByCategory(currentCategory.categoryId, kw, page);
+    scrollTo({ top: 0 });
+  };
+
+  const totalPages = Math.ceil(totalCount / 20);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -174,13 +148,101 @@ const SearchResult = () => {
               <SlidersHorizontal size={16} className="text-purple-600" />
               Bộ lọc
             </span>
-            <button className="text-xs text-purple-600 font-semibold hover:underline cursor-pointer">
+            <button
+              onClick={() => {
+                setFromPrice("");
+                setToPrice("");
+                setTeacherName("");
+                setPriceError("");
+                setPriceRange({ from: "", to: "" });
+                navigate(location.pathname, { replace: true, state: {} });
+              }}
+              className="text-xs text-purple-600 font-semibold hover:underline cursor-pointer"
+            >
               Xóa tất cả
             </button>
           </div>
 
+          <div className="mb-8">
+            <div className="font-bold text-sm text-gray-800 mb-3">
+              Tên giảng viên
+            </div>
+            <input
+              type="text"
+              placeholder="Tìm theo tên..."
+              value={teacherName}
+              onChange={(e) => setTeacherName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+            />
+          </div>
+
+          <div className="mb-8">
+            <div className="font-bold text-sm text-gray-800 mb-3">
+              Khoảng giá
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex-1">
+                <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                  Từ (VNĐ)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={fromPrice}
+                  onChange={(e) => {
+                    if (Number(e.target.value) >= 0 || e.target.value === "") {
+                      setFromPrice(e.target.value);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                />
+              </div>
+              <span className="text-gray-400 mt-5">-</span>
+              <div className="flex-1">
+                <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                  Đến (VNĐ)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Max"
+                  value={toPrice}
+                  onChange={(e) => {
+                    if (Number(e.target.value) >= 0 || e.target.value === "") {
+                      setToPrice(e.target.value);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                />
+              </div>
+            </div>
+            {priceError && (
+              <p className="text-red-500 text-xs mb-2 font-medium">
+                {priceError}
+              </p>
+            )}
+            <button
+              onClick={() => {
+                setPriceError("");
+                if (
+                  fromPrice !== "" &&
+                  toPrice !== "" &&
+                  Number(toPrice) < Number(fromPrice)
+                ) {
+                  setPriceError("Giá 'Đến' phải lớn hơn hoặc bằng giá 'Từ'");
+                  return;
+                }
+                setPriceRange({ from: fromPrice, to: toPrice });
+              }}
+              className="w-full bg-purple-50 text-purple-700 font-semibold border border-purple-200 py-2 rounded-lg text-sm hover:bg-purple-100 transition-colors cursor-pointer"
+            >
+              Áp dụng
+            </button>
+          </div>
+
           <div>
-            <p className="font-bold text-sm text-gray-800 mb-3">Danh mục</p>
+            <div className="font-bold text-sm text-gray-800 mb-3">Danh mục</div>
             <div className="flex flex-col gap-1">
               <button
                 onClick={() => {
@@ -222,47 +284,63 @@ const SearchResult = () => {
         </aside>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm text-gray-500">Sắp xếp theo:</span>
-              <button className="px-3 py-1.5 text-xs font-semibold bg-purple-600 text-white rounded-full cursor-pointer">
-                Đánh giá cao
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3">
+              <SkeletonCard numberCards={6} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-3">
+              {courses.length === 0 ? (
+                <div className="col-span-full text-center py-10 text-gray-500 font-medium">
+                  Chưa có khóa học nào trong danh mục này
+                </div>
+              ) : (
+                courses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    className="w-full"
+                  />
+                ))
+              )}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-10">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold bg-white border border-gray-200 text-gray-600 hover:border-purple-300 hover:text-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronLeft size={16} />
               </button>
-              <button className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-full hover:border-purple-300 hover:text-purple-600 transition-colors cursor-pointer">
-                Mới nhất
-              </button>
-              <button className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-full hover:border-purple-300 hover:text-purple-600 transition-colors cursor-pointer">
-                Giá
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold ${
+                      currentPage === page
+                        ? "bg-purple-500 text-white"
+                        : "bg-white border border-gray-200 text-gray-600 hover:border-purple-300 hover:text-purple-600"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold bg-white border border-gray-200 text-gray-600 hover:border-purple-300 hover:text-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronRight size={16} />
               </button>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {courses.length === 0 ? (
-              <div className="col-span-full text-center py-10 text-gray-500 font-medium">
-                Chưa có khóa học nào trong danh mục này
-              </div>
-            ) : (
-              courses.map((course) => (
-                <CourseCard key={course.id} course={course} />
-              ))
-            )}
-          </div>
-
-          <div className="flex items-center justify-center gap-2 mt-10">
-            {[1, 2, 3, 4, 5].map((p) => (
-              <button
-                key={p}
-                className={`w-9 h-9 rounded-full text-sm font-bold transition-all cursor-pointer ${
-                  p === 1
-                    ? "bg-purple-600 text-white shadow-md shadow-purple-200"
-                    : "bg-white border border-gray-200 text-gray-600 hover:border-purple-300 hover:text-purple-600"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
+          )}
         </div>
       </div>
     </div>

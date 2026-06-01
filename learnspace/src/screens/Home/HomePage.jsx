@@ -20,7 +20,7 @@ const HomePage = () => {
     try {
       uiDispatch({ type: "SHOW_LOADING" });
       const res = await Apis.get(`${endpoints.courses}?page=1`);
-      setCourses(res.data);
+      setCourses(res.data.results);
     } catch (err) {
       uiDispatch({
         type: "SHOW_DIALOG",
@@ -62,7 +62,7 @@ const HomePage = () => {
             </div>
             <div>
               <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
-                Chào mừng {user?.firstName} {user?.lastName}!
+                Chào mừng {user?.firstName || "bạn"} {user?.lastName}!
               </h2>
               <p className="text-sm text-gray-500 mt-1 font-medium">
                 Chúc bạn một ngày học tập hiệu quả! Tiếp tục chinh phục kiến
@@ -86,11 +86,13 @@ const HomePage = () => {
                       : "text-amber-600 bg-amber-50 border-amber-100"
                 }`}
               >
-                {user?.role === "STUDENT"
-                  ? "Học viên"
-                  : user?.role === "TEACHER"
-                    ? "Giảng viên"
-                    : "Quản trị"}
+                {user
+                  ? user?.role === "STUDENT"
+                    ? "Học viên"
+                    : user?.role === "TEACHER"
+                      ? "Giảng viên"
+                      : "Quản trị"
+                  : "Khách"}
               </span>
             </div>
             <div className="text-xs font-bold text-gray-750 mb-0.5">
@@ -127,7 +129,7 @@ const HomePage = () => {
               ref={scrollRef}
               className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x"
             >
-              {courses.map((course) => (
+              {courses?.map((course) => (
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
