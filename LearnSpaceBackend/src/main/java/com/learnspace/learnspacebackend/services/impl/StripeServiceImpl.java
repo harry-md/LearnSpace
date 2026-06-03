@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.services.StripeService;
+import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
@@ -30,6 +31,7 @@ public class StripeServiceImpl implements StripeService {
     @Override
     public Session createCheckoutSession(BigDecimal amount, String description)
             throws StripeException {
+        Stripe.apiKey = STRIPE_SECRET_KEY;
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(STRIPE_SUCCESS_URL)
@@ -37,7 +39,7 @@ public class StripeServiceImpl implements StripeService {
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setQuantity(1L)
                         .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
-                                .setCurrency("usd")
+                                .setCurrency("vnd")
                                 .setUnitAmount(amount.longValue())
                                 .setProductData(
                                         SessionCreateParams.LineItem.PriceData.ProductData.builder()

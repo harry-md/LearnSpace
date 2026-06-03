@@ -47,13 +47,12 @@ const CartPage = () => {
 
     setIsProcessing(true);
     try {
-      // Map to format [{ courseId: 100 }, ...]
       const payload = cartItems.map((item) => ({ courseId: item.id }));
 
       const res = await authApis(user.token).post(endpoints.checkout, payload);
 
-      if (res.data && res.data.approvalUrl) {
-        window.location.href = res.data.approvalUrl;
+      if (res.data && res.data.checkoutUrl) {
+        window.location.href = res.data.checkoutUrl;
       } else {
         setIsProcessing(false);
         alert("Không nhận được đường dẫn thanh toán từ máy chủ.");

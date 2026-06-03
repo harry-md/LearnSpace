@@ -214,9 +214,6 @@ public class CourseServiceImpl implements CourseService {
 
         if (courseDto.categoryId() != null) {
             Category category = categoryRepository.getCateById(courseDto.categoryId());
-            if (category == null) {
-                throw new IllegalArgumentException("Không tìm thấy danh mục");
-            }
             existCourse.setCategory(category);
         }
 

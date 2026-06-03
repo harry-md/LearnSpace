@@ -1,9 +1,8 @@
 package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.payment.CartDto;
+import com.learnspace.learnspacebackend.dtos.payment.CheckoutDto;
 import com.learnspace.learnspacebackend.services.PaymentService;
-import com.stripe.exception.SignatureVerificationException;
-import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
 
@@ -12,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -24,15 +22,11 @@ public class ApiPaymentController {
     @PostMapping("/payments/checkout")
     public ResponseEntity<?> checkout(@RequestBody @Valid List<CartDto> cartItems) {
         try {
-            return new ResponseEntity<>(paymentService.checkout(cartItems), HttpStatus.CREATED);
-        } catch (StripeException ex) {
-            return new ResponseEntity<>(
-                    Collections.singletonMap("stripe", "Lỗi thanh toán Stripe"),
-                    HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException ex) {
+            CheckoutDto checkout = paymentService.checkout(cartItems);
+            return new ResponseEntity<>(checkout, HttpStatus.CREATED);
+        } catch (Exception ex) {
             System.err.println(ex.getMessage());
-            return new ResponseEntity<>(
-                    Collections.singletonMap("checkout", "Có lỗi xảy ra"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
@@ -42,11 +36,9 @@ public class ApiPaymentController {
             @RequestHeader("Stripe-Signature") String signatureHeader) {
         try {
             paymentService.handleWebhookEvent(payload, signatureHeader);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (SignatureVerificationException ex) {
-            return new ResponseEntity<>(
-                    Collections.singletonMap("stripe", "Lỗi xác thực chữ ký Stripe"),
-                    HttpStatus.BAD_REQUEST);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
