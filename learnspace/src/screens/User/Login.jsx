@@ -5,14 +5,14 @@ import { Button, Col, Form, Placeholder } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Apis, { endpoints, authApis } from "../../configs/Apis";
 import { UserContext } from "@/configs/Context";
-import FloatField from '../../components/User/FloatField'
+import FloatField from "../../components/User/FloatField";
 
 const Login = () => {
   const [user, setUser] = useState({ username: "", password: "" });
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
 
-  const [_, dispatchUser] = useContext(UserContext);
+  const [, dispatchUser] = useContext(UserContext);
 
   const nav = useNavigate();
 

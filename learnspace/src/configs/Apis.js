@@ -3,6 +3,7 @@ import axios from "axios";
 export const endpoints = {
   categories: "/categories",
   courses: "/courses",
+  courseDetails: (courseId) => `/courses/${courseId}`,
   chapters: "/chapters",
   addChapter: (courseId) => `/courses/${courseId}/chapters`,
   chapterLesson: (chapterId) => `/chapters/${chapterId}/lessons`,

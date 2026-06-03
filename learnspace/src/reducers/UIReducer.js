@@ -17,6 +17,16 @@ const UIReducer = (state, action) => {
         ...state,
         compareMode: action.payload,
       };
+    case "SHOW_SKELETON":
+      return {
+        ...state,
+        skeleton: true,
+      };
+    case "HIDE_SKELETON":
+      return {
+        ...state,
+        skeleton: false,
+      };
     case "SHOW_LOADING":
       return {
         ...state,

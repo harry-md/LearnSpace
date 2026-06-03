@@ -71,7 +71,8 @@ public class AdminController {
     }
 
     @GetMapping("/enrollments")
-    public String enrollment() {
+    public String enrollment(Model model) {
+        model.addAttribute("enrollments", courseService.getEnrolledCourses());
         return "admin_enrollments";
     }
 

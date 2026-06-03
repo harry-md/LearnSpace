@@ -45,6 +45,9 @@
                 <div class="col-md-2">
                   <button type="submit" class="btn btn-secondary w-100">Lọc dữ liệu</button>
                 </div>
+                <div class="col-md-2">
+                  <a th:href="@{/courses}" class="btn btn-outline-danger w-100">Xóa lọc</a>
+                </div>
               </form>
 
               <div class="table-responsive">
@@ -60,7 +63,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr th:each="course : ${courses}">
+                    <tr th:each="course : ${courses.results}">
                       <td class="text-muted fw-bold" th:text="${'#' + course.id}">#1</td>
                       <td>
                         <div class="d-flex align-items-center">
@@ -74,20 +77,23 @@
                           </div>
                         </div>
                       </td>
-                      <td th:text="${course.categoryName}">Công nghệ thông tin</td>
+                      <td th:text="${course.category.name}">Công nghệ thông tin</td>
                       <td class="fw-semibold text-success"
                         th:text="${#numbers.formatDecimal(course.price, 0, 'COMMA', 0, 'POINT')} + 'VNĐ'">
                         1,500,000 đ
                       </td>
                       <td>
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success"
-                          th:if="${course.active}">Đang mở</span>
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger"
-                          th:unless="${course.active}">Đã đóng</span>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success">Đang mở</span>
                       </td>
                       <td class="text-end">
                         <div class="btn-group shadow-sm">
-                          <a th:href="@{'/courses/delete' + ${course.id}}"
+                          <button class="btn btn-sm btn-light text-primary" data-bs-toggle="tooltip" title="Chi tiết">
+                            <i class="fa-solid fa-list-ol"></i>
+                          </button>
+                          <button class="btn btn-sm btn-light text-warning" data-bs-toggle="tooltip" title="Chỉnh sửa">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                          </button>
+                          <a th:href="@{'/courses/delete/' + ${course.id}}"
                             class="btn btn-sm btn-light text-danger"
                             onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này?');"
                             data-bs-toggle="tooltip" title="Xóa">
@@ -97,31 +103,9 @@
                       </td>
                     </tr>
 
-                    <tr th:if="${courses == null or courses.empty}">
-                      <td class="text-muted">#2</td>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <img src="https://placehold.co/60x40/0D8ABC/FFFFFF?text=Python"
-                            alt="Course Image" class="rounded me-3 border" width="60" height="40"
-                            style="object-fit: cover;">
-                          <div>
-                            <div class="fw-bold text-dark">Lập trình Python từ Zero đến Hero</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>Khoa học dữ liệu</td>
-                      <td class="fw-semibold text-success">850,000 đ</td>
-                      <td><span class="badge bg-success bg-opacity-10 text-success border border-success">Đang mở</span>
-                      </td>
-                      <td class="text-end">
-                        <div class="btn-group shadow-sm">
-                          <button class="btn btn-sm btn-light text-primary"><i
-                            class="fa-solid fa-list-ol"></i></button>
-                          <button class="btn btn-sm btn-light text-warning"><i
-                            class="fa-solid fa-pen-to-square"></i></button>
-                          <button class="btn btn-sm btn-light text-danger"><i
-                            class="fa-solid fa-trash-can"></i></button>
-                        </div>
+                    <tr th:if="${courses == null or courses.results.empty}">
+                      <td colspan="6" class="text-center text-muted py-4">
+                        Không có dữ liệu khóa học
                       </td>
                     </tr>
                   </tbody>
@@ -139,10 +123,10 @@
                     </a>
                   </li>
 
-                  <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${currentPage == i} ? 'active'">
-                    <a class="page-link" th:href="@{/courses(page=${i}, kw=${param.kw}, categoryId=${param.categoryId}, active=${param.active})}" th:text="${i}">
-                      1
-                    </a>
+                  <li class="page-item disabled">
+                    <span class="page-link text-dark" th:text="'Trang ' + ${currentPage} + ' / ' + ${totalPages}">
+                      Trang 1 / 1
+                    </span>
                   </li>
 
                   <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">

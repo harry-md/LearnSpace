@@ -4,9 +4,11 @@ import Apis, { authApis, endpoints } from "@/configs/Apis";
 
 const useTeacherDashBoard = () => {
   const [teacherCourses, setTeacherCourses] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCourses, setTotalCourses] = useState(0);
   const [categories, setCategories] = useState([]);
   const [user] = useContext(UserContext);
-  const [_, uiDispatch] = useContext(UIContext);
+  const [, uiDispatch] = useContext(UIContext);
 
   const handleDeleteLesson = async (lessonId) => {
     uiDispatch({ type: "SHOW_LOADING" });
@@ -298,9 +300,8 @@ const useTeacherDashBoard = () => {
   const loadCourseDetails = async (courseId) => {
     uiDispatch({ type: "SHOW_LOADING" });
     try {
-      const res = await authApis(user.token).get(
-        `${endpoints.courses}/${courseId}`,
-      );
+      if (!user || !user.token) return;
+      const res = await Apis.get(endpoints.courseDetails(courseId));
       setTeacherCourses((prev) => {
         const exists = prev.some((c) => c.id === courseId);
         if (exists) {
@@ -322,17 +323,19 @@ const useTeacherDashBoard = () => {
     }
   };
 
-  const handleLoadCourseOfTeacher = async () => {
+  const handleLoadCourseOfTeacher = async (page = 1) => {
     try {
       if (!user || !user.token) {
         return;
       }
       uiDispatch({ type: "SHOW_LOADING" });
       const res = await authApis(user.token).get(
-        `${endpoints.courses}?teacherId=${user.id}`,
+        `${endpoints.courses}?teacherId=${user.id}&page=${page}`,
       );
 
-      setTeacherCourses(res.data);
+      setTeacherCourses(res.data.results);
+      setTotalCourses(res.data.count);
+      setTotalPages(Math.ceil(res.data.count / 20));
     } catch (error) {
       uiDispatch({
         type: "SHOW_DIALOG",
@@ -351,8 +354,10 @@ const useTeacherDashBoard = () => {
   return {
     teacherCourses,
     setTeacherCourses,
+    totalPages,
     categories,
     user,
+    totalCourses,
     handleLoadCourseOfTeacher,
     loadCourseDetails,
     handleUpdateCourse,

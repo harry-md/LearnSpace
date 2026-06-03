@@ -1,11 +1,17 @@
 import React, { useContext } from "react";
-import { ChatContext } from "@/configs/Context";
+import { ChatContext, UserContext } from "@/configs/Context";
 import ChatWindow from "./ChatWindow";
 
 const GlobalChatContainer = () => {
   const [chatState] = useContext(ChatContext);
+  const [user] = useContext(UserContext);
 
-  if (!chatState || !chatState.activeChats || chatState.activeChats.length === 0) {
+  if (
+    !user ||
+    !chatState ||
+    !chatState.activeChats ||
+    chatState.activeChats.length === 0
+  ) {
     return null;
   }
 

@@ -124,7 +124,7 @@ const RequiredLogin = () => {
         </div>
 
         <Link
-          to="/home"
+          to="/"
           style={{
             display: "inline-flex",
             alignItems: "center",
