@@ -148,19 +148,6 @@ const HomePage = () => {
             </button>
           </div>
         </section>
-
-        <SectionContainer className="flex-col">
-          <h3 className="text-2xl font-extrabold mb-6 text-gray-900">
-            Các khóa học hàng đầu về Phát triển
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5  gap-6">
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-          </div>
-        </SectionContainer>
       </main>
 
       <style
