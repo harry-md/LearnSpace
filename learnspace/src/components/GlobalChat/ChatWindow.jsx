@@ -96,7 +96,7 @@ const ChatWindow = ({ chatData }) => {
         timestamp: serverTimestamp(),
         unread: 1,
         // Gửi kèm thông tin của MÌNH để Header của bên kia biết ai đang nhắn
-        senderName: currentUser.firstName + " " + currentUser.lastName, // Hoặc currentUser.username tùy BE của bạn
+        senderName: currentUser.fullName, // Hoặc currentUser.username tùy BE của bạn
         senderAvatar: currentUser.avatar || "https://placehold.co/100",
       });
     } catch (error) {

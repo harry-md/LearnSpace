@@ -54,15 +54,15 @@ const HomePage = () => {
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />
-              ) : user?.firstName ? (
-                user?.firstName.charAt(0).toUpperCase()
+              ) : user?.fullName ? (
+                user?.fullName.charAt(0).toUpperCase()
               ) : (
                 "U"
               )}
             </div>
             <div>
               <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
-                Chào mừng {user?.firstName || "bạn"} {user?.lastName}!
+                Chào mừng {user?.fullName || "bạn"}!
               </h2>
               <p className="text-sm text-gray-500 mt-1 font-medium">
                 Chúc bạn một ngày học tập hiệu quả! Tiếp tục chinh phục kiến

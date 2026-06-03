@@ -308,11 +308,7 @@ const Header = () => {
                   />
                 ) : (
                   <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-500 hover:ring-offset-2 transition-all">
-                    {(
-                      (user.firstName && user.firstName[0]) ||
-                      (user.username && user.username[0]) ||
-                      "U"
-                    ).toUpperCase()}
+                    {(user.fullName || "U").toUpperCase()}
                   </div>
                 )}
               </div>

@@ -1,0 +1,254 @@
+.chapter-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: opacity 0.2s;
+}
+
+.chapter-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  background: white;
+  transition: background 0.15s;
+}
+
+.chapter-header:hover {
+  background: #fafafa;
+}
+
+.chapter-idx-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(139, 92, 246, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.chapter-idx-text {
+  font-size: 12px;
+  font-weight: 900;
+  color: #8b5cf6;
+}
+
+.chapter-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1c1d1f;
+}
+
+.btn-add-lesson {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8b5cf6;
+  border: 1px solid #c4b5fd;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-add-lesson:hover {
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.btn-chapter-edit {
+  padding: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #3b82f6;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.btn-chapter-edit:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.btn-chapter-delete {
+  padding: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #ef4444;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.btn-chapter-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.empty-lessons {
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #9ca3af;
+  border: 2px dashed transparent;
+}
+
+.lesson-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px 12px 28px;
+  border-bottom: 1px solid #f9fafb;
+  transition:
+    background 0.15s,
+    opacity 0.2s;
+  background: transparent;
+}
+
+.lesson-row:hover {
+  background: #fafafa;
+}
+
+.lesson-idx {
+  font-size: 12px;
+  color: #9ca3af;
+  width: 20px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.lesson-title {
+  flex: 1;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lesson-free-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  background: #ecfdf5;
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.lesson-duration {
+  font-size: 12px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.lesson-type-tag {
+  font-size: 11px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  text-transform: capitalize;
+}
+
+.btn-lesson-edit {
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #3b82f6;
+  border-radius: 4px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-lesson-edit:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.btn-lesson-delete {
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #ef4444;
+  border-radius: 4px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-lesson-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.btn-order-change {
+  padding: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.btn-order-change:hover:not(:disabled) {
+  background: rgba(107, 114, 128, 0.1);
+  color: #1f2937;
+}
+
+.btn-order-change:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.btn-lesson-order {
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #6b7280;
+  opacity: 0.4;
+  border-radius: 4px;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-lesson-order:hover:not(:disabled) {
+  opacity: 1;
+  background: rgba(107, 114, 128, 0.1);
+}
+
+.btn-lesson-order:disabled {
+  opacity: 0.15;
+  cursor: not-allowed;
+}

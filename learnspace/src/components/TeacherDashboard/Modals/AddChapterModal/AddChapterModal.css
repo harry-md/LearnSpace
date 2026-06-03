@@ -1,0 +1,39 @@
+.add-chapter-modal-textarea {
+  resize: none;
+}
+
+.add-chapter-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 16px;
+}
+
+.add-chapter-modal-btn-cancel {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  background: white;
+  font-size: 14px;
+}
+
+.add-chapter-modal-btn-submit {
+  flex: 1;
+  padding: 12px;
+  background: #5624d0;
+  color: white;
+  font-weight: 700;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}

@@ -12,7 +12,6 @@ import org.springframework.web.servlet.config.annotation.*;
 @Configuration
 @EnableTransactionManagement
 @EnableWebMvc
-@EnableCaching
 @ComponentScan(
         basePackages = {
             "com.learnspace.learnspacebackend.controllers",

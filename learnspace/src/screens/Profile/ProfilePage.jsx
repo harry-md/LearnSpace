@@ -20,8 +20,7 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   // Form states
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [fullName, setFullName] = useState(user?.fullName || "");
   const [email, setEmail] = useState(user?.email || "");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar || "");
@@ -32,8 +31,7 @@ const ProfilePage = () => {
 
   const handleEditClick = () => {
     if (user) {
-      setFirstName(user.firstName || "");
-      setLastName(user.lastName || "");
+      setFullName(user.fullName || "");
       setEmail(user.email || "");
       setAvatarPreview(user.avatar || "");
       setAvatarFile(null);
@@ -71,8 +69,8 @@ const ProfilePage = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (!firstName.trim() || !lastName.trim() || !email.trim()) {
-      setError("Vui lòng điền đầy đủ Họ, Tên và Email.");
+    if (!fullName.trim() || !email.trim()) {
+      setError("Vui lòng điền đầy đủ Họ và tên và Email.");
       return;
     }
 
@@ -82,11 +80,9 @@ const ProfilePage = () => {
       return;
     }
 
-    // Update context & cookie via dispatch
     const updatedUser = {
       ...user,
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
+      fullName: fullName.trim(),
       email: email.trim(),
       avatar: avatarPreview || user?.avatar,
     };
@@ -125,8 +121,7 @@ const ProfilePage = () => {
     );
   }
 
-  const fullName =
-    `${user.lastName || ""} ${user.firstName || ""}`.trim() || user.username;
+  const displayFullName = user.fullName || user.username;
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-sans text-[#1c1d1f] pb-16">
@@ -164,7 +159,7 @@ const ProfilePage = () => {
                 {avatarPreview ? (
                   <img
                     src={avatarPreview}
-                    alt={fullName}
+                    alt={displayFullName}
                     className={`w-[150px] h-[150px] object-cover rounded-full shadow-md border-4 border-white ring-1 ring-gray-200 transition-all duration-300 ${
                       isEditing ? "group-hover:opacity-80" : ""
                     }`}
@@ -172,7 +167,7 @@ const ProfilePage = () => {
                 ) : (
                   <div className="w-[150px] h-[150px] bg-slate-900 text-white rounded-full flex items-center justify-center text-[54px] font-bold shadow-md border-4 border-white ring-1 ring-gray-200">
                     {(
-                      (user.firstName && user.firstName[0]) ||
+                      (user.fullName && user.fullName[0]) ||
                       (user.username && user.username[0]) ||
                       "U"
                     ).toUpperCase()}
@@ -212,7 +207,7 @@ const ProfilePage = () => {
               {/* User Identity Details */}
               <div className="text-center w-full pb-4 border-b border-gray-100">
                 <h3 className="font-extrabold text-lg text-gray-900 leading-tight">
-                  {fullName}
+                  {displayFullName}
                 </h3>
                 <p className="text-sm text-gray-500 mt-1 font-medium">
                   @{user.username}
@@ -296,41 +291,22 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Form fields grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   <div>
                     <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wider mb-2">
-                      Họ và tên lót <span className="text-red-500">*</span>
+                      Họ và tên <span className="text-red-500">*</span>
                     </label>
                     {isEditing ? (
                       <input
                         type="text"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
                         className="w-full text-base font-medium text-gray-800 px-4 py-3 bg-white rounded-xl border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all duration-250"
-                        placeholder="Nhập họ và tên lót"
+                        placeholder="Nhập họ và tên"
                       />
                     ) : (
                       <div className="text-base font-medium text-gray-800 px-4 py-3 bg-white rounded-xl border border-gray-200/80">
-                        {user.lastName || "Chưa thiết lập"}
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wider mb-2">
-                      Tên <span className="text-red-500">*</span>
-                    </label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        className="w-full text-base font-medium text-gray-800 px-4 py-3 bg-white rounded-xl border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all duration-250"
-                        placeholder="Nhập tên"
-                      />
-                    ) : (
-                      <div className="text-base font-medium text-gray-800 px-4 py-3 bg-white rounded-xl border border-gray-200/80">
-                        {user.firstName || "Chưa thiết lập"}
+                        {user.fullName || "Chưa thiết lập"}
                       </div>
                     )}
                   </div>

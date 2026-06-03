@@ -36,10 +36,7 @@ const AvatarMenu = ({ onClose }) => {
         )}
         <div className="overflow-hidden">
           <h4 className="font-extrabold text-sm text-[#2d2f31]">
-            {user
-              ? `${user.lastName || ""} ${user.firstName || ""}`.trim() ||
-                user.username
-              : "Guest"}
+            {user ? user.fullName || user.username : "Học viên"}
           </h4>
           <p
             className="text-xs text-gray-500 truncate"
