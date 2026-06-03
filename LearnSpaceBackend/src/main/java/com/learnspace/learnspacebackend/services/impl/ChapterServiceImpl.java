@@ -47,7 +47,7 @@ public class ChapterServiceImpl implements ChapterService {
         return userRepository.getUserById(principal.getId());
     }
 
-    private void verifyCourseOwner(Course course) {
+    private void checkCourseOwner(Course course) {
         User teacher = getLoggedInTeacher();
         if (!course.getTeacher().getId().equals(teacher.getId())) {
             throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này");
@@ -57,11 +57,7 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     public ChapterDto createChapter(int courseId, ChapterDto chapterDto) {
         Course course = courseRepository.getCourseById(courseId);
-        if (course == null) {
-            throw new IllegalArgumentException("Không tìm thấy khóa học");
-        }
-
-        verifyCourseOwner(course);
+        checkCourseOwner(course);
 
         Chapter chapter = chapterMapper.toEntity(chapterDto);
         chapter.setCourse(course);
@@ -106,35 +102,27 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public ChapterDto updateChapter(int chapterId, ChapterPatchDto chapterDto) {
-        Chapter existingChapter = chapterRepository.getChapterById(chapterId);
-        if (existingChapter == null) {
-            throw new IllegalArgumentException("Không tìm thấy chương học");
-        }
+        Chapter chapter = chapterRepository.getChapterById(chapterId);
+        checkCourseOwner(chapter.getCourse());
 
-        verifyCourseOwner(existingChapter.getCourse());
-
-        chapterMapper.updateEntityFromDto(existingChapter, chapterDto);
+        chapterMapper.updateEntityFromDto(chapter, chapterDto);
         if (chapterDto.frontChapterId() != null || chapterDto.behindChapterId() != null) {
             int newOrder = calNewOrder(chapterDto.frontChapterId(), chapterDto.behindChapterId());
-            existingChapter.setOrder(newOrder);
+            chapter.setOrder(newOrder);
         }
 
-        Chapter updatedChapter = chapterRepository.createOrUpdate(existingChapter);
+        Chapter updatedChapter = chapterRepository.createOrUpdate(chapter);
 
         if (chapterDto.frontChapterId() != null || chapterDto.behindChapterId() != null) {
-            checkAndReorderChapter(existingChapter.getCourse().getId());
+            checkAndReorderChapter(chapter.getCourse().getId());
         }
         return chapterMapper.toDto(updatedChapter);
     }
 
     @Override
     public void deleteChapter(int chapterId) {
-        Chapter existingChapter = chapterRepository.getChapterById(chapterId);
-        if (existingChapter == null) {
-            throw new IllegalArgumentException("Không tìm thấy chương học");
-        }
-
-        verifyCourseOwner(existingChapter.getCourse());
+        Chapter chapter = chapterRepository.getChapterById(chapterId);
+        checkCourseOwner(chapter.getCourse());
 
         List<String> videoUrls = lessonRepository.getVideoUrlsByChapterId(chapterId);
         r2Service.deleteVideos(videoUrls);
