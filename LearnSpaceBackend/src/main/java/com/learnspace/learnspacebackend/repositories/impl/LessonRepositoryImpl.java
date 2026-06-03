@@ -83,7 +83,6 @@ public class LessonRepositoryImpl implements LessonRepository {
                 .groupBy(chapterJoin.get("course"));
 
         List<Object[]> results = session.createQuery(q).getResultList();
-
         return results.stream()
                 .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
     }

@@ -122,7 +122,6 @@ public class CourseRepositoryImpl implements CourseRepository {
         if (!predicates.isEmpty()) {
             q.where(predicates.toArray(Predicate[]::new));
         }
-
         return session.createQuery(q).getSingleResult();
     }
 

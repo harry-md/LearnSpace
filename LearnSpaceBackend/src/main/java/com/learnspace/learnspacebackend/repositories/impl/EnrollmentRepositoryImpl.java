@@ -82,7 +82,7 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
         }
 
         q.select(root).where(predicates.toArray(Predicate[]::new));
-        return session.createQuery(q).getSingleResult();
+        return session.createQuery(q).getSingleResultOrNull();
     }
 
     @Override
