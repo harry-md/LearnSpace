@@ -56,12 +56,11 @@ const AddLessonModal = ({ open, onClose, onSubmit }) => {
       });
       return;
     }
-    onSubmit(form); // gửi toàn bộ form lên hook xử lý
+    onSubmit(form);
   };
 
   return (
     <Modal open={open} onClose={onClose} title="Tạo bài học mới">
-      {/* Tiêu đề bài học */}
       <Field label="Tiêu đề bài học" required>
         <input
           className="input-cls"
@@ -73,7 +72,6 @@ const AddLessonModal = ({ open, onClose, onSubmit }) => {
         />
       </Field>
 
-      {/* Mô tả / nội dung (tùy chọn) */}
       <Field label="Mô tả bài học">
         <textarea
           className="input-cls add-lesson-modal-textarea"
@@ -86,7 +84,6 @@ const AddLessonModal = ({ open, onClose, onSubmit }) => {
         />
       </Field>
 
-      {/* Upload file video – bắt buộc */}
       <Field label="File video bài học" required hint="Chỉ chấp nhận file .mp4">
         <label
           className={`add-lesson-file-label ${form.videoFile ? "has-file" : ""}`}
@@ -115,7 +112,6 @@ const AddLessonModal = ({ open, onClose, onSubmit }) => {
         </label>
       </Field>
 
-      {/* Nút hành động */}
       <div className="add-lesson-modal-footer">
         <button onClick={onClose} className="add-lesson-modal-btn-cancel">
           Hủy bỏ

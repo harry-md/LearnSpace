@@ -149,7 +149,6 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
       }}
     >
       <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col relative max-h-[92vh] animate-[slideUp_0.25s_ease-out]">
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-[#5624d0] flex items-center justify-center shrink-0">
@@ -172,9 +171,7 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto">
-          {/* Error state */}
           {error && (
             <div className="aspect-video w-full flex flex-col items-center justify-center bg-gray-50 text-center p-6">
               <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
@@ -193,10 +190,8 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
             </div>
           )}
 
-          {/* Lesson content */}
           {lesson && !error && (
             <>
-              {/* Video container */}
               <div className="relative bg-[#1c1d1f]">
                 {lesson.video ? (
                   <video
@@ -227,10 +222,8 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                 )}
               </div>
 
-              {/* Lesson info bar */}
               <div className="px-5 py-4 border-t border-gray-200">
                 <div className="flex flex-wrap items-start gap-6">
-                  {/* Left: Description */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <FileText size={15} className="text-[#5624d0] shrink-0" />
@@ -243,7 +236,6 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                     </p>
                   </div>
 
-                  {/* Right: Metadata chips */}
                   <div className="shrink-0 flex flex-col gap-2">
                     {lesson.videoLength != null && (
                       <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 rounded-lg px-3 py-2">
@@ -261,7 +253,6 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                 </div>
               </div>
 
-              {/* Comment Section Mockup */}
               <Comments />
             </>
           )}

@@ -84,7 +84,6 @@ const CartPage = () => {
 
   return (
     <div className="bg-slate-50 font-sans text-gray-900 h-[calc(100vh-110px)] flex flex-col overflow-hidden">
-      {/* Header section of Cart Page */}
       <div className="shrink-0 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2 sm:pt-8 sm:pb-3">
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-1 sm:mb-1.5">
           Giỏ hàng của bạn
@@ -98,10 +97,7 @@ const CartPage = () => {
         </p>
       </div>
 
-      {/* Main Content Area */}
-      {/* Mobile: scroll entire main. Desktop (lg): hide main scroll, scroll left column only */}
       <main className="flex-1 overflow-y-auto lg:overflow-hidden max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 w-full flex flex-col lg:flex-row gap-5">
-        {/* Left Column: Cart Items Wrapper */}
         <div className="flex-1 flex flex-col bg-white rounded-xl border border-gray-100 shadow-lg shadow-purple-900/5 p-4 sm:p-5 overflow-hidden h-fit lg:max-h-full mb-6 lg:mb-0">
           <div className="flex justify-between items-center mb-2 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-100 shrink-0">
             <h2 className="text-base font-bold text-gray-900">
@@ -118,7 +114,6 @@ const CartPage = () => {
                 key={item.id}
                 className="flex flex-col sm:flex-row gap-4 py-3 sm:py-4 border-b border-gray-100 last:border-0 last:pb-0 hover:bg-slate-50/50 transition-colors rounded-lg px-2 -mx-2"
               >
-                {/* Image */}
                 <div className="w-full sm:w-[150px] lg:w-[160px] shrink-0 relative rounded-lg overflow-hidden bg-gray-100 aspect-video sm:h-[90px]">
                   <img
                     src={item.image}
@@ -132,7 +127,6 @@ const CartPage = () => {
                   )}
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 flex flex-col min-w-0">
                   <h3 className="!text-sm !sm:text-base font-bold text-gray-900 mb-1 leading-tight truncate">
                     {item.name}
@@ -167,7 +161,6 @@ const CartPage = () => {
                   </div>
                 </div>
 
-                {/* Price & Action */}
                 <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 sm:pl-4 sm:border-l border-gray-100 shrink-0 sm:min-w-[160px]">
                   <div className="text-base font-black text-slate-900">
                     {item.price === 0
@@ -220,7 +213,6 @@ const CartPage = () => {
             {!isProcessing && <ShoppingBag size={16} />}
           </button>
 
-          {/* Phone Support Button */}
           <a
             href="tel:0123456789"
             className="w-full mt-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-purple-600 hover:border-purple-200 font-bold text-sm py-2.5 px-4 rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 !no-underline"
@@ -236,7 +228,6 @@ const CartPage = () => {
         </div>
       </main>
 
-      {/* Hide scrollbar styles */}
       <style
         dangerouslySetInnerHTML={{
           __html: `

@@ -62,7 +62,6 @@ const ChatMenu = ({ onClose }) => {
 
   return (
     <div className="absolute right-0 top-full mt-3 w-[360px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 flex flex-col max-h-[500px] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-      {/* Header */}
       <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
         <div className="font-extrabold text-2xl text-gray-900">Đoạn chat</div>
         <div className="flex items-center gap-2">
@@ -78,7 +77,6 @@ const ChatMenu = ({ onClose }) => {
         </div>
       </div>
 
-      {/* --- PHẦN LOGIC ĐIỀU HƯỚNG MỚI NẰM Ở ĐÂY --- */}
       {!user ? (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white h-[300px]">
           <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mb-4">
@@ -93,7 +91,7 @@ const ChatMenu = ({ onClose }) => {
           </p>
           <Link
             to="/login"
-            onClick={onClose} // Nhớ đóng menu chat khi click chuyển trang
+            onClick={onClose}
             className="!no-underline w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-xl transition-colors"
           >
             Đăng nhập ngay
@@ -101,7 +99,6 @@ const ChatMenu = ({ onClose }) => {
         </div>
       ) : (
         <>
-          {/* Search Bar */}
           <div className="px-4 py-2 bg-white shrink-0">
             <div className="relative">
               <Search
@@ -118,7 +115,6 @@ const ChatMenu = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Conversation List */}
           <div className="flex-1 overflow-y-auto p-2 scrollbar-hide bg-white">
             {mergedChats.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-[15px]">
@@ -181,7 +177,6 @@ const ChatMenu = ({ onClose }) => {
             )}
           </div>
 
-          {/* Footer */}
           <div className="p-2 border-t border-gray-100 bg-white text-center shrink-0">
             <button className="text-[15px] font-semibold text-purple-600 hover:bg-gray-50 w-full py-1.5 rounded-lg transition-colors">
               Xem tất cả trong Messenger

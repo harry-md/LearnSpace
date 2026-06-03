@@ -76,9 +76,6 @@ function App() {
             <GlobalChatContainer />
             <BrowserRouter>
               <Routes>
-                {/* Routes without shared Header/Footer */}
-
-                {/* Protected Teacher Route */}
                 <Route
                   path="/teacher"
                   element={
@@ -90,7 +87,6 @@ function App() {
                   }
                 />
 
-                {/* Routes with shared Header/Footer */}
                 <Route element={<MainLayout />}>
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />

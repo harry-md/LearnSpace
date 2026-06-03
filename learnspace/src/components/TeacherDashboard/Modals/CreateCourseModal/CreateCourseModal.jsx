@@ -19,7 +19,6 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
     introVideo: null,
   });
 
-  // Set default category when categories load
   useEffect(() => {
     if (categories && categories.length > 0) {
       setCourseForm((prev) => ({
@@ -96,7 +95,6 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
       >
         <input
           className="input-cls"
-          
           placeholder="VD: Python từ cơ bản đến nâng cao"
           value={courseForm.name}
           onChange={(e) =>
@@ -141,7 +139,6 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
         <Field label="Giá (VND)">
           <input
             className="input-cls"
-            
             placeholder="VD: 499000"
             type="number"
             value={courseForm.price}
@@ -197,10 +194,7 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
         </Field>
       </div>
       <div className="create-course-footer">
-        <button
-          onClick={onClose}
-          className="create-course-btn-cancel"
-        >
+        <button onClick={onClose} className="create-course-btn-cancel">
           Hủy bỏ
         </button>
         <button
