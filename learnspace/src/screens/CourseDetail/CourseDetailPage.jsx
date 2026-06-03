@@ -33,6 +33,8 @@ const CourseDetailPage = () => {
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [, uiDispatch] = useContext(UIContext);
   const [cart, cartDispatch] = useContext(CartContext);
+  const [review, setReview] = useState([]);
+
   const nav = useNavigate();
 
   const addToCart = (course) => {
@@ -69,15 +71,22 @@ const CourseDetailPage = () => {
     }
   };
 
+  const loadReview = async () => {
+    try {
+      const res = await Apis.get(endpoints.reviewCourse(id));
+      setReview(res.data.results);
+    } catch (err) {
+      console.log("Có lỗi xảy ra!");
+    }
+  };
+
   const loadCourseDetails = async () => {
     uiDispatch({ type: "SHOW_LOADING" });
     try {
       const res = await Apis.get(`${endpoints.courses}/${id}`);
       if (res.data && res.data.id) {
         const course = res.data;
-
         setCourseDetails(course);
-        console.log(course);
 
         // 4. Check enrollment status
         if (user && user.token) {
@@ -116,6 +125,7 @@ const CourseDetailPage = () => {
 
   useEffect(() => {
     loadCourseDetails();
+    loadReview();
   }, [id]);
 
   if (notFound) {
@@ -183,17 +193,31 @@ const CourseDetailPage = () => {
 
             {/* Rating row */}
             <div className="flex items-center flex-wrap gap-3 mb-2">
-              <span className="font-black text-amber-400 text-lg">4.7</span>
-              <div className="flex items-center gap-0.5 text-amber-400">
-                <Star size={16} fill="currentColor" />
-                <Star size={16} fill="currentColor" />
-                <Star size={16} fill="currentColor" />
-                <Star size={16} fill="currentColor" />
-                <StarHalf size={16} fill="currentColor" />
-              </div>
-              <span className="text-amber-400 text-sm underline cursor-pointer">
-                (2.134 đánh giá)
+              <span className="font-black text-amber-400 text-lg">
+                {courseDetails?.avgRating?.toFixed(1) || "0.0"}
               </span>
+              <div className="flex items-center gap-0.5 text-amber-400">
+                {Array.from({
+                  length: Math.floor(courseDetails?.avgRating || 0),
+                }).map((_, i) => (
+                  <Star key={`full-${i}`} size={16} fill="currentColor" />
+                ))}
+                {(courseDetails?.avgRating || 0) % 1 >= 0.5 && (
+                  <StarHalf size={16} fill="currentColor" />
+                )}
+                {Array.from({
+                  length:
+                    5 -
+                    Math.floor(courseDetails?.avgRating || 0) -
+                    ((courseDetails?.avgRating || 0) % 1 >= 0.5 ? 1 : 0),
+                }).map((_, i) => (
+                  <Star
+                    key={`empty-${i}`}
+                    size={16}
+                    className="text-gray-300"
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Author */}
@@ -346,131 +370,6 @@ const CourseDetailPage = () => {
             </div>
           </section>
 
-          {/* Related Courses Section */}
-          <section className="mb-10">
-            <h2 className="text-2xl font-black mb-6 text-[#1c1d1f]">
-              Các khóa học khác
-            </h2>
-            <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-              {/* Related Course Card 1 */}
-              <div className="bg-white border border-[#d1d7dc] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group min-w-[280px] max-w-[300px] shrink-0 snap-start">
-                <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
-                  <img
-                    src="https://placehold.co/400x225/3b82f6/ffffff?text=NextJS+Course"
-                    alt="NextJS"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-4 flex-1 flex flex-col">
-                  <h4 className="font-bold text-sm text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-1">
-                    Lập trình Web nâng cao với NextJS
-                  </h4>
-                  <p className="text-xs text-gray-500 font-medium mb-3">
-                    Nguyễn Văn A
-                  </p>
-                  <div className="mt-auto space-y-2">
-                    <div className="flex items-center gap-1 mb-1">
-                      <span className="font-black text-amber-500 text-xs">
-                        4.8
-                      </span>
-                      <div className="flex text-amber-400 gap-0.5">
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                      </div>
-                      <span className="text-gray-400 text-[10px]">(1.420)</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-extrabold text-base text-[#1c1d1f]">
-                        699.000 ₫
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Related Course Card 2 */}
-              <div className="bg-white border border-[#d1d7dc] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group min-w-[280px] max-w-[300px] shrink-0 snap-start">
-                <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
-                  <img
-                    src="https://placehold.co/400x225/7c3aed/ffffff?text=React+Native"
-                    alt="React Native"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-4 flex-1 flex flex-col">
-                  <h4 className="font-bold text-sm text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-1">
-                    Lập trình di động Multi-platform với React Native
-                  </h4>
-                  <p className="text-xs text-gray-500 font-medium mb-3">
-                    Nguyễn Văn A
-                  </p>
-                  <div className="mt-auto space-y-2">
-                    <div className="flex items-center gap-1 mb-1">
-                      <span className="font-black text-amber-500 text-xs">
-                        4.9
-                      </span>
-                      <div className="flex text-amber-400 gap-0.5">
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                      </div>
-                      <span className="text-gray-400 text-[10px]">(890)</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-extrabold text-base text-[#1c1d1f]">
-                        799.000 ₫
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Related Course Card 3 */}
-              <div className="bg-white border border-[#d1d7dc] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group min-w-[280px] max-w-[300px] shrink-0 snap-start">
-                <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
-                  <img
-                    src="https://placehold.co/400x225/f97316/ffffff?text=HTML+CSS+JS"
-                    alt="HTML CSS JS"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-4 flex-1 flex flex-col">
-                  <h4 className="font-bold text-sm text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-1">
-                    HTML, CSS và JavaScript cho người mới bắt đầu
-                  </h4>
-                  <p className="text-xs text-gray-500 font-medium mb-3">
-                    AI Coding
-                  </p>
-                  <div className="mt-auto space-y-2">
-                    <div className="flex items-center gap-1 mb-1">
-                      <span className="font-black text-amber-500 text-xs">
-                        4.6
-                      </span>
-                      <div className="flex text-amber-400 gap-0.5">
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <StarHalf size={12} fill="currentColor" />
-                      </div>
-                      <span className="text-gray-400 text-[10px]">(3.210)</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-extrabold text-base text-[#1c1d1f]">
-                        199.000 ₫
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
           {/* Reviews */}
           <section className="mb-10">
             <h2 className="text-2xl font-black mb-2 text-[#1c1d1f]">
@@ -478,160 +377,81 @@ const CourseDetailPage = () => {
             </h2>
 
             {/* Rating Summary */}
-            <div className="flex items-center gap-8 mb-7 p-5 bg-amber-50 rounded-xl border border-amber-100">
+            <div className="flex items-center justify-center gap-8 mb-7 p-5 bg-amber-50 rounded-xl border border-amber-100">
               <div className="text-center shrink-0">
-                <div className="text-6xl font-black text-amber-500">4.7</div>
-                <div className="flex items-center gap-0.5 text-amber-400">
-                  <Star size={18} fill="currentColor" />
-                  <Star size={18} fill="currentColor" />
-                  <Star size={18} fill="currentColor" />
-                  <Star size={18} fill="currentColor" />
-                  <StarHalf size={18} fill="currentColor" />
+                <div className="text-6xl font-black text-amber-500">
+                  {courseDetails?.avgRating?.toFixed(1) || "0.0"}
+                </div>
+                <div className="flex items-center justify-center gap-0.5 text-amber-400 mt-2">
+                  {Array.from({
+                    length: Math.floor(courseDetails?.avgRating || 0),
+                  }).map((_, i) => (
+                    <Star key={`full-${i}`} size={18} fill="currentColor" />
+                  ))}
+                  {(courseDetails?.avgRating || 0) % 1 >= 0.5 && (
+                    <StarHalf size={18} fill="currentColor" />
+                  )}
+                  {Array.from({
+                    length:
+                      5 -
+                      Math.floor(courseDetails?.avgRating || 0) -
+                      ((courseDetails?.avgRating || 0) % 1 >= 0.5 ? 1 : 0),
+                  }).map((_, i) => (
+                    <Star
+                      key={`empty-${i}`}
+                      size={18}
+                      className="text-gray-300"
+                    />
+                  ))}
                 </div>
                 <div className="text-sm text-gray-500 mt-1">
                   Xếp hạng khóa học
-                </div>
-              </div>
-              {/* Bar chart fake */}
-              <div className="flex-1 space-y-2 min-w-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
-                    <div
-                      className="h-2 bg-amber-400 rounded-full"
-                      style={{ width: "72%" }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-500 shrink-0">72%</span>
-                  <div className="flex items-center gap-0.5 text-amber-400">
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
-                    <div
-                      className="h-2 bg-amber-400 rounded-full"
-                      style={{ width: "18%" }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-500 shrink-0">18%</span>
-                  <div className="flex items-center gap-0.5 text-amber-400">
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} className="text-amber-200" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
-                    <div
-                      className="h-2 bg-amber-400 rounded-full"
-                      style={{ width: "6%" }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-500 shrink-0">6%</span>
-                  <div className="flex items-center gap-0.5 text-amber-400">
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} className="text-amber-200" />
-                    <Star size={12} className="text-amber-200" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
-                    <div
-                      className="h-2 bg-amber-400 rounded-full"
-                      style={{ width: "2%" }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-500 shrink-0">2%</span>
-                  <div className="flex items-center gap-0.5 text-amber-400">
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} className="text-amber-200" />
-                    <Star size={12} className="text-amber-200" />
-                    <Star size={12} className="text-amber-200" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden shrink-0">
-                    <div
-                      className="h-2 bg-amber-400 rounded-full"
-                      style={{ width: "2%" }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-500 shrink-0">2%</span>
-                  <div className="flex items-center gap-0.5 text-amber-400">
-                    <Star size={12} fill="currentColor" />
-                    <Star size={12} className="text-amber-200" />
-                    <Star size={12} className="text-amber-200" />
-                    <Star size={12} className="text-amber-200" />
-                    <Star size={12} className="text-amber-200" />
-                  </div>
                 </div>
               </div>
             </div>
 
             {/* Review Cards */}
             <div className="space-y-6">
-              {/* Review 1 */}
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-400 text-white flex items-center justify-center font-bold shrink-0 text-base">
-                  H
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 flex-wrap mb-1">
-                    <span className="font-bold text-[#1c1d1f] text-sm">
-                      Trần Văn Hải
-                    </span>
-                    <div className="flex items-center gap-0.5 text-amber-400">
-                      <Star size={13} fill="currentColor" />
-                      <Star size={13} fill="currentColor" />
-                      <Star size={13} fill="currentColor" />
-                      <Star size={13} fill="currentColor" />
-                      <Star size={13} fill="currentColor" />
-                    </div>
-                    <span className="text-xs text-gray-400">1 tháng trước</span>
+              {review.map((item, index) => (
+                <div key={index} className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-400 text-white flex items-center justify-center font-bold shrink-0 text-base">
+                    {item.student.avatar ? (
+                      <img
+                        src={item.student.avatar}
+                        alt={item.student.fullName}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      item.student.fullName.charAt(0)
+                    )}
                   </div>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    Khóa học cực kỳ chất lượng! Giảng viên giảng rất rõ ràng,
-                    từng bước từng bước. Sau 2 tháng học tôi đã tự tin ứng dụng
-                    vào dự án thực tế. Cực kỳ worth it!
-                  </p>
-                </div>
-              </div>
-
-              {/* Review 2 */}
-              <div className="flex gap-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-400 text-white flex items-center justify-center font-bold shrink-0 text-base">
-                  L
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 flex-wrap mb-1">
-                    <span className="font-bold text-[#1c1d1f] text-sm">
-                      Nguyễn Thị Lan Anh
-                    </span>
-                    <div className="flex items-center gap-0.5 text-amber-400">
-                      <Star size={13} fill="currentColor" />
-                      <Star size={13} fill="currentColor" />
-                      <Star size={13} fill="currentColor" />
-                      <Star size={13} fill="currentColor" />
-                      <Star size={13} fill="currentColor" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 flex-wrap mb-1">
+                      <span className="font-bold text-[#1c1d1f] text-sm">
+                        {item.student.fullName}
+                      </span>
+                      <div className="flex items-center gap-0.5 text-amber-400">
+                        {Array.from({ length: item.rating }).map((_, i) => (
+                          <Star key={i} size={13} fill="currentColor" />
+                        ))}
+                        {Array.from({ length: 5 - item.rating }).map((_, i) => (
+                          <Star
+                            key={`empty-${i}`}
+                            size={13}
+                            className="text-gray-300"
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+                      </span>
                     </div>
-                    <span className="text-xs text-gray-400">3 tuần trước</span>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {item.comment}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    Nội dung ReactJS được giải thích quá xuất sắc. Đây là lần
-                    đầu tiên tôi thực sự hiểu các Hook cơ bản sau khi tự học ở
-                    rất nhiều nguồn khác nhau. Highly recommended!
-                  </p>
                 </div>
-              </div>
+              ))}
             </div>
           </section>
         </div>
