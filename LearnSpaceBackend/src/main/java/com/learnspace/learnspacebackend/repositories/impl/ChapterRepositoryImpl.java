@@ -1,12 +1,10 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -25,24 +25,14 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     @Override
     public Chapter getChapterById(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Chapter> q = builder.createQuery(Chapter.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Chapter> q = b.createQuery(Chapter.class);
         Root<Chapter> root = q.from(Chapter.class);
         root.fetch("course");
         root.fetch("lessons", JoinType.LEFT);
 
-        q.select(root).where(builder.equal(root.get("id"), chapterId));
+        q.select(root).where(b.equal(root.get("id"), chapterId));
         return session.createQuery(q).getSingleResult();
-    }
-
-    @Override
-    public boolean existChapter(int chapterId) {
-        Session session = factory.getObject().getCurrentSession();
-        return session.createQuery("SELECT 1 FROM Chapter c WHERE c.id = :chapterId", Integer.class)
-                        .setParameter("chapterId", chapterId)
-                        .setMaxResults(1)
-                        .getSingleResult()
-                != null;
     }
 
     @Override
@@ -65,28 +55,46 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     }
 
     @Override
-    public List<Chapter> getChaptersByCourse(int courseId) {
+    public List<Chapter> getChaptersByCourse(int ids) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Chapter> q = builder.createQuery(Chapter.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Chapter> q = b.createQuery(Chapter.class);
 
         Root<Chapter> root = q.from(Chapter.class);
 
         q.select(root)
-                .where(builder.equal(root.get("course").get("id"), courseId))
-                .orderBy(builder.asc(root.get("order")));
-
+                .where(b.equal(root.get("course").get("id"), ids))
+                .orderBy(b.asc(root.get("order")));
         return session.createQuery(q).getResultList();
+    }
+
+    @Override
+    public Map<Integer, Long> countChapters(List<Integer> ids) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
+        Root<Chapter> root = q.from(Chapter.class);
+
+        Join<Chapter, Course> courseJoin = root.join("course");
+        q.multiselect(courseJoin.get("id"), b.count(root))
+                .where(courseJoin.get("id").in(ids))
+                .groupBy(courseJoin);
+
+        List<Object[]> results = session.createQuery(q).getResultList();
+
+        return results.stream()
+                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
     }
 
     @Override
     public Integer getMaxOrder(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "SELECT COALESCE(MAX(c.order), 0) FROM Chapter c WHERE c.course.id ="
-                                + " :courseId",
-                        Integer.class)
-                .setParameter("courseId", courseId)
-                .getSingleResult();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Integer> q = b.createQuery(Integer.class);
+        Root<Chapter> root = q.from(Chapter.class);
+
+        q.select(b.coalesce(b.max(root.get("order")), 0))
+                .where(b.equal(root.get("course").get("id"), courseId));
+        return session.createQuery(q).getSingleResult();
     }
 }

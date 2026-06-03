@@ -17,12 +17,9 @@ public record LessonDto(
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         Integer id,
 
-        @NotBlank(message = "Tựa đề bài học không được để trống")
-        @Size(max = 255, message = "Tựa đề bài học vượt quá độ dài cho phép")
-        String title,
+        @NotBlank @Size(max = 255) String title,
 
-        @Size(max = 255, message = "Nội dung bài học vượt quá độ dài cho phép")
-        String content,
+        @Size(max = 255) String content,
 
         @JsonProperty(access = Access.READ_ONLY) String video,
         @JsonProperty(access = Access.READ_ONLY) Integer videoLength,

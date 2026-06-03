@@ -3,6 +3,9 @@ package com.learnspace.learnspacebackend.repositories;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 
+import java.util.List;
+import java.util.Map;
+
 public interface EnrollmentRepository {
     boolean checkValidEnrollment(int studentId, int courseId);
 
@@ -10,10 +13,10 @@ public interface EnrollmentRepository {
 
     Enrollment addOrUpdateEnrollment(Enrollment enrollment);
 
-    void deleteEnrollment(int enrollmentId);
-
     Enrollment getEnrollmentByStudentAndCourse(
             int studentId, int courseId, EnrollmentStatus... status);
 
-    Long countEnrollmentsByCourse(int courseId);
+    Long countEnrollments(int courseId);
+
+    Map<Integer, Long> getEnrollmentCounts(List<Integer> courseIds);
 }

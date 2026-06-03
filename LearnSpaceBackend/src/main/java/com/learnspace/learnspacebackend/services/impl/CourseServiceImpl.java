@@ -15,6 +15,7 @@ import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
+import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
@@ -27,7 +28,7 @@ import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +68,9 @@ public class CourseServiceImpl implements CourseService {
     private EnrollmentRepository enrollmentRepository;
 
     @Autowired
+    private ChapterRepository chapterRepository;
+
+    @Autowired
     private ReviewRepository reviewRepository;
 
     @Autowired
@@ -77,29 +81,35 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public PaginatedResponseDto<CourseListDto> getCourses(Map<String, String> params) {
-        List<CourseListDto> results = courseRepository.getAllCourses(params).stream()
-                .map(row -> {
-                    Course course = (Course) row[0];
-                    Double avgRating = (Double) row[1];
-                    Long enrollmentCount = (Long) row[2];
-                    Long chapterCount = (Long) row[3];
-                    Long lessonCount = (Long) row[4];
-                    CourseListDto base = courseMapper.toListDto(course);
+        List<Course> courses = courseRepository.getAllCourses(params);
+        List<Integer> courseIds = courses.stream().map(Course::getId).toList();
+
+        Map<Integer, Double> avgRatings = reviewRepository.avgRatings(courseIds);
+        Map<Integer, Long> enrollmentCounts = enrollmentRepository.getEnrollmentCounts(courseIds);
+        Map<Integer, Long> chapterCounts = chapterRepository.countChapters(courseIds);
+        Map<Integer, Long> lessonCounts = lessonRepository.countLessons(courseIds);
+
+        List<CourseListDto> results = courses.stream()
+                .map(c -> {
+                    CourseListDto course = courseMapper.toListDto(c);
+                    Double avgRating = avgRatings.get(c.getId());
+                    Long enrollmentCount = enrollmentCounts.getOrDefault(c.getId(), 0L);
+                    Long chapterCount = chapterCounts.getOrDefault(c.getId(), 0L);
+                    Long lessonCount = lessonCounts.getOrDefault(c.getId(), 0L);
 
                     return new CourseListDto(
-                            base.id(),
-                            base.name(),
-                            base.image(),
-                            base.price(),
-                            base.category(),
-                            base.teacher(),
+                            course.id(),
+                            course.name(),
+                            course.image(),
+                            course.price(),
+                            course.category(),
+                            course.teacher(),
                             avgRating,
                             enrollmentCount,
                             chapterCount,
                             lessonCount);
                 })
                 .toList();
-
         return PaginatedResponseMapper.toPaginatedResponseDto(
                 courseRepository.countCourses(params),
                 Integer.parseInt(params.getOrDefault("page", "1")),
@@ -112,8 +122,8 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.getCourseById(courseId);
 
         CourseDto dto = courseMapper.toDto(course);
-        Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
-        Long enrollCount = enrollmentRepository.countEnrollmentsByCourse(courseId);
+        Double avgRating = reviewRepository.getAverageRatingByCourse(courseId);
+        Long enrollCount = enrollmentRepository.countEnrollments(courseId);
         LessonProgressDto latestProgress = null;
 
         Object p = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -157,12 +167,11 @@ public class CourseServiceImpl implements CourseService {
 
     private void verifyCourseOwner(Course course, User teacher) {
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new RuntimeException("Bạn không phải giáo viên của course");
+            throw new AccessDeniedException("Không sở hữu khóa học");
         }
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public CourseDto createCourse(CourseDto courseDto) {
         Course course = courseMapper.toEntity(courseDto);
 
@@ -196,13 +205,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public CourseDto updateCourse(int id, CoursePatchDto courseDto) {
         Course existCourse = courseRepository.getCourseById(id);
-        if (existCourse == null) {
-            throw new IllegalArgumentException("Không tìm thấy khóa học cần cập nhật");
-        }
-
         User teacher = getLoggedInTeacher();
         verifyCourseOwner(existCourse, teacher);
 
@@ -240,7 +244,6 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public void deleteCourse(int id) {
         Course course = courseRepository.getCourseById(id);
         if (course == null) {

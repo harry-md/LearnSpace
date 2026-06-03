@@ -1,9 +1,14 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
-import com.learnspace.learnspacebackend.pojo.Review;
+import com.learnspace.learnspacebackend.pojo.*;
 import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 
 import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -25,58 +31,78 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     private LocalSessionFactoryBean factory;
 
     @Override
-    public Double getAverageRatingByCourseId(int courseId) {
+    public Double getAverageRatingByCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "SELECT AVG(r.rating) FROM Review r WHERE r.course.id = :courseId",
-                        Double.class)
-                .setParameter("courseId", courseId)
-                .getSingleResult();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Double> q = b.createQuery(Double.class);
+        Root<Review> root = q.from(Review.class);
+
+        q.select(b.avg(root.get("rating"))).where(b.equal(root.get("course").get("id"), courseId));
+        return session.createQuery(q).getSingleResult();
     }
 
     @Override
     public List<Review> getReviewsByCourse(int courseId, Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
-        String hql = """
-            SELECT DISTINCT r
-            FROM Review r
-            JOIN FETCH r.student s
-            JOIN s.enrollments e
-            JOIN r.course c
-            WHERE
-                e.status IN ('ACTIVE', 'COMPLETED')
-                AND c.id = :courseId
-                AND e.course.id = :courseId
-            ORDER BY r.rating DESC, r.createdAt DESC
-            """;
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Review> q = b.createQuery(Review.class);
+        Root<Review> root = q.from(Review.class);
 
-        Query query = session.createQuery(hql, Review.class).setParameter("courseId", courseId);
+        Fetch<Review, User> studentJoinFetch = root.fetch("student");
+        Join<Review, User> userJoin = (Join<Review, User>) studentJoinFetch;
+        Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollment");
 
+        q.select(root)
+                .where(
+                        b.equal(root.get("course"), courseId),
+                        enrollmentJoin
+                                .get("status")
+                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+
+        Query query = session.createQuery(q).setParameter("courseId", courseId);
         if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
             int start = (page - 1) * REVIEW_PAGE_SIZE;
             query.setFirstResult(start);
             query.setMaxResults(REVIEW_PAGE_SIZE);
         }
-
         return query.getResultList();
     }
 
     @Override
     public Long countReviewsByCourse(int courseId, Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
-        String hql = """
-            SELECT COUNT(r)
-            FROM Review r
-            JOIN r.student s
-            JOIN s.enrollments e
-            JOIN r.course c
-            WHERE e.status IN ('ACTIVE', 'COMPLETED') AND c.id = :courseId AND e.course.id = :courseId
-            """;
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<Review> root = q.from(Review.class);
 
-        return session.createQuery(hql, Long.class)
-                .setParameter("courseId", courseId)
-                .getSingleResultOrNull();
+        Join<Review, User> userJoin = root.join("student");
+        Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollment");
+
+        q.select(b.count(root))
+                .where(
+                        b.equal(root.get("course").get("id"), courseId),
+                        enrollmentJoin
+                                .get("status")
+                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+        return session.createQuery(q).getSingleResult();
+    }
+
+    @Override
+    public Map<Integer, Double> avgRatings(List<Integer> courseIds) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
+        Root<Review> root = q.from(Review.class);
+
+        Join<Review, Course> courseJoin = root.join("course");
+        q.multiselect(courseJoin.get("id"), b.avg(root.get("rating")))
+                .where(courseJoin.get("id").in(courseIds))
+                .groupBy(courseJoin);
+
+        List<Object[]> results = session.createQuery(q).getResultList();
+        return results.stream()
+                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Double) row[1]));
     }
 
     @Override

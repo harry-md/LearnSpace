@@ -36,15 +36,15 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     @Override
     public List<Payment> getPaymentsByStripeSessionId(String stripeSessionId) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Payment> q = builder.createQuery(Payment.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Payment> q = b.createQuery(Payment.class);
         Root<Payment> root = q.from(Payment.class);
 
         Fetch<Payment, Enrollment> fetchEnrollment = root.fetch("enrollment");
         fetchEnrollment.fetch("student");
         fetchEnrollment.fetch("course");
 
-        q.select(root).where(builder.equal(root.get("stripeSessionId"), stripeSessionId));
+        q.select(root).where(b.equal(root.get("stripeSessionId"), stripeSessionId));
         return session.createQuery(q).getResultList();
     }
 
