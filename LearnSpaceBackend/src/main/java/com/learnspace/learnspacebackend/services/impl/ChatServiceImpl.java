@@ -17,7 +17,6 @@ import java.util.List;
 
 @Service
 public class ChatServiceImpl implements ChatService {
-
     @Autowired
     private UserRepository userRepository;
 
@@ -26,7 +25,6 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public List<SimpleUserDto> getContactsEnrolled(int userId) {
-
         CustomUserDetails principal = (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Collection<? extends GrantedAuthority> authorities = principal.getAuthorities();

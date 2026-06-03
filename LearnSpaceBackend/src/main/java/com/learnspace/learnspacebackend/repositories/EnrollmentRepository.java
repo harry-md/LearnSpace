@@ -4,7 +4,6 @@ import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 
 public interface EnrollmentRepository {
-
     boolean checkValidEnrollment(int studentId, int courseId);
 
     Enrollment getEnrollmentById(int enrollmentId);
@@ -14,7 +13,7 @@ public interface EnrollmentRepository {
     void deleteEnrollment(int enrollmentId);
 
     Enrollment getEnrollmentByStudentAndCourse(
-            int studentId, int courseId, EnrollmentStatus... statuses);
+            int studentId, int courseId, EnrollmentStatus... status);
 
     Long countEnrollmentsByCourse(int courseId);
 }

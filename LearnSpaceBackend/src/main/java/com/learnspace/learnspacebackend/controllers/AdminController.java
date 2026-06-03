@@ -22,7 +22,6 @@ import java.util.Map;
 @Controller
 @RequestMapping
 public class AdminController {
-
     @Autowired
     private Environment env;
 

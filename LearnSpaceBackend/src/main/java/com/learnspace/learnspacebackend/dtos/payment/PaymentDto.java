@@ -14,19 +14,13 @@ public record PaymentDto(
         Integer enrollmentId,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String paypalOrderId,
-
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        String approvalUrl,
+        String stripeSessionId,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         PaymentStatus status,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        BigDecimal usdAmount,
-
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        BigDecimal vndAmount,
+        BigDecimal amount,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         String currency,

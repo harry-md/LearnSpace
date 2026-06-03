@@ -27,7 +27,6 @@ public class PaginatedResponseMapper {
                     .replaceQueryParam("page", currentPage - 1)
                     .toUriString();
         }
-
         return new PaginatedResponseDto<>(count, next, previous, results);
     }
 }

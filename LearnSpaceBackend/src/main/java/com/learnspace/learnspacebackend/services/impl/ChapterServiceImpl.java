@@ -26,7 +26,6 @@ import java.util.List;
 @Service
 @Transactional
 public class ChapterServiceImpl implements ChapterService {
-
     @Autowired
     private ChapterRepository chapterRepository;
 

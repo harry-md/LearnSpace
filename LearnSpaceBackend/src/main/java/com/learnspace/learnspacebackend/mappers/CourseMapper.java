@@ -11,11 +11,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(
-        componentModel = "spring",
-        uses = {UserMapper.class, CategoryMapper.class, ChapterMapper.class})
+@Mapper(componentModel = "spring")
 public interface CourseMapper {
-
     @Mapping(target = "category", source = "category")
     @Mapping(target = "teacher", source = "teacher")
     @Mapping(target = "avgRating", ignore = true)

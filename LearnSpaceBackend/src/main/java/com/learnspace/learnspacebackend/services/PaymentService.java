@@ -1,17 +1,15 @@
 package com.learnspace.learnspacebackend.services;
 
-import com.learnspace.learnspacebackend.dtos.payment.CaptureResponseDto;
 import com.learnspace.learnspacebackend.dtos.payment.CartDto;
-import com.learnspace.learnspacebackend.dtos.payment.CheckoutResponseDto;
+import com.learnspace.learnspacebackend.dtos.payment.CheckoutDto;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
 
 import java.util.List;
-import java.util.Map;
 
 public interface PaymentService {
+    CheckoutDto checkout(List<CartDto> cartItems) throws StripeException;
 
-    CheckoutResponseDto checkout(List<CartDto> cartItems);
-
-    CaptureResponseDto capturePayment(String paypalOrderId);
-
-    void handleWebhookEvent(String payload, Map<String, String> headers);
+    void handleWebhookEvent(String payload, String signatureHeader)
+            throws SignatureVerificationException;
 }

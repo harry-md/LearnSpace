@@ -33,7 +33,6 @@ import java.util.Map;
 @Repository
 @Transactional
 public class CourseRepositoryImpl implements CourseRepository {
-
     @Autowired
     private LocalSessionFactoryBean factory;
 
@@ -93,8 +92,8 @@ public class CourseRepositoryImpl implements CourseRepository {
         CriteriaQuery<Object[]> q = builder.createQuery(Object[].class);
         Root<Course> root = q.from(Course.class);
 
-        root.fetch("category", JoinType.INNER);
-        root.fetch("teacher", JoinType.INNER);
+        root.fetch("category");
+        root.fetch("teacher");
 
         Subquery<Double> avgRatingSubquery = q.subquery(Double.class);
         Root<Review> reviewRoot = avgRatingSubquery.from(Review.class);
@@ -218,10 +217,10 @@ public class CourseRepositoryImpl implements CourseRepository {
         CriteriaQuery<Object[]> q = builder.createQuery(Object[].class);
 
         Root<Course> root = q.from(Course.class);
-        root.fetch("category", JoinType.INNER);
-        root.fetch("teacher", JoinType.INNER);
+        root.fetch("category");
+        root.fetch("teacher");
 
-        Join<Course, Enrollment> enrollmentJoin = root.join("enrollments", JoinType.INNER);
+        Join<Course, Enrollment> enrollmentJoin = root.join("enrollments");
 
         Subquery<Long> chapterCountSubquery = q.subquery(Long.class);
         Root<Chapter> chapterRoot = chapterCountSubquery.from(Chapter.class);

@@ -15,7 +15,6 @@ import java.util.Set;
 @Table(name = "course")
 @Entity
 public class Course {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

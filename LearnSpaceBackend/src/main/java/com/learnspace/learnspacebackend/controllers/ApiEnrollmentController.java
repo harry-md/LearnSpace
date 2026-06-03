@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 public class ApiEnrollmentController {
-
     @Autowired
     private EnrollmentService enrollmentService;
 

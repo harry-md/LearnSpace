@@ -31,7 +31,6 @@ import java.util.List;
 @Service
 @Transactional
 public class LessonServiceImpl implements LessonService {
-
     @Autowired
     private LessonRepository lessonRepository;
 

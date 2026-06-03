@@ -14,7 +14,6 @@ import java.util.List;
 @Repository
 @Transactional
 public class CategoryRepositoryImpl implements CategoryRepository {
-
     @Autowired
     private LocalSessionFactoryBean factory;
 

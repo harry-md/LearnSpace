@@ -28,7 +28,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class ApiUserController {
-
     @Autowired
     private UserService userService;
 

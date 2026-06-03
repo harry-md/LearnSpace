@@ -7,7 +7,6 @@ import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Fetch;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -21,7 +20,6 @@ import java.util.List;
 @Repository
 @Transactional
 public class LessonRepositoryImpl implements LessonRepository {
-
     @Autowired
     private LocalSessionFactoryBean factory;
 
@@ -52,8 +50,8 @@ public class LessonRepositoryImpl implements LessonRepository {
         CriteriaQuery<Lesson> q = builder.createQuery(Lesson.class);
         Root<Lesson> root = q.from(Lesson.class);
 
-        Fetch<Lesson, Chapter> chapterFetch = root.fetch("chapter", JoinType.INNER);
-        chapterFetch.fetch("course", JoinType.INNER);
+        Fetch<Lesson, Chapter> chapterFetch = root.fetch("chapter");
+        chapterFetch.fetch("course");
 
         q.select(root).where(builder.equal(root.get("id"), lessonId));
 

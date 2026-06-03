@@ -7,7 +7,6 @@ import com.learnspace.learnspacebackend.dtos.lesson.LessonPatchDto;
 import java.util.List;
 
 public interface LessonService {
-
     List<LessonListDto> getLessons(int chapterId);
 
     LessonDto getLesson(int lessonId);
