@@ -18,6 +18,4 @@ public interface LessonRepository {
     List<String> getVideoUrlsByCourseId(int courseId);
 
     Integer getMaxOrder(int chapterId);
-
-    int countLessonsByCourseId(int courseId);
 }

@@ -39,12 +39,12 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean checkUsernameExist(String username) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                                "SELECT 1 FROM User u WHERE u.username = :username", Integer.class)
-                        .setParameter("username", username)
-                        .setMaxResults(1)
-                        .getSingleResult()
-                != null;
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<User> root = q.from(User.class);
+        q.select(b.count(root)).where(b.equal(root.get("username"), username));
+        Long count = session.createQuery(q).setMaxResults(1).getSingleResult();
+        return count == 1;
     }
 
     @Override
@@ -57,8 +57,8 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> getAllUsers(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<User> q = builder.createQuery(User.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<User> q = b.createQuery(User.class);
 
         Root<User> root = q.from(User.class);
         q.select(root);
@@ -68,20 +68,20 @@ public class UserRepositoryImpl implements UserRepository {
 
             String kw = params.get("kw");
             if (kw != null && !kw.trim().isEmpty()) {
-                Predicate p1 = builder.like(root.get("username"), String.format("%%%s%%", kw));
-                Predicate p2 = builder.like(root.get("email"), String.format("%%%s%%", kw));
-                Predicate p3 = builder.like(root.get("fullName"), String.format("%%%s%%", kw));
-                predicates.add(builder.or(p1, p2, p3));
+                Predicate p1 = b.like(root.get("username"), String.format("%%%s%%", kw));
+                Predicate p2 = b.like(root.get("email"), String.format("%%%s%%", kw));
+                Predicate p3 = b.like(root.get("fullName"), String.format("%%%s%%", kw));
+                predicates.add(b.or(p1, p2, p3));
             }
 
             String role = params.get("role");
             if (role != null && !role.trim().isEmpty()) {
-                predicates.add(builder.equal(root.get("role"), UserRole.valueOf(role)));
+                predicates.add(b.equal(root.get("role"), UserRole.valueOf(role)));
             }
 
             String active = params.get("active");
             if (active != null && !active.trim().isEmpty()) {
-                predicates.add(builder.equal(root.get("active"), active.equals("1")));
+                predicates.add(b.equal(root.get("active"), active.equals("1")));
             }
 
             q.where(predicates.toArray(Predicate[]::new));
@@ -105,25 +105,21 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> getContactsEnrolled(int userId, UserRole role) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<User> q = builder.createQuery(User.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<User> q = b.createQuery(User.class);
 
         Root<Enrollment> root = q.from(Enrollment.class);
         Join<Enrollment, Course> courseJoin = root.join("course");
 
         if (role == UserRole.TEACHER) {
             Join<Enrollment, User> studentJoin = root.join("student");
-            q.select(studentJoin)
-                    .distinct(true)
-                    .where(builder.equal(courseJoin.get("teacher").get("id"), userId));
+            q.select(studentJoin).where(b.equal(courseJoin.get("teacher").get("id"), userId));
             return session.createQuery(q).getResultList();
         }
 
         if (role == UserRole.STUDENT) {
             Join<Course, User> teacherJoin = courseJoin.join("teacher");
-            q.select(teacherJoin)
-                    .distinct(true)
-                    .where(builder.equal(root.get("student").get("id"), userId));
+            q.select(teacherJoin).where(b.equal(root.get("student").get("id"), userId));
             return session.createQuery(q).getResultList();
         }
         return null;

@@ -27,23 +27,25 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     @Override
     public boolean checkValidEnrollment(int studentId, int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                                "SELECT 1 FROM Enrollment e WHERE e.student.id = :studentId AND"
-                                        + " e.course.id = :courseId AND e.status IN ('ACTIVE',"
-                                        + " 'COMPLETED')",
-                                Integer.class)
-                        .setParameter("studentId", studentId)
-                        .setParameter("courseId", courseId)
-                        .setMaxResults(1)
-                        .getSingleResultOrNull()
-                != null;
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+
+        Root<Enrollment> root = q.from(Enrollment.class);
+
+        q.select(b.count(root))
+                .where(
+                        b.equal(root.get("student").get("id"), studentId),
+                        b.equal(root.get("course").get("id"), courseId),
+                        root.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+        Long count = session.createQuery(q).getSingleResult();
+        return count == 1;
     }
 
     @Override
     public Enrollment getEnrollmentById(int id) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Enrollment> q = b.createQuery(Enrollment.class);
 
         Root<Enrollment> root = q.from(Enrollment.class);
         root.fetch("course");
@@ -51,35 +53,35 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
 
         q.select(root)
                 .where(
-                        builder.equal(root.get("id"), id),
-                        root.get("status").in("ACTIVE", "COMPLETED"));
-        return session.createQuery(q).getSingleResultOrNull();
+                        b.equal(root.get("id"), id),
+                        root.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+        return session.createQuery(q).getSingleResult();
     }
 
     @Override
     public Enrollment getEnrollmentByStudentAndCourse(
             int studentId, int courseId, EnrollmentStatus... status) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Enrollment> q = b.createQuery(Enrollment.class);
 
         Root<Enrollment> root = q.from(Enrollment.class);
         root.fetch("course");
         root.fetch("student");
 
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(builder.equal(root.get("student").get("id"), studentId));
-        predicates.add(builder.equal(root.get("course").get("id"), courseId));
+        predicates.add(b.equal(root.get("student").get("id"), studentId));
+        predicates.add(b.equal(root.get("course").get("id"), courseId));
 
         if (status != null && status.length > 0) {
-            CriteriaBuilder.In<EnrollmentStatus> statusBuilder = builder.in(root.get("status"));
-            for (EnrollmentStatus status : status) {
-                statusBuilder.value(status);
+            CriteriaBuilder.In<EnrollmentStatus> statusBuilder = b.in(root.get("status"));
+            for (EnrollmentStatus s : status) {
+                statusBuilder.value(s);
             }
             predicates.add(statusBuilder);
         }
 
-        q.select(root).where(builder.and(predicates.toArray(Predicate[]::new)));
+        q.select(root).where(predicates.toArray(Predicate[]::new));
         return session.createQuery(q).getSingleResult();
     }
 
@@ -105,11 +107,14 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     @Override
     public Long countEnrollmentsByCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId"
-                                + " AND e.status IN ('ACTIVE', 'COMPLETED')",
-                        Long.class)
-                .setParameter("courseId", courseId)
-                .getSingleResult();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<Enrollment> root = q.from(Enrollment.class);
+
+        q.select(b.count(root))
+                .where(
+                        b.equal(root.get("course").get("id"), courseId),
+                        root.in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+        return session.createQuery(q).getSingleResult();
     }
 }

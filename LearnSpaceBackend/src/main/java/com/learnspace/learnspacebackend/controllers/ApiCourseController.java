@@ -57,7 +57,7 @@ public class ApiCourseController {
     }
 
     @DeleteMapping("/{courseId}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "courseId") int courseId) {
+    public ResponseEntity<Void> delete(@PathVariable("courseId") int courseId) {
         courseService.deleteCourse(courseId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

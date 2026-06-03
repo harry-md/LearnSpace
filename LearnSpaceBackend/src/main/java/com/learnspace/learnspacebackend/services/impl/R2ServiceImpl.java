@@ -41,14 +41,10 @@ public class R2ServiceImpl implements R2Service {
     private Tika tika;
 
     @Override
-    public void validateMp4File(File file) {
-        try {
-            String mime = tika.detect(file);
-            if (!mime.equals("video/mp4")) {
-                throw new IllegalArgumentException("Chỉ chấp nhận upload file mp4");
-            }
-        } catch (IOException ex) {
-            throw new RuntimeException("Lỗi khi đọc file video");
+    public void validateMp4File(File file) throws IOException, RuntimeException {
+        String mime = tika.detect(file);
+        if (!mime.equals("video/mp4")) {
+            throw new RuntimeException();
         }
     }
 

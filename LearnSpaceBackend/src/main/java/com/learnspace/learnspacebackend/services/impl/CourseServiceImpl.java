@@ -27,6 +27,7 @@ import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -157,7 +158,7 @@ public class CourseServiceImpl implements CourseService {
 
     private void verifyCourseOwner(Course course, User teacher) {
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new RuntimeException("Bạn không phải giáo viên của course");
+            throw new AccessDeniedException("Không sở hữu khóa học");
         }
     }
 
@@ -199,10 +200,6 @@ public class CourseServiceImpl implements CourseService {
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public CourseDto updateCourse(int id, CoursePatchDto courseDto) {
         Course existCourse = courseRepository.getCourseById(id);
-        if (existCourse == null) {
-            throw new IllegalArgumentException("Không tìm thấy khóa học cần cập nhật");
-        }
-
         User teacher = getLoggedInTeacher();
         verifyCourseOwner(existCourse, teacher);
 

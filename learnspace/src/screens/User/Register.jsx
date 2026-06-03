@@ -4,7 +4,7 @@ import "./Style.css";
 import { Button, Col, Form, Placeholder, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Apis, { endpoints } from "../../configs/Apis";
-import FloatField from '../../components/User/FloatField'
+import FloatField from "../../components/User/FloatField";
 
 const Register = () => {
   const [user, setUser] = useState({});
@@ -26,14 +26,6 @@ const Register = () => {
       if (!user[u.field] || user[u.field].trim() === "") {
         setError(`Vui lòng điền đủ ${u.title}`);
         return false;
-      }
-
-      if (u.field === "fullName") {
-        const nameRegex = /^[\p{L}\s]+$/u;
-        if (!nameRegex.test(user[u.field])) {
-          setError(`${u.title} không được chứa ký tự đặc biệt`);
-          return false;
-        }
       }
 
       if (u.field === "username") {
@@ -128,10 +120,7 @@ const Register = () => {
           className="form-column d-flex flex-column p-5 justify-content-center bg-white"
         >
           <div className="registration-form-content">
-            <h2
-              className="fw-bold mb-1"
-              style={{ fontSize: "2rem" }}
-            >
+            <h2 className="fw-bold mb-1" style={{ fontSize: "2rem" }}>
               Đăng ký tài khoản
             </h2>
 

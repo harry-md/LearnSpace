@@ -40,28 +40,21 @@ public class ApiUserController {
         return new ResponseEntity<>(userService.register(dto), HttpStatus.CREATED);
     }
 
-    @GetMapping("/current-user")
-    public ResponseEntity<UserProfileDto> getCurrentUser(
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
-        if (currentUser == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        return ResponseEntity.ok(userService.getUserByUsername(currentUser.getUsername()));
-    }
-
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody UserLoginDto user) {
         return ResponseEntity.ok().body(Collections.singletonMap("token", userService.login(user)));
+    }
+
+    @GetMapping("/current-user")
+    public ResponseEntity<UserProfileDto> getCurrentUser(
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+        return ResponseEntity.ok(userService.getUserByUsername(currentUser.getUsername()));
     }
 
     @PatchMapping("/current-user")
     public ResponseEntity<UserProfileDto> update(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @Valid @ModelAttribute UserUpdateDto dto) {
-        if (currentUser == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
         return ResponseEntity.ok(userService.updateUser(currentUser.getId(), dto));
     }
 }

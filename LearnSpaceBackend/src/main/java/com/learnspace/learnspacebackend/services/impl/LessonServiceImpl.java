@@ -61,7 +61,7 @@ public class LessonServiceImpl implements LessonService {
     private void verifyCourseOwner(Course course) {
         User teacher = getLoggedInTeacher();
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện hành động này");
+            throw new AccessDeniedException("Không có quyền");
         }
     }
 
@@ -79,7 +79,7 @@ public class LessonServiceImpl implements LessonService {
         }
 
         if (!enrollmentRepository.checkValidEnrollment(principal.getId(), course.getId())) {
-            throw new AccessDeniedException("Bạn cần mua khóa học này để xem bài học");
+            throw new RuntimeException();
         }
     }
 
@@ -104,7 +104,7 @@ public class LessonServiceImpl implements LessonService {
         verifyCourseOwner(chapter.getCourse());
 
         if (lessonDto.videoFile() == null || lessonDto.videoFile().isEmpty()) {
-            throw new IllegalArgumentException("Tạo bài học phải có video");
+            throw new RuntimeException();
         }
 
         MultipartFile videoFile = lessonDto.videoFile();

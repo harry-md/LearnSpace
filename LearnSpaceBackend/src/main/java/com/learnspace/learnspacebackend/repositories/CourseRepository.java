@@ -12,8 +12,6 @@ public interface CourseRepository {
 
     Course getCourseById(int courseId);
 
-    boolean existCourse(int courseId);
-
     Course addOrUpdateCourse(Course course);
 
     void deleteCourse(int courseId);

@@ -3,6 +3,7 @@ package com.learnspace.learnspacebackend.repositories.impl;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
+import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.pojo.Review;
@@ -40,7 +41,7 @@ public class CourseRepositoryImpl implements CourseRepository {
     private int COURSE_PAGE_SIZE;
 
     private List<Predicate> filter(
-            Map<String, String> params, CriteriaBuilder builder, Root<Course> root) {
+            Map<String, String> params, CriteriaBuilder b, Root<Course> root) {
         List<Predicate> predicates = new ArrayList<>();
         if (params == null) {
             return predicates;
@@ -48,37 +49,36 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         String kw = params.get("kw");
         if (kw != null && !kw.isBlank()) {
-            predicates.add(builder.like(
-                    builder.lower(root.get("name")), String.format("%%%s%%", kw.trim())));
+            predicates.add(b.like(b.lower(root.get("name")), String.format("%%%s%%", kw.trim())));
         }
 
         String fromPrice = params.get("fromPrice");
         if (fromPrice != null && !fromPrice.isBlank()) {
             BigDecimal price = new BigDecimal(fromPrice);
-            predicates.add(builder.greaterThanOrEqualTo(root.get("price"), price));
+            predicates.add(b.greaterThanOrEqualTo(root.get("price"), price));
         }
 
         String toPrice = params.get("toPrice");
         if (toPrice != null && !toPrice.isBlank()) {
             BigDecimal price = new BigDecimal(toPrice);
-            predicates.add(builder.lessThanOrEqualTo(root.get("price"), price));
+            predicates.add(b.lessThanOrEqualTo(root.get("price"), price));
         }
 
         String categoryId = params.get("categoryId");
         if (categoryId != null && !categoryId.isBlank()) {
             Integer id = Integer.parseInt(categoryId);
-            predicates.add(builder.equal(root.get("category").get("id"), id));
+            predicates.add(b.equal(root.get("category").get("id"), id));
         }
 
         String teacherId = params.get("teacherId");
         if (teacherId != null && !teacherId.isBlank()) {
             Integer id = Integer.parseInt(teacherId);
-            predicates.add(builder.equal(root.get("teacher").get("id"), id));
+            predicates.add(b.equal(root.get("teacher").get("id"), id));
         }
 
         String teacherName = params.get("teacherName");
         if (teacherName != null && !teacherName.isBlank()) {
-            predicates.add(builder.or(builder.like(
+            predicates.add(b.or(b.like(
                     root.get("teacher").get("fullName"), String.format("%%%s%%", teacherName))));
         }
 
@@ -88,8 +88,8 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Override
     public List<Object[]> getAllCourses(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Object[]> q = builder.createQuery(Object[].class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
         Root<Course> root = q.from(Course.class);
 
         root.fetch("category");
@@ -98,29 +98,31 @@ public class CourseRepositoryImpl implements CourseRepository {
         Subquery<Double> avgRatingSubquery = q.subquery(Double.class);
         Root<Review> reviewRoot = avgRatingSubquery.from(Review.class);
         avgRatingSubquery
-                .select(builder.avg(reviewRoot.get("rating")))
-                .where(builder.equal(reviewRoot.get("course"), root));
+                .select(b.avg(reviewRoot.get("rating")))
+                .where(b.equal(reviewRoot.get("course"), root));
 
         Subquery<Long> enrollmentCountSubquery = q.subquery(Long.class);
         Root<Enrollment> enrollmentRoot = enrollmentCountSubquery.from(Enrollment.class);
         enrollmentCountSubquery
-                .select(builder.count(enrollmentRoot))
-                .where(builder.and(
-                        builder.equal(enrollmentRoot.get("course"), root),
-                        enrollmentRoot.get("status").in("ACTIVE", "COMPLETED")));
+                .select(b.count(enrollmentRoot))
+                .where(
+                        b.equal(enrollmentRoot.get("course"), root),
+                        enrollmentRoot
+                                .get("status")
+                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
 
         Subquery<Long> chapterCountSubquery = q.subquery(Long.class);
         Root<Chapter> chapterRoot = chapterCountSubquery.from(Chapter.class);
         chapterCountSubquery
-                .select(builder.count(chapterRoot))
-                .where(builder.equal(chapterRoot.get("course"), root));
+                .select(b.count(chapterRoot))
+                .where(b.equal(chapterRoot.get("course"), root));
 
         Subquery<Long> lessonCountSubquery = q.subquery(Long.class);
         Root<Lesson> lessonRoot = lessonCountSubquery.from(Lesson.class);
         Join<Lesson, Chapter> lessonJoin = lessonRoot.join("chapter");
         lessonCountSubquery
-                .select(builder.count(lessonRoot))
-                .where(builder.equal(lessonJoin.get("course"), root));
+                .select(b.count(lessonRoot))
+                .where(b.equal(lessonJoin.get("course"), root));
 
         q.multiselect(
                 root,
@@ -129,14 +131,14 @@ public class CourseRepositoryImpl implements CourseRepository {
                 chapterCountSubquery.getSelection(),
                 lessonCountSubquery.getSelection());
 
-        List<Predicate> predicates = filter(params, builder, root);
+        List<Predicate> predicates = filter(params, b, root);
         if (!predicates.isEmpty()) {
-            q.where(builder.and(predicates.toArray(Predicate[]::new)));
+            q.where(b.and(predicates.toArray(Predicate[]::new)));
         }
 
         q.orderBy(
-                builder.desc(avgRatingSubquery.getSelection()),
-                builder.desc(enrollmentCountSubquery.getSelection()));
+                b.desc(avgRatingSubquery.getSelection()),
+                b.desc(enrollmentCountSubquery.getSelection()));
 
         Query query = session.createQuery(q);
         if (params != null) {
@@ -150,15 +152,15 @@ public class CourseRepositoryImpl implements CourseRepository {
 
     public Long countCourses(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Long> q = builder.createQuery(Long.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
         Root<Course> root = q.from(Course.class);
 
-        q.select(builder.count(root));
+        q.select(b.count(root));
 
-        List<Predicate> predicates = filter(params, builder, root);
+        List<Predicate> predicates = filter(params, b, root);
         if (!predicates.isEmpty()) {
-            q.where(builder.and(predicates.toArray(Predicate[]::new)));
+            q.where(predicates.toArray(Predicate[]::new));
         }
 
         return session.createQuery(q).getSingleResult();
@@ -167,8 +169,8 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Override
     public Course getCourseById(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Course> q = builder.createQuery(Course.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Course> q = b.createQuery(Course.class);
 
         Root<Course> root = q.from(Course.class);
         root.fetch("category");
@@ -177,17 +179,8 @@ public class CourseRepositoryImpl implements CourseRepository {
         Fetch<Course, Chapter> chaptersFetch = root.fetch("chapters", JoinType.LEFT);
         chaptersFetch.fetch("lessons", JoinType.LEFT);
 
-        q.select(root).where(builder.equal(root.get("id"), courseId));
+        q.select(root).where(b.equal(root.get("id"), courseId));
         return session.createQuery(q).getSingleResult();
-    }
-
-    @Override
-    public boolean existCourse(int courseId) {
-        Session session = factory.getObject().getCurrentSession();
-        session.createQuery("SELECT COUNT(c) FROM Course c WHERE c.id = :courseId", Long.class)
-                .setParameter("courseId", courseId)
-                .getSingleResult();
-        return true;
     }
 
     @Override
@@ -213,8 +206,8 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Override
     public List<Object[]> getEnrolledCoursesByStudent(int studentId) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Object[]> q = builder.createQuery(Object[].class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
 
         Root<Course> root = q.from(Course.class);
         root.fetch("category");
@@ -225,15 +218,15 @@ public class CourseRepositoryImpl implements CourseRepository {
         Subquery<Long> chapterCountSubquery = q.subquery(Long.class);
         Root<Chapter> chapterRoot = chapterCountSubquery.from(Chapter.class);
         chapterCountSubquery
-                .select(builder.count(chapterRoot))
-                .where(builder.equal(chapterRoot.get("course"), root));
+                .select(b.count(chapterRoot))
+                .where(b.equal(chapterRoot.get("course"), root));
 
         Subquery<Long> lessonCountSubquery = q.subquery(Long.class);
         Root<Lesson> lessonRoot = lessonCountSubquery.from(Lesson.class);
         Join<Lesson, Chapter> lessonJoin = lessonRoot.join("chapter");
         lessonCountSubquery
-                .select(builder.count(lessonRoot))
-                .where(builder.equal(lessonJoin.get("course"), root));
+                .select(b.count(lessonRoot))
+                .where(b.equal(lessonJoin.get("course"), root));
 
         Subquery<Long> completedLessonCount = q.subquery(Long.class);
         Root<LessonProgress> progressRoot = completedLessonCount.from(LessonProgress.class);
@@ -241,20 +234,20 @@ public class CourseRepositoryImpl implements CourseRepository {
         Join<Lesson, Chapter> progressChapterJoin = progressLessonJoin.join("chapter");
 
         completedLessonCount
-                .select(builder.count(progressRoot))
-                .where(builder.and(
-                        builder.equal(progressRoot.get("student").get("id"), studentId),
-                        builder.equal(progressChapterJoin.get("course"), root),
-                        builder.equal(progressRoot.get("completed"), true)));
+                .select(b.count(progressRoot))
+                .where(b.and(
+                        b.equal(progressRoot.get("student").get("id"), studentId),
+                        b.equal(progressChapterJoin.get("course"), root),
+                        b.equal(progressRoot.get("completed"), true)));
 
         q.multiselect(
                         root,
                         chapterCountSubquery.getSelection(),
                         lessonCountSubquery.getSelection(),
                         completedLessonCount.getSelection())
-                .where(builder.equal(enrollmentJoin.get("student").get("id"), studentId));
+                .where(b.equal(enrollmentJoin.get("student").get("id"), studentId));
 
-        q.orderBy(builder.desc(enrollmentJoin.get("createdAt")));
+        q.orderBy(b.desc(enrollmentJoin.get("createdAt")));
 
         return session.createQuery(q).getResultList();
     }
