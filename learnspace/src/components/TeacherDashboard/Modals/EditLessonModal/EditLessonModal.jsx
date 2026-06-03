@@ -29,7 +29,6 @@ const EditLessonModal = ({ open, onClose, lesson, onSubmit }) => {
 
   return (
     <Modal open={open} onClose={onClose} title="Chỉnh sửa bài học">
-      {/* Tiêu đề bài học */}
       <Field label="Tiêu đề bài học" required>
         <input
           className="input-cls"
@@ -41,7 +40,6 @@ const EditLessonModal = ({ open, onClose, lesson, onSubmit }) => {
         />
       </Field>
 
-      {/* Mô tả / nội dung */}
       <Field label="Mô tả bài học">
         <textarea
           className="input-cls edit-lesson-modal-textarea"
@@ -54,7 +52,6 @@ const EditLessonModal = ({ open, onClose, lesson, onSubmit }) => {
         />
       </Field>
 
-      {/* Thay video – tùy chọn (để trống = giữ video cũ) */}
       <Field
         label="Thay video bài học"
         hint="Để trống nếu không muốn thay video cũ"
@@ -88,7 +85,6 @@ const EditLessonModal = ({ open, onClose, lesson, onSubmit }) => {
         </label>
       </Field>
 
-      {/* Nút hành động */}
       <div className="edit-lesson-modal-footer">
         <button onClick={onClose} className="edit-lesson-modal-btn-cancel">
           Hủy bỏ

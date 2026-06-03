@@ -19,7 +19,6 @@ const ProfilePage = () => {
   const [user, dispatchUser] = useContext(UserContext);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Form states
   const [fullName, setFullName] = useState(user?.fullName || "");
   const [email, setEmail] = useState(user?.email || "");
   const [avatarFile, setAvatarFile] = useState(null);
@@ -54,7 +53,6 @@ const ProfilePage = () => {
       setAvatarFile(file);
       setAvatarPreview(URL.createObjectURL(file));
 
-      // Auto enter editing mode if they selected a file while in view mode
       if (!isEditing) {
         setIsEditing(true);
       }
@@ -125,7 +123,6 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-sans text-[#1c1d1f] pb-16">
-      {/* Premium Header */}
       <div className="bg-white border-b border-gray-100 py-8 px-6 md:px-12">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
@@ -140,16 +137,13 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Main Grid Content */}
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-10">
         <form
           onSubmit={handleSave}
           className="grid grid-cols-1 lg:grid-cols-12 gap-8"
         >
-          {/* Left Column - Profile Summary Card */}
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white rounded-2xl border border-gray-200/70 shadow-[0_2px_12px_rgba(0,0,0,0.03)] p-6 flex flex-col items-center">
-              {/* Avatar Container */}
               <div
                 className={`relative group mb-6 rounded-full overflow-hidden ${
                   isEditing ? "cursor-pointer" : ""
@@ -174,7 +168,6 @@ const ProfilePage = () => {
                   </div>
                 )}
 
-                {/* Edit overlay */}
                 {isEditing && (
                   <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white text-xs font-semibold opacity-0 group-hover:opacity-100 transition-all duration-200">
                     <Camera size={20} className="mb-1" />
@@ -183,7 +176,6 @@ const ProfilePage = () => {
                 )}
               </div>
 
-              {/* Hidden file input */}
               <input
                 type="file"
                 ref={fileInputRef}
@@ -192,7 +184,6 @@ const ProfilePage = () => {
                 className="hidden"
               />
 
-              {/* Upload Helper Button */}
               {isEditing && (
                 <button
                   type="button"
@@ -204,7 +195,6 @@ const ProfilePage = () => {
                 </button>
               )}
 
-              {/* User Identity Details */}
               <div className="text-center w-full pb-4 border-b border-gray-100">
                 <h3 className="font-extrabold text-lg text-gray-900 leading-tight">
                   {displayFullName}
@@ -214,7 +204,6 @@ const ProfilePage = () => {
                 </p>
               </div>
 
-              {/* Metadata details */}
               <div className="w-full pt-4 space-y-3.5 text-sm text-gray-600">
                 <div className="flex items-center gap-2.5">
                   <Shield size={16} className="text-gray-400" />
@@ -240,7 +229,6 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Right Column - Account Settings Form */}
           <div className="lg:col-span-8 space-y-6">
             {success && (
               <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl flex items-center gap-2.5 animate-fadeIn animate-duration-300">
@@ -263,7 +251,6 @@ const ProfilePage = () => {
               </h2>
 
               <div className="space-y-6">
-                {/* Username & Role (Read-only) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-[11px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">
@@ -290,7 +277,6 @@ const ProfilePage = () => {
                   </div>
                 </div>
 
-                {/* Form fields grid */}
                 <div className="grid grid-cols-1 gap-6">
                   <div>
                     <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wider mb-2">
@@ -332,7 +318,6 @@ const ProfilePage = () => {
                   )}
                 </div>
 
-                {/* Verification Status Box (Visible ONLY for TEACHER role) */}
                 {user.role === "TEACHER" && (
                   <div className="pt-4 border-t border-gray-100">
                     <label className="block text-[11px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">
@@ -374,7 +359,6 @@ const ProfilePage = () => {
                   </div>
                 )}
 
-                {/* Form Action Buttons */}
                 <div className="pt-6 border-t border-gray-100 flex justify-end gap-3">
                   {!isEditing ? (
                     <button

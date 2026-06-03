@@ -38,7 +38,6 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
     const [moved] = chapters.splice(fromIndex, 1);
     chapters.splice(toIndex, 0, moved);
 
-    // Cập nhật UI ngay lập tức
     setTeacherCourses((prev) =>
       prev.map((c) => {
         if (c.id === course?.id) {
@@ -48,7 +47,6 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
       }),
     );
 
-    // Xác định ID của chapter đứng trước và sau ở vị trí mới
     const prevChapter = toIndex > 0 ? chapters[toIndex - 1] : null;
     const nextChapter =
       toIndex < chapters.length - 1 ? chapters[toIndex + 1] : null;
@@ -57,7 +55,6 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
     const nextId = nextChapter ? nextChapter.id : null;
 
     try {
-      // Gửi PATCH request vào api /chapters/<chapterId> của chapter bị di chuyển
       await authApis(user.token).patch(`${endpoints.chapters}/${moved.id}`, {
         frontChapterId: prevId,
         behindChapterId: nextId,
@@ -173,7 +170,6 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
 
   return (
     <div className="manage-course-container">
-      {/* Mini stats */}
       <div className="mini-stats-grid">
         <div className="stat-card">
           <div
@@ -201,7 +197,6 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
           </div>
         </div>
 
-        {/* Nút sửa thông tin khóa học */}
         <button
           onClick={() => setShowEditCourse(true)}
           className="edit-course-btn"
@@ -217,7 +212,6 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
           </div>
         </button>
 
-        {/* Nút thêm chương */}
         <button
           onClick={() => setShowAddChapter(true)}
           className="add-chapter-btn"
@@ -234,7 +228,6 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
         </button>
       </div>
 
-      {/* Danh sách chương */}
       <div className="sections-list">
         {(currentCourse?.chapters || []).map((chapter, index) => {
           return (
@@ -257,7 +250,6 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
         })}
       </div>
 
-      {/* ─── MODALS ─────────────────────────────────────────── */}
       <AddChapterModal
         open={showAddChapter}
         onClose={() => setShowAddChapter(false)}

@@ -84,7 +84,6 @@ const Header = () => {
       return;
     }
     let unsubscribeDb = null;
-    // Đợi Firebase báo "Đã xác thực thành công" thì mới thò tay vào Database
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser && firebaseUser.uid === String(user.id)) {
         const conversationsRef = ref(db, `userConversations/${user.id}`);
@@ -98,7 +97,6 @@ const Header = () => {
               if (conv.unread && conv.unread > 0) {
                 total += conv.unread;
                 const prevConv = prevConversations.current[otherId];
-                // CHỈ POPUP KHI: Đã tải dữ liệu lần 1 xong (có prevConv) VÀ có tin nhắn MỚI ĐẾN (timestamp lớn hơn)
                 if (prevConv && conv.timestamp > prevConv.timestamp) {
                   chatDispatch({
                     type: "OPEN_CHAT",
@@ -136,7 +134,6 @@ const Header = () => {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm w-full">
       <div className="flex items-center justify-between px-6 h-16 gap-4">
-        {/* Logo & Mobile Menu */}
         <div className="flex items-center gap-4">
           <Menu className="lg:hidden cursor-pointer" />
           <Link
@@ -147,7 +144,6 @@ const Header = () => {
           </Link>
         </div>
 
-        {/* Search Bar */}
         <div className="flex-1 flex gap-4 min-w-0">
           <div className="flex items-center min-w-0 flex-1">
             <nav className="flex items-center gap-1 ms-2">
@@ -270,7 +266,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Action Icons */}
         <div className="flex items-center gap-4 lg:gap-6">
           <Link
             to="/cart"

@@ -44,7 +44,6 @@ const CoursesTab = ({ onManageCourse }) => {
 
   return (
     <div className="courses-container">
-      {/* Action bar */}
       <div className="action-bar-wrapper">
         <button
           onClick={() => setShowCreateModal(true)}
@@ -88,7 +87,6 @@ const CoursesTab = ({ onManageCourse }) => {
         onPageChange={setCurrentPage}
       />
 
-      {/* Modals */}
       <CreateCourseModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}

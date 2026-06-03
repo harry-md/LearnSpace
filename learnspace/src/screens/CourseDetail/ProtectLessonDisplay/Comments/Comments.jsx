@@ -9,7 +9,6 @@ const Comments = () => {
         <h4 className="font-bold text-[#1c1d1f] text-sm">Bình luận (12)</h4>
       </div>
 
-      {/* Input area */}
       <div className="flex gap-3 mb-6">
         <img
           src="https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png"
@@ -29,7 +28,6 @@ const Comments = () => {
         </div>
       </div>
 
-      {/* Comments list */}
       <div className="space-y-5">
         <div className="flex gap-3">
           <img
