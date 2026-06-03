@@ -88,7 +88,6 @@ const CourseDetailPage = () => {
         const course = res.data;
         setCourseDetails(course);
 
-        // 4. Check enrollment status
         if (user && user.token) {
           try {
             const enrollRes = await authApis(user.token).get(
@@ -165,14 +164,11 @@ const CourseDetailPage = () => {
 
   return (
     <div className="bg-white text-[#1c1d1f] font-sans animate-[fadeIn_0.4s_ease-out]">
-      {/* ─── Dark Hero Banner ─────────────────────────────────── */}
       <div className="bg-[#1c1d1f] w-full">
         <div
           className={`max-w-7xl mx-auto px-6 md:px-12 py-6 grid grid-cols-1 gap-8 ${!isEnrolled ? "lg:grid-cols-[1fr_360px]" : ""}`}
         >
-          {/* Left hero content */}
           <div className="text-white">
-            {/* Back to Management button */}
             <Link
               to="/learning"
               className="flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-3 transition-colors no-underline !text-gray-400 font-semibold"
@@ -181,17 +177,14 @@ const CourseDetailPage = () => {
               Quản lý khóa học của tôi
             </Link>
 
-            {/* Title */}
             <h1 className="text-2xl md:text-3xl font-black leading-tight mb-2 text-white">
               {courseDetails.name}
             </h1>
 
-            {/* Subtitle */}
             <p className="text-gray-300 text-base mb-3 leading-relaxed max-w-2xl">
               {courseDetails.description}
             </p>
 
-            {/* Rating row */}
             <div className="flex items-center flex-wrap gap-3 mb-2">
               <span className="font-black text-amber-400 text-lg">
                 {courseDetails?.avgRating?.toFixed(1) || "0.0"}
@@ -220,7 +213,6 @@ const CourseDetailPage = () => {
               </div>
             </div>
 
-            {/* Author */}
             <p className="text-sm text-gray-300 mb-2">
               Tạo bởi{" "}
               <span className="text-purple-400 underline cursor-pointer hover:text-purple-300 transition-colors">
@@ -228,7 +220,6 @@ const CourseDetailPage = () => {
               </span>
             </p>
 
-            {/* Meta row */}
             <div className="flex flex-wrap items-center gap-5 text-sm text-gray-400">
               <span className="flex items-center gap-1.5">
                 <Clock size={14} className="shrink-0" />
@@ -237,18 +228,14 @@ const CourseDetailPage = () => {
             </div>
           </div>
 
-          {/* Right column placeholder for sticky card alignment */}
           {!isEnrolled && <div className="hidden lg:block" />}
         </div>
       </div>
 
-      {/* ─── Main Layout ──────────────────────────────────────────── */}
       <div
         className={`max-w-7xl mx-auto px-6 md:px-12 py-10 grid grid-cols-1 gap-10 items-start ${!isEnrolled ? "lg:grid-cols-[1fr_360px]" : ""}`}
       >
-        {/* ── LEFT: Main Content ────────────────────────────────── */}
         <div className="min-w-0">
-          {/* Intro Video Section */}
           {courseDetails.introVideo && (
             <section className="mb-10">
               <h2 className="text-2xl font-black mb-4 text-[#1c1d1f]">
@@ -266,7 +253,6 @@ const CourseDetailPage = () => {
             </section>
           )}
 
-          {/* Course Content / Accordion */}
           <section className="mb-10">
             <h2 className="text-2xl font-black mb-2 text-[#1c1d1f]">
               Nội dung khóa học
@@ -370,7 +356,6 @@ const CourseDetailPage = () => {
             </div>
           </section>
 
-          {/* Reviews */}
           <section className="mb-10">
             <h2 className="text-2xl font-black mb-2 text-[#1c1d1f]">
               Đánh giá của học viên
@@ -410,7 +395,6 @@ const CourseDetailPage = () => {
               </div>
             </div>
 
-            {/* Review Cards */}
             <div className="space-y-6">
               {review.map((item, index) => (
                 <div key={index} className="flex gap-4">
@@ -456,11 +440,9 @@ const CourseDetailPage = () => {
           </section>
         </div>
 
-        {/* ── RIGHT: Sticky Checkout Sidebar ───────────────────── */}
         {!isEnrolled && (
           <div className="lg:sticky lg:top-20 self-start">
             <div className="bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
-              {/* Course Image */}
               <div className="w-full aspect-video overflow-hidden">
                 <img
                   src={
@@ -473,7 +455,6 @@ const CourseDetailPage = () => {
               </div>
 
               <div className="p-4">
-                {/* Price */}
                 <div className="flex items-baseline gap-3 mb-3">
                   <span className="text-2xl font-black text-[#1c1d1f]">
                     {courseDetails.price
@@ -481,8 +462,6 @@ const CourseDetailPage = () => {
                       : "Miễn phí"}
                   </span>
                 </div>
-
-                {/* Buttons */}
 
                 {courseDetails.price !== 0 ? (
                   <>

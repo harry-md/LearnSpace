@@ -22,7 +22,7 @@ const ChapterRow = ({
   onEditLesson,
   onDeleteLesson,
 }) => {
-  const [isOpen, setIsOpen] = useState(index === 0); // Mở chương đầu tiên làm mặc định
+  const [isOpen, setIsOpen] = useState(index === 0);
   const [draggedLessonIndex, setDraggedLessonIndex] = useState(null);
 
   const lessonsCount = chapter?.lessons?.length || 0;
@@ -53,10 +53,7 @@ const ChapterRow = ({
         style={{ cursor: "grab" }}
       >
         <div className="chapter-idx-box">
-          <GripVertical
-            size={14}
-            className="text-[#9ca3af] mr-1 shrink-0"
-          />
+          <GripVertical size={14} className="text-[#9ca3af] mr-1 shrink-0" />
           <span className="chapter-idx-text">{index + 1}</span>
         </div>
         <div className="flex-1 min-w-0">
@@ -133,11 +130,7 @@ const ChapterRow = ({
                     draggedLessonIndex !== null &&
                     draggedLessonIndex !== lessonIdx
                   ) {
-                    onReorderLessons(
-                      chapter.id,
-                      draggedLessonIndex,
-                      lessonIdx,
-                    );
+                    onReorderLessons(chapter.id, draggedLessonIndex, lessonIdx);
                   }
                   setDraggedLessonIndex(null);
                 }}
@@ -149,9 +142,7 @@ const ChapterRow = ({
                 <span className="lesson-idx">{lessonIdx + 1}</span>
                 <PlayCircle size={14} className="text-[#8b5cf6]" />
                 <span className="lesson-title">{lesson.title}</span>
-                {lesson.free && (
-                  <span className="lesson-free-badge">FREE</span>
-                )}
+                {lesson.free && <span className="lesson-free-badge">FREE</span>}
                 {lesson.videoLength && (
                   <span className="lesson-duration">
                     {Math.floor(lesson.videoLength / 60)}:

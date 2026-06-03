@@ -131,7 +131,6 @@ public class CourseServiceImpl implements CourseService {
                     principal.getId(), courseId);
             latestProgress = progressMapper.toDto(l);
         }
-
         return new CourseDto(
                 dto.id(),
                 dto.name(),

@@ -182,7 +182,6 @@ const EditCourseModal = ({ open, onClose, course, categories, onSuccess }) => {
         </Field>
       </div>
 
-      {/* Upload ảnh bìa và video giới thiệu */}
       <div className="edit-course-grid">
         <Field label="Đổi ảnh bìa" hint="Để trống nếu không muốn thay">
           <div

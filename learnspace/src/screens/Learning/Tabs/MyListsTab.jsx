@@ -84,7 +84,6 @@ const MyListsTab = () => {
                 </div>
               </div>
 
-              {/* Progress bar attached to image bottom */}
               <div className="h-1.5 w-full bg-gray-200">
                 <div
                   className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#5624d0] rounded-r-full transition-all duration-1000 ease-out"

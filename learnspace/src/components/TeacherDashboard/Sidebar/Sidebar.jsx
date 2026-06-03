@@ -23,7 +23,6 @@ const Sidebar = ({ view, setView }) => {
 
   return (
     <aside className="sidebar-aside">
-      {/* Logo */}
       <div className="logo-container">
         <div className="flex items-center gap-[10px]">
           <div className="logo-icon-box">
@@ -38,7 +37,6 @@ const Sidebar = ({ view, setView }) => {
         </div>
       </div>
 
-      {/* Teacher card */}
       <div className="teacher-card-container">
         <div className="flex items-center gap-3">
           <img
@@ -59,7 +57,6 @@ const Sidebar = ({ view, setView }) => {
         </div>
       </div>
 
-      {/* Nav */}
       <nav className="sidebar-nav">
         <div className="nav-section-title">Menu chính</div>
         {navItems.map(({ id, label, icon: Icon }) => {
@@ -80,7 +77,6 @@ const Sidebar = ({ view, setView }) => {
         })}
       </nav>
 
-      {/* Bottom */}
       <div className="sidebar-footer">
         <Link to="/" className="sidebar-btn">
           <Globe size={17} />

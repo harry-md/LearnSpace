@@ -11,12 +11,10 @@ const ChatWindow = ({ chatData }) => {
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
-  // Tạo ID phòng chat chung (ID nhỏ đứng trước, ID lớn đứng sau)
   const conversationId = [currentUser?.id, chatData?.id]
     .sort((a, b) => a - b)
     .join("_");
 
-  // Cuộn xuống cuối mỗi khi có tin nhắn mới
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -25,7 +23,6 @@ const ChatWindow = ({ chatData }) => {
     scrollToBottom();
   }, [messages]);
 
-  // 1. Lắng nghe lịch sử tin nhắn và Xóa số thông báo chưa đọc
   useEffect(() => {
     if (!currentUser) return;
 
@@ -33,7 +30,6 @@ const ChatWindow = ({ chatData }) => {
     const unsubscribe = onValue(messagesRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        // Chuyển Object của Firebase thành Array
         const msgList = Object.keys(data)
           .map((key) => ({
             id: key,
@@ -47,7 +43,6 @@ const ChatWindow = ({ chatData }) => {
       }
     });
 
-    // Khi mở cửa sổ chat, reset unread về 0
     const myConversationRef = ref(
       db,
       `userConversations/${currentUser.id}/${chatData.id}/unread`,
@@ -65,38 +60,31 @@ const ChatWindow = ({ chatData }) => {
     chatDispatch({ type: "TOGGLE_MINIMIZE", payload: chatData.id });
   };
 
-  // 2. Gửi tin nhắn
   const handleSend = async () => {
     if (!message.trim() || !currentUser) return;
 
     const textToSend = message.trim();
-    setMessage(""); // Xóa input ngay lập tức cho mượt
+    setMessage("");
 
     try {
-      // 2.1 Đẩy tin nhắn vào mảng chung
       const messagesRef = ref(db, `messages/${conversationId}`);
       await push(messagesRef, {
         text: textToSend,
         senderId: currentUser.id,
-        timestamp: serverTimestamp(), // Lấy giờ chuẩn từ server Firebase
+        timestamp: serverTimestamp(),
       });
 
-      // 2.2 Cập nhật lại "Tin nhắn gần nhất" cho menu chat của MÌNH
       await set(ref(db, `userConversations/${currentUser.id}/${chatData.id}`), {
         lastMessage: textToSend,
         timestamp: serverTimestamp(),
         unread: 0,
       });
 
-      // 2.3 Cập nhật lại "Tin nhắn gần nhất" và Tăng số thông báo cho NGƯỜI NHẬN
-      // Cần lấy ra unread hiện tại của người nhận trước (Tùy chọn nâng cao)
-      // Để đơn giản, ta gán cứng unread = 1 nếu có tin nhắn mới (chờ họ mở)
       await set(ref(db, `userConversations/${chatData.id}/${currentUser.id}`), {
         lastMessage: textToSend,
         timestamp: serverTimestamp(),
         unread: 1,
-        // Gửi kèm thông tin của MÌNH để Header của bên kia biết ai đang nhắn
-        senderName: currentUser.fullName, // Hoặc currentUser.username tùy BE của bạn
+        senderName: currentUser.fullName,
         senderAvatar: currentUser.avatar || "https://placehold.co/100",
       });
     } catch (error) {
@@ -138,7 +126,6 @@ const ChatWindow = ({ chatData }) => {
 
   return (
     <div className="w-[330px] h-[450px] bg-white rounded-t-xl shadow-[0_-5px_25px_rgba(0,0,0,0.15)] border border-gray-200 border-b-0 flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
-      {/* Header */}
       <div className="h-14 border-b border-gray-100 flex items-center justify-between px-3 bg-white shrink-0 shadow-sm z-10">
         <div
           className="flex items-center gap-2 cursor-pointer w-full overflow-hidden"
@@ -177,7 +164,6 @@ const ChatWindow = ({ chatData }) => {
         </div>
       </div>
 
-      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 bg-white scrollbar-hide">
         <div className="flex justify-center my-4">
           <div className="flex flex-col items-center gap-1">
@@ -195,7 +181,6 @@ const ChatWindow = ({ chatData }) => {
           </div>
         </div>
 
-        {/* Render tin nhắn */}
         {messages.map((msg, index) => {
           const isMine = msg.senderId === currentUser.id;
           return (
@@ -222,11 +207,9 @@ const ChatWindow = ({ chatData }) => {
             </div>
           );
         })}
-        {/* Điểm neo để cuộn xuống cuối */}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="p-3 border-t border-gray-100 bg-white">
         <div className="flex items-end gap-2">
           <div className="flex-1 relative bg-gray-100 rounded-2xl">

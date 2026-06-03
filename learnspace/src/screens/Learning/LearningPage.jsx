@@ -7,14 +7,12 @@ const LearningPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f7f9fa] font-sans text-gray-900 flex flex-col">
-      {/* SUB-HEADER / DARK BANNER */}
       <section className="bg-[#1c1d1f] text-white pt-8 px-6 md:px-12 border-b border-gray-800 shrink-0">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-serif font-black tracking-tight mb-8">
             Học tập
           </h2>
 
-          {/* Navigation Tabs */}
           <div className="flex items-center gap-6 overflow-x-auto scrollbar-none pb-0">
             <button
               onClick={() => setActiveTab("all_course")}
@@ -40,13 +38,11 @@ const LearningPage = () => {
         </div>
       </section>
 
-      {/* MAIN CONTENT AREA */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 md:px-12">
         {activeTab === "all_course" && <AllCoursesTab />}
         {activeTab === "my_course" && <MyListsTab />}
       </main>
 
-      {/* Animations */}
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }
