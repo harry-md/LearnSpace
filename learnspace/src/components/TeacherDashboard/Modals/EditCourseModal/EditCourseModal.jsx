@@ -91,7 +91,7 @@ const EditCourseModal = ({ open, onClose, course, categories, onSuccess }) => {
         payload: {
           show: true,
           title: "Lỗi",
-          message: `Cập nhật khóa học thất bại: ${err.response?.data?.message || err.message}`,
+          message: "Cập nhật khóa học thất bại!",
           actions: [
             {
               label: "Đóng",

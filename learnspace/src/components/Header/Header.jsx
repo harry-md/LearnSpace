@@ -43,7 +43,7 @@ const Header = () => {
       const res = await Apis.get(`${endpoints.courses}?kw=${keyword}`);
       setSearchData(res.data.results);
     } catch (err) {
-      console.log(err);
+      console.log("Đã có lỗi xảy ra!");
     }
   };
 

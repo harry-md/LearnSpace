@@ -18,7 +18,7 @@ const ChatMenu = ({ onClose }) => {
       const res = await authApis(user?.token).get(endpoints.chatContacts);
       setContacts(res.data);
     } catch (err) {
-      console.log("Lỗi lấy danh sách liên hệ", err);
+      console.log("Lỗi lấy danh sách liên hệ!");
     }
   };
 

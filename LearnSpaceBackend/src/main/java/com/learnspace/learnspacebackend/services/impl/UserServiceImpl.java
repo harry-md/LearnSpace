@@ -25,8 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -116,13 +114,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toProfileDto(userRepository.register(user));
     }
 
-    @Override
-    public List<UserProfileDto> getAllUsers(Map<String, String> params) {
-        return userRepository.getAllUsers(params).stream()
-                .map(userMapper::toProfileDto)
-                .toList();
-    }
-
     private void handleAvatarUpdate(User u, MultipartFile newAvatar) {
         if (newAvatar != null && !newAvatar.isEmpty()) {
             if (u.getAvatar() != null) {
@@ -160,5 +151,10 @@ public class UserServiceImpl implements UserService {
 
         userRepository.update(user);
         return userMapper.toProfileDto(user);
+    }
+
+    @Override
+    public int countAllUsers() {
+        return userRepository.countAllUser();
     }
 }

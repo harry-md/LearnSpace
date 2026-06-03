@@ -64,7 +64,7 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
       });
       console.log("Cập nhật thứ tự chương thành công!");
     } catch (err) {
-      console.error("Lỗi cập nhật thứ tự chương:", err);
+      console.error("Lỗi cập nhật thứ tự chương!");
     }
   };
 
@@ -108,7 +108,7 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
       );
       console.log("Cập nhật thứ tự bài học thành công!");
     } catch (err) {
-      console.error("Lỗi cập nhật thứ tự bài học:", err);
+      console.error("Lỗi cập nhật thứ tự bài học!");
     }
   };
 
@@ -142,7 +142,7 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
       await handleCreateLesson(showAddLesson, formData);
       setShowAddLesson(null);
     } catch (err) {
-      console.error(err);
+      console.error("Đã có lỗi xảy ra!");
     }
   };
   const updateLesson = async (lessonData) => {
@@ -157,7 +157,7 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
       await handleUpdateLesson(selectedLesson.id, formData);
       setShowEditLesson(false);
     } catch (err) {
-      console.error(err);
+      console.error("Đã có lỗi xảy ra!");
     }
   };
 

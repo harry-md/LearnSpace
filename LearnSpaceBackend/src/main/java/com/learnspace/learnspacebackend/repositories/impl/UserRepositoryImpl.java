@@ -9,7 +9,6 @@ import com.learnspace.learnspacebackend.repositories.UserRepository;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -19,9 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 @Transactional
@@ -65,42 +62,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> getAllUsers(Map<String, String> params) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<User> q = b.createQuery(User.class);
-
-        Root<User> root = q.from(User.class);
-        q.select(root);
-
-        if (params != null && !params.isEmpty()) {
-            List<Predicate> predicates = new ArrayList<>();
-
-            String kw = params.get("kw");
-            if (kw != null && !kw.trim().isEmpty()) {
-                Predicate p1 = b.like(root.get("username"), String.format("%%%s%%", kw));
-                Predicate p2 = b.like(root.get("email"), String.format("%%%s%%", kw));
-                Predicate p3 = b.like(root.get("fullName"), String.format("%%%s%%", kw));
-                predicates.add(b.or(p1, p2, p3));
-            }
-
-            String role = params.get("role");
-            if (role != null && !role.trim().isEmpty()) {
-                predicates.add(b.equal(root.get("role"), UserRole.valueOf(role)));
-            }
-
-            String active = params.get("active");
-            if (active != null && !active.trim().isEmpty()) {
-                predicates.add(b.equal(root.get("active"), active.equals("1")));
-            }
-
-            q.where(predicates.toArray(Predicate[]::new));
-        }
-
-        return session.createQuery(q).getResultList();
-    }
-
-    @Override
     public User getUserById(Integer id) {
         Session session = factory.getObject().getCurrentSession();
         return session.get(User.class, id);
@@ -133,5 +94,16 @@ public class UserRepositoryImpl implements UserRepository {
             return session.createQuery(q).getResultList();
         }
         return null;
+    }
+
+    @Override
+    public int countAllUser() {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Long> q = b.createQuery(Long.class);
+        Root<User> root = q.from(User.class);
+        q.select(b.count(root));
+
+        return session.createQuery(q).getSingleResult().intValue();
     }
 }
