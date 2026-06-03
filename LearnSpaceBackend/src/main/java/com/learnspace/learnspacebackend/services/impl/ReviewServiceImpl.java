@@ -15,7 +15,6 @@ import com.learnspace.learnspacebackend.services.ReviewService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +49,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         return PaginatedResponseMapper.toPaginatedResponseDto(
                 reviewRepository.countReviewsByCourse(courseId, params),
-                Integer.parseInt(params.get("page")),
+                Integer.parseInt(params.getOrDefault("page", "1")),
                 REVIEW_PAGE_SIZE,
                 results);
     }
@@ -65,7 +64,6 @@ public class ReviewServiceImpl implements ReviewService {
         return review.getStudent().getId().equals(student.getId());
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     @Override
     public ReviewDto addReview(int courseId, ReviewDto reviewDto) {
         Course course = courseRepository.getCourseById(courseId);
@@ -83,7 +81,6 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewMapper.toDto(review);
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     @Override
     public ReviewDto updateReview(int reviewId, ReviewDto reviewDto) {
         User currentUser = userRepository.getUserById(getLoggedInStudent().getId());

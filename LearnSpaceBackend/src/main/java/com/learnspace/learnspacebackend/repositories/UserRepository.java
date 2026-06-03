@@ -9,6 +9,8 @@ import java.util.Map;
 public interface UserRepository {
     User getUserByUsername(String username);
 
+    boolean authenticate(String username, String password);
+
     boolean checkUsernameExist(String username);
 
     User register(User u);

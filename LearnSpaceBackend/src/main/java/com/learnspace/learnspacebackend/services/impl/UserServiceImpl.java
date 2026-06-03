@@ -15,10 +15,7 @@ import com.learnspace.learnspacebackend.services.UserService;
 import com.learnspace.learnspacebackend.utils.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,12 +41,7 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Autowired
-    @Lazy
     private BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    @Lazy
-    private AuthenticationManager authenticationManager;
 
     @Autowired
     private CloudinaryService cloudinaryService;
@@ -58,7 +50,7 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.getUserByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException("Không tìm thấy người dùng với username");
+            throw new UsernameNotFoundException("Username không thấy");
         }
 
         Set<GrantedAuthority> authorities = new HashSet<>();
@@ -96,12 +88,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(UserLoginDto user) {
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(user.username(), user.password());
-
-        Authentication authenticatedToken = authenticationManager.authenticate(authentication);
-
-        CustomUserDetails principal = (CustomUserDetails) authenticatedToken.getPrincipal();
+        boolean isAuthenticated = userRepository.authenticate(user.username(), user.password());
+        if (!isAuthenticated) {
+            throw new AccessDeniedException("Thông tin đăng nhập sai");
+        }
+        CustomUserDetails principal = (CustomUserDetails) loadUserByUsername(user.username());
 
         String authority = principal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
