@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
-import com.learnspace.learnspacebackend.utils.NotHtml;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -22,7 +21,7 @@ public record LessonDto(
         @Size(max = 255, message = "Tựa đề bài học vượt quá độ dài cho phép")
         String title,
 
-        @Size(max = 255, message = "Nội dung bài học vượt quá độ dài cho phép") @NotHtml
+        @Size(max = 255, message = "Nội dung bài học vượt quá độ dài cho phép")
         String content,
 
         @JsonProperty(access = Access.READ_ONLY) String video,

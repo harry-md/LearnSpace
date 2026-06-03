@@ -32,7 +32,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                         "SELECT AVG(r.rating) FROM Review r WHERE r.course.id = :courseId",
                         Double.class)
                 .setParameter("courseId", courseId)
-                .getSingleResultOrNull();
+                .getSingleResult();
     }
 
     @Override
@@ -44,8 +44,11 @@ public class ReviewRepositoryImpl implements ReviewRepository {
             JOIN FETCH r.student s
             JOIN s.enrollments e
             JOIN r.course c
-            WHERE e.status IN ('ACTIVE', 'COMPLETED') AND c.id = :courseId AND e.course.id = :courseId
-            ORDER BY r.rating, r.createdAt
+            WHERE
+                e.status IN ('ACTIVE', 'COMPLETED')
+                AND c.id = :courseId
+                AND e.course.id = :courseId
+            ORDER BY r.rating DESC, r.createdAt DESC
             """;
 
         Query query = session.createQuery(hql, Review.class).setParameter("courseId", courseId);
@@ -75,5 +78,15 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         return session.createQuery(hql, Long.class)
                 .setParameter("courseId", courseId)
                 .getSingleResultOrNull();
+    }
+
+    @Override
+    public Review addOrUpdateReview(Review review) {
+        Session session = factory.getObject().getCurrentSession();
+        if (review.getId() == null) {
+            session.persist(review);
+            return review;
+        }
+        return session.merge(review);
     }
 }

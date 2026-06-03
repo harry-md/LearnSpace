@@ -38,13 +38,8 @@ public class User {
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "first_name", nullable = false)
-    private String firstName;
-
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "last_name", nullable = false)
-    private String lastName;
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
 
     @Size(max = 255)
     @NotNull
@@ -87,6 +82,14 @@ public class User {
         this.id = id;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -109,22 +112,6 @@ public class User {
 
     public void setRole(UserRole role) {
         this.role = role;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     public String getEmail() {
@@ -173,10 +160,6 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getFullName() {
-        return this.firstName + " " + this.lastName;
     }
 
     public Set<Enrollment> getEnrollments() {

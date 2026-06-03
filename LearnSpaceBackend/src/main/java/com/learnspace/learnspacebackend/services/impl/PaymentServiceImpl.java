@@ -2,7 +2,6 @@ package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.payment.*;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.PaymentMapper;
 import com.learnspace.learnspacebackend.pojo.*;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
@@ -65,9 +64,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         for (CartDto c : carts) {
             Course course = courseRepository.getCourseById(c.courseId());
-            if (course == null) {
-                throw new ResourceNotFoundException("Không tìm thấy khóa học #" + c.courseId());
-            }
 
             if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
                 throw new IllegalArgumentException(
@@ -157,10 +153,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public CaptureResponseDto capturePayment(String paypalOrderId) {
         List<Payment> payments = paymentRepository.getPaymentsByPaypalOrderId(paypalOrderId);
-        if (payments.isEmpty()) {
-            throw new ResourceNotFoundException(
-                    "Không tìm thấy payment cho PayPal order: " + paypalOrderId);
-        }
 
         CustomUserDetails principal = getLoggedInPrincipal();
         for (Payment payment : payments) {

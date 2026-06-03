@@ -6,9 +6,6 @@ import com.learnspace.learnspacebackend.dtos.user.UserLoginDto;
 import com.learnspace.learnspacebackend.dtos.user.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.user.UserRegisterDto;
 import com.learnspace.learnspacebackend.dtos.user.UserUpdateDto;
-import com.learnspace.learnspacebackend.exceptions.DuplicateResourceException;
-import com.learnspace.learnspacebackend.exceptions.InvalidLoginException;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.UserMapper;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
@@ -22,7 +19,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -79,18 +75,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileDto getUserByUsername(String username) {
-        User user = userRepository.getUserByUsername(username);
-        if (user == null) {
-            throw new ResourceNotFoundException("Không tìm thấy người dùng với username");
-        }
-        return userMapper.toProfileDto(user);
+        return userMapper.toProfileDto(userRepository.getUserByUsername(username));
     }
 
     @Override
     public UserProfileDto register(UserRegisterDto dto) {
-        if (userRepository.checkUsernameExist(dto.username())) {
-            throw new DuplicateResourceException("Username đã tồn tại");
-        }
 
         User user = userMapper.toEntity(dto);
 
@@ -106,28 +95,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(UserLoginDto user) {
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(user.username(), user.password());
+
+        Authentication authenticatedToken = authenticationManager.authenticate(authentication);
+
+        CustomUserDetails principal = (CustomUserDetails) authenticatedToken.getPrincipal();
+
+        String authority = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("ROLE_STUDENT")
+                .replace("ROLE_", "");
         try {
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(user.username(), user.password());
-
-            Authentication authenticatedToken = authenticationManager.authenticate(authentication);
-
-            CustomUserDetails principal = (CustomUserDetails) authenticatedToken.getPrincipal();
-
-            String authority = principal.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .findFirst()
-                    .orElse("ROLE_STUDENT")
-                    .replace("ROLE_", "");
-
             return jwtUtils.generateToken(
                     principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
-        } catch (AuthenticationException ex) {
-            System.err.println(ex.getMessage());
-            throw new InvalidLoginException();
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
-            throw new RuntimeException("Có lỗi khi tạo token");
+            throw new RuntimeException();
         }
     }
 
@@ -158,12 +143,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateByAdmin(AdminUserUpdateDto dto) {
         User user = userRepository.getUserById(dto.id());
-        if (user == null) {
-            throw new ResourceNotFoundException("Không tìm thấy user");
-        }
-
-        user.setFirstName(dto.firstName());
-        user.setLastName(dto.lastName());
+        user.setFullName(dto.fullName());
         user.setEmail(dto.email());
         user.setRole(dto.role());
         user.setActive(dto.active() != null ? dto.active() : false);
@@ -181,12 +161,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto) {
         User user = userRepository.getUserById(currentUserId);
-        if (user == null) {
-            throw new ResourceNotFoundException("Không tìm thấy user");
-        }
-
-        user.setFirstName(dto.firstName());
-        user.setLastName(dto.lastName());
+        user.setFullName(dto.fullName());
         user.setEmail(dto.email());
 
         handleAvatarUpdate(user, dto.avatar());
