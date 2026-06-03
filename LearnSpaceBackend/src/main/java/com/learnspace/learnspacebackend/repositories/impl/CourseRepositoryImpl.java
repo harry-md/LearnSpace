@@ -8,9 +8,9 @@ import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.pojo.Review;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 
+import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -19,7 +19,6 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -41,7 +40,7 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Value("${course.page_size}")
     private int COURSE_PAGE_SIZE;
 
-    private List<Predicate> buildPredicates(
+    private List<Predicate> filter(
             Map<String, String> params, CriteriaBuilder builder, Root<Course> root) {
         List<Predicate> predicates = new ArrayList<>();
         if (params == null) {
@@ -51,50 +50,37 @@ public class CourseRepositoryImpl implements CourseRepository {
         String kw = params.get("kw");
         if (kw != null && !kw.isBlank()) {
             predicates.add(builder.like(
-                    builder.lower(root.get("name")),
-                    String.format("%%%s%%", kw.trim().toLowerCase())));
+                    builder.lower(root.get("name")), String.format("%%%s%%", kw.trim())));
         }
 
         String fromPrice = params.get("fromPrice");
         if (fromPrice != null && !fromPrice.isBlank()) {
-            BigDecimal price = parsePrice(fromPrice);
-            if (price != null) {
-                predicates.add(builder.greaterThanOrEqualTo(root.get("price"), price));
-            }
+            BigDecimal price = new BigDecimal(fromPrice);
+            predicates.add(builder.greaterThanOrEqualTo(root.get("price"), price));
         }
 
         String toPrice = params.get("toPrice");
         if (toPrice != null && !toPrice.isBlank()) {
-            BigDecimal price = parsePrice(toPrice);
-            if (price != null) {
-                predicates.add(builder.lessThanOrEqualTo(root.get("price"), price));
-            }
+            BigDecimal price = new BigDecimal(toPrice);
+            predicates.add(builder.lessThanOrEqualTo(root.get("price"), price));
         }
 
         String categoryId = params.get("categoryId");
         if (categoryId != null && !categoryId.isBlank()) {
-            Integer id = parseId(categoryId);
-            if (id != null) {
-                predicates.add(builder.equal(root.get("category").get("id"), id));
-            }
+            Integer id = Integer.parseInt(categoryId);
+            predicates.add(builder.equal(root.get("category").get("id"), id));
         }
 
         String teacherId = params.get("teacherId");
         if (teacherId != null && !teacherId.isBlank()) {
-            Integer id = parseId(teacherId);
-            if (id != null) {
-                predicates.add(builder.equal(root.get("teacher").get("id"), id));
-            }
+            Integer id = Integer.parseInt(teacherId);
+            predicates.add(builder.equal(root.get("teacher").get("id"), id));
         }
 
         String teacherName = params.get("teacherName");
         if (teacherName != null && !teacherName.isBlank()) {
-            Expression<String> fullName = builder.concat(
-                    builder.concat(root.get("teacher").get("firstName"), " "),
-                    root.get("teacher").get("lastName"));
-            predicates.add(builder.like(
-                    builder.lower(fullName),
-                    String.format("%%%s%%", teacherName.trim().toLowerCase())));
+            predicates.add(builder.or(builder.like(
+                    root.get("teacher").get("fullName"), String.format("%%%s%%", teacherName))));
         }
 
         return predicates;
@@ -144,7 +130,7 @@ public class CourseRepositoryImpl implements CourseRepository {
                 chapterCountSubquery.getSelection(),
                 lessonCountSubquery.getSelection());
 
-        List<Predicate> predicates = buildPredicates(params, builder, root);
+        List<Predicate> predicates = filter(params, builder, root);
         if (!predicates.isEmpty()) {
             q.where(builder.and(predicates.toArray(Predicate[]::new)));
         }
@@ -153,7 +139,7 @@ public class CourseRepositoryImpl implements CourseRepository {
                 builder.desc(avgRatingSubquery.getSelection()),
                 builder.desc(enrollmentCountSubquery.getSelection()));
 
-        Query<Object[]> query = session.createQuery(q);
+        Query query = session.createQuery(q);
         if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
             int start = (page - 1) * COURSE_PAGE_SIZE;
@@ -169,31 +155,14 @@ public class CourseRepositoryImpl implements CourseRepository {
         CriteriaQuery<Long> q = builder.createQuery(Long.class);
         Root<Course> root = q.from(Course.class);
 
-        q.select(builder.countDistinct(root));
+        q.select(builder.count(root));
 
-        List<Predicate> predicates = buildPredicates(params, builder, root);
+        List<Predicate> predicates = filter(params, builder, root);
         if (!predicates.isEmpty()) {
             q.where(builder.and(predicates.toArray(Predicate[]::new)));
         }
 
-        Query<Long> query = session.createQuery(q);
-        return query.getSingleResultOrNull();
-    }
-
-    private BigDecimal parsePrice(String price) {
-        try {
-            return new BigDecimal(price);
-        } catch (NumberFormatException ex) {
-            return null;
-        }
-    }
-
-    private Integer parseId(String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return session.createQuery(q).getSingleResult();
     }
 
     @Override
@@ -203,28 +172,27 @@ public class CourseRepositoryImpl implements CourseRepository {
         CriteriaQuery<Course> q = builder.createQuery(Course.class);
 
         Root<Course> root = q.from(Course.class);
-        root.fetch("category", JoinType.INNER);
-        root.fetch("teacher", JoinType.INNER);
+        root.fetch("category");
+        root.fetch("teacher");
 
         Fetch<Course, Chapter> chaptersFetch = root.fetch("chapters", JoinType.LEFT);
         chaptersFetch.fetch("lessons", JoinType.LEFT);
 
         q.select(root).where(builder.equal(root.get("id"), courseId));
-        return session.createQuery(q).getSingleResultOrNull();
+        return session.createQuery(q).getSingleResult();
     }
 
     @Override
     public boolean existCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery("SELECT 1 FROM Course c WHERE c.id = :courseId", Integer.class)
-                        .setParameter("courseId", courseId)
-                        .setMaxResults(1)
-                        .getSingleResultOrNull()
-                != null;
+        session.createQuery("SELECT COUNT(c) FROM Course c WHERE c.id = :courseId", Long.class)
+                .setParameter("courseId", courseId)
+                .getSingleResult();
+        return true;
     }
 
     @Override
-    public Course createOrUpdate(Course course) {
+    public Course addOrUpdateCourse(Course course) {
         Session session = factory.getObject().getCurrentSession();
         if (course.getId() == null) {
             session.persist(course);

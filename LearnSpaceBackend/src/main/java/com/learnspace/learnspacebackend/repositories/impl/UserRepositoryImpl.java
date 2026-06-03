@@ -34,7 +34,7 @@ public class UserRepositoryImpl implements UserRepository {
         Session session = factory.getObject().getCurrentSession();
         return session.createQuery("FROM User WHERE username = :username", User.class)
                 .setParameter("username", username)
-                .getSingleResultOrNull();
+                .getSingleResult();
     }
 
     @Override
@@ -44,7 +44,7 @@ public class UserRepositoryImpl implements UserRepository {
                                 "SELECT 1 FROM User u WHERE u.username = :username", Integer.class)
                         .setParameter("username", username)
                         .setMaxResults(1)
-                        .getSingleResultOrNull()
+                        .getSingleResult()
                 != null;
     }
 
@@ -69,20 +69,15 @@ public class UserRepositoryImpl implements UserRepository {
 
             String kw = params.get("kw");
             if (kw != null && !kw.trim().isEmpty()) {
-                Predicate p1 = builder.like(root.get("username"), "%" + kw + "%");
-                Predicate p2 = builder.like(root.get("email"), "%" + kw + "%");
-                Predicate p3 = builder.like(root.get("firstName"), "%" + kw + "%");
-                Predicate p4 = builder.like(root.get("lastName"), "%" + kw + "%");
-                predicates.add(builder.or(p1, p2, p3, p4));
+                Predicate p1 = builder.like(root.get("username"), String.format("%%%s%%", kw));
+                Predicate p2 = builder.like(root.get("email"), String.format("%%%s%%", kw));
+                Predicate p3 = builder.like(root.get("fullName"), String.format("%%%s%%", kw));
+                predicates.add(builder.or(p1, p2, p3));
             }
 
             String role = params.get("role");
             if (role != null && !role.trim().isEmpty()) {
-                try {
-                    predicates.add(builder.equal(root.get("role"), UserRole.valueOf(role)));
-                } catch (IllegalArgumentException ex) {
-                    ex.printStackTrace();
-                }
+                predicates.add(builder.equal(root.get("role"), UserRole.valueOf(role)));
             }
 
             String active = params.get("active");

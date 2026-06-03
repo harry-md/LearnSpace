@@ -8,7 +8,6 @@ import com.learnspace.learnspacebackend.dtos.category.CategoryDto;
 import com.learnspace.learnspacebackend.dtos.chapter.ChapterDto;
 import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.dtos.user.SimpleUserDto;
-import com.learnspace.learnspacebackend.utils.NotHtml;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
@@ -29,7 +28,7 @@ public record CourseDto(
         @Pattern(regexp = "^[^<>]*$", message = "Tên khóa học không hợp lệ")
         String name,
 
-        @Size(max = 255, message = "Mô tả khóa học vượt quá độ dài cho phép") @NotHtml
+        @Size(max = 255, message = "Mô tả khóa học vượt quá độ dài cho phép")
         String description,
 
         @JsonProperty(access = Access.READ_ONLY) String image,

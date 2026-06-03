@@ -7,7 +7,6 @@ import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
 import com.learnspace.learnspacebackend.mappers.PaginatedResponseMapper;
@@ -28,7 +27,6 @@ import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -113,9 +111,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseDto getCourse(int courseId) {
         Course course = courseRepository.getCourseById(courseId);
-        if (course == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học");
-        }
 
         CourseDto dto = courseMapper.toDto(course);
         Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
@@ -124,14 +119,10 @@ public class CourseServiceImpl implements CourseService {
 
         Object p = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         CustomUserDetails principal = p.equals("anonymousUser") ? null : (CustomUserDetails) p;
-
         if (principal != null) {
             LessonProgress l = progressRepository.getLessonProgressByStudentAndCourse(
                     principal.getId(), courseId);
-
-            if (latestProgress == null) {
-                latestProgress = progressMapper.toDto(l);
-            }
+            latestProgress = progressMapper.toDto(l);
         }
 
         return new CourseDto(
@@ -167,7 +158,7 @@ public class CourseServiceImpl implements CourseService {
 
     private void verifyCourseOwner(Course course, User teacher) {
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này");
+            throw new RuntimeException("Bạn không phải giáo viên của course");
         }
     }
 
@@ -178,10 +169,6 @@ public class CourseServiceImpl implements CourseService {
 
         if (courseDto.categoryId() != null) {
             Category category = categoryRepository.getCateById(courseDto.categoryId());
-            if (category == null) {
-                throw new ResourceNotFoundException(
-                        "Không tìm thấy danh mục " + courseDto.categoryId());
-            }
             course.setCategory(category);
         }
 
@@ -205,7 +192,7 @@ public class CourseServiceImpl implements CourseService {
             course.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
 
-        Course savedCourse = courseRepository.createOrUpdate(course);
+        Course savedCourse = courseRepository.addOrUpdateCourse(course);
         return courseMapper.toDto(savedCourse);
     }
 
@@ -214,7 +201,7 @@ public class CourseServiceImpl implements CourseService {
     public CourseDto updateCourse(int id, CoursePatchDto courseDto) {
         Course existCourse = courseRepository.getCourseById(id);
         if (existCourse == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học cần cập nhật");
+            throw new IllegalArgumentException("Không tìm thấy khóa học cần cập nhật");
         }
 
         User teacher = getLoggedInTeacher();
@@ -225,8 +212,7 @@ public class CourseServiceImpl implements CourseService {
         if (courseDto.categoryId() != null) {
             Category category = categoryRepository.getCateById(courseDto.categoryId());
             if (category == null) {
-                throw new ResourceNotFoundException(
-                        "Không tìm thấy danh mục " + courseDto.categoryId());
+                throw new IllegalArgumentException("Không tìm thấy danh mục");
             }
             existCourse.setCategory(category);
         }
@@ -251,29 +237,29 @@ public class CourseServiceImpl implements CourseService {
             existCourse.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
 
-        return courseMapper.toDto(courseRepository.createOrUpdate(existCourse));
+        return courseMapper.toDto(courseRepository.addOrUpdateCourse(existCourse));
     }
 
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public void deleteCourse(int id) {
-        Course existCourse = courseRepository.getCourseById(id);
-        if (existCourse == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học để xóa");
+        Course course = courseRepository.getCourseById(id);
+        if (course == null) {
+            throw new IllegalArgumentException("Không tìm thấy khóa học");
         }
 
         User teacher = getLoggedInTeacher();
-        verifyCourseOwner(existCourse, teacher);
+        verifyCourseOwner(course, teacher);
 
         List<String> lessonVideoUrls = lessonRepository.getVideoUrlsByCourseId(id);
         r2Service.deleteVideos(lessonVideoUrls);
 
-        if (existCourse.getImage() != null) {
-            cloudinaryService.deleteImage(existCourse.getImage());
+        if (course.getImage() != null) {
+            cloudinaryService.deleteImage(course.getImage());
         }
 
-        if (existCourse.getIntroVideo() != null) {
-            cloudinaryService.deleteVideo(existCourse.getIntroVideo());
+        if (course.getIntroVideo() != null) {
+            cloudinaryService.deleteVideo(course.getIntroVideo());
         }
 
         courseRepository.deleteCourse(id);

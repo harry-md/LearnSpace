@@ -81,7 +81,7 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
         }
 
         q.select(root).where(builder.and(predicates.toArray(Predicate[]::new)));
-        return session.createQuery(q).getSingleResultOrNull();
+        return session.createQuery(q).getSingleResult();
     }
 
     @Override
@@ -111,6 +111,6 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
                                 + " AND e.status IN ('ACTIVE', 'COMPLETED')",
                         Long.class)
                 .setParameter("courseId", courseId)
-                .getSingleResultOrNull();
+                .getSingleResult();
     }
 }

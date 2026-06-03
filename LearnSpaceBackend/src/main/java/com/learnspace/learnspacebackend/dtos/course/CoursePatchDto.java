@@ -1,7 +1,6 @@
 package com.learnspace.learnspacebackend.dtos.course;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.learnspace.learnspacebackend.utils.NotHtml;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Pattern;
@@ -16,7 +15,7 @@ public record CoursePatchDto(
         @Pattern(regexp = "^[^<>]*$", message = "Tên khóa học không hợp lệ")
         String name,
 
-        @Size(max = 255, message = "Mô tả khóa học vượt quá độ dài cho phép") @NotHtml
+        @Size(max = 255, message = "Mô tả khóa học vượt quá độ dài cho phép")
         String description,
 
         @Digits(integer = 17, fraction = 2, message = "Giá tiền không đúng định dạng")

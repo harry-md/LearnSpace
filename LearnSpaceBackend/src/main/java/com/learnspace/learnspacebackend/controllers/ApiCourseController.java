@@ -42,8 +42,7 @@ public class ApiCourseController {
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
     public ResponseEntity<CourseDto> create(@Valid @ModelAttribute CourseDto courseDto) {
-        CourseDto saved = courseService.createCourse(courseDto);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        return new ResponseEntity<>(courseService.createCourse(courseDto), HttpStatus.CREATED);
     }
 
     @PatchMapping(
@@ -55,8 +54,7 @@ public class ApiCourseController {
     public ResponseEntity<CourseDto> update(
             @PathVariable("courseId") int courseId,
             @Valid @ModelAttribute CoursePatchDto courseDto) {
-        CourseDto updated = courseService.updateCourse(courseId, courseDto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(courseService.updateCourse(courseId, courseDto));
     }
 
     @DeleteMapping("/{courseId}")
