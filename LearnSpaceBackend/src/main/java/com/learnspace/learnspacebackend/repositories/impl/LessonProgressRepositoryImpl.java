@@ -7,6 +7,7 @@ import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 
@@ -55,16 +56,15 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<LessonProgress> q = b.createQuery(LessonProgress.class);
         Root<LessonProgress> root = q.from(LessonProgress.class);
-        root.fetch("lesson");
+        Fetch<LessonProgress, Lesson> lessonJoinFetch = root.fetch("lesson");
 
-        Join<LessonProgress, Lesson> lessonJoin = root.join("lesson");
+        Join<LessonProgress, Lesson> lessonJoin = (Join<LessonProgress, Lesson>) lessonJoinFetch;
         Join<Lesson, Chapter> chapterJoin = lessonJoin.join("chapter");
         q.select(root)
                 .where(
                         b.equal(root.get("student").get("id"), studentId),
                         b.equal(chapterJoin.get("course").get("id"), courseId))
                 .orderBy(b.desc(root.get("updatedAt")), b.desc(root.get("id")));
-
         return session.createQuery(q).setMaxResults(1).getSingleResult();
     }
 }

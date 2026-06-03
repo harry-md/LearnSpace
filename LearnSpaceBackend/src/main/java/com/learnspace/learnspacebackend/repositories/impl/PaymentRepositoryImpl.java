@@ -51,10 +51,10 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     @Override
     public Payment getPaymentByEnrollmentId(int enrollmentId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "FROM Payment p WHERE p.enrollment.id = :enrollmentId", Payment.class)
-                .setParameter("enrollmentId", enrollmentId)
-                .setMaxResults(1)
-                .getSingleResult();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Payment> q = b.createQuery(Payment.class);
+        Root<Payment> root = q.from(Payment.class);
+        q.select(root).where(b.equal(root.get("enrollment").get("id"), enrollmentId));
+        return session.createQuery(q).getSingleResult();
     }
 }

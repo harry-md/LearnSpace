@@ -61,7 +61,7 @@ const Login = () => {
       const res = await authApis(token).get(endpoints.currentUser);
       return res.data;
     } catch (err) {
-      console.log(err);
+      console.log("Đã có lỗi xảy ra!");
     }
   };
 

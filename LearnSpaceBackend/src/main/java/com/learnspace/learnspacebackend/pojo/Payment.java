@@ -26,7 +26,7 @@ public class Payment {
 
     @NotNull
     @ColumnDefault("0.00")
-    @Column(name = "vnd_amount", nullable = false, precision = 19, scale = 2)
+    @Column(name = "amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
 
     @ColumnDefault("'PENDING'")

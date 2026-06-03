@@ -73,7 +73,7 @@ const SearchResult = () => {
       setTotalCount(res.data.count);
       setCurrentPage(page);
     } catch (err) {
-      console.log(err);
+      console.error("Đã có lỗi xảy ra!");
     } finally {
       setLoading(false);
     }

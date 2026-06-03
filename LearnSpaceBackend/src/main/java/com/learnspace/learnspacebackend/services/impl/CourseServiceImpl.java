@@ -37,8 +37,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
-@Service
 @Transactional
+@Service
 public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseRepository courseRepository;
@@ -122,7 +122,7 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.getCourseById(courseId);
 
         CourseDto dto = courseMapper.toDto(course);
-        Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
+        Double avgRating = reviewRepository.getAverageRatingByCourse(courseId);
         Long enrollCount = enrollmentRepository.countEnrollments(courseId);
         LessonProgressDto latestProgress = null;
 
@@ -213,9 +213,6 @@ public class CourseServiceImpl implements CourseService {
 
         if (courseDto.categoryId() != null) {
             Category category = categoryRepository.getCateById(courseDto.categoryId());
-            if (category == null) {
-                throw new IllegalArgumentException("Không tìm thấy danh mục");
-            }
             existCourse.setCategory(category);
         }
 

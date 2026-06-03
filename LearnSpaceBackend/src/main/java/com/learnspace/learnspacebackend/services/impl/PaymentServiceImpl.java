@@ -67,16 +67,17 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public CheckoutDto checkout(List<CartDto> carts) throws StripeException {
         if (carts == null || carts.isEmpty()) {
-            throw new IllegalArgumentException("Giỏ hàng trống");
+            throw new RuntimeException("Giỏ hàng trống");
         }
         CustomUserDetails principal = getLoggedInPrincipal();
         User student = userRepository.getUserById(principal.getId());
         BigDecimal totalAmount = BigDecimal.ZERO;
+
         List<Payment> payments = new ArrayList<>();
         for (CartDto c : carts) {
             Course course = courseRepository.getCourseById(c.courseId());
             if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
-                throw new IllegalArgumentException("Khóa học miễn phí, không cần thanh toán");
+                throw new RuntimeException("Khóa học miễn phí, không cần thanh toán");
             }
 
             Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
@@ -85,8 +86,7 @@ public class PaymentServiceImpl implements PaymentService {
             if (enrollment != null) {
                 if (enrollment.getStatus() == EnrollmentStatus.ACTIVE
                         || enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
-                    throw new IllegalArgumentException(
-                            "Bạn đã đăng ký khóa học " + course.getName() + " rồi");
+                    throw new RuntimeException("Đã đăng ký khóa học " + course.getName() + " rồi");
                 }
                 enrollment.setStatus(EnrollmentStatus.PENDING);
                 enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
@@ -107,7 +107,7 @@ public class PaymentServiceImpl implements PaymentService {
             totalAmount = totalAmount.add(course.getPrice());
             payments.add(payment);
         }
-        String description = "Thanh toán " + carts.size() + " khóa học trên LearnSpace";
+        String description = "Thanh toán khóa học trên LearnSpace";
         Session session = stripeService.createCheckoutSession(totalAmount, description);
         String sessionId = session.getId();
         String checkoutUrl = session.getUrl();
@@ -127,7 +127,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (event.getType().equals("checkout.session.completed")) {
             Session session =
                     (Session) event.getDataObjectDeserializer().getObject().orElse(null);
-            if (session != null && "paid".equals(session.getPaymentStatus())) {
+            if (session != null && session.getPaymentStatus().equals("paid")) {
                 List<Payment> payments =
                         paymentRepository.getPaymentsByStripeSessionId(session.getId());
                 if (!payments.isEmpty()) {

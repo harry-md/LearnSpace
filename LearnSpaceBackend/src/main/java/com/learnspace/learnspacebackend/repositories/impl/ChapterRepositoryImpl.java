@@ -81,7 +81,6 @@ public class ChapterRepositoryImpl implements ChapterRepository {
                 .groupBy(courseJoin);
 
         List<Object[]> results = session.createQuery(q).getResultList();
-
         return results.stream()
                 .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
     }

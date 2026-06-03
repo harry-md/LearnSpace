@@ -22,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
 @Transactional
+@Service
 public class ChapterServiceImpl implements ChapterService {
     @Autowired
     private ChapterRepository chapterRepository;

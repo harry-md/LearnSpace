@@ -100,7 +100,7 @@ const ChatWindow = ({ chatData }) => {
         senderAvatar: currentUser.avatar || "https://placehold.co/100",
       });
     } catch (error) {
-      console.error("Lỗi khi gửi tin nhắn", error);
+      console.error("Lỗi khi gửi tin nhắn");
     }
   };
 

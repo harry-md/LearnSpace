@@ -32,7 +32,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
         setIsAuthorized(hasRequiredRole);
       } catch (error) {
-        console.error("Lỗi giải mã token:", error);
+        console.error("Lỗi giải mã token!");
         setIsAuthorized(false);
       }
     };

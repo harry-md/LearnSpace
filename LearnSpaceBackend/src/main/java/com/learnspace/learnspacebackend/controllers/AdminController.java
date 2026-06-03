@@ -1,10 +1,7 @@
 package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.user.AdminUserUpdateDto;
-import com.learnspace.learnspacebackend.services.CategoryService;
-import com.learnspace.learnspacebackend.services.CourseService;
-import com.learnspace.learnspacebackend.services.EnrollmentService;
-import com.learnspace.learnspacebackend.services.UserService;
+import com.learnspace.learnspacebackend.services.*;
 
 import jakarta.validation.Valid;
 
@@ -18,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.Year;
 import java.util.Map;
 
 @Controller
@@ -35,10 +33,22 @@ public class AdminController {
     @Autowired
     private CourseService courseService;
 
+    @Autowired
+    private StatsService statsService;
+
     @GetMapping()
-    public String admin(Model model) {
+    public String admin(Model model, @RequestParam(value = "year", required = false) Integer year) {
         model.addAttribute("totalUsers", userService.countAllUsers());
         model.addAttribute("totalCourses", courseService.countCourses(null));
+        model.addAttribute("totalIncome", statsService.getTotalIncome());
+
+        int targetYear = (year != null) ? year : Year.now().getValue();
+
+        model.addAttribute("monthlyIncome", statsService.getIncomeByAllMonths(targetYear));
+        model.addAttribute("quarterlyIncome", statsService.getIncomeByAllQuarter(targetYear));
+
+        model.addAttribute("selectedYear", targetYear);
+
         return "admin";
     }
 
