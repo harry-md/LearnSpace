@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -128,7 +127,8 @@ public class CourseServiceImpl implements CourseService {
         Object p = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         CustomUserDetails principal = p.equals("anonymousUser") ? null : (CustomUserDetails) p;
         if (principal != null) {
-            LessonProgress l = progressRepository.getLessonProgressByStudentAndCourse(principal.getId(), courseId);
+            LessonProgress l = progressRepository.getLessonProgressByStudentAndCourse(
+                    principal.getId(), courseId);
             latestProgress = progressMapper.toDto(l);
         }
 
@@ -271,7 +271,8 @@ public class CourseServiceImpl implements CourseService {
         List<Integer> courseIds = courses.stream().map(Course::getId).toList();
         Map<Integer, Long> chapterCounts = chapterRepository.countChapters(courseIds);
         Map<Integer, Long> lessonCounts = lessonRepository.countLessons(courseIds);
-        Map<Integer, Long> completedCounts = progressRepository.countCompletedLessons(principal.getId(), courseIds);
+        Map<Integer, Long> completedCounts =
+                progressRepository.countCompletedLessons(principal.getId(), courseIds);
 
         return courses.stream()
                 .map(c -> {

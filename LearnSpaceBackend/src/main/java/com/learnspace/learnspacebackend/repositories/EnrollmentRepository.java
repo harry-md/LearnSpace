@@ -3,7 +3,6 @@ package com.learnspace.learnspacebackend.repositories;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +13,8 @@ public interface EnrollmentRepository {
 
     Enrollment addOrUpdateEnrollment(Enrollment enrollment);
 
-    Enrollment getEnrollmentByStudentAndCourse(int studentId, int courseId, EnrollmentStatus... status);
+    Enrollment getEnrollmentByStudentAndCourse(
+            int studentId, int courseId, EnrollmentStatus... status);
 
     Long countEnrollments(int courseId);
 

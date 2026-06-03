@@ -15,7 +15,7 @@ import com.learnspace.learnspacebackend.services.ReviewService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +50,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         return PaginatedResponseMapper.toPaginatedResponseDto(
                 reviewRepository.countReviewsByCourse(courseId, params),
-                Integer.parseInt(params.get("page")),
+                Integer.parseInt(params.getOrDefault("page", "1")),
                 REVIEW_PAGE_SIZE,
                 results);
     }
@@ -61,37 +61,29 @@ public class ReviewServiceImpl implements ReviewService {
         return userRepository.getUserById(principal.getId());
     }
 
-    private boolean verifyReviewOwner(Review review, User student) {
+    private boolean checkReviewOwner(Review review, User student) {
         return review.getStudent().getId().equals(student.getId());
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     @Override
     public ReviewDto addReview(int courseId, ReviewDto reviewDto) {
         Course course = courseRepository.getCourseById(courseId);
-        if (course == null) throw new RuntimeException("Khóa học không tồn tại");
-
         User user = userRepository.getUserById(getLoggedInStudent().getId());
-        if (user == null) throw new RuntimeException("Người dùng không tồn tại");
 
         Review review = reviewMapper.toEntity(reviewDto);
         review.setCourse(course);
         review.setStudent(user);
 
         reviewRepository.addOrUpdateReview(review);
-
         return reviewMapper.toDto(review);
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
     @Override
     public ReviewDto updateReview(int reviewId, ReviewDto reviewDto) {
         User currentUser = userRepository.getUserById(getLoggedInStudent().getId());
         Review review = reviewRepository.getReviewById(reviewId);
-        if (review == null) throw new RuntimeException("Đánh giá không tồn tại");
-        if (!verifyReviewOwner(review, currentUser))
-            throw new RuntimeException("Bạn không có quyền chỉnh sửa đánh giá này");
-
+        if (!checkReviewOwner(review, currentUser))
+            throw new AccessDeniedException("Bạn không có quyền");
         return null;
     }
 

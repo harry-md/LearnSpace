@@ -3,6 +3,7 @@ package com.learnspace.learnspacebackend.controllers;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
+import com.learnspace.learnspacebackend.dtos.user.SimpleUserDto;
 import com.learnspace.learnspacebackend.services.ChatService;
 import com.learnspace.learnspacebackend.services.UserService;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,7 +45,7 @@ public class ApiChatController {
     }
 
     @GetMapping("/contacts")
-    public ResponseEntity<?> getChatContacts(
+    public ResponseEntity<List<SimpleUserDto>> getChatContacts(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         return ResponseEntity.ok(chatService.getContactsEnrolled(currentUser.getId()));
     }

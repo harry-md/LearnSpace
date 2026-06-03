@@ -56,14 +56,16 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 
         Fetch<Review, User> studentJoinFetch = root.fetch("student");
         Join<Review, User> userJoin = (Join<Review, User>) studentJoinFetch;
-        Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollment");
+        Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollments");
 
         q.select(root)
                 .where(
-                        b.equal(root.get("course"), courseId),
-                        enrollmentJoin.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+                        b.equal(root.get("course").get("id"), courseId),
+                        enrollmentJoin
+                                .get("status")
+                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
 
-        Query query = session.createQuery(q).setParameter("courseId", courseId);
+        Query query = session.createQuery(q);
         if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
             int start = (page - 1) * REVIEW_PAGE_SIZE;
@@ -81,12 +83,14 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         Root<Review> root = q.from(Review.class);
 
         Join<Review, User> userJoin = root.join("student");
-        Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollment");
+        Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollments");
 
         q.select(b.count(root))
                 .where(
                         b.equal(root.get("course").get("id"), courseId),
-                        enrollmentJoin.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+                        enrollmentJoin
+                                .get("status")
+                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
         return session.createQuery(q).getSingleResult();
     }
 
@@ -103,7 +107,8 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                 .groupBy(courseJoin);
 
         List<Object[]> results = session.createQuery(q).getResultList();
-        return results.stream().collect(Collectors.toMap(row -> (Integer) row[0], row -> (Double) row[1]));
+        return results.stream()
+                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Double) row[1]));
     }
 
     @Override

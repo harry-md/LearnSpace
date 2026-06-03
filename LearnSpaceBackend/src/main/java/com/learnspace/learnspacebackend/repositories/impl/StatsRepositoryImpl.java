@@ -59,7 +59,8 @@ public class StatsRepositoryImpl implements StatsRepository {
 
         Root<Payment> root = q.from(Payment.class);
 
-        q.multiselect(b.function(time, Integer.class, root.get("createdAt")), b.sum(root.get("amount")));
+        q.multiselect(
+                b.function(time, Integer.class, root.get("createdAt")), b.sum(root.get("amount")));
 
         q.where(
                 b.equal(root.get("status"), "COMPLETED"),

@@ -188,7 +188,8 @@ public class LessonServiceImpl implements LessonService {
 
                 r2Service.validateMp4File(tmpFile);
 
-                String videoUrl = r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");
+                String videoUrl =
+                        r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");
                 int videoLength = r2Service.getVideoLength(tmpFile);
 
                 lesson.setVideo(videoUrl);
@@ -206,7 +207,8 @@ public class LessonServiceImpl implements LessonService {
 
         Lesson updatedLesson = lessonRepository.addOrUpdateLesson(lesson);
 
-        if (lessonDto != null && (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null)) {
+        if (lessonDto != null
+                && (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null)) {
             checkAndReorderLesson(lesson.getChapter().getId());
         }
 
