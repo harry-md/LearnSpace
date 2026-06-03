@@ -50,15 +50,12 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
         root.fetch("student");
 
         q.select(root)
-                .where(
-                        builder.equal(root.get("id"), id),
-                        root.get("status").in("ACTIVE", "COMPLETED"));
+                .where(builder.equal(root.get("id"), id), root.get("status").in("ACTIVE", "COMPLETED"));
         return session.createQuery(q).getSingleResultOrNull();
     }
 
     @Override
-    public Enrollment getEnrollmentByStudentAndCourse(
-            int studentId, int courseId, EnrollmentStatus... status) {
+    public Enrollment getEnrollmentByStudentAndCourse(int studentId, int courseId, EnrollmentStatus... status) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
@@ -73,8 +70,8 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
 
         if (status != null && status.length > 0) {
             CriteriaBuilder.In<EnrollmentStatus> statusBuilder = builder.in(root.get("status"));
-            for (EnrollmentStatus status : status) {
-                statusBuilder.value(status);
+            for (EnrollmentStatus s : status) {
+                statusBuilder.value(s);
             }
             predicates.add(statusBuilder);
         }
