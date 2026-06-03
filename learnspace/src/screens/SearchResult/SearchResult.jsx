@@ -183,7 +183,7 @@ const SearchResult = () => {
             <div className="flex items-center gap-2 mb-3">
               <div className="flex-1">
                 <label className="block text-[11px] font-semibold text-gray-500 mb-1">
-                  Từ (VNĐ)
+                  Từ
                 </label>
                 <input
                   type="number"
@@ -201,7 +201,7 @@ const SearchResult = () => {
               <span className="text-gray-400 mt-5">-</span>
               <div className="flex-1">
                 <label className="block text-[11px] font-semibold text-gray-500 mb-1">
-                  Đến (VNĐ)
+                  Đến
                 </label>
                 <input
                   type="number"

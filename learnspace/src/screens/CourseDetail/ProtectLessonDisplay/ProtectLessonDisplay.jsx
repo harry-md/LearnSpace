@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
 import { UserContext, UIContext } from "@/configs/Context";
-import Comments from "./Comments/Comments";
 import useLessonProcess from "@/hooks/useLessonProcess";
 
 const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
@@ -245,15 +244,9 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 rounded-lg px-3 py-2">
-                      <ShieldCheck size={14} className="text-emerald-500" />
-                      <span className="font-semibold">Bản quyền bảo vệ</span>
-                    </div>
                   </div>
                 </div>
               </div>
-
-              <Comments />
             </>
           )}
         </div>
