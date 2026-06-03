@@ -14,10 +14,7 @@ import java.time.LocalDateTime;
 public record ReviewDto(
         @JsonProperty(access = Access.READ_ONLY) SimpleUserDto student,
 
-        @NotNull(message = "Không được để trống điểm đánh giá")
-        @Min(value = 1, message = "Comment phải từ 1 đến 5 điểm")
-        @Max(value = 5, message = "Comment phải từ 1 đến 5 điểm")
-        Integer rating,
+        @NotNull @Min(value = 1) @Max(value = 5) Integer rating,
 
         String comment,
 

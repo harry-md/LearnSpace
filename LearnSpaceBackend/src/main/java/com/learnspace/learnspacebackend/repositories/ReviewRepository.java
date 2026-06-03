@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface ReviewRepository {
-    Double getAverageRatingByCourseId(int courseId);
+    Double getAverageRatingByCourse(int courseId);
 
     List<Review> getReviewsByCourse(int courseId, Map<String, String> params);
+
+    Map<Integer, Double> avgRatings(List<Integer> courseIds);
 
     Long countReviewsByCourse(int courseId, Map<String, String> params);
 

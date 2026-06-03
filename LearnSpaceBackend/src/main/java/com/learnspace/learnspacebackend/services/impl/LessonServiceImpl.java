@@ -18,7 +18,6 @@ import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,7 +60,7 @@ public class LessonServiceImpl implements LessonService {
     private void verifyCourseOwner(Course course) {
         User teacher = getLoggedInTeacher();
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện hành động này");
+            throw new AccessDeniedException("Không có quyền");
         }
     }
 
@@ -79,7 +78,7 @@ public class LessonServiceImpl implements LessonService {
         }
 
         if (!enrollmentRepository.checkValidEnrollment(principal.getId(), course.getId())) {
-            throw new AccessDeniedException("Bạn cần mua khóa học này để xem bài học");
+            throw new RuntimeException();
         }
     }
 
@@ -98,13 +97,12 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public LessonDto createLesson(int chapterId, LessonDto lessonDto) {
         Chapter chapter = chapterRepository.getChapterById(chapterId);
         verifyCourseOwner(chapter.getCourse());
 
         if (lessonDto.videoFile() == null || lessonDto.videoFile().isEmpty()) {
-            throw new IllegalArgumentException("Tạo bài học phải có video");
+            throw new RuntimeException();
         }
 
         MultipartFile videoFile = lessonDto.videoFile();
@@ -167,7 +165,6 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         verifyCourseOwner(lesson.getChapter().getCourse());
@@ -221,7 +218,6 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public void deleteLesson(int lessonId) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         verifyCourseOwner(lesson.getChapter().getCourse());

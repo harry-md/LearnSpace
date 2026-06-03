@@ -79,7 +79,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileDto register(UserRegisterDto dto) {
-
+        if (userRepository.checkUsernameExist(dto.username())) {
+            throw new RuntimeException();
+        }
         User user = userMapper.toEntity(dto);
 
         user.setPassword(passwordEncoder.encode(dto.password()));

@@ -25,13 +25,14 @@ public class ApiPaymentController {
     public ResponseEntity<?> checkout(@RequestBody @Valid List<CartDto> cartItems) {
         try {
             return new ResponseEntity<>(paymentService.checkout(cartItems), HttpStatus.CREATED);
-        } catch (IllegalArgumentException ex) {
-            return new ResponseEntity<>(
-                    Collections.singletonMap("checkout", ex.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (StripeException ex) {
             return new ResponseEntity<>(
                     Collections.singletonMap("stripe", "Lỗi thanh toán Stripe"),
                     HttpStatus.BAD_REQUEST);
+        } catch (RuntimeException ex) {
+            System.err.println(ex.getMessage());
+            return new ResponseEntity<>(
+                    Collections.singletonMap("checkout", "Có lỗi xảy ra"), HttpStatus.BAD_REQUEST);
         }
     }
 
