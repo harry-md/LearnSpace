@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class JwtFilter implements Filter {
-
     @Autowired
     private JwtUtils jwtUtils;
 

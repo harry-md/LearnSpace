@@ -5,7 +5,6 @@ import com.learnspace.learnspacebackend.pojo.Chapter;
 import java.util.List;
 
 public interface ChapterRepository {
-
     Chapter getChapterById(int chapterId);
 
     boolean existChapter(int chapterId);

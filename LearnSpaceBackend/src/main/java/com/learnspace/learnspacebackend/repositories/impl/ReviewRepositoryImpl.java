@@ -18,7 +18,6 @@ import java.util.Map;
 @Repository
 @Transactional
 public class ReviewRepositoryImpl implements ReviewRepository {
-
     @Value("${review.page_size}")
     private int REVIEW_PAGE_SIZE;
 

@@ -1,6 +1,5 @@
 package com.learnspace.learnspacebackend.configs;
 
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +22,6 @@ import org.springframework.web.servlet.config.annotation.*;
             "com.learnspace.learnspacebackend.filters",
         })
 public class WebAppContextConfigs implements WebMvcConfigurer {
-
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable();

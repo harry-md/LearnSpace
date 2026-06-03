@@ -34,7 +34,6 @@ import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
-
     @Autowired
     private UserRepository userRepository;
 
@@ -105,7 +104,7 @@ public class UserServiceImpl implements UserService {
         String authority = principal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .findFirst()
-                .orElse("ROLE_STUDENT")
+                .orElse("ROLE_STUTDENT")
                 .replace("ROLE_", "");
         try {
             return jwtUtils.generateToken(

@@ -6,9 +6,7 @@ import com.learnspace.learnspacebackend.pojo.Review;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(
-        componentModel = "spring",
-        uses = {UserMapper.class})
+@Mapper(componentModel = "spring")
 public interface ReviewMapper {
 
     @Mapping(target = "id", ignore = true)

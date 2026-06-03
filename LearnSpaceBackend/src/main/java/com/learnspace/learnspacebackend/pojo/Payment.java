@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "payment")
 public class Payment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -27,23 +26,8 @@ public class Payment {
 
     @NotNull
     @ColumnDefault("0.00")
-    @Column(name = "usd_amount", nullable = false, precision = 19, scale = 2)
-    private BigDecimal usdAmount;
-
-    @NotNull
-    @ColumnDefault("0.00")
     @Column(name = "vnd_amount", nullable = false, precision = 19, scale = 2)
-    private BigDecimal vndAmount;
-
-    @Size(max = 3)
-    @ColumnDefault("'USD'")
-    @Column(name = "currency", length = 10)
-    private String currency = "USD";
-
-    @Size(max = 3)
-    @ColumnDefault("'VND'")
-    @Column(name = "original_currency", length = 10)
-    private String originalCurrency = "VND";
+    private BigDecimal amount;
 
     @ColumnDefault("'PENDING'")
     @Enumerated(EnumType.STRING)
@@ -51,12 +35,12 @@ public class Payment {
     private PaymentStatus status;
 
     @Size(max = 100)
-    @Column(name = "paypal_order_id", length = 100)
-    private String paypalOrderId;
+    @Column(name = "stripe_session_id", length = 100)
+    private String stripeSessionId;
 
     @Size(max = 100)
-    @Column(name = "paypal_capture_id", length = 100)
-    private String paypalCaptureId;
+    @Column(name = "stripe_payment_intent_id", length = 100)
+    private String stripePaymentIntentId;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -84,38 +68,6 @@ public class Payment {
         this.enrollment = enrollment;
     }
 
-    public BigDecimal getUsdAmount() {
-        return usdAmount;
-    }
-
-    public void setUsdAmount(BigDecimal usdAmount) {
-        this.usdAmount = usdAmount;
-    }
-
-    public BigDecimal getVndAmount() {
-        return vndAmount;
-    }
-
-    public void setVndAmount(BigDecimal vndAmount) {
-        this.vndAmount = vndAmount;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public String getOriginalCurrency() {
-        return originalCurrency;
-    }
-
-    public void setOriginalCurrency(String originalCurrency) {
-        this.originalCurrency = originalCurrency;
-    }
-
     public PaymentStatus getStatus() {
         return status;
     }
@@ -124,20 +76,20 @@ public class Payment {
         this.status = status;
     }
 
-    public String getPaypalOrderId() {
-        return paypalOrderId;
+    public String getStripeSessionId() {
+        return stripeSessionId;
     }
 
-    public void setPaypalOrderId(String paypalOrderId) {
-        this.paypalOrderId = paypalOrderId;
+    public void setStripeSessionId(String paypalOrderId) {
+        this.stripeSessionId = paypalOrderId;
     }
 
-    public String getPaypalCaptureId() {
-        return paypalCaptureId;
+    public String getStripePaymentIntentId() {
+        return stripePaymentIntentId;
     }
 
-    public void setPaypalCaptureId(String paypalCaptureId) {
-        this.paypalCaptureId = paypalCaptureId;
+    public void setStripePaymentIntentId(String paypalCaptureId) {
+        this.stripePaymentIntentId = paypalCaptureId;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -154,5 +106,13 @@ public class Payment {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 }

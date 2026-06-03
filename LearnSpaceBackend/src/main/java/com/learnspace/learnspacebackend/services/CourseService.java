@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface CourseService {
-
     PaginatedResponseDto<CourseListDto> getCourses(Map<String, String> params);
 
     Long countCourses(Map<String, String> params);

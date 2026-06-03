@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LessonProgressServiceImpl implements LessonProgressService {
-
     @Autowired
     private LessonProgressRepository lessonProgressRepository;
 

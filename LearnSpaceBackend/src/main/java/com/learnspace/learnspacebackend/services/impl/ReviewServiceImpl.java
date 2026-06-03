@@ -41,8 +41,6 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private CourseRepository courseRepository;
 
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
 
     @Override
     public PaginatedResponseDto<ReviewDto> getReviewsByCourse(int courseId, Map<String, String> params) {
@@ -92,12 +90,10 @@ public class ReviewServiceImpl implements ReviewService {
         User currentUser = userRepository.getUserById(getLoggedInStudent().getId());
         Review review = reviewRepository.getReviewById(reviewId);
         if (review == null) throw new RuntimeException("Đánh giá không tồn tại");
-        if (!verifyReviewOwner(review, currentUser))
-            throw new RuntimeException("Bạn không có quyền chỉnh sửa đánh giá này");
-        if (reviewDto.rating() != null) review.setRating(reviewDto.rating());
-        if (reviewDto.comment() != null) review.setComment(reviewDto.comment());
+        if(!verifyReviewOwner(review, currentUser)) throw new RuntimeException("Bạn không có quyền chỉnh sửa đánh giá này");
 
-        return reviewMapper.toDto(reviewRepository.addOrUpdateReview(review));
+        
+        return null;
     }
 
     @Override

@@ -25,7 +25,6 @@ import java.util.Map;
 @Repository
 @Transactional
 public class UserRepositoryImpl implements UserRepository {
-
     @Autowired
     private LocalSessionFactoryBean factory;
 

@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 @Service
 @Transactional
 public class EnrollmentServiceImpl implements EnrollmentService {
-
     @Autowired
     private UserRepository userRepository;
 

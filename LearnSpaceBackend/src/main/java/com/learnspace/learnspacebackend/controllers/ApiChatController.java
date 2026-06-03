@@ -23,7 +23,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/chat")
 public class ApiChatController {
-
     @Autowired
     private UserService userService;
 
