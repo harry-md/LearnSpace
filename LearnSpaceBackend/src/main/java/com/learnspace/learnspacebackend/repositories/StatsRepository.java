@@ -1,3 +1,8 @@
 package com.learnspace.learnspacebackend.repositories;
 
-public interface StatsRepository {}
+import java.util.List;
+
+public interface StatsRepository {
+
+    List<Object[]> statsEnrollmentByCourse();
+}

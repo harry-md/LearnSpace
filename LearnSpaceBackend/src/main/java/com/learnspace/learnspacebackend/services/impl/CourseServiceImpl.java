@@ -31,14 +31,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
 @Service
-@Transactional
 public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseRepository courseRepository;
@@ -268,22 +266,28 @@ public class CourseServiceImpl implements CourseService {
     public List<MyCourseListDto> getEnrolledCourses() {
         CustomUserDetails principal = (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<Course> courses = courseRepository.getEnrolledCoursesByStudent(principal.getId());
 
-        return courseRepository.getEnrolledCoursesByStudent(principal.getId()).stream()
-                .map(row -> {
-                    Course course = (Course) row[0];
-                    Long chapterCount = (Long) row[1];
-                    Long lessonCount = (Long) row[2];
-                    Long completedCount = (Long) row[3];
-                    CourseListDto base = courseMapper.toListDto(course);
+        List<Integer> courseIds = courses.stream().map(Course::getId).toList();
+        Map<Integer, Long> chapterCounts = chapterRepository.countChapters(courseIds);
+        Map<Integer, Long> lessonCounts = lessonRepository.countLessons(courseIds);
+        Map<Integer, Long> completedCounts =
+                progressRepository.countCompletedLessons(principal.getId(), courseIds);
 
+        return courses.stream()
+                .map(c -> {
+                    Long chapterCount = chapterCounts.getOrDefault(c.getId(), 0L);
+                    Long lessonCount = lessonCounts.getOrDefault(c.getId(), 0L);
+                    Long completedCount = completedCounts.getOrDefault(c.getId(), 0L);
+
+                    CourseListDto course = courseMapper.toListDto(c);
                     return new MyCourseListDto(
-                            base.id(),
-                            base.name(),
-                            base.image(),
-                            base.price(),
-                            base.category(),
-                            base.teacher(),
+                            course.id(),
+                            course.name(),
+                            course.image(),
+                            course.price(),
+                            course.category(),
+                            course.teacher(),
                             chapterCount,
                             lessonCount,
                             completedCount);

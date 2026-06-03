@@ -42,7 +42,8 @@ public class ChapterRepositoryImpl implements ChapterRepository {
             session.persist(chapter);
             return chapter;
         }
-        return session.merge(chapter);
+        Chapter merged = session.merge(chapter);
+        return getChapterById(merged.getId());
     }
 
     @Override

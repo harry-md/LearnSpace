@@ -16,5 +16,5 @@ public interface CourseRepository {
 
     void deleteCourse(int courseId);
 
-    List<Object[]> getEnrolledCoursesByStudent(int studentId);
+    List<Course> getEnrolledCoursesByStudent(int studentId);
 }
