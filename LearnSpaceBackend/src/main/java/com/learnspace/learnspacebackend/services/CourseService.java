@@ -6,6 +6,7 @@ import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -16,11 +17,11 @@ public interface CourseService {
 
     CourseDto getCourse(int id);
 
-    CourseDto createCourse(CourseDto courseDto);
+    CourseDto createCourse(CourseDto courseDto) throws IOException;
 
-    CourseDto updateCourse(int id, CoursePatchDto courseDto);
+    CourseDto updateCourse(int id, CoursePatchDto courseDto) throws IOException;
 
-    void deleteCourse(int id);
+    void deleteCourse(int id) throws IOException;
 
     List<MyCourseListDto> getEnrolledCourses();
 }

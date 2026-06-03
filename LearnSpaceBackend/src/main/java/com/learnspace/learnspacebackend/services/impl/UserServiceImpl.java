@@ -24,6 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -78,7 +79,11 @@ public class UserServiceImpl implements UserService {
         user.setRole(UserRole.STUDENT);
 
         if (dto.avatarFile() != null && !dto.avatarFile().isEmpty()) {
-            user.setAvatar(cloudinaryService.uploadImage(dto.avatarFile()));
+            try {
+                user.setAvatar(cloudinaryService.uploadImage(dto.avatarFile()));
+            } catch (IOException ex) {
+                System.err.println(ex.getMessage());
+            }
         }
 
         return userMapper.toProfileDto(userRepository.register(user));
@@ -102,7 +107,7 @@ public class UserServiceImpl implements UserService {
                     principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
-            throw new RuntimeException();
+            throw new RuntimeException("Lỗi đăng nhập");
         }
     }
 
@@ -114,7 +119,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toProfileDto(userRepository.register(user));
     }
 
-    private void handleAvatarUpdate(User u, MultipartFile newAvatar) {
+    private void handleAvatarUpdate(User u, MultipartFile newAvatar) throws IOException {
         if (newAvatar != null && !newAvatar.isEmpty()) {
             if (u.getAvatar() != null) {
                 cloudinaryService.deleteImage(u.getAvatar());
@@ -124,7 +129,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateByAdmin(AdminUserUpdateDto dto) {
+    public void updateByAdmin(AdminUserUpdateDto dto) throws IOException {
         User user = userRepository.getUserById(dto.id());
         user.setFullName(dto.fullName());
         user.setEmail(dto.email());
@@ -142,7 +147,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto) {
+    public UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto) throws IOException {
         User user = userRepository.getUserById(currentUserId);
         user.setFullName(dto.fullName());
         user.setEmail(dto.email());

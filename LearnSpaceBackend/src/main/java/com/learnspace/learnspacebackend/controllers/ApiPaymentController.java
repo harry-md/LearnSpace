@@ -3,6 +3,8 @@ package com.learnspace.learnspacebackend.controllers;
 import com.learnspace.learnspacebackend.dtos.payment.CartDto;
 import com.learnspace.learnspacebackend.dtos.payment.CheckoutDto;
 import com.learnspace.learnspacebackend.services.PaymentService;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
 
@@ -20,25 +22,17 @@ public class ApiPaymentController {
     private PaymentService paymentService;
 
     @PostMapping("/payments/checkout")
-    public ResponseEntity<?> checkout(@RequestBody @Valid List<CartDto> cartItems) {
-        try {
-            CheckoutDto checkout = paymentService.checkout(cartItems);
-            return new ResponseEntity<>(checkout, HttpStatus.CREATED);
-        } catch (Exception ex) {
-            System.err.println(ex.getMessage());
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
+    public ResponseEntity<CheckoutDto> checkout(@RequestBody @Valid List<CartDto> cartItems)
+            throws StripeException {
+        CheckoutDto checkout = paymentService.checkout(cartItems);
+        return new ResponseEntity<>(checkout, HttpStatus.CREATED);
     }
 
     @PostMapping("/payments/webhook")
-    public ResponseEntity<?> webhook(
-            @RequestBody String payload,
-            @RequestHeader("Stripe-Signature") String signatureHeader) {
-        try {
-            paymentService.handleWebhookEvent(payload, signatureHeader);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+    public ResponseEntity<Void> webhook(
+            @RequestBody String payload, @RequestHeader("Stripe-Signature") String signatureHeader)
+            throws SignatureVerificationException {
+        paymentService.handleWebhookEvent(payload, signatureHeader);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

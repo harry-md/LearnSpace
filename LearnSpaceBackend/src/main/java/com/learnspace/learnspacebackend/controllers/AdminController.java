@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.time.Year;
 import java.util.Map;
 
@@ -55,8 +56,13 @@ public class AdminController {
     }
 
     @PostMapping("/users/update")
-    public String updateUser(@Valid @ModelAttribute("userDto") AdminUserUpdateDto dto) {
-        userService.updateByAdmin(dto);
+    public String updateUser(@Valid @ModelAttribute("userDto") AdminUserUpdateDto dto)
+            throws IOException {
+        try {
+            userService.updateByAdmin(dto);
+        } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+        }
         return "redirect:/users";
     }
 

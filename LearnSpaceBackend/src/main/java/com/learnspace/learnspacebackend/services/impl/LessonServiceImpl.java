@@ -55,14 +55,14 @@ public class LessonServiceImpl implements LessonService {
         return userRepository.getUserById(getLoggedInPrincipal().getId());
     }
 
-    private void verifyCourseOwner(Course course) {
+    private void checkCourseOwner(Course course) {
         User teacher = getLoggedInTeacher();
         if (!course.getTeacher().getId().equals(teacher.getId())) {
             throw new AccessDeniedException("Không có quyền");
         }
     }
 
-    private void verifyLessonAccess(Lesson lesson) {
+    private void checkLessonAccess(Lesson lesson) {
         Chapter chapter = lesson.getChapter();
         Course course = chapter.getCourse();
         CustomUserDetails principal = getLoggedInPrincipal();
@@ -90,14 +90,14 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public LessonDto getLesson(int lessonId) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
-        verifyLessonAccess(lesson);
+        checkLessonAccess(lesson);
         return lessonMapper.toDto(lesson);
     }
 
     @Override
     public LessonDto createLesson(int chapterId, LessonDto lessonDto) {
         Chapter chapter = chapterRepository.getChapterById(chapterId);
-        verifyCourseOwner(chapter.getCourse());
+        checkCourseOwner(chapter.getCourse());
 
         if (lessonDto.videoFile() == null || lessonDto.videoFile().isEmpty()) {
             throw new RuntimeException();
@@ -165,7 +165,7 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
-        verifyCourseOwner(lesson.getChapter().getCourse());
+        checkCourseOwner(lesson.getChapter().getCourse());
 
         lessonMapper.updateEntityFromDto(lesson, lessonDto);
 
@@ -218,7 +218,7 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public void deleteLesson(int lessonId) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
-        verifyCourseOwner(lesson.getChapter().getCourse());
+        checkCourseOwner(lesson.getChapter().getCourse());
 
         r2Service.deleteVideo(lesson.getVideo());
 
