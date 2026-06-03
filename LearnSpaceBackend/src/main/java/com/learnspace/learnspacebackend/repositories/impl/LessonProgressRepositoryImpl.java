@@ -57,7 +57,7 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
         Root<LessonProgress> root = q.from(LessonProgress.class);
         root.fetch("lesson");
 
-        Join<LessonProgress, Lesson> lessonJoin = root.join("chapter");
+        Join<LessonProgress, Lesson> lessonJoin = root.join("lesson");
         Join<Lesson, Chapter> chapterJoin = lessonJoin.join("chapter");
         q.select(root)
                 .where(

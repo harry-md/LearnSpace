@@ -18,7 +18,6 @@ import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,7 +97,6 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public LessonDto createLesson(int chapterId, LessonDto lessonDto) {
         Chapter chapter = chapterRepository.getChapterById(chapterId);
         verifyCourseOwner(chapter.getCourse());
@@ -167,7 +165,6 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         verifyCourseOwner(lesson.getChapter().getCourse());
@@ -221,7 +218,6 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public void deleteLesson(int lessonId) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         verifyCourseOwner(lesson.getChapter().getCourse());

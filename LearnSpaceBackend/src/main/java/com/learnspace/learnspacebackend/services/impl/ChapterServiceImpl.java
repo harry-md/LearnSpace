@@ -16,7 +16,6 @@ import com.learnspace.learnspacebackend.services.R2Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +57,6 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public ChapterDto createChapter(int courseId, ChapterDto chapterDto) {
         Course course = courseRepository.getCourseById(courseId);
         if (course == null) {
@@ -109,7 +107,6 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public ChapterDto updateChapter(int chapterId, ChapterPatchDto chapterDto) {
         Chapter existingChapter = chapterRepository.getChapterById(chapterId);
         if (existingChapter == null) {
@@ -133,7 +130,6 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public void deleteChapter(int chapterId) {
         Chapter existingChapter = chapterRepository.getChapterById(chapterId);
         if (existingChapter == null) {

@@ -1,12 +1,10 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -55,7 +55,7 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     }
 
     @Override
-    public List<Chapter> getChaptersByCourse(int courseId) {
+    public List<Chapter> getChaptersByCourse(int ids) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Chapter> q = b.createQuery(Chapter.class);
@@ -63,9 +63,27 @@ public class ChapterRepositoryImpl implements ChapterRepository {
         Root<Chapter> root = q.from(Chapter.class);
 
         q.select(root)
-                .where(b.equal(root.get("course").get("id"), courseId))
+                .where(b.equal(root.get("course").get("id"), ids))
                 .orderBy(b.asc(root.get("order")));
         return session.createQuery(q).getResultList();
+    }
+
+    @Override
+    public Map<Integer, Long> countChapters(List<Integer> ids) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
+        Root<Chapter> root = q.from(Chapter.class);
+
+        Join<Chapter, Course> courseJoin = root.join("course");
+        q.multiselect(courseJoin.get("id"), b.count(root))
+                .where(courseJoin.get("id").in(ids))
+                .groupBy(courseJoin);
+
+        List<Object[]> results = session.createQuery(q).getResultList();
+
+        return results.stream()
+                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
     }
 
     @Override

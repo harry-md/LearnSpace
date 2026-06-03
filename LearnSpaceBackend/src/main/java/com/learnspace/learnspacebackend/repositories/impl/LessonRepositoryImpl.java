@@ -17,6 +17,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -66,6 +68,24 @@ public class LessonRepositoryImpl implements LessonRepository {
         if (lesson != null) {
             session.remove(lesson);
         }
+    }
+
+    @Override
+    public Map<Integer, Long> countLessons(List<Integer> courseIds) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
+        Root<Lesson> root = q.from(Lesson.class);
+
+        Join<Lesson, Chapter> chapterJoin = root.join("chapter");
+        q.multiselect(chapterJoin.get("course").get("id"), b.count(root))
+                .where(chapterJoin.get("course").get("id").in(courseIds))
+                .groupBy(chapterJoin.get("course"));
+
+        List<Object[]> results = session.createQuery(q).getResultList();
+
+        return results.stream()
+                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
     }
 
     @Override
