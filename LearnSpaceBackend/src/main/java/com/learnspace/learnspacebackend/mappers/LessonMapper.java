@@ -12,9 +12,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(
-        componentModel = "spring",
-        uses = {LessonProgressMapper.class})
+@Mapper(componentModel = "spring")
 public interface LessonMapper {
 
     LessonListDto toListDto(Lesson lesson);

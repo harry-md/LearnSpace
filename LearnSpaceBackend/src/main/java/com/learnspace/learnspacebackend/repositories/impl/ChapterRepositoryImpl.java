@@ -19,7 +19,6 @@ import java.util.List;
 @Repository
 @Transactional
 public class ChapterRepositoryImpl implements ChapterRepository {
-
     @Autowired
     private LocalSessionFactoryBean factory;
 

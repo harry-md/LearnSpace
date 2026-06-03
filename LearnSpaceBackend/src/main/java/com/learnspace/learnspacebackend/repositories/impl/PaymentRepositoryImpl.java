@@ -20,7 +20,6 @@ import java.util.List;
 @Repository
 @Transactional
 public class PaymentRepositoryImpl implements PaymentRepository {
-
     @Autowired
     private LocalSessionFactoryBean factory;
 
@@ -35,7 +34,7 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public List<Payment> getPaymentsByPaypalOrderId(String paypalOrderId) {
+    public List<Payment> getPaymentsByStripeSessionId(String stripeSessionId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Payment> q = builder.createQuery(Payment.class);
@@ -45,7 +44,7 @@ public class PaymentRepositoryImpl implements PaymentRepository {
         fetchEnrollment.fetch("student");
         fetchEnrollment.fetch("course");
 
-        q.select(root).where(builder.equal(root.get("paypalOrderId"), paypalOrderId));
+        q.select(root).where(builder.equal(root.get("stripeSessionId"), stripeSessionId));
         return session.createQuery(q).getResultList();
     }
 

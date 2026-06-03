@@ -15,7 +15,6 @@ import java.util.Map;
 
 @Service
 public class CloudinaryServiceImpl implements CloudinaryService {
-
     private static final int MAX_IMAGE_SIZE = 10 * 1024 * 1024;
     private static final int MAX_VIDEO_SIZE = 100 * 1024 * 1024;
 

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class UserController {
-
     @Autowired
     private UserService userService;
 

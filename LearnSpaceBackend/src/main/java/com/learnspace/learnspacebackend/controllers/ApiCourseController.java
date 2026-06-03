@@ -21,7 +21,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/courses")
 public class ApiCourseController {
-
     @Autowired
     private CourseService courseService;
 

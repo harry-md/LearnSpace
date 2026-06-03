@@ -20,7 +20,6 @@ import java.util.List;
 @Configuration
 @Order(1)
 public class ApiSecurityConfigs {
-
     @Bean
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/api/**")

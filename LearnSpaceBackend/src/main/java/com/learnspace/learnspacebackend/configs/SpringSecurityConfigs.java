@@ -2,7 +2,6 @@ package com.learnspace.learnspacebackend.configs;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -54,7 +53,6 @@ import java.util.List;
             "com.learnspace.learnspacebackend.utils",
         })
 public class SpringSecurityConfigs {
-
     @Autowired
     private Environment env;
 
@@ -164,10 +162,5 @@ public class SpringSecurityConfigs {
                 .serviceConfiguration(
                         S3Configuration.builder().chunkedEncodingEnabled(false).build())
                 .build();
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
     }
 }

@@ -5,7 +5,6 @@ import com.learnspace.learnspacebackend.dtos.category.CategoryDto;
 import java.util.List;
 
 public interface CategoryService {
-
     List<CategoryDto> getCategories();
 
     CategoryDto getCategory(int cateId);

@@ -39,7 +39,6 @@ import java.util.Map;
 @Service
 @Transactional
 public class CourseServiceImpl implements CourseService {
-
     @Autowired
     private CourseRepository courseRepository;
 
@@ -103,7 +102,7 @@ public class CourseServiceImpl implements CourseService {
 
         return PaginatedResponseMapper.toPaginatedResponseDto(
                 courseRepository.countCourses(params),
-                Integer.parseInt(params.get("page")),
+                Integer.parseInt(params.getOrDefault("page", "1")),
                 COURSE_PAGE_SIZE,
                 results);
     }

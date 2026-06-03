@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 public class ApiLessonController {
-
     @Autowired
     private LessonService lessonService;
 

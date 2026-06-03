@@ -28,7 +28,6 @@ import java.util.UUID;
 
 @Service
 public class R2ServiceImpl implements R2Service {
-
     @Autowired
     private S3Client r2Client;
 

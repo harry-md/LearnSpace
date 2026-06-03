@@ -21,7 +21,6 @@ import java.util.List;
 @Repository
 @Transactional
 public class EnrollmentRepositoryImpl implements EnrollmentRepository {
-
     @Autowired
     private LocalSessionFactoryBean factory;
 
@@ -59,7 +58,7 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
 
     @Override
     public Enrollment getEnrollmentByStudentAndCourse(
-            int studentId, int courseId, EnrollmentStatus... statuses) {
+            int studentId, int courseId, EnrollmentStatus... status) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Enrollment> q = builder.createQuery(Enrollment.class);
@@ -72,9 +71,9 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
         predicates.add(builder.equal(root.get("student").get("id"), studentId));
         predicates.add(builder.equal(root.get("course").get("id"), courseId));
 
-        if (statuses != null && statuses.length > 0) {
+        if (status != null && status.length > 0) {
             CriteriaBuilder.In<EnrollmentStatus> statusBuilder = builder.in(root.get("status"));
-            for (EnrollmentStatus status : statuses) {
+            for (EnrollmentStatus status : status) {
                 statusBuilder.value(status);
             }
             predicates.add(statusBuilder);

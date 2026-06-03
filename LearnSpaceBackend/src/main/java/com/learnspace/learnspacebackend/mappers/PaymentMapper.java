@@ -10,7 +10,6 @@ import org.mapstruct.Mapping;
 public interface PaymentMapper {
 
     @Mapping(target = "enrollmentId", source = "enrollment.id")
-    @Mapping(target = "approvalUrl", ignore = true)
     PaymentDto toDto(Payment payment);
 
     Payment toEntity(PaymentDto paymentDto);
