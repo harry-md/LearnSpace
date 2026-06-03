@@ -3,8 +3,6 @@ package com.learnspace.learnspacebackend.repositories.impl;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
-import com.learnspace.learnspacebackend.pojo.Lesson;
-import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 
 import jakarta.persistence.Query;
@@ -15,7 +13,6 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,7 +144,8 @@ public class CourseRepositoryImpl implements CourseRepository {
             session.persist(course);
             return course;
         }
-        return session.merge(course);
+        Course merged = session.merge(course);
+        return getCourseById(merged.getId());
     }
 
     @Override
@@ -161,47 +159,18 @@ public class CourseRepositoryImpl implements CourseRepository {
     }
 
     @Override
-    public List<Object[]> getEnrolledCoursesByStudent(int studentId) {
+    public List<Course> getEnrolledCoursesByStudent(int studentId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
+        CriteriaQuery<Course> q = b.createQuery(Course.class);
 
         Root<Course> root = q.from(Course.class);
         root.fetch("category");
         root.fetch("teacher");
 
         Join<Course, Enrollment> enrollmentJoin = root.join("enrollments");
-
-        Subquery<Long> chapterCountSubquery = q.subquery(Long.class);
-        Root<Chapter> chapterRoot = chapterCountSubquery.from(Chapter.class);
-        chapterCountSubquery.select(b.count(chapterRoot)).where(b.equal(chapterRoot.get("course"), root));
-
-        Subquery<Long> lessonCountSubquery = q.subquery(Long.class);
-        Root<Lesson> lessonRoot = lessonCountSubquery.from(Lesson.class);
-        Join<Lesson, Chapter> lessonJoin = lessonRoot.join("chapter");
-        lessonCountSubquery.select(b.count(lessonRoot)).where(b.equal(lessonJoin.get("course"), root));
-
-        Subquery<Long> completedLessonCount = q.subquery(Long.class);
-        Root<LessonProgress> progressRoot = completedLessonCount.from(LessonProgress.class);
-        Join<LessonProgress, Lesson> progressLessonJoin = progressRoot.join("lesson");
-        Join<Lesson, Chapter> progressChapterJoin = progressLessonJoin.join("chapter");
-
-        completedLessonCount
-                .select(b.count(progressRoot))
-                .where(b.and(
-                        b.equal(progressRoot.get("student").get("id"), studentId),
-                        b.equal(progressChapterJoin.get("course"), root),
-                        b.equal(progressRoot.get("completed"), true)));
-
-        q.multiselect(
-                        root,
-                        chapterCountSubquery.getSelection(),
-                        lessonCountSubquery.getSelection(),
-                        completedLessonCount.getSelection())
-                .where(b.equal(enrollmentJoin.get("student").get("id"), studentId));
-
+        q.select(root).where(b.equal(enrollmentJoin.get("student").get("id"), studentId));
         q.orderBy(b.desc(enrollmentJoin.get("createdAt")));
-
         return session.createQuery(q).getResultList();
     }
 }

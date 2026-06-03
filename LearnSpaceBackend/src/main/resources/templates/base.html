@@ -18,7 +18,7 @@
      class="col-md-3 col-lg-2 d-md-block bg-white border-end shadow-sm collapse p-0"
      style="min-height: calc(100vh - 56px);" id="sidebarMenu">
 
-    <div class="d-flex flex-column h-100 pt-3">
+    <div class="d-flex flex-column pt-3">
 
         <div class="d-flex align-items-center px-3 mb-3">
             <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff"
@@ -48,18 +48,6 @@
                 <a th:href="@{/courses}"
                    th:class="${activeTab == 'courses' ? 'nav-link active' : 'nav-link text-dark'}">
                     <i class="fa-solid fa-book fa-fw me-2 text-center"></i>Khóa học
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a th:href="@{/enrollments}"
-                   th:class="${activeTab == 'enrollments' ? 'nav-link active' : 'nav-link text-dark'}">
-                    <i class="fa-solid fa-user-check fa-fw me-2 text-center"></i>Đăng ký
-                </a>
-            </li>
-            <li class="nav-item mb-1">
-                <a th:href="@{/payments}"
-                   th:class="${activeTab == 'payments' ? 'nav-link active' : 'nav-link text-dark'}">
-                    <i class="fa-solid fa-file-invoice-dollar fa-fw me-2 text-center"></i>Thanh toán
                 </a>
             </li>
         </ul>

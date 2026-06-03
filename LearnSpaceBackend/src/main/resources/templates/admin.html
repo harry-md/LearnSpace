@@ -119,6 +119,12 @@
               <canvas id="revenueChart" style="max-height: 400px"></canvas>
             </div>
           </div>
+          <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Thống kê học viên theo khóa học</h5>
+              <canvas id="enrollmentChart" style="max-height: 400px"></canvas>
+            </div>
+          </div>
         </main>
       </div>
     </div>
@@ -162,6 +168,30 @@
 
           revenueChart.update();
       }
+
+      const enrollmentStats = [[${enrollmentStats}]];
+      const enrollmentLabels = enrollmentStats.map(item => item[0]);
+      const enrollmentData = enrollmentStats.map(item => item[1]);
+
+      const ctxEnrollment = document.getElementById('enrollmentChart').getContext('2d');
+      new Chart(ctxEnrollment, {
+          type: 'bar',
+          data: {
+              labels: enrollmentLabels,
+              datasets: [{
+                  label: 'Số lượng học viên',
+                  data: enrollmentData,
+                  backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  borderWidth: 1,
+                  borderRadius: 4
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false
+          }
+      });
     </script>
   </body>
 </html>

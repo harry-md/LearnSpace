@@ -49,6 +49,8 @@ public class AdminController {
 
         model.addAttribute("selectedYear", targetYear);
 
+        model.addAttribute("enrollmentStats", statsService.statsEnrollmentByCourse());
+
         return "admin";
     }
 

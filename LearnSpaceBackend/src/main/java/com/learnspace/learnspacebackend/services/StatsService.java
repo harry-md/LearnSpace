@@ -9,4 +9,6 @@ public interface StatsService {
     List<BigDecimal> getIncomeByAllMonths(int year);
 
     List<BigDecimal> getIncomeByAllQuarter(int year);
+
+    List<Object[]> statsEnrollmentByCourse();
 }

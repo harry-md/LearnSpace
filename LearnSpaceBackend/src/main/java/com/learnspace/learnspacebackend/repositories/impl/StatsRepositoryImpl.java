@@ -1,11 +1,15 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Course;
+import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.Payment;
 import com.learnspace.learnspacebackend.repositories.StatsRepository;
+
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
+
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -13,16 +17,28 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Repository
 @Transactional
 public class StatsRepositoryImpl implements StatsRepository {
-
     @Autowired
     private LocalSessionFactoryBean factory;
+
+    @Override
+    public List<Object[]> statsEnrollmentByCourse() {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
+        Root<Enrollment> root = q.from(Enrollment.class);
+        Join<Enrollment, Course> courseJoin = root.join("course");
+
+        q.multiselect(courseJoin.get("name"), b.count(root))
+                .groupBy(courseJoin.get("id"))
+                .orderBy(b.desc(b.count(root)));
+
+        return session.createQuery(q).setMaxResults(10).getResultList();
+    }
 
     @Override
     public BigDecimal getTotalIncome() {
@@ -36,51 +52,21 @@ public class StatsRepositoryImpl implements StatsRepository {
     }
 
     @Override
-    public List<BigDecimal> getIncomeByAllMonths(int year) {
+    public List<Object[]> statsRevenueByTime(String time, int year) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
-        Root<Payment> root = q.from(Payment.class);
-        q.multiselect(b.function("MONTH", Integer.class, root.get("createdAt")), b.sum(root.get("amount")))
-                .where(
-                        b.equal(root.get("status"), "COMPLETED"),
-                        b.equal(b.function("YEAR", Integer.class, root.get("createdAt")), year))
-                .groupBy(b.function("MONTH", Integer.class, root.get("createdAt")));
 
-        List<Object[]> results = session.createQuery(q).getResultList();
-
-        List<BigDecimal> monthlyIncome = new ArrayList<>(Collections.nCopies(12, BigDecimal.ZERO));
-
-        for (Object[] row : results) {
-            int month = (Integer) row[0];
-            BigDecimal total = (BigDecimal) row[1];
-            monthlyIncome.set(month - 1, total != null ? total : BigDecimal.ZERO);
-        }
-        return monthlyIncome;
-    }
-
-    @Override
-    public List<BigDecimal> getIncomeByAllQuarters(int year) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
         Root<Payment> root = q.from(Payment.class);
 
-        q.multiselect(b.function("QUARTER", Integer.class, root.get("createdAt")), b.sum(root.get("amount")))
-                .where(
-                        b.equal(root.get("status"), "COMPLETED"),
-                        b.equal(b.function("YEAR", Integer.class, root.get("createdAt")), year))
-                .groupBy(b.function("QUARTER", Integer.class, root.get("createdAt")));
+        q.multiselect(b.function(time, Integer.class, root.get("createdAt")), b.sum(root.get("amount")));
 
-        List<Object[]> results = session.createQuery(q).getResultList();
+        q.where(
+                b.equal(root.get("status"), "COMPLETED"),
+                b.equal(b.function("YEAR", Integer.class, root.get("createdAt")), year));
 
-        List<BigDecimal> quarterlyIncome = new ArrayList<>(Collections.nCopies(4, BigDecimal.ZERO));
+        q.groupBy(b.function(time, Integer.class, root.get("createdAt")));
 
-        for (Object[] row : results) {
-            int quarter = (Integer) row[0];
-            BigDecimal total = (BigDecimal) row[1];
-            quarterlyIncome.set(quarter - 1, total != null ? total : BigDecimal.ZERO);
-        }
-        return quarterlyIncome;
+        return session.createQuery(q).getResultList();
     }
 }
