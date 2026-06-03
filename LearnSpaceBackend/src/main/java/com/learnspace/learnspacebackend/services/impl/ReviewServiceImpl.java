@@ -9,7 +9,6 @@ import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Review;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
-import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.ReviewService;
@@ -41,9 +40,9 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private CourseRepository courseRepository;
 
-
     @Override
-    public PaginatedResponseDto<ReviewDto> getReviewsByCourse(int courseId, Map<String, String> params) {
+    public PaginatedResponseDto<ReviewDto> getReviewsByCourse(
+            int courseId, Map<String, String> params) {
 
         List<ReviewDto> results = reviewRepository.getReviewsByCourse(courseId, params).stream()
                 .map(reviewMapper::toDto)
@@ -90,9 +89,9 @@ public class ReviewServiceImpl implements ReviewService {
         User currentUser = userRepository.getUserById(getLoggedInStudent().getId());
         Review review = reviewRepository.getReviewById(reviewId);
         if (review == null) throw new RuntimeException("Đánh giá không tồn tại");
-        if(!verifyReviewOwner(review, currentUser)) throw new RuntimeException("Bạn không có quyền chỉnh sửa đánh giá này");
+        if (!verifyReviewOwner(review, currentUser))
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa đánh giá này");
 
-        
         return null;
     }
 

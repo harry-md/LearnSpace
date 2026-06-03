@@ -37,7 +37,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     }
 
     @Override
-    public Double getAverageRatingByCourseId(int courseId) {
+    public Double getAverageRatingByCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Double> q = b.createQuery(Double.class);
