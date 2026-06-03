@@ -3,8 +3,6 @@ package com.learnspace.learnspacebackend.configs;
 import com.learnspace.learnspacebackend.filters.JwtFilter;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -30,20 +28,6 @@ public class ApiSecurityConfigs {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json");
-                            response.getWriter()
-                                    .write("{\"message\": \"" + authException.getMessage() + "\"}");
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.setContentType("application/json");
-                            response.getWriter()
-                                    .write("{\"message\": \"" + accessDeniedException.getMessage()
-                                            + "\"}");
-                        }))
                 .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/login")
@@ -56,20 +40,8 @@ public class ApiSecurityConfigs {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/courses/*/reviews")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/courses/*/enrollments")
-                        .authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/enrollments/*")
-                        .authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/payments/checkout")
-                        .authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/payments/*/capture")
-                        .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/payments/webhook")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/chat/*")
-                        .authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/lessons/*")
-                        .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/categories")
                         .hasRole(UserRole.ADMIN.name())
                         .requestMatchers(HttpMethod.PATCH, "/api/categories/*")

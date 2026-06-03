@@ -28,14 +28,12 @@ public class ChapterRepositoryImpl implements ChapterRepository {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<Chapter> q = builder.createQuery(Chapter.class);
-
         Root<Chapter> root = q.from(Chapter.class);
         root.fetch("course");
         root.fetch("lessons", JoinType.LEFT);
 
         q.select(root).where(builder.equal(root.get("id"), chapterId));
-
-        return session.createQuery(q).getSingleResultOrNull();
+        return session.createQuery(q).getSingleResult();
     }
 
     @Override
@@ -44,7 +42,7 @@ public class ChapterRepositoryImpl implements ChapterRepository {
         return session.createQuery("SELECT 1 FROM Chapter c WHERE c.id = :chapterId", Integer.class)
                         .setParameter("chapterId", chapterId)
                         .setMaxResults(1)
-                        .getSingleResultOrNull()
+                        .getSingleResult()
                 != null;
     }
 

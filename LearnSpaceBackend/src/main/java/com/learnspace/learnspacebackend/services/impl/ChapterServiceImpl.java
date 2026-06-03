@@ -3,7 +3,6 @@ package com.learnspace.learnspacebackend.services.impl;
 import com.learnspace.learnspacebackend.dtos.chapter.ChapterDto;
 import com.learnspace.learnspacebackend.dtos.chapter.ChapterPatchDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.ChapterMapper;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
@@ -64,7 +63,7 @@ public class ChapterServiceImpl implements ChapterService {
     public ChapterDto createChapter(int courseId, ChapterDto chapterDto) {
         Course course = courseRepository.getCourseById(courseId);
         if (course == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học");
+            throw new IllegalArgumentException("Không tìm thấy khóa học");
         }
 
         verifyCourseOwner(course);
@@ -76,7 +75,7 @@ public class ChapterServiceImpl implements ChapterService {
         return chapterMapper.toDto(chapterRepository.createOrUpdate(chapter));
     }
 
-    private int calculateNewOrder(Integer frontChapterId, Integer behindChapterId) {
+    private int calNewOrder(Integer frontChapterId, Integer behindChapterId) {
         if (frontChapterId == null) {
             return chapterRepository.getChapterById(behindChapterId).getOrder() / 2;
         }
@@ -115,15 +114,14 @@ public class ChapterServiceImpl implements ChapterService {
     public ChapterDto updateChapter(int chapterId, ChapterPatchDto chapterDto) {
         Chapter existingChapter = chapterRepository.getChapterById(chapterId);
         if (existingChapter == null) {
-            throw new ResourceNotFoundException("Không tìm thấy chương học");
+            throw new IllegalArgumentException("Không tìm thấy chương học");
         }
 
         verifyCourseOwner(existingChapter.getCourse());
 
         chapterMapper.updateEntityFromDto(existingChapter, chapterDto);
         if (chapterDto.frontChapterId() != null || chapterDto.behindChapterId() != null) {
-            int newOrder =
-                    calculateNewOrder(chapterDto.frontChapterId(), chapterDto.behindChapterId());
+            int newOrder = calNewOrder(chapterDto.frontChapterId(), chapterDto.behindChapterId());
             existingChapter.setOrder(newOrder);
         }
 
@@ -140,7 +138,7 @@ public class ChapterServiceImpl implements ChapterService {
     public void deleteChapter(int chapterId) {
         Chapter existingChapter = chapterRepository.getChapterById(chapterId);
         if (existingChapter == null) {
-            throw new ResourceNotFoundException("Không tìm thấy chương học");
+            throw new IllegalArgumentException("Không tìm thấy chương học");
         }
 
         verifyCourseOwner(existingChapter.getCourse());

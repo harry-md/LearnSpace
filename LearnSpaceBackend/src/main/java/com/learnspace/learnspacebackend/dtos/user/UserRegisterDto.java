@@ -25,14 +25,7 @@ public record UserRegisterDto(
         @NotBlank(message = "Tên không được để trống")
         @Size(max = 255, message = "Tên vượt quá độ dài cho phép")
         @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Tên không được chứa ký tự đặc biệt")
-        String firstName,
-
-        @NotBlank(message = "Họ và tên lót không được để trống")
-        @Size(max = 255, message = "Họ và tên lót vượt quá độ dài cho phép")
-        @Pattern(
-                regexp = "^[\\p{L}\\s]+$",
-                message = "Họ và tên lót không được chứa ký tự đặc biệt")
-        String lastName,
+        String fullName,
 
         @JsonProperty(access = Access.READ_ONLY) String avatar,
 

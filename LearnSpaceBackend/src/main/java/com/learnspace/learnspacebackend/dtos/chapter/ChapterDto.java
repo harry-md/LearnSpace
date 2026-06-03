@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
-import com.learnspace.learnspacebackend.utils.NotHtml;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -22,7 +21,7 @@ public record ChapterDto(
         @Size(max = 255, message = "Tên chương vượt quá độ dài cho phép")
         String name,
 
-        @Size(max = 15000, message = "Mô tả chương vượt quá độ dài cho phép") @NotHtml
+        @Size(max = 15000, message = "Mô tả chương vượt quá độ dài cho phép")
         String description,
 
         Boolean free,

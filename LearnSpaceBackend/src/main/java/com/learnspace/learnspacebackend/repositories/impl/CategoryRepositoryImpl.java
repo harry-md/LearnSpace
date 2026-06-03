@@ -27,12 +27,11 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     @Override
     public Category getCateById(int id) {
         Session session = factory.getObject().getCurrentSession();
-
         return session.get(Category.class, id);
     }
 
     @Override
-    public Category createOrUpdate(Category category) {
+    public Category addOrUpdateCate(Category category) {
         Session session = factory.getObject().getCurrentSession();
         if (category.getId() == null) {
             session.persist(category);
@@ -44,7 +43,6 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     @Override
     public void deleteCate(int id) {
         Session session = factory.getObject().getCurrentSession();
-
         Category c = session.get(Category.class, id);
         if (c != null) {
             session.remove(c);

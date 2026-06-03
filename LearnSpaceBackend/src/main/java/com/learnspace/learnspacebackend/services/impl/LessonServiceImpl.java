@@ -4,7 +4,6 @@ import com.learnspace.learnspacebackend.dtos.lesson.LessonDto;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonPatchDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.LessonMapper;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
@@ -87,9 +86,6 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public List<LessonListDto> getLessons(int chapterId) {
-        if (!chapterRepository.existChapter(chapterId)) {
-            throw new ResourceNotFoundException("Không tìm thấy chương học");
-        }
         return lessonRepository.getLessons(chapterId).stream()
                 .map(lessonMapper::toListDto)
                 .toList();
@@ -98,12 +94,7 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public LessonDto getLesson(int lessonId) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
-        if (lesson == null) {
-            throw new ResourceNotFoundException("Không tìm thấy bài học");
-        }
-
         verifyLessonAccess(lesson);
-
         return lessonMapper.toDto(lesson);
     }
 
@@ -111,10 +102,6 @@ public class LessonServiceImpl implements LessonService {
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public LessonDto createLesson(int chapterId, LessonDto lessonDto) {
         Chapter chapter = chapterRepository.getChapterById(chapterId);
-        if (chapter == null) {
-            throw new ResourceNotFoundException("Không tìm thấy chương học");
-        }
-
         verifyCourseOwner(chapter.getCourse());
 
         if (lessonDto.videoFile() == null || lessonDto.videoFile().isEmpty()) {
@@ -183,24 +170,19 @@ public class LessonServiceImpl implements LessonService {
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
+        Lesson lesson = lessonRepository.getLessonById(lessonId);
+        verifyCourseOwner(lesson.getChapter().getCourse());
 
-        Lesson existingLesson = lessonRepository.getLessonById(lessonId);
-        if (existingLesson == null) {
-            throw new ResourceNotFoundException("Không tìm thấy bài học");
-        }
-
-        verifyCourseOwner(existingLesson.getChapter().getCourse());
-
-        lessonMapper.updateEntityFromDto(existingLesson, lessonDto);
+        lessonMapper.updateEntityFromDto(lesson, lessonDto);
 
         if (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null) {
             int newOrder = calculateNewOrder(lessonDto.frontLessonId(), lessonDto.behindLessonId());
-            existingLesson.setOrder(newOrder);
+            lesson.setOrder(newOrder);
         }
 
         MultipartFile videoFile = lessonDto.videoFile();
         if (videoFile != null && !videoFile.isEmpty()) {
-            String oldVideoUrl = existingLesson.getVideo();
+            String oldVideoUrl = lesson.getVideo();
             if (oldVideoUrl != null && !oldVideoUrl.isBlank()) {
                 r2Service.deleteVideo(oldVideoUrl);
             }
@@ -216,8 +198,8 @@ public class LessonServiceImpl implements LessonService {
                         r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");
                 int videoLength = r2Service.getVideoLength(tmpFile);
 
-                existingLesson.setVideo(videoUrl);
-                existingLesson.setVideoLength(videoLength);
+                lesson.setVideo(videoUrl);
+                lesson.setVideoLength(videoLength);
 
             } catch (Exception ex) {
                 System.err.println(ex.getMessage());
@@ -229,11 +211,11 @@ public class LessonServiceImpl implements LessonService {
             }
         }
 
-        Lesson updatedLesson = lessonRepository.addOrUpdateLesson(existingLesson);
+        Lesson updatedLesson = lessonRepository.addOrUpdateLesson(lesson);
 
         if (lessonDto != null
                 && (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null)) {
-            checkAndReorderLesson(existingLesson.getChapter().getId());
+            checkAndReorderLesson(lesson.getChapter().getId());
         }
 
         return lessonMapper.toDto(updatedLesson);
@@ -242,14 +224,10 @@ public class LessonServiceImpl implements LessonService {
     @Override
     @PreAuthorize("hasRole('VERIFIED_TEACHER')")
     public void deleteLesson(int lessonId) {
-        Lesson existingLesson = lessonRepository.getLessonById(lessonId);
-        if (existingLesson == null) {
-            throw new ResourceNotFoundException("Không tìm thấy bài học");
-        }
+        Lesson lesson = lessonRepository.getLessonById(lessonId);
+        verifyCourseOwner(lesson.getChapter().getCourse());
 
-        verifyCourseOwner(existingLesson.getChapter().getCourse());
-
-        r2Service.deleteVideo(existingLesson.getVideo());
+        r2Service.deleteVideo(lesson.getVideo());
 
         lessonRepository.deleteLesson(lessonId);
     }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -48,7 +47,6 @@ public class ExternalApiClient {
         }
     }
 
-    @Cacheable(value = "paypalAccessToken")
     public String getPaypalAccessToken() {
         String credentials = PAYPAL_CLIENT_ID + ":" + PAYPAL_CLIENT_SECRET;
         String encoded = Base64.getEncoder().encodeToString(credentials.getBytes());
@@ -68,7 +66,6 @@ public class ExternalApiClient {
         return res.accessToken();
     }
 
-    @Cacheable(value = "exchangeRate")
     public BigDecimal getVndToUsdRate() {
         ExchangeRateResponseDto res = RestClient.create()
                 .get()

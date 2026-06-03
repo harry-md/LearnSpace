@@ -9,11 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 public record UserUpdateDto(
         @Size(max = 255, message = "Tên vượt quá độ dài cho phép")
         @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Tên không được chứa ký tự đặc biệt")
-        String firstName,
-
-        @Size(max = 255, message = "Họ và tên lót vượt quá độ dài cho phép")
-        @Pattern(regexp = "^[\\p{L}\\s]+$", message = "Tên không được chứa ký tự đặc biệt")
-        String lastName,
+        String fullName,
 
         @Email(message = "Định dạng email không hợp lệ") String email,
 

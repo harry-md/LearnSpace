@@ -2,7 +2,6 @@ package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
@@ -42,10 +41,6 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     @Override
     public LessonProgressDto addLessonProgress(int lessonId, LessonProgressDto lessonProgressDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
-        if (lesson == null) {
-            throw new ResourceNotFoundException("Không tìm thấy bài học");
-        }
-
         Course course = lesson.getChapter().getCourse();
         int userId = getLoggedInPrincipal().getId();
         Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
@@ -54,13 +49,13 @@ public class LessonProgressServiceImpl implements LessonProgressService {
         if (enrollment == null) {
             throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
         }
-        LessonProgress existing =
+        LessonProgress p =
                 lessonProgressRepository.getLessonProgressByStudentAndLesson(userId, lessonId);
 
-        if (existing != null) {
-            existing.setWatchedSec(lessonProgressDto.watchedSec());
+        if (p != null) {
+            p.setWatchedSec(lessonProgressDto.watchedSec());
             return lessonProgressMapper.toDto(
-                    lessonProgressRepository.addOrUpdateLessonProgress(existing));
+                    lessonProgressRepository.addOrUpdateLessonProgress(p));
         }
 
         LessonProgress progress = lessonProgressMapper.toEntity(lessonProgressDto);
@@ -74,10 +69,6 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     public LessonProgressDto updateLessonProgress(
             int lessonId, LessonProgressDto lessonProgressDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
-        if (lesson == null) {
-            throw new ResourceNotFoundException("Không tìm thấy bài học");
-        }
-
         Course course = lesson.getChapter().getCourse();
         int userId = getLoggedInPrincipal().getId();
         Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(

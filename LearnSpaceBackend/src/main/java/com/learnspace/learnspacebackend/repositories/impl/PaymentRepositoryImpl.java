@@ -56,6 +56,6 @@ public class PaymentRepositoryImpl implements PaymentRepository {
                         "FROM Payment p WHERE p.enrollment.id = :enrollmentId", Payment.class)
                 .setParameter("enrollmentId", enrollmentId)
                 .setMaxResults(1)
-                .getSingleResultOrNull();
+                .getSingleResult();
     }
 }

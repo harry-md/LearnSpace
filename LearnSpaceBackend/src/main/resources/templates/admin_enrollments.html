@@ -69,11 +69,11 @@
 
                       <td>
                         <div class="d-flex align-items-center">
-                          <img th:src="${enrollment.student.avatar != null ? enrollment.student.avatar : 'https://ui-avatars.com/api/?name=' + enrollment.student.firstName + '+' + enrollment.student.lastName}"
+                          <img th:src="${enrollment.student.avatar != null ? enrollment.student.avatar : 'https://ui-avatars.com/api/?name=' + enrollment.student.fullName}"
                             alt="Avatar" class="rounded-circle me-2 border" width="35" height="35">
                           <div>
                             <div class="fw-bold text-dark"
-                              th:text="${enrollment.student.firstName + ' ' + enrollment.student.lastName}">
+                              th:text="${enrollment.student.fullName}">
                               Nguyễn Văn A
                             </div>
                             <div class="small text-muted" th:text="${enrollment.student.email}">

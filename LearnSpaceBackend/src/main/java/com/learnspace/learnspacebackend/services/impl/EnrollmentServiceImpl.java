@@ -2,7 +2,6 @@ package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.enrollment.EnrollmentDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.EnrollmentMapper;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
@@ -46,9 +45,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public EnrollmentDto getEnrollment(int enrollmentId) {
         CustomUserDetails principal = getLoggedInPrincipal();
         Enrollment enrollment = enrollmentRepository.getEnrollmentById(enrollmentId);
-        if (enrollment == null) {
-            throw new ResourceNotFoundException("Không tìm thấy enrollment cho khóa học này");
-        }
         User student = enrollment.getStudent();
         if (!student.getId().equals(principal.getId())) {
             throw new AccessDeniedException("Bạn không có quyền truy cập");
@@ -62,9 +58,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         User student = userRepository.getUserById(principal.getId());
 
         Course course = courseRepository.getCourseById(courseId);
-        if (course == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học");
-        }
         if (enrollmentRepository.checkValidEnrollment(student.getId(), courseId)) {
             throw new IllegalArgumentException("Bạn đã đăng ký khóa học này rồi");
         }
