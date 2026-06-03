@@ -9,5 +9,7 @@ public interface PaymentRepository {
 
     List<Payment> getPaymentsByStripeSessionId(String stripeSessionId);
 
+    Payment getPaymentById(int id);
+
     Payment addOrUpdatePayment(Payment payment);
 }
