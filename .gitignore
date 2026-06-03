@@ -34,3 +34,4 @@ LearnSpace/nb-configuration.xml
 env.properties
 deploy.sh
 firebase-service-account.json
+learnspace/.env

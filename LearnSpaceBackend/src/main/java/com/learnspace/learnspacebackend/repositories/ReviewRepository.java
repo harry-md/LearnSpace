@@ -15,4 +15,6 @@ public interface ReviewRepository {
     Long countReviewsByCourse(int courseId, Map<String, String> params);
 
     Review addOrUpdateReview(Review review);
+
+    Review getReviewById(int reviewId);
 }

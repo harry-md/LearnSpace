@@ -17,7 +17,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import Apis, { authApis, endpoints } from "@/configs/Apis";
-import { UIContext, UserContext } from "@/configs/Context";
+import { CartContext, UIContext, UserContext } from "@/configs/Context";
 import ProtectLessonDisplay from "./ProtectLessonDisplay/ProtectLessonDisplay";
 import useLessonProcess from "@/hooks/useLessonProcess";
 
@@ -32,7 +32,12 @@ const CourseDetailPage = () => {
   const [selectedLessonId, setSelectedLessonId] = useState(null);
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [, uiDispatch] = useContext(UIContext);
+  const [cart, cartDispatch] = useContext(CartContext);
   const nav = useNavigate();
+
+  const addToCart = (course) => {
+    cartDispatch({ type: "ADD_COURSE", payload: course });
+  };
 
   const enrollFreeCourse = async () => {
     try {
@@ -661,12 +666,12 @@ const CourseDetailPage = () => {
 
                 {courseDetails.price !== 0 ? (
                   <>
-                    <button className="w-full py-2.5 rounded-lg font-extrabold text-sm mb-2 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer bg-[#5624d0] hover:bg-[#4712c4] text-white">
+                    <button
+                      onClick={() => addToCart(courseDetails)}
+                      className="w-full py-2.5 rounded-lg font-extrabold text-sm mb-2 flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer bg-[#5624d0] hover:bg-[#4712c4] text-white"
+                    >
                       <ShoppingCart size={16} />
                       Thêm vào giỏ hàng
-                    </button>
-                    <button className="w-full py-2.5 border-2 border-[#1c1d1f] hover:bg-gray-50 text-[#1c1d1f] font-extrabold rounded-lg text-sm mb-3 transition-all active:scale-95 cursor-pointer">
-                      Mua ngay
                     </button>
 
                     <p className="text-center text-[11px] text-gray-500 mb-1">

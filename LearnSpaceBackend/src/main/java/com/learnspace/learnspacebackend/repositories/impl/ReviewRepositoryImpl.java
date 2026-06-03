@@ -31,7 +31,13 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     private LocalSessionFactoryBean factory;
 
     @Override
-    public Double getAverageRatingByCourse(int courseId) {
+    public Review getReviewById(int reviewId) {
+        Session session = factory.getObject().getCurrentSession();
+        return session.get(Review.class, reviewId);
+    }
+
+    @Override
+    public Double getAverageRatingByCourseId(int courseId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Double> q = b.createQuery(Double.class);
