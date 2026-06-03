@@ -1,5 +1,6 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.google.type.Decimal;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
@@ -13,6 +14,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +125,6 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
                 .groupBy(courseJoin);
 
         List<Object[]> results = session.createQuery(q).getResultList();
-        return results.stream()
-                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
+        return results.stream().collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
     }
 }

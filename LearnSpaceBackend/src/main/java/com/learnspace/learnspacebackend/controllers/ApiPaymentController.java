@@ -27,26 +27,22 @@ public class ApiPaymentController {
             return new ResponseEntity<>(paymentService.checkout(cartItems), HttpStatus.CREATED);
         } catch (StripeException ex) {
             return new ResponseEntity<>(
-                    Collections.singletonMap("stripe", "Lỗi thanh toán Stripe"),
-                    HttpStatus.BAD_REQUEST);
+                    Collections.singletonMap("stripe", "Lỗi thanh toán Stripe"), HttpStatus.BAD_REQUEST);
         } catch (RuntimeException ex) {
             System.err.println(ex.getMessage());
-            return new ResponseEntity<>(
-                    Collections.singletonMap("checkout", "Có lỗi xảy ra"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Collections.singletonMap("checkout", ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/payments/webhook")
     public ResponseEntity<?> webhook(
-            @RequestBody String payload,
-            @RequestHeader("Stripe-Signature") String signatureHeader) {
+            @RequestBody String payload, @RequestHeader("Stripe-Signature") String signatureHeader) {
         try {
             paymentService.handleWebhookEvent(payload, signatureHeader);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (SignatureVerificationException ex) {
             return new ResponseEntity<>(
-                    Collections.singletonMap("stripe", "Lỗi xác thực chữ ký Stripe"),
-                    HttpStatus.BAD_REQUEST);
+                    Collections.singletonMap("stripe", "Lỗi xác thực chữ ký Stripe"), HttpStatus.BAD_REQUEST);
         }
     }
 }

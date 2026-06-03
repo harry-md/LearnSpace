@@ -122,15 +122,14 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.getCourseById(courseId);
 
         CourseDto dto = courseMapper.toDto(course);
-        Double avgRating = reviewRepository.getAverageRatingByCourse(courseId);
+        Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
         Long enrollCount = enrollmentRepository.countEnrollments(courseId);
         LessonProgressDto latestProgress = null;
 
         Object p = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         CustomUserDetails principal = p.equals("anonymousUser") ? null : (CustomUserDetails) p;
         if (principal != null) {
-            LessonProgress l = progressRepository.getLessonProgressByStudentAndCourse(
-                    principal.getId(), courseId);
+            LessonProgress l = progressRepository.getLessonProgressByStudentAndCourse(principal.getId(), courseId);
             latestProgress = progressMapper.toDto(l);
         }
 

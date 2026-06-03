@@ -3,6 +3,7 @@ package com.learnspace.learnspacebackend.controllers;
 import com.learnspace.learnspacebackend.dtos.user.AdminUserUpdateDto;
 import com.learnspace.learnspacebackend.services.CategoryService;
 import com.learnspace.learnspacebackend.services.CourseService;
+import com.learnspace.learnspacebackend.services.EnrollmentService;
 import com.learnspace.learnspacebackend.services.UserService;
 
 import jakarta.validation.Valid;
@@ -35,14 +36,10 @@ public class AdminController {
     private CourseService courseService;
 
     @GetMapping()
-    public String admin() {
+    public String admin(Model model) {
+        model.addAttribute("totalUsers", userService.countAllUsers());
+        model.addAttribute("totalCourses", courseService.countCourses(null));
         return "admin";
-    }
-
-    @GetMapping("/users")
-    public String user(Model model, @RequestParam Map<String, String> params) {
-        model.addAttribute("users", userService.getAllUsers(params));
-        return "admin_user";
     }
 
     @PostMapping("/users/update")
@@ -56,7 +53,7 @@ public class AdminController {
         model.addAttribute("categories", categoryService.getCategories());
         model.addAttribute("courses", courseService.getCourses(params));
 
-        int pageSize = env.getProperty("course.pageSize", Integer.class);
+        int pageSize = env.getProperty("course.page_size", Integer.class);
         long totalCourse = courseService.countCourses(params);
         int totalPages = (int) Math.ceil((double) totalCourse / pageSize);
 

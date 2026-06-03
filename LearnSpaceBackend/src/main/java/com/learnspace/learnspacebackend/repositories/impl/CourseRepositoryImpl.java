@@ -38,8 +38,7 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Value("${course.page_size}")
     private int COURSE_PAGE_SIZE;
 
-    private List<Predicate> filter(
-            Map<String, String> params, CriteriaBuilder b, Root<Course> root) {
+    private List<Predicate> filter(Map<String, String> params, CriteriaBuilder b, Root<Course> root) {
         List<Predicate> predicates = new ArrayList<>();
         if (params == null) {
             return predicates;
@@ -64,8 +63,7 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         String teacherName = params.get("teacherName");
         if (teacherName != null && !teacherName.isBlank()) {
-            predicates.add(b.or(b.like(
-                    root.get("teacher").get("fullName"), String.format("%%%s%%", teacherName))));
+            predicates.add(b.or(b.like(root.get("teacher").get("fullName"), String.format("%%%s%%", teacherName))));
         }
 
         String categoryId = params.get("categoryId");
@@ -177,16 +175,12 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         Subquery<Long> chapterCountSubquery = q.subquery(Long.class);
         Root<Chapter> chapterRoot = chapterCountSubquery.from(Chapter.class);
-        chapterCountSubquery
-                .select(b.count(chapterRoot))
-                .where(b.equal(chapterRoot.get("course"), root));
+        chapterCountSubquery.select(b.count(chapterRoot)).where(b.equal(chapterRoot.get("course"), root));
 
         Subquery<Long> lessonCountSubquery = q.subquery(Long.class);
         Root<Lesson> lessonRoot = lessonCountSubquery.from(Lesson.class);
         Join<Lesson, Chapter> lessonJoin = lessonRoot.join("chapter");
-        lessonCountSubquery
-                .select(b.count(lessonRoot))
-                .where(b.equal(lessonJoin.get("course"), root));
+        lessonCountSubquery.select(b.count(lessonRoot)).where(b.equal(lessonJoin.get("course"), root));
 
         Subquery<Long> completedLessonCount = q.subquery(Long.class);
         Root<LessonProgress> progressRoot = completedLessonCount.from(LessonProgress.class);

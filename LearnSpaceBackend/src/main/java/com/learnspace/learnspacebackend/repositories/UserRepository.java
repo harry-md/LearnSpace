@@ -13,11 +13,11 @@ public interface UserRepository {
 
     User register(User u);
 
-    List<User> getAllUsers(Map<String, String> params);
-
     User getUserById(Integer id);
 
     void update(User user);
+
+    int countAllUser();
 
     List<User> getContactsEnrolled(int userId, UserRole role);
 }
