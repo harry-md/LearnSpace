@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -66,8 +67,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
             enrollment.setStatus(EnrollmentStatus.ACTIVE);
         } else {
-            throw new RuntimeException(
-                    "Khóa học có phí. Vui lòng thêm vào giỏ hàng và thanh toán để học");
+            throw new RuntimeException("Khóa học có phí. Vui lòng thêm vào giỏ hàng và thanh toán để học");
         }
 
         return enrollmentMapper.toDto(enrollmentRepository.addOrUpdateEnrollment(enrollment));

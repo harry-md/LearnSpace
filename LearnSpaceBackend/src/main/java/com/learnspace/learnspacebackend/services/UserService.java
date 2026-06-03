@@ -14,6 +14,8 @@ import java.util.Map;
 public interface UserService extends UserDetailsService {
     UserProfileDto getUserByUsername(String username);
 
+    int countAllUsers();
+
     UserProfileDto register(UserRegisterDto dto);
 
     UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto);
@@ -21,8 +23,6 @@ public interface UserService extends UserDetailsService {
     String login(UserLoginDto user);
 
     UserProfileDto registerAdmin(UserRegisterDto user);
-
-    List<UserProfileDto> getAllUsers(Map<String, String> params);
 
     void updateByAdmin(AdminUserUpdateDto dto);
 }

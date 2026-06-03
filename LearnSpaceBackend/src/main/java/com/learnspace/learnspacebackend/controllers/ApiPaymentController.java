@@ -32,8 +32,7 @@ public class ApiPaymentController {
 
     @PostMapping("/payments/webhook")
     public ResponseEntity<?> webhook(
-            @RequestBody String payload,
-            @RequestHeader("Stripe-Signature") String signatureHeader) {
+            @RequestBody String payload, @RequestHeader("Stripe-Signature") String signatureHeader) {
         try {
             paymentService.handleWebhookEvent(payload, signatureHeader);
         } catch (Exception ex) {

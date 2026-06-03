@@ -52,11 +52,7 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
   };
 
   const handleLoadedMetadata = (e) => {
-    if (
-      lessonProgress &&
-      lessonProgress.watchedSec &&
-      !hasSeeked.current
-    ) {
+    if (lessonProgress && lessonProgress.watchedSec && !hasSeeked.current) {
       e.target.currentTime = lessonProgress.watchedSec;
       hasSeeked.current = true;
     }
@@ -80,7 +76,7 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
         }
         setLesson(res.data);
       } catch (err) {
-        console.error("Lỗi khi tải chi tiết bài học:", err);
+        console.error("Lỗi khi tải chi tiết bài học!");
         setError(
           "Không thể tải thông tin bài học hoặc bạn không có quyền truy cập.",
         );

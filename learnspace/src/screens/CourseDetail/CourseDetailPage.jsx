@@ -89,7 +89,7 @@ const CourseDetailPage = () => {
             const enrolled = enrolledList.some((c) => c.id == id);
             setIsEnrolled(enrolled);
           } catch (enrollErr) {
-            console.error("Lỗi khi check enroll:", enrollErr);
+            console.error("Lỗi khi check enroll!");
             setIsEnrolled(false);
           }
         } else {

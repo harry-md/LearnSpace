@@ -61,9 +61,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         q.select(root)
                 .where(
                         b.equal(root.get("course"), courseId),
-                        enrollmentJoin
-                                .get("status")
-                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+                        enrollmentJoin.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
 
         Query query = session.createQuery(q).setParameter("courseId", courseId);
         if (params != null) {
@@ -88,9 +86,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         q.select(b.count(root))
                 .where(
                         b.equal(root.get("course").get("id"), courseId),
-                        enrollmentJoin
-                                .get("status")
-                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+                        enrollmentJoin.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
         return session.createQuery(q).getSingleResult();
     }
 
@@ -107,8 +103,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                 .groupBy(courseJoin);
 
         List<Object[]> results = session.createQuery(q).getResultList();
-        return results.stream()
-                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Double) row[1]));
+        return results.stream().collect(Collectors.toMap(row -> (Integer) row[0], row -> (Double) row[1]));
     }
 
     @Override

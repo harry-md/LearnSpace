@@ -35,8 +35,7 @@ public class CourseRepositoryImpl implements CourseRepository {
     @Value("${course.page_size}")
     private int COURSE_PAGE_SIZE;
 
-    private List<Predicate> filter(
-            Map<String, String> params, CriteriaBuilder b, Root<Course> root) {
+    private List<Predicate> filter(Map<String, String> params, CriteriaBuilder b, Root<Course> root) {
         List<Predicate> predicates = new ArrayList<>();
         if (params == null) {
             return predicates;
@@ -61,8 +60,7 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         String teacherName = params.get("teacherName");
         if (teacherName != null && !teacherName.isBlank()) {
-            predicates.add(b.or(b.like(
-                    root.get("teacher").get("fullName"), String.format("%%%s%%", teacherName))));
+            predicates.add(b.or(b.like(root.get("teacher").get("fullName"), String.format("%%%s%%", teacherName))));
         }
 
         String categoryId = params.get("categoryId");

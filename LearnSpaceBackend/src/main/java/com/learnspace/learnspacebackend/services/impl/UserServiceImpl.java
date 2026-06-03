@@ -68,8 +68,7 @@ public class UserServiceImpl implements UserService {
         } else {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
         }
-        return new CustomUserDetails(
-                user.getUsername(), user.getPassword(), authorities, user.getId());
+        return new CustomUserDetails(user.getUsername(), user.getPassword(), authorities, user.getId());
     }
 
     @Override
@@ -109,8 +108,7 @@ public class UserServiceImpl implements UserService {
                 .orElse("ROLE_STUTDENT")
                 .replace("ROLE_", "");
         try {
-            return jwtUtils.generateToken(
-                    principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
+            return jwtUtils.generateToken(principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
             throw new RuntimeException();
@@ -123,13 +121,6 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setRole(UserRole.ADMIN);
         return userMapper.toProfileDto(userRepository.register(user));
-    }
-
-    @Override
-    public List<UserProfileDto> getAllUsers(Map<String, String> params) {
-        return userRepository.getAllUsers(params).stream()
-                .map(userMapper::toProfileDto)
-                .toList();
     }
 
     private void handleAvatarUpdate(User u, MultipartFile newAvatar) {
@@ -169,5 +160,10 @@ public class UserServiceImpl implements UserService {
 
         userRepository.update(user);
         return userMapper.toProfileDto(user);
+    }
+
+    @Override
+    public int countAllUsers() {
+        return userRepository.countAllUser();
     }
 }

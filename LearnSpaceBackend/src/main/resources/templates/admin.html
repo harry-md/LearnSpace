@@ -1,39 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Admin Dashboard - Learn Space</title>
     <th:block th:replace="~{base :: styles}"></th:block>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
 
     <style>
-    .card-stat {
-      border-left: 4px solid;
-    }
+      .card-stat {
+        border-left: 4px solid;
+      }
 
-    .card-stat.users {
-      border-left-color: #0d6efd;
-    }
+      .card-stat.users {
+        border-left-color: #0d6efd;
+      }
 
-    .card-stat.courses {
-      border-left-color: #198754;
-    }
+      .card-stat.courses {
+        border-left-color: #198754;
+      }
 
-    .card-stat.revenue {
-      border-left-color: #ffc107;
-    }
+      .card-stat.revenue {
+        border-left-color: #ffc107;
+      }
     </style>
   </head>
   <body class="bg-light">
-
-
     <div class="container-fluid">
       <div class="row">
-
         <nav th:replace="~{base :: admin_sidebar('dashboard')}"></nav>
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+          <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom"
+          >
             <h1 class="h2 text-dark">Tổng quan hệ thống</h1>
           </div>
 
@@ -42,37 +46,152 @@
               <div class="card card-stat users shadow-sm border-0 h-100">
                 <div class="card-body">
                   <h6 class="text-muted mb-2">Tổng Người Dùng</h6>
-                  <h3 class="mb-0 fw-bold text-primary"
-                    th:text="${totalUsers != null ? totalUsers : '1,250'}">1,250</h3>
+                  <h3
+                    class="mb-0 fw-bold text-primary"
+                    th:text="${totalUsers != null ? totalUsers : '0'}"
+                  ></h3>
                 </div>
               </div>
             </div>
             <div class="col-md-4">
               <div class="card card-stat courses shadow-sm border-0 h-100">
                 <div class="card-body">
-                  <h6 class="text-muted mb-2">Khóa Học Active</h6>
-                  <h3 class="mb-0 fw-bold text-success"
-                    th:text="${totalCourses != null ? totalCourses : '45'}">45</h3>
+                  <h6 class="text-muted mb-2">Khóa Học</h6>
+                  <h3
+                    class="mb-0 fw-bold text-success"
+                    th:text="${totalCourses != null ? totalCourses : '0'}"
+                  ></h3>
                 </div>
               </div>
             </div>
             <div class="col-md-4">
               <div class="card card-stat revenue shadow-sm border-0 h-100">
                 <div class="card-body">
-                  <h6 class="text-muted mb-2">Doanh Thu (VNĐ)</h6>
-                  <h3 class="mb-0 fw-bold text-warning"
-                    th:text="${totalRevenue != null ? #numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT') : '25,000,000'}">
-                    25,000,000</h3>
+                  <h6 class="text-muted mb-2">Doanh Thu</h6>
+                  <h3
+                    class="mb-0 fw-bold text-warning"
+                    th:text="${totalIncome != null ? #numbers.formatDecimal(totalIncome, 1, 'COMMA', 2, 'POINT') : '0.00'}"
+                  ></h3>
                 </div>
               </div>
             </div>
           </div>
 
+          <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <h5 class="card-title mb-0">Biểu đồ doanh thu</h5>
 
+                <div class="d-flex align-items-center gap-3">
+                  <form
+                    action=""
+                    method="get"
+                    class="d-flex align-items-center m-0"
+                  >
+                    <label
+                      for="yearInput"
+                      class="form-label me-2 mb-0 text-nowrap"
+                      >Năm:</label
+                    >
+                    <input
+                      type="number"
+                      id="yearInput"
+                      name="year"
+                      class="form-control"
+                      style="width: 100px"
+                      th:value="${selectedYear}"
+                      onchange="this.form.submit()"
+                    />
+                  </form>
+
+                  <select
+                    id="chartSelector"
+                    class="form-select w-auto"
+                    onchange="updateChart()"
+                  >
+                    <option value="year">Xem theo năm (12 tháng)</option>
+                    <option value="quarter">Xem theo 4 quý</option>
+                  </select>
+                </div>
+              </div>
+              <canvas id="revenueChart" style="max-height: 400px"></canvas>
+            </div>
+          </div>
+          <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Thống kê học viên theo khóa học</h5>
+              <canvas id="enrollmentChart" style="max-height: 400px"></canvas>
+            </div>
+          </div>
         </main>
       </div>
     </div>
 
     <footer th:replace="~{base :: footer}"></footer>
+    <script th:inline="javascript">
+      const monthlyData = [[${monthlyIncome}]];
+      const quarterlyData = [[${quarterlyIncome}]];
+
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+
+      let revenueChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+              labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+              datasets: [{
+                  label: 'Doanh thu (VNĐ)',
+                  data: monthlyData,
+                  backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  borderWidth: 1,
+                  borderRadius: 4
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false
+          }
+      });
+
+      function updateChart() {
+          const type = document.getElementById('chartSelector').value;
+
+          if (type === 'year') {
+              revenueChart.data.labels = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+              revenueChart.data.datasets[0].data = monthlyData;
+          } else if (type === 'quarter') {
+              revenueChart.data.labels = ['Quý 1', 'Quý 2', 'Quý 3', 'Quý 4'];
+              revenueChart.data.datasets[0].data = quarterlyData;
+          }
+
+          revenueChart.update();
+      }
+
+      const enrollmentStats = [[${enrollmentStats}]];
+      const enrollmentLabels = enrollmentStats.map(item => item[0]);
+      const enrollmentData = enrollmentStats.map(item => item[1]);
+
+      const ctxEnrollment = document.getElementById('enrollmentChart').getContext('2d');
+      new Chart(ctxEnrollment, {
+          type: 'bar',
+          data: {
+              labels: enrollmentLabels,
+              datasets: [{
+                  label: 'Số lượng học viên',
+                  data: enrollmentData,
+                  backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  borderWidth: 1,
+                  borderRadius: 4
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false
+          }
+      });
+    </script>
   </body>
 </html>

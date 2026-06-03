@@ -33,7 +33,7 @@ const useLessonProcess = () => {
       setLessonProgress(data);
       return data;
     } catch (err) {
-      console.log("POST create progress failed:", err);
+      console.log("Đã có lỗi xảy ra!");
       return null;
     }
   };
@@ -47,7 +47,7 @@ const useLessonProcess = () => {
         prev ? { ...prev, watchedSec: sec } : { watchedSec: sec },
       );
     } catch (err) {
-      console.log("PATCH update progress failed:", err);
+      console.log("Đã có lỗi xảy ra!");
     }
   };
   return { lessonProgress, getLessonProgress, updateLessonProgress };

@@ -50,7 +50,7 @@ function App() {
         await signInWithCustomToken(auth, customToken);
         console.log("Đăng nhập Firebase thành công");
       } catch (error) {
-        console.error("Lỗi đăng nhập Firebase", error);
+        console.error("Lỗi đăng nhập Firebase");
       }
     }
   };
