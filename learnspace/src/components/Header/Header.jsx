@@ -207,7 +207,7 @@ const Header = () => {
                 </div>
                 {!searchKeyword.trim() ? (
                   <div className="text-sm text-gray-500 text-center py-4">
-                    Nhập từ khóa để tìm kiếm khóa học...
+                    Nhập từ khóa để tìm kiếm khóa học
                   </div>
                 ) : !searchData || searchData.length === 0 ? (
                   <div className="text-sm text-gray-500 text-center py-4">

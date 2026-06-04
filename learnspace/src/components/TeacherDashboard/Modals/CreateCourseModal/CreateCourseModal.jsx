@@ -88,14 +88,10 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
 
   return (
     <Modal open={open} onClose={onClose} title="Tạo khóa học mới" wide>
-      <Field
-        label="Tên khóa học"
-        required
-        hint="Hãy dùng tiêu đề rõ ràng, hấp dẫn để thu hút học viên"
-      >
+      <Field label="Tên khóa học" required hint="">
         <input
           className="input-cls"
-          placeholder="VD: Python từ cơ bản đến nâng cao"
+          placeholder=""
           value={courseForm.name}
           onChange={(e) =>
             setCourseForm({ ...courseForm, name: e.target.value })
@@ -108,7 +104,7 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
         <textarea
           className="input-cls create-course-textarea"
           rows={3}
-          placeholder="Mô tả tổng quan về khóa học..."
+          placeholder="Mô tả tổng quan về khóa học"
           value={courseForm.description}
           onChange={(e) =>
             setCourseForm({ ...courseForm, description: e.target.value })
@@ -136,10 +132,10 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
             ))}
           </select>
         </Field>
-        <Field label="Giá (VND)">
+        <Field label="Giá">
           <input
             className="input-cls"
-            placeholder="VD: 499000"
+            placeholder=""
             type="number"
             value={courseForm.price}
             onChange={(e) =>

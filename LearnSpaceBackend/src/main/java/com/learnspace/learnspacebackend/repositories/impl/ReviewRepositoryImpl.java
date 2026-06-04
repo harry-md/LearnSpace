@@ -58,11 +58,14 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         Join<Review, User> userJoin = (Join<Review, User>) studentJoinFetch;
         Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollments");
 
-        q.select(root).distinct(true)
+        q.select(root)
+                .distinct(true)
                 .where(
                         b.equal(root.get("course").get("id"), courseId),
                         b.equal(enrollmentJoin.get("course").get("id"), courseId),
-                        enrollmentJoin.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+                        enrollmentJoin
+                                .get("status")
+                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
 
         Query query = session.createQuery(q);
         if (params != null) {
@@ -88,7 +91,9 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                 .where(
                         b.equal(root.get("course").get("id"), courseId),
                         b.equal(enrollmentJoin.get("course").get("id"), courseId),
-                        enrollmentJoin.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+                        enrollmentJoin
+                                .get("status")
+                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
         return session.createQuery(q).getSingleResult();
     }
 
@@ -105,7 +110,8 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                 .groupBy(courseJoin);
 
         List<Object[]> results = session.createQuery(q).getResultList();
-        return results.stream().collect(Collectors.toMap(row -> (Integer) row[0], row -> (Double) row[1]));
+        return results.stream()
+                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Double) row[1]));
     }
 
     @Override

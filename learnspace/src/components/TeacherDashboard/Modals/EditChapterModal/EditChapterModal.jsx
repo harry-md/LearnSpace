@@ -33,7 +33,7 @@ const EditChapterModal = ({ open, onClose, chapter, onSubmit }) => {
       <Field label="Tên chương" required>
         <input
           className="input-cls"
-          placeholder="VD: Array & Hashing"
+          placeholder="Tên chương"
           value={chapterForm.title}
           onChange={(e) =>
             setChapterForm({ ...chapterForm, title: e.target.value })
@@ -46,7 +46,7 @@ const EditChapterModal = ({ open, onClose, chapter, onSubmit }) => {
         <textarea
           className="input-cls edit-chapter-modal-textarea"
           rows={3}
-          placeholder="Tóm tắt nội dung chương..."
+          placeholder="Tóm tắt nội dung chương"
           value={chapterForm.description}
           onChange={(e) =>
             setChapterForm({

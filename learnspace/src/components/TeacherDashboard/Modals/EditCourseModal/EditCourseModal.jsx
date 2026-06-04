@@ -119,9 +119,7 @@ const EditCourseModal = ({ open, onClose, course, categories, onSuccess }) => {
       >
         <input
           className="input-cls"
-          placeholder={
-            course?.name || course?.title || "VD: Python từ cơ bản đến nâng cao"
-          }
+          placeholder={course?.name || course?.title || "Tiêu đề"}
           value={editCourseForm.name}
           onChange={(e) =>
             setEditCourseForm({ ...editCourseForm, name: e.target.value })
@@ -165,11 +163,11 @@ const EditCourseModal = ({ open, onClose, course, categories, onSuccess }) => {
             ))}
           </select>
         </Field>
-        <Field label="Giá (VND)">
+        <Field label="Giá">
           <input
             className="input-cls"
             placeholder={
-              course?.price !== undefined ? String(course.price) : "VD: 499000"
+              course?.price !== undefined ? String(course.price) : ""
             }
             type="number"
             value={editCourseForm.price}
