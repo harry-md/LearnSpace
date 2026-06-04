@@ -14,6 +14,5 @@ public record AdminUserUpdateDto(
         @NotBlank @Email String email,
 
         UserRole role,
-        Boolean active,
         Boolean verified,
         MultipartFile avatar) {}

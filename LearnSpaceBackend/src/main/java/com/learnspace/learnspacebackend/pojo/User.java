@@ -52,10 +52,6 @@ public class User {
     private String avatar =
             "https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png";
 
-    @ColumnDefault("1")
-    @Column(name = "active")
-    private Boolean active = true;
-
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     Set<Enrollment> enrollments;
 
@@ -127,14 +123,6 @@ public class User {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
     }
 
     public Boolean getVerified() {

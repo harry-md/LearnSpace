@@ -24,4 +24,6 @@ public interface UserRepository {
     int countAllUser();
 
     List<User> getContactsEnrolled(int userId, UserRole role);
+
+    void deleteUser(int id);
 }

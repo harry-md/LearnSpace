@@ -75,7 +75,7 @@ public class PaymentServiceImpl implements PaymentService {
         for (CartDto c : carts) {
             Course course = courseRepository.getCourseById(c.courseId());
             if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
-                throw new RuntimeException("Khóa học miễn phí, không cần thanh toán");
+                throw new RuntimeException("Khóa học miễn phí");
             }
 
             Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
@@ -105,7 +105,7 @@ public class PaymentServiceImpl implements PaymentService {
             totalAmount = totalAmount.add(course.getPrice());
             payments.add(payment);
         }
-        String description = "Thanh toán khóa học trên LearnSpace";
+        String description = "Thanh toán khóa học LearnSpace";
         Session session = stripeService.createCheckoutSession(totalAmount, description);
         String sessionId = session.getId();
         String checkoutUrl = session.getUrl();

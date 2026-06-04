@@ -107,7 +107,7 @@
                 </div>
                 <div class="modal-footer justify-content-center bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <form id="deleteForm" method="post" action="">
+                    <form id="deleteForm" method="post" th:action="@{/}">
                         <input type="hidden" name="_method" value="delete"/>
                         <button type="submit" class="btn btn-danger">Xóa</button>
                     </form>

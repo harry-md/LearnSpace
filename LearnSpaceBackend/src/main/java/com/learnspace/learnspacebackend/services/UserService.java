@@ -28,4 +28,6 @@ public interface UserService extends UserDetailsService {
     UserProfileDto registerAdmin(UserRegisterDto user);
 
     void updateByAdmin(AdminUserUpdateDto dto) throws IOException;
+
+    void deleteUser(int id);
 }

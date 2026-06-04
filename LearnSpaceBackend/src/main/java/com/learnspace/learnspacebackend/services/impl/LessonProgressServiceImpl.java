@@ -70,11 +70,4 @@ public class LessonProgressServiceImpl implements LessonProgressService {
         return lessonProgressMapper.toDto(
                 lessonProgressRepository.addOrUpdateLessonProgress(saveProgress));
     }
-
-    @Override
-    public LessonProgressDto getLessonProgress(int lessonId) {
-        int userId = getLoggedInPrincipal().getId();
-        return lessonProgressMapper.toDto(
-                lessonProgressRepository.getLessonProgressByStudentAndLesson(userId, lessonId));
-    }
 }

@@ -29,7 +29,7 @@ public class Chapter {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL)
     @OrderBy("order ASC")
     @Column(name = "lessons")
     private Set<Lesson> lessons;

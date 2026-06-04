@@ -24,11 +24,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto getCategory(int cateId) {
-        return categoryMapper.toDto(categoryRepository.getCateById(cateId));
-    }
-
-    @Override
     public CategoryDto createOrUpdate(CategoryDto categoryDto) {
         return categoryMapper.toDto(
                 categoryRepository.addOrUpdateCate(categoryMapper.toEntity(categoryDto)));

@@ -8,8 +8,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.Map;
 
 @Controller
@@ -39,5 +41,15 @@ public class CourseController {
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("currentPage", currentPage);
         return "admin_courses";
+    }
+
+    @GetMapping("/courses/delete/{id}")
+    public String deleteCourse(@PathVariable(value = "id") int id) {
+        try {
+            courseService.deleteCourse(id);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "redirect:/courses";
     }
 }

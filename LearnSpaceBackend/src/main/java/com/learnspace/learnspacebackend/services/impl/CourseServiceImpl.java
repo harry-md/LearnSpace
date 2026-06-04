@@ -7,16 +7,14 @@ import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
-import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
 import com.learnspace.learnspacebackend.mappers.PaginatedResponseMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.User;
+import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
-import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
-import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
@@ -53,19 +51,10 @@ public class CourseServiceImpl implements CourseService {
     private LessonRepository lessonRepository;
 
     @Autowired
-    private LessonProgressRepository progressRepository;
-
-    @Autowired
-    private LessonProgressMapper progressMapper;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private ChapterRepository chapterRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;
@@ -145,7 +134,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     private void checkCourseOwner(Course course, User teacher) {
-        if (!course.getTeacher().getId().equals(teacher.getId())) {
+        if (!course.getTeacher().getId().equals(teacher.getId())
+                && teacher.getRole() != UserRole.ADMIN) {
             throw new AccessDeniedException("Bạn không phải chủ sở hữu khóa học");
         }
     }

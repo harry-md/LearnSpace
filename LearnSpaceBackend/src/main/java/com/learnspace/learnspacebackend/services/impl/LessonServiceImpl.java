@@ -1,7 +1,6 @@
 package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.lesson.LessonDto;
-import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonPatchDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.mappers.LessonMapper;
@@ -19,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 @Service
 public class LessonServiceImpl implements LessonService {
@@ -79,13 +77,6 @@ public class LessonServiceImpl implements LessonService {
         if (!enrollmentRepository.checkValidEnrollment(principal.getId(), course.getId())) {
             throw new RuntimeException("Không có enrollment");
         }
-    }
-
-    @Override
-    public List<LessonListDto> getLessons(int chapterId) {
-        return lessonRepository.getLessons(chapterId).stream()
-                .map(lessonMapper::toListDto)
-                .toList();
     }
 
     @Override
