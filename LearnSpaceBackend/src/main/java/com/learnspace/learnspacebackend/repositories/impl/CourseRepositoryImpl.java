@@ -130,6 +130,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         return query.getResultList();
     }
 
+    @Override
     public Long countCourses(Map<String, String> params) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();

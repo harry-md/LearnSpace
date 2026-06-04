@@ -1,12 +1,10 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
-import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.Payment;
 import com.learnspace.learnspacebackend.repositories.PaymentRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -29,10 +27,7 @@ public class PaymentRepositoryImpl implements PaymentRepository {
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Payment> q = b.createQuery(Payment.class);
         Root<Payment> root = q.from(Payment.class);
-
-        Fetch<Payment, Enrollment> fetchEnrollment = root.fetch("enrollment");
-        fetchEnrollment.fetch("student");
-        fetchEnrollment.fetch("course");
+        root.fetch("enrollment");
 
         q.select(root).where(b.equal(root.get("stripeSessionId"), stripeSessionId));
         return session.createQuery(q).getResultList();

@@ -10,6 +10,7 @@ import com.learnspace.learnspacebackend.dtos.user.SimpleUserDto;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +32,7 @@ public record CourseDto(
 
         @Digits(integer = 19, fraction = 2) BigDecimal price,
 
-        @JsonProperty(access = Access.WRITE_ONLY) Integer categoryId,
+        @JsonProperty(access = Access.WRITE_ONLY) @NotNull Integer categoryId,
 
         @JsonProperty(access = Access.READ_ONLY) Double avgRating,
         @JsonProperty(access = Access.READ_ONLY) Long enrollmentCount,

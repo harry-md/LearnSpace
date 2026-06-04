@@ -143,19 +143,14 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseDto createCourse(CourseDto courseDto) throws IOException {
         Course course = courseMapper.toEntity(courseDto);
-
-        if (courseDto.categoryId() != null) {
-            Category category = categoryRepository.getCateById(courseDto.categoryId());
-            course.setCategory(category);
-        }
-
+        Category category = categoryRepository.getCateById(courseDto.categoryId());
+        course.setCategory(category);
         course.setTeacher(getLoggedInTeacher());
 
         MultipartFile imageFile = courseDto.imageFile();
         if (imageFile != null && !imageFile.isEmpty()) {
             cloudinaryService.validateImageFile(imageFile);
         }
-
         MultipartFile introVideoFile = courseDto.introVideoFile();
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             cloudinaryService.validateVideoFile(introVideoFile);

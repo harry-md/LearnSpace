@@ -6,8 +6,6 @@ import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Fetch;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -46,20 +44,9 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Review> q = b.createQuery(Review.class);
         Root<Review> root = q.from(Review.class);
+        root.fetch("student");
 
-        Fetch<Review, User> studentJoinFetch = root.fetch("student");
-        Join<Review, User> userJoin = (Join<Review, User>) studentJoinFetch;
-        Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollments");
-
-        q.select(root)
-                .distinct(true)
-                .where(
-                        b.equal(root.get("course").get("id"), courseId),
-                        b.equal(enrollmentJoin.get("course").get("id"), courseId),
-                        enrollmentJoin
-                                .get("status")
-                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
-
+        q.select(root).distinct(true).where(b.equal(root.get("course").get("id"), courseId));
         Query query = session.createQuery(q);
         if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
@@ -76,17 +63,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Long> q = b.createQuery(Long.class);
         Root<Review> root = q.from(Review.class);
-
-        Join<Review, User> userJoin = root.join("student");
-        Join<User, Enrollment> enrollmentJoin = userJoin.join("enrollments");
-
-        q.select(b.countDistinct(root))
-                .where(
-                        b.equal(root.get("course").get("id"), courseId),
-                        b.equal(enrollmentJoin.get("course").get("id"), courseId),
-                        enrollmentJoin
-                                .get("status")
-                                .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
+        q.select(b.count(root)).where(b.equal(root.get("course").get("id"), courseId));
         return session.createQuery(q).getSingleResult();
     }
 }

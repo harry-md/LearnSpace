@@ -1,6 +1,7 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 
@@ -43,10 +44,10 @@ public class LessonRepositoryImpl implements LessonRepository {
         Root<Lesson> root = q.from(Lesson.class);
 
         Fetch<Lesson, Chapter> chapterFetch = root.fetch("chapter");
-        chapterFetch.fetch("course");
+        Fetch<Chapter, Course> courseFetch = chapterFetch.fetch("course");
+        courseFetch.fetch("teacher");
 
         q.select(root).where(b.equal(root.get("id"), lessonId));
-
         return session.createQuery(q).getSingleResult();
     }
 
