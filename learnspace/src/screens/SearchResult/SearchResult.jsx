@@ -34,6 +34,8 @@ const SearchResult = () => {
   const [toPrice, setToPrice] = useState("");
   const [teacherName, setTeacherName] = useState("");
   const [debouncedTeacherName, setDebouncedTeacherName] = useState("");
+  const [courseName, setCourseName] = useState(kw || "");
+  const [debouncedCourseName, setDebouncedCourseName] = useState(kw || "");
   const [priceRange, setPriceRange] = useState({ from: "", to: "" });
   const [priceError, setPriceError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,6 +46,13 @@ const SearchResult = () => {
     }, 500);
     return () => clearTimeout(timer);
   }, [teacherName]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedCourseName(courseName);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [courseName]);
 
   const loadCourseByCategory = async (
     catId,
@@ -89,14 +98,14 @@ const SearchResult = () => {
   }, []);
 
   useEffect(() => {
-    if (kw) {
+    if (debouncedCourseName) {
       setCurrentCategory({
         categoryId: null,
-        categoryName: `Kết quả tìm kiếm cho: "${kw}"`,
+        categoryName: `Kết quả tìm kiếm cho: "${debouncedCourseName}"`,
       });
       loadCourseByCategory(
         null,
-        kw,
+        debouncedCourseName,
         1,
         priceRange.from,
         priceRange.to,
@@ -116,10 +125,16 @@ const SearchResult = () => {
         debouncedTeacherName,
       );
     }
-  }, [categoryId, categoryName, kw, priceRange, debouncedTeacherName]);
+  }, [
+    categoryId,
+    categoryName,
+    debouncedCourseName,
+    priceRange,
+    debouncedTeacherName,
+  ]);
 
   const handlePageChange = (page) => {
-    loadCourseByCategory(currentCategory.categoryId, kw, page);
+    loadCourseByCategory(currentCategory.categoryId, debouncedCourseName, page);
     scrollTo({ top: 0 });
   };
 
@@ -153,6 +168,7 @@ const SearchResult = () => {
                 setFromPrice("");
                 setToPrice("");
                 setTeacherName("");
+                setCourseName("");
                 setPriceError("");
                 setPriceRange({ from: "", to: "" });
                 navigate(location.pathname, { replace: true, state: {} });
@@ -169,8 +185,8 @@ const SearchResult = () => {
             <input
               type="text"
               placeholder="Tìm theo tên..."
-              value={teacherName}
-              onChange={(e) => setTeacherName(e.target.value)}
+              value={courseName}
+              onChange={(e) => setCourseName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
             />
           </div>
