@@ -217,6 +217,57 @@ const useTeacherDashBoard = () => {
     }
   };
 
+  const handleUpdateChapter = async (courseId, chapterId, chapterData) => {
+    uiDispatch({ type: "SHOW_LOADING" });
+    try {
+      const res = await authApis(user.token).patch(
+        `${endpoints.chapters}/${chapterId}`,
+        chapterData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const updatedChapter = res.data;
+
+      setTeacherCourses((prev) =>
+        prev.map((c) => {
+          if (c.id === courseId) {
+            return {
+              ...c,
+              chapters: (c.chapters || []).map((ch) =>
+                ch.id === chapterId ? { ...ch, ...updatedChapter } : ch
+              ),
+            };
+          }
+          return c;
+        }),
+      );
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Thành công",
+          message: "Cập nhật chương thành công!",
+          type: "success",
+        },
+      });
+      return updatedChapter;
+    } catch (err) {
+      uiDispatch({ type: "HIDE_LOADING" });
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Lỗi",
+          message: err.response?.data?.message || err.message,
+          type: "error",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
+  };
+
   const handleDeleteCourse = async (courseId) => {
     uiDispatch({ type: "SHOW_LOADING" });
     try {
@@ -364,6 +415,7 @@ const useTeacherDashBoard = () => {
     handleLoadCategories,
     handleDeleteCourse,
     handleCreateChapter,
+    handleUpdateChapter,
     handleDeleteChapter,
     handleCreateLesson,
     handleUpdateLesson,

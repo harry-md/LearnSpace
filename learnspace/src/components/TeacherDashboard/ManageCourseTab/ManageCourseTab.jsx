@@ -17,6 +17,7 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
     user,
     loadCourseDetails,
     handleCreateChapter,
+    handleUpdateChapter,
     handleDeleteChapter,
     handleCreateLesson,
     handleUpdateLesson,
@@ -32,6 +33,7 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
   const [showEditCourse, setShowEditCourse] = useState(false);
 
   const [selectedLesson, setSelectedLesson] = useState(null);
+  const [selectedChapter, setSelectedChapter] = useState(null);
 
   const handleReorderChapters = async (fromIndex, toIndex) => {
     const chapters = [...(currentCourse.chapters || [])];
@@ -122,10 +124,20 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
   const submitChapter = async (chapterData) => {
     await handleCreateChapter(course?.id, {
       name: chapterData.title,
-      free: false,
+      free: chapterData.free,
       order: totalChapters + 1,
     });
     setShowAddChapter(false);
+  };
+
+  const submitEditChapter = async (chapterData) => {
+    if (!selectedChapter) return;
+    await handleUpdateChapter(course?.id, selectedChapter.id, {
+      name: chapterData.name,
+      description: chapterData.description,
+      free: chapterData.free,
+    });
+    setShowEditChapter(false);
   };
 
   const submitLesson = async (lessonData) => {
@@ -242,7 +254,10 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
               chapter={chapter}
               index={index}
               onAddLesson={setShowAddLesson}
-              onEditChapter={() => setShowEditChapter(true)}
+              onEditChapter={(ch) => {
+                setSelectedChapter(ch);
+                setShowEditChapter(true);
+              }}
               onDeleteChapter={handleDeleteChapter}
               onEditLesson={(lesson) => {
                 setSelectedLesson(lesson);
@@ -264,8 +279,8 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
       <EditChapterModal
         open={showEditChapter}
         onClose={() => setShowEditChapter(false)}
-        chapter={{ name: "Chương mẫu" }}
-        onSubmit={() => setShowEditChapter(false)}
+        chapter={selectedChapter}
+        onSubmit={submitEditChapter}
       />
 
       <AddLessonModal

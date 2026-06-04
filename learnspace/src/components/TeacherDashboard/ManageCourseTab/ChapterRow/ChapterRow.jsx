@@ -57,7 +57,7 @@ const ChapterRow = ({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onEditChapter(true);
+              onEditChapter(chapter);
             }}
             className="btn-chapter-edit"
           >
