@@ -123,15 +123,21 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
     await handleCreateChapter(course?.id, {
       name: chapterData.title,
       free: false,
+      order: totalChapters + 1,
     });
     setShowAddChapter(false);
   };
 
   const submitLesson = async (lessonData) => {
     if (!showAddLesson) return;
+    const chapter = currentCourse.chapters.find(
+      (ch) => ch.id === showAddLesson,
+    );
+    const lessonCount = chapter?.lessons?.length || 0;
     const formData = new FormData();
     formData.append("title", lessonData.title);
     formData.append("content", lessonData.content || "");
+    formData.append("order", lessonCount + 1);
     if (lessonData.videoFile) {
       formData.append("videoFile", lessonData.videoFile);
     }
@@ -235,11 +241,9 @@ const ManageCourseTab = ({ course, onCourseUpdate }) => {
               key={chapter.id}
               chapter={chapter}
               index={index}
-              onReorderChapters={handleReorderChapters}
               onAddLesson={setShowAddLesson}
               onEditChapter={() => setShowEditChapter(true)}
               onDeleteChapter={handleDeleteChapter}
-              onReorderLessons={handleReorderLessons}
               onEditLesson={(lesson) => {
                 setSelectedLesson(lesson);
                 setShowEditLesson(true);

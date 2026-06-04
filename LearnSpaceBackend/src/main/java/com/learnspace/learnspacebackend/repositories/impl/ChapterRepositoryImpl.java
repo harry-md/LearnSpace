@@ -56,20 +56,6 @@ public class ChapterRepositoryImpl implements ChapterRepository {
     }
 
     @Override
-    public List<Chapter> getChaptersByCourse(int ids) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Chapter> q = b.createQuery(Chapter.class);
-
-        Root<Chapter> root = q.from(Chapter.class);
-
-        q.select(root)
-                .where(b.equal(root.get("course").get("id"), ids))
-                .orderBy(b.asc(root.get("order")));
-        return session.createQuery(q).getResultList();
-    }
-
-    @Override
     public Map<Integer, Long> countChapters(List<Integer> ids) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
@@ -84,17 +70,5 @@ public class ChapterRepositoryImpl implements ChapterRepository {
         List<Object[]> results = session.createQuery(q).getResultList();
         return results.stream()
                 .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
-    }
-
-    @Override
-    public Integer getMaxOrder(int courseId) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Integer> q = b.createQuery(Integer.class);
-        Root<Chapter> root = q.from(Chapter.class);
-
-        q.select(b.coalesce(b.max(root.get("order")), 0))
-                .where(b.equal(root.get("course").get("id"), courseId));
-        return session.createQuery(q).getSingleResult();
     }
 }

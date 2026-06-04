@@ -13,8 +13,4 @@ public interface ChapterRepository {
     void deleteChapter(int chapterId);
 
     Map<Integer, Long> countChapters(List<Integer> courseIds);
-
-    List<Chapter> getChaptersByCourse(int ids);
-
-    Integer getMaxOrder(int courseId);
 }

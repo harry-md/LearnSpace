@@ -112,11 +112,7 @@ const EditCourseModal = ({ open, onClose, course, categories, onSuccess }) => {
       title="Chỉnh sửa thông tin khóa học"
       wide
     >
-      <Field
-        label="Tên khóa học"
-        required
-        hint="Hãy dùng tiêu đề rõ ràng, hấp dẫn để thu hút học viên"
-      >
+      <Field label="Tên khóa học" required hint="">
         <input
           className="input-cls"
           placeholder={course?.name || course?.title || "Tiêu đề"}

@@ -23,7 +23,7 @@ public record LessonDto(
 
         @JsonProperty(access = Access.READ_ONLY) String video,
         @JsonProperty(access = Access.READ_ONLY) Integer videoLength,
-        @JsonProperty(access = Access.READ_ONLY) Integer order,
+        Integer order,
 
         @JsonProperty(access = Access.READ_ONLY) LessonProgressDto progress,
 

@@ -65,8 +65,7 @@ const HomePage = () => {
                 Chào mừng {user?.fullName || "bạn"}!
               </h2>
               <p className="text-sm text-gray-500 mt-1 font-medium">
-                Chúc bạn một ngày học tập hiệu quả! Tiếp tục chinh phục kiến
-                thức mới hôm nay nhé.
+                Chúc bạn một ngày học tập hiệu quả!
               </p>
             </div>
           </div>
@@ -100,8 +99,7 @@ const HomePage = () => {
             </div>
             {user?.createdAt && (
               <div className="text-[11px] text-gray-400 font-semibold">
-                Thành viên từ:{" "}
-                {(() => {
+                Thành viên từ: {(() => {
                   const date = new Date(user?.createdAt);
                   return `${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
                 })()}

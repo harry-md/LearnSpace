@@ -21,7 +21,7 @@ public record ChapterDto(
 
         Boolean free,
 
-        @JsonProperty(access = Access.READ_ONLY) Integer order,
+        Integer order,
 
         @JsonProperty(access = Access.READ_ONLY) List<LessonListDto> lessons,
 
