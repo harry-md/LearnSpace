@@ -37,11 +37,8 @@ public class JwtFilter implements Filter {
                 if (claims != null) {
                     Integer userId = claims.getIntegerClaim("userId");
                     String username = claims.getSubject();
-
                     httpRequest.setAttribute("username", username);
-
                     String role = claims.getClaim("role").toString();
-
                     List<SimpleGrantedAuthority> authorities =
                             List.of(new SimpleGrantedAuthority("ROLE_" + role));
 

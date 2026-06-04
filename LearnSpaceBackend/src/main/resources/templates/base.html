@@ -50,6 +50,12 @@
                     <i class="fa-solid fa-book fa-fw me-2 text-center"></i>Khóa học
                 </a>
             </li>
+                <li class="nav-item mb-1">
+                <a th:href="@{/users}"
+                   th:class="${activeTab == 'users' ? 'nav-link active' : 'nav-link text-dark'}">
+                    <i class="fa fa-user fa-fw me-2 text-center"></i>Người dùng
+                </a>
+            </li>
         </ul>
 
         <div class="px-3 mt-auto mb-3">
@@ -68,7 +74,7 @@
 
 <footer th:fragment="footer">
     <div class="mt-4 p-5 bg-primary text-white rounded text-center">
-        <h2>Learn Space E-Learning &copy; 2026</h2>
+        <h2>Learn Space &copy; 2026</h2>
     </div>
 </footer>
 <th:block th:fragment="global_toast">

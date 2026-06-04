@@ -6,10 +6,7 @@ import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @Transactional
@@ -52,6 +51,37 @@ public class UserRepositoryImpl implements UserRepository {
         q.select(b.count(root)).where(b.equal(root.get("username"), username));
         Long count = session.createQuery(q).setMaxResults(1).getSingleResult();
         return count == 1;
+    }
+
+    @Override
+    public List<User> getAllUsers(Map<String, String> params) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<User> q = builder.createQuery(User.class);
+
+        Root<User> root = q.from(User.class);
+        q.select(root);
+
+        if (params != null && !params.isEmpty()) {
+            List<Predicate> predicates = new ArrayList<>();
+
+            String kw = params.get("kw");
+            if (kw != null && !kw.trim().isEmpty()) {
+                predicates.add(builder.like(root.get("username"), String.format("%%%s%%", kw)));
+            }
+
+            String role = params.get("role");
+            if (role != null) {
+                predicates.add(builder.equal(root.get("role"), UserRole.valueOf(role)));
+            }
+
+            String active = params.get("active");
+            if (active != null && !active.trim().isEmpty()) {
+                predicates.add(builder.equal(root.get("active"), active.equals("1")));
+            }
+            q.where(predicates.toArray(Predicate[]::new));
+        }
+        return session.createQuery(q).getResultList();
     }
 
     @Override

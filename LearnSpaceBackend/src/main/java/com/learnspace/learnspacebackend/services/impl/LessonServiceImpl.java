@@ -77,7 +77,7 @@ public class LessonServiceImpl implements LessonService {
         }
 
         if (!enrollmentRepository.checkValidEnrollment(principal.getId(), course.getId())) {
-            throw new RuntimeException();
+            throw new RuntimeException("Không có enrollment");
         }
     }
 
@@ -93,7 +93,9 @@ public class LessonServiceImpl implements LessonService {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         checkLessonAccess(lesson);
         CustomUserDetails principal = getLoggedInPrincipal();
-        LessonProgress lessonProgress = lessonProgressRepository.getLessonProgressByStudentAndLesson(principal.getId(), lessonId);
+        LessonProgress lessonProgress =
+                lessonProgressRepository.getLessonProgressByStudentAndLesson(
+                        principal.getId(), lessonId);
         return new LessonDto(
                 lesson.getId(),
                 lesson.getTitle(),
@@ -104,8 +106,7 @@ public class LessonServiceImpl implements LessonService {
                 lessonProgressMapper.toDto(lessonProgress),
                 lesson.getCreatedAt(),
                 lesson.getUpdatedAt(),
-                null
-        );
+                null);
     }
 
     @Override

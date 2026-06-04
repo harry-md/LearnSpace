@@ -5,14 +5,12 @@ import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
-import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
 import com.learnspace.learnspacebackend.mappers.PaginatedResponseMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
@@ -80,21 +78,14 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public PaginatedResponseDto<CourseListDto> getCourses(Map<String, String> params) {
-        List<Course> courses = courseRepository.getAllCourses(params);
-        List<Integer> courseIds = courses.stream().map(Course::getId).toList();
-
-        Map<Integer, Double> avgRatings = reviewRepository.avgRatings(courseIds);
-        Map<Integer, Long> enrollmentCounts = enrollmentRepository.getEnrollmentCounts(courseIds);
-        Map<Integer, Long> chapterCounts = chapterRepository.countChapters(courseIds);
-        Map<Integer, Long> lessonCounts = lessonRepository.countLessons(courseIds);
-
-        List<CourseListDto> results = courses.stream()
-                .map(c -> {
+        List<CourseListDto> results = courseRepository.getAllCourses(params).stream()
+                .map(row -> {
+                    Course c = (Course) row[0];
+                    Double avgRating = (Double) row[1];
+                    Long enrollmentCount = (Long) row[2];
+                    Long chapterCount = (Long) row[3];
+                    Long lessonCount = (Long) row[4];
                     CourseListDto course = courseMapper.toListDto(c);
-                    Double avgRating = avgRatings.get(c.getId());
-                    Long enrollmentCount = enrollmentCounts.getOrDefault(c.getId(), 0L);
-                    Long chapterCount = chapterCounts.getOrDefault(c.getId(), 0L);
-                    Long lessonCount = lessonCounts.getOrDefault(c.getId(), 0L);
 
                     return new CourseListDto(
                             course.id(),
@@ -119,19 +110,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseDto getCourse(int courseId) {
         Course course = courseRepository.getCourseById(courseId);
-
         CourseDto dto = courseMapper.toDto(course);
         Double avgRating = reviewRepository.getAverageRatingByCourse(courseId);
         Long enrollCount = enrollmentRepository.countEnrollments(courseId);
-        LessonProgressDto latestProgress = null;
 
-        Object p = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        CustomUserDetails principal = p.equals("anonymousUser") ? null : (CustomUserDetails) p;
-        if (principal != null) {
-            LessonProgress l = progressRepository.getLessonProgressByStudentAndCourse(
-                    principal.getId(), courseId);
-            latestProgress = progressMapper.toDto(l);
-        }
         return new CourseDto(
                 dto.id(),
                 dto.name(),
@@ -145,7 +127,6 @@ public class CourseServiceImpl implements CourseService {
                 dto.chapters(),
                 dto.category(),
                 dto.teacher(),
-                latestProgress,
                 dto.createdAt(),
                 dto.updatedAt(),
                 dto.imageFile(),
@@ -265,20 +246,13 @@ public class CourseServiceImpl implements CourseService {
     public List<MyCourseListDto> getEnrolledCourses() {
         CustomUserDetails principal = (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<Course> courses = courseRepository.getEnrolledCoursesByStudent(principal.getId());
-
-        List<Integer> courseIds = courses.stream().map(Course::getId).toList();
-        Map<Integer, Long> chapterCounts = chapterRepository.countChapters(courseIds);
-        Map<Integer, Long> lessonCounts = lessonRepository.countLessons(courseIds);
-        Map<Integer, Long> completedCounts =
-                progressRepository.countCompletedLessons(principal.getId(), courseIds);
-
+        List<Object[]> courses = courseRepository.getEnrolledCoursesByStudent(principal.getId());
         return courses.stream()
-                .map(c -> {
-                    Long chapterCount = chapterCounts.getOrDefault(c.getId(), 0L);
-                    Long lessonCount = lessonCounts.getOrDefault(c.getId(), 0L);
-                    Long completedCount = completedCounts.getOrDefault(c.getId(), 0L);
-
+                .map(row -> {
+                    Course c = (Course) row[0];
+                    Long chapterCount = (Long) row[1];
+                    Long lessonCount = (Long) row[2];
+                    Long completedCount = (Long) row[3];
                     CourseListDto course = courseMapper.toListDto(c);
                     return new MyCourseListDto(
                             course.id(),

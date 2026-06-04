@@ -53,22 +53,6 @@ public class JwtUtils {
         return null;
     }
 
-    public String validateTokenAndGetUsername(String token) throws Exception {
-        JWTClaimsSet claims = validateToken(token);
-        if (claims != null) {
-            return claims.getSubject();
-        }
-        return null;
-    }
-
-    public Integer validateTokenAndGetUserId(String token) throws Exception {
-        JWTClaimsSet claims = validateToken(token);
-        if (claims != null && claims.getClaim("userId") != null) {
-            return Integer.parseInt(claims.getClaim("userId").toString());
-        }
-        return null;
-    }
-
     public JWTClaimsSet validateTokenAndGetClaims(String token) throws Exception {
         return validateToken(token);
     }

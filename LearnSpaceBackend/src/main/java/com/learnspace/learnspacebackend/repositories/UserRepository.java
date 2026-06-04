@@ -4,6 +4,7 @@ import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserRepository {
     User getUserByUsername(String username);
@@ -11,6 +12,8 @@ public interface UserRepository {
     boolean authenticate(String username, String password);
 
     boolean checkUsernameExist(String username);
+
+    List<User> getAllUsers(Map<String, String> params);
 
     User register(User u);
 

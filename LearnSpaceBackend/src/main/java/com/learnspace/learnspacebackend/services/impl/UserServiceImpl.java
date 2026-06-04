@@ -26,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -44,6 +46,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private UserService userService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -71,7 +76,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserProfileDto register(UserRegisterDto dto) {
         if (userRepository.checkUsernameExist(dto.username())) {
-            throw new RuntimeException();
+            throw new RuntimeException("Username đã tồn tại");
         }
         User user = userMapper.toEntity(dto);
 
@@ -91,8 +96,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(UserLoginDto user) {
-        boolean isAuthenticated = userRepository.authenticate(user.username(), user.password());
-        if (!isAuthenticated) {
+        if (!userRepository.authenticate(user.username(), user.password())) {
             throw new AccessDeniedException("Thông tin đăng nhập sai");
         }
         CustomUserDetails principal = (CustomUserDetails) loadUserByUsername(user.username());
@@ -161,5 +165,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public int countAllUsers() {
         return userRepository.countAllUser();
+    }
+
+    @Override
+    public List<UserProfileDto> getAllUsers(Map<String, String> params) {
+        return userRepository.getAllUsers(params).stream()
+                .map(userMapper::toProfileDto)
+                .toList();
     }
 }
