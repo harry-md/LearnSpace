@@ -19,12 +19,10 @@ import {
 import Apis, { authApis, endpoints } from "@/configs/Apis";
 import { CartContext, UIContext, UserContext } from "@/configs/Context";
 import ProtectLessonDisplay from "./ProtectLessonDisplay/ProtectLessonDisplay";
-import useLessonProcess from "@/hooks/useLessonProcess";
 
 const CourseDetailPage = () => {
   const { id } = useParams();
   const [user] = useContext(UserContext);
-  const { lessonProgress, getLessonProgress } = useLessonProcess();
 
   const [courseDetails, setCourseDetails] = useState({ chapters: [] });
   const [notFound, setNotFound] = useState(false);

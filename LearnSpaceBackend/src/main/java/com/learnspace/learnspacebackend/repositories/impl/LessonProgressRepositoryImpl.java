@@ -95,4 +95,5 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
         return results.stream()
                 .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
     }
+
 }
