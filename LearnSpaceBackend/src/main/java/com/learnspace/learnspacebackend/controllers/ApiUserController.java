@@ -1,6 +1,5 @@
 package com.learnspace.learnspacebackend.controllers;
 
-import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.dtos.user.UserLoginDto;
 import com.learnspace.learnspacebackend.dtos.user.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.user.UserRegisterDto;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -47,16 +45,13 @@ public class ApiUserController {
     }
 
     @GetMapping("/current-user")
-    public ResponseEntity<UserProfileDto> getCurrentUser(
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
-        return ResponseEntity.ok(userService.getUserByUsername(currentUser.getUsername()));
+    public ResponseEntity<UserProfileDto> getCurrentUser() {
+        return ResponseEntity.ok(userService.getCurrentUser());
     }
 
     @PatchMapping("/current-user")
-    public ResponseEntity<UserProfileDto> update(
-            @AuthenticationPrincipal CustomUserDetails currentUser,
-            @Valid @ModelAttribute UserUpdateDto dto)
+    public ResponseEntity<UserProfileDto> update(@Valid @ModelAttribute UserUpdateDto dto)
             throws IOException {
-        return ResponseEntity.ok(userService.updateUser(currentUser.getId(), dto));
+        return ResponseEntity.ok(userService.updateUser(dto));
     }
 }

@@ -6,11 +6,9 @@ import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.mappers.ChapterMapper;
 import com.learnspace.learnspacebackend.pojo.Chapter;
 import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.repositories.ChapterRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
-import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.ChapterService;
 import com.learnspace.learnspacebackend.services.R2Service;
 
@@ -30,9 +28,6 @@ public class ChapterServiceImpl implements ChapterService {
     private CourseRepository courseRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private ChapterMapper chapterMapper;
 
     @Autowired
@@ -41,15 +36,13 @@ public class ChapterServiceImpl implements ChapterService {
     @Autowired
     private R2Service r2Service;
 
-    private User getLoggedInTeacher() {
-        CustomUserDetails principal = (CustomUserDetails)
+    private CustomUserDetails getPrincipal() {
+        return (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userRepository.getUserById(principal.getId());
     }
 
     private void checkCourseOwner(Course course) {
-        User teacher = getLoggedInTeacher();
-        if (!course.getTeacher().getId().equals(teacher.getId())) {
+        if (!course.getTeacher().getId().equals(getPrincipal().getId())) {
             throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này");
         }
     }

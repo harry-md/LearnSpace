@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -146,9 +147,20 @@ public class UserServiceImpl implements UserService {
         userRepository.update(user);
     }
 
+    private CustomUserDetails getPrincipal() {
+        return (CustomUserDetails)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
     @Override
-    public UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto) throws IOException {
-        User user = userRepository.getUserById(currentUserId);
+    public UserProfileDto getCurrentUser() {
+        return userMapper.toProfileDto(
+                userRepository.getUserByUsername(getPrincipal().getUsername()));
+    }
+
+    @Override
+    public UserProfileDto updateUser(UserUpdateDto dto) throws IOException {
+        User user = userRepository.getUserById(getPrincipal().getId());
         user.setFullName(dto.fullName());
         user.setEmail(dto.email());
 

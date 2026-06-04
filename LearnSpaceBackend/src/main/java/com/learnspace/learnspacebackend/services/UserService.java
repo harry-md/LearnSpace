@@ -21,7 +21,9 @@ public interface UserService extends UserDetailsService {
 
     UserProfileDto register(UserRegisterDto dto);
 
-    UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto) throws IOException;
+    UserProfileDto getCurrentUser();
+
+    UserProfileDto updateUser(UserUpdateDto dto) throws IOException;
 
     String login(UserLoginDto user);
 

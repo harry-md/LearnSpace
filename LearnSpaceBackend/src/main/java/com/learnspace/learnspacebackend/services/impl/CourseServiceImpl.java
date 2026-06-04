@@ -10,7 +10,6 @@ import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.mappers.PaginatedResponseMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
@@ -127,16 +126,18 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.countCourses(params);
     }
 
-    private User getLoggedInTeacher() {
-        CustomUserDetails principal = (CustomUserDetails)
+    private CustomUserDetails getPrincipal() {
+        return (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userRepository.getUserById(principal.getId());
     }
 
-    private void checkCourseOwner(Course course, User teacher) {
-        if (!course.getTeacher().getId().equals(teacher.getId())
-                && teacher.getRole() != UserRole.ADMIN) {
-            throw new AccessDeniedException("Bạn không phải chủ sở hữu khóa học");
+    private void checkCourseOwner(Course course) {
+        CustomUserDetails principal = getPrincipal();
+        boolean isAdmin = principal.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_" + UserRole.ADMIN.name()));
+
+        if (!course.getTeacher().getId().equals(principal.getId()) && !isAdmin) {
+            throw new AccessDeniedException("Không có quyền sửa khóa học");
         }
     }
 
@@ -145,7 +146,7 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseMapper.toEntity(courseDto);
         Category category = categoryRepository.getCateById(courseDto.categoryId());
         course.setCategory(category);
-        course.setTeacher(getLoggedInTeacher());
+        course.setTeacher(userRepository.getUserById(getPrincipal().getId()));
 
         MultipartFile imageFile = courseDto.imageFile();
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -169,14 +170,13 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseDto updateCourse(int id, CoursePatchDto courseDto) throws IOException {
-        Course existCourse = courseRepository.getCourseById(id);
-        User teacher = getLoggedInTeacher();
-        checkCourseOwner(existCourse, teacher);
-        courseMapper.updateEntityFromDto(existCourse, courseDto);
+        Course course = courseRepository.getCourseById(id);
+        checkCourseOwner(course);
+        courseMapper.updateEntityFromDto(course, courseDto);
 
         if (courseDto.categoryId() != null) {
             Category category = categoryRepository.getCateById(courseDto.categoryId());
-            existCourse.setCategory(category);
+            course.setCategory(category);
         }
 
         MultipartFile imageFile = courseDto.imageFile();
@@ -190,16 +190,16 @@ public class CourseServiceImpl implements CourseService {
         }
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            cloudinaryService.deleteImage(existCourse.getImage());
-            existCourse.setImage(cloudinaryService.uploadImage(imageFile));
+            cloudinaryService.deleteImage(course.getImage());
+            course.setImage(cloudinaryService.uploadImage(imageFile));
         }
 
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
-            cloudinaryService.deleteVideo(existCourse.getIntroVideo());
-            existCourse.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
+            cloudinaryService.deleteVideo(course.getIntroVideo());
+            course.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
 
-        return courseMapper.toDto(courseRepository.addOrUpdateCourse(existCourse));
+        return courseMapper.toDto(courseRepository.addOrUpdateCourse(course));
     }
 
     @Override
@@ -208,9 +208,7 @@ public class CourseServiceImpl implements CourseService {
         if (course == null) {
             throw new IllegalArgumentException("Không tìm thấy khóa học");
         }
-
-        User teacher = getLoggedInTeacher();
-        checkCourseOwner(course, teacher);
+        checkCourseOwner(course);
 
         List<String> lessonVideoUrls = lessonRepository.getVideoUrlsByCourseId(id);
         r2Service.deleteVideos(lessonVideoUrls);

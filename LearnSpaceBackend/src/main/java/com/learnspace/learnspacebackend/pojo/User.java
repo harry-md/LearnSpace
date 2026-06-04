@@ -52,7 +52,7 @@ public class User {
     private String avatar =
             "https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png";
 
-    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     Set<Enrollment> enrollments;
 
     @ColumnDefault("0")

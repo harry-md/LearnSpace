@@ -32,14 +32,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Autowired
     private EnrollmentMapper enrollmentMapper;
 
-    private CustomUserDetails getLoggedInPrincipal() {
+    private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     @Override
     public EnrollmentDto createEnrollment(int courseId) {
-        CustomUserDetails principal = getLoggedInPrincipal();
+        CustomUserDetails principal = getPrincipal();
         User student = userRepository.getUserById(principal.getId());
         Course course = courseRepository.getCourseById(courseId);
         if (enrollmentRepository.checkValidEnrollment(student.getId(), courseId)) {

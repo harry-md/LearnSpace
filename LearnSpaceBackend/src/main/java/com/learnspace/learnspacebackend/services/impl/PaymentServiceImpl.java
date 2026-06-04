@@ -43,7 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private PaymentMapper paymentMapper;
 
-    private CustomUserDetails getLoggedInPrincipal() {
+    private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
@@ -66,7 +66,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (carts == null || carts.isEmpty()) {
             throw new RuntimeException("Giỏ hàng trống");
         }
-        User student = userRepository.getUserById(getLoggedInPrincipal().getId());
+        User student = userRepository.getUserById(getPrincipal().getId());
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<Payment> payments = new ArrayList<>();
 

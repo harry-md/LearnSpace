@@ -37,26 +37,18 @@ public class LessonServiceImpl implements LessonService {
     private LessonProgressMapper lessonProgressMapper;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private LessonMapper lessonMapper;
 
     @Autowired
     private R2Service r2Service;
 
-    private CustomUserDetails getLoggedInPrincipal() {
+    private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    private User getLoggedInTeacher() {
-        return userRepository.getUserById(getLoggedInPrincipal().getId());
-    }
-
     private void checkCourseOwner(Course course) {
-        User teacher = getLoggedInTeacher();
-        if (!course.getTeacher().getId().equals(teacher.getId())) {
+        if (!course.getTeacher().getId().equals(getPrincipal().getId())) {
             throw new AccessDeniedException("Không có quyền");
         }
     }
@@ -64,18 +56,16 @@ public class LessonServiceImpl implements LessonService {
     private void checkLessonAccess(Lesson lesson) {
         Chapter chapter = lesson.getChapter();
         Course course = chapter.getCourse();
-        CustomUserDetails principal = getLoggedInPrincipal();
+        CustomUserDetails principal = getPrincipal();
 
         if (course.getTeacher().getId().equals(principal.getId())) {
             return;
         }
-
         if (chapter.isFree()) {
             return;
         }
-
         if (!enrollmentRepository.checkValidEnrollment(principal.getId(), course.getId())) {
-            throw new RuntimeException("Không có enrollment");
+            throw new RuntimeException("Không có đăng ký học");
         }
     }
 
@@ -83,7 +73,7 @@ public class LessonServiceImpl implements LessonService {
     public LessonDto getLesson(int lessonId) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         checkLessonAccess(lesson);
-        CustomUserDetails principal = getLoggedInPrincipal();
+        CustomUserDetails principal = getPrincipal();
         LessonProgress lessonProgress =
                 lessonProgressRepository.getLessonProgressByStudentAndLesson(
                         principal.getId(), lessonId);

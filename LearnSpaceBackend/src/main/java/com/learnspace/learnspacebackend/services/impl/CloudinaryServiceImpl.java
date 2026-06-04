@@ -83,7 +83,6 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     private void deleteFromCloudinary(String url, String resourceType) throws IOException {
-
         String[] parts = url.split("/upload/");
         if (parts.length < 2) return;
         String pathAfterUpload = parts[1];

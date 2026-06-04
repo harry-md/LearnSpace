@@ -33,7 +33,7 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
-    private CustomUserDetails getLoggedInPrincipal() {
+    private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
@@ -42,7 +42,7 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     @Transactional
     public LessonProgressDto saveLessonProgress(int lessonId, LessonProgressDto lessonProgressDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
-        int userId = getLoggedInPrincipal().getId();
+        int userId = getPrincipal().getId();
         LessonProgress progress =
                 lessonProgressRepository.getLessonProgressByStudentAndLesson(userId, lessonId);
 
