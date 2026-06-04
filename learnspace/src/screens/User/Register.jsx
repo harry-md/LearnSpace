@@ -61,14 +61,12 @@ const Register = () => {
 
       const { confirm, ...registerData } = user;
 
-      const jsonBlob = new Blob([JSON.stringify(registerData)], {
-        type: "application/json",
-      });
-
-      form.append("data", jsonBlob);
+      for (let key in registerData) {
+        form.append(key, registerData[key]);
+      }
 
       if (avatar.current.files.length > 0) {
-        form.append("avatar", avatar.current.files[0]);
+        form.append("avatarFile", avatar.current.files[0]);
       }
 
       try {
