@@ -39,23 +39,6 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
     }
 
     @Override
-    public Enrollment getEnrollmentById(int id) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Enrollment> q = b.createQuery(Enrollment.class);
-
-        Root<Enrollment> root = q.from(Enrollment.class);
-        root.fetch("course");
-        root.fetch("student");
-
-        q.select(root)
-                .where(
-                        b.equal(root.get("id"), id),
-                        root.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
-        return session.createQuery(q).getSingleResult();
-    }
-
-    @Override
     public Enrollment getEnrollmentByStudentAndCourse(
             int studentId, int courseId, EnrollmentStatus... status) {
         Session session = factory.getObject().getCurrentSession();

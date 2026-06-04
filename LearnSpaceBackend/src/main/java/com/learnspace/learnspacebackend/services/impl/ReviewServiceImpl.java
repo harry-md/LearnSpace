@@ -35,7 +35,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .toList();
 
         return PaginatedResponseMapper.toPaginatedResponseDto(
-                reviewRepository.countReviewsByCourse(courseId, params),
+                reviewRepository.countReviewsByCourse(courseId),
                 Integer.parseInt(params.getOrDefault("page", "1")),
                 REVIEW_PAGE_SIZE,
                 results);

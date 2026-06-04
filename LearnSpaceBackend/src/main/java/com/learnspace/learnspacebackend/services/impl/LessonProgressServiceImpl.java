@@ -42,32 +42,28 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     @Transactional
     public LessonProgressDto saveLessonProgress(int lessonId, LessonProgressDto lessonProgressDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
-        Course course = lesson.getChapter().getCourse();
         int userId = getLoggedInPrincipal().getId();
-
-        Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
-                userId, course.getId(), EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED);
-        if (enrollment == null) {
-            throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
-        }
-
         LessonProgress progress =
                 lessonProgressRepository.getLessonProgressByStudentAndLesson(userId, lessonId);
-        LessonProgress saveProgress;
-        if (progress != null) {
-            saveProgress = progress;
-        } else {
-            saveProgress = lessonProgressMapper.toEntity(lessonProgressDto);
-            saveProgress.setLesson(lesson);
-            saveProgress.setStudent(enrollment.getStudent());
-        }
-        saveProgress.setWatchedSec(lessonProgressDto.watchedSec());
 
-        if (saveProgress.getWatchedSec() >= lesson.getVideoLength()) {
-            saveProgress.setCompleted(true);
+        if (progress == null) {
+            Course course = lesson.getChapter().getCourse();
+            Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
+                    userId, course.getId(), EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED);
+
+            if (enrollment == null) {
+                throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
+            }
+            progress = lessonProgressMapper.toEntity(lessonProgressDto);
+            progress.setLesson(lesson);
+            progress.setStudent(enrollment.getStudent());
+        }
+        progress.setWatchedSec(lessonProgressDto.watchedSec());
+        if (progress.getWatchedSec() >= lesson.getVideoLength()) {
+            progress.setCompleted(true);
         }
 
         return lessonProgressMapper.toDto(
-                lessonProgressRepository.addOrUpdateLessonProgress(saveProgress));
+                lessonProgressRepository.addOrUpdateLessonProgress(progress));
     }
 }

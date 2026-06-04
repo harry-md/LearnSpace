@@ -41,22 +41,19 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public EnrollmentDto createEnrollment(int courseId) {
         CustomUserDetails principal = getLoggedInPrincipal();
         User student = userRepository.getUserById(principal.getId());
-
         Course course = courseRepository.getCourseById(courseId);
         if (enrollmentRepository.checkValidEnrollment(student.getId(), courseId)) {
             throw new RuntimeException("Bạn đã đăng ký khóa học này rồi");
         }
 
         Enrollment enrollment = new Enrollment();
-        enrollment.setStudent(student);
-        enrollment.setCourse(course);
-
         if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
             enrollment.setStatus(EnrollmentStatus.ACTIVE);
         } else {
             throw new RuntimeException("Khóa học có phí");
         }
-
+        enrollment.setStudent(student);
+        enrollment.setCourse(course);
         return enrollmentMapper.toDto(enrollmentRepository.addOrUpdateEnrollment(enrollment));
     }
 }
