@@ -33,6 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -162,14 +163,14 @@ public class CourseServiceImpl implements CourseService {
         return userRepository.getUserById(principal.getId());
     }
 
-    private void verifyCourseOwner(Course course, User teacher) {
+    private void checkCourseOwner(Course course, User teacher) {
         if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException("Không sở hữu khóa học");
+            throw new AccessDeniedException("Bạn không phải chủ sở hữu khóa học");
         }
     }
 
     @Override
-    public CourseDto createCourse(CourseDto courseDto) {
+    public CourseDto createCourse(CourseDto courseDto) throws IOException {
         Course course = courseMapper.toEntity(courseDto);
 
         if (courseDto.categoryId() != null) {
@@ -192,7 +193,6 @@ public class CourseServiceImpl implements CourseService {
         if (imageFile != null && !imageFile.isEmpty()) {
             course.setImage(cloudinaryService.uploadImage(imageFile));
         }
-
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             course.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
@@ -202,10 +202,10 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDto updateCourse(int id, CoursePatchDto courseDto) {
+    public CourseDto updateCourse(int id, CoursePatchDto courseDto) throws IOException {
         Course existCourse = courseRepository.getCourseById(id);
         User teacher = getLoggedInTeacher();
-        verifyCourseOwner(existCourse, teacher);
+        checkCourseOwner(existCourse, teacher);
 
         courseMapper.updateEntityFromDto(existCourse, courseDto);
 
@@ -238,14 +238,14 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public void deleteCourse(int id) {
+    public void deleteCourse(int id) throws IOException {
         Course course = courseRepository.getCourseById(id);
         if (course == null) {
             throw new IllegalArgumentException("Không tìm thấy khóa học");
         }
 
         User teacher = getLoggedInTeacher();
-        verifyCourseOwner(course, teacher);
+        checkCourseOwner(course, teacher);
 
         List<String> lessonVideoUrls = lessonRepository.getVideoUrlsByCourseId(id);
         r2Service.deleteVideos(lessonVideoUrls);

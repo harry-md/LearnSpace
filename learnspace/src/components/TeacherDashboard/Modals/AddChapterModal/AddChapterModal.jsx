@@ -30,8 +30,7 @@ const AddChapterModal = ({ open, onClose, onSubmit, course }) => {
       <Field label="Tên chương" required>
         <input
           className="input-cls"
-          
-          placeholder="VD: Array & Hashing"
+          placeholder="Tên chương"
           value={chapterForm.title}
           onChange={(e) =>
             setChapterForm({ ...chapterForm, title: e.target.value })
@@ -44,7 +43,7 @@ const AddChapterModal = ({ open, onClose, onSubmit, course }) => {
         <textarea
           className="input-cls add-chapter-modal-textarea"
           rows={3}
-          placeholder="Tóm tắt nội dung chương..."
+          placeholder="Tóm tắt nội dung chương"
           value={chapterForm.description}
           onChange={(e) =>
             setChapterForm({
@@ -57,16 +56,10 @@ const AddChapterModal = ({ open, onClose, onSubmit, course }) => {
         />
       </Field>
       <div className="add-chapter-modal-footer">
-        <button
-          onClick={onClose}
-          className="add-chapter-modal-btn-cancel"
-        >
+        <button onClick={onClose} className="add-chapter-modal-btn-cancel">
           Hủy bỏ
         </button>
-        <button
-          onClick={handleAdd}
-          className="add-chapter-modal-btn-submit"
-        >
+        <button onClick={handleAdd} className="add-chapter-modal-btn-submit">
           <FolderPlus size={16} />
           Thêm vào khóa học
         </button>

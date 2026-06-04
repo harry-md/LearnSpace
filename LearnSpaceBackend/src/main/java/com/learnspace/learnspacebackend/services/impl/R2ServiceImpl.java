@@ -18,11 +18,7 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,7 +79,7 @@ public class R2ServiceImpl implements R2Service {
                 return directory.getInt(Mp4Directory.TAG_DURATION_SECONDS);
             }
         } catch (Exception ex) {
-            throw new RuntimeException("Lỗi khi đọc độ dài video");
+            throw new RuntimeException(ex.getMessage());
         }
         return 0;
     }
@@ -97,8 +93,7 @@ public class R2ServiceImpl implements R2Service {
                     DeleteObjectRequest.builder().bucket(bucketName).key(key).build();
             r2Client.deleteObject(delRequest);
         } catch (Exception ex) {
-            System.err.println(ex.getMessage());
-            throw new RuntimeException("Có lỗi khi xóa video");
+            throw new RuntimeException(ex.getMessage());
         }
     }
 
@@ -120,8 +115,8 @@ public class R2ServiceImpl implements R2Service {
                     .build();
 
             r2Client.deleteObjects(delRequest);
-        } catch (Exception e) {
-            throw new RuntimeException("Có lỗi khi xóa video");
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
         }
     }
 }

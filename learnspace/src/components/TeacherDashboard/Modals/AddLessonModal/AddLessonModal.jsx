@@ -64,7 +64,7 @@ const AddLessonModal = ({ open, onClose, onSubmit }) => {
       <Field label="Tiêu đề bài học" required>
         <input
           className="input-cls"
-          placeholder="VD: Two Sum – Bài kinh điển LeetCode"
+          placeholder="Tiêu đề bài học"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
           onFocus={(e) => (e.target.style.borderColor = "#8b5cf6")}
@@ -76,7 +76,7 @@ const AddLessonModal = ({ open, onClose, onSubmit }) => {
         <textarea
           className="input-cls add-lesson-modal-textarea"
           rows={3}
-          placeholder="Tóm tắt nội dung bài học..."
+          placeholder="Tóm tắt nội dung bài học"
           value={form.content}
           onChange={(e) => setForm({ ...form, content: e.target.value })}
           onFocus={(e) => (e.target.style.borderColor = "#8b5cf6")}

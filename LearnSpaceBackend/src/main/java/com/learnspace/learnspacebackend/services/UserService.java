@@ -8,6 +8,8 @@ import com.learnspace.learnspacebackend.dtos.user.UserUpdateDto;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.io.IOException;
+
 public interface UserService extends UserDetailsService {
     UserProfileDto getUserByUsername(String username);
 
@@ -15,11 +17,11 @@ public interface UserService extends UserDetailsService {
 
     UserProfileDto register(UserRegisterDto dto);
 
-    UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto);
+    UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto) throws IOException;
 
     String login(UserLoginDto user);
 
     UserProfileDto registerAdmin(UserRegisterDto user);
 
-    void updateByAdmin(AdminUserUpdateDto dto);
+    void updateByAdmin(AdminUserUpdateDto dto) throws IOException;
 }

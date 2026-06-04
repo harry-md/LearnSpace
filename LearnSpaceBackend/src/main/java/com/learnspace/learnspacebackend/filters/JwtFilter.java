@@ -34,7 +34,6 @@ public class JwtFilter implements Filter {
 
             try {
                 JWTClaimsSet claims = jwtUtils.validateTokenAndGetClaims(token);
-
                 if (claims != null) {
                     Integer userId = claims.getIntegerClaim("userId");
                     String username = claims.getSubject();
@@ -59,7 +58,6 @@ public class JwtFilter implements Filter {
                 System.err.println(ex.getMessage());
             }
         }
-
         chain.doFilter(request, response);
     }
 }

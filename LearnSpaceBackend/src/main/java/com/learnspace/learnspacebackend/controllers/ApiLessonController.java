@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
 
 @RestController
 @RequestMapping("/api")
@@ -32,15 +29,10 @@ public class ApiLessonController {
                 MediaType.MULTIPART_FORM_DATA_VALUE,
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
-    public ResponseEntity<?> create(
+    public ResponseEntity<LessonDto> create(
             @PathVariable("chapterId") int chapterId, @Valid @ModelAttribute LessonDto lessonDto) {
-        try {
-            return new ResponseEntity<>(
-                    lessonService.createLesson(chapterId, lessonDto), HttpStatus.CREATED);
-        } catch (AccessDeniedException ex) {
-            return new ResponseEntity<>(
-                    Collections.singletonMap("permission", ex.getMessage()), HttpStatus.FORBIDDEN);
-        }
+        return new ResponseEntity<>(
+                lessonService.createLesson(chapterId, lessonDto), HttpStatus.CREATED);
     }
 
     @PatchMapping(
@@ -49,24 +41,14 @@ public class ApiLessonController {
                 MediaType.MULTIPART_FORM_DATA_VALUE,
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
-    public ResponseEntity<?> update(
+    public ResponseEntity<LessonDto> update(
             @PathVariable("id") int id, @Valid @ModelAttribute LessonPatchDto lessonDto) {
-        try {
-            return ResponseEntity.ok(lessonService.updateLesson(id, lessonDto));
-        } catch (AccessDeniedException ex) {
-            return new ResponseEntity<>(
-                    Collections.singletonMap("permission", ex.getMessage()), HttpStatus.FORBIDDEN);
-        }
+        return ResponseEntity.ok(lessonService.updateLesson(id, lessonDto));
     }
 
     @DeleteMapping("/lessons/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") int id) {
-        try {
-            lessonService.deleteLesson(id);
-            return ResponseEntity.noContent().build();
-        } catch (AccessDeniedException ex) {
-            return new ResponseEntity<>(
-                    Collections.singletonMap("permission", ex.getMessage()), HttpStatus.FORBIDDEN);
-        }
+    public ResponseEntity<Void> delete(@PathVariable("id") int id) {
+        lessonService.deleteLesson(id);
+        return ResponseEntity.noContent().build();
     }
 }

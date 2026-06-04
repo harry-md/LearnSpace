@@ -5,7 +5,6 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.dtos.user.SimpleUserDto;
 import com.learnspace.learnspacebackend.services.ChatService;
-import com.learnspace.learnspacebackend.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,9 +21,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/chat")
 public class ApiChatController {
-    @Autowired
-    private UserService userService;
-
     @Autowired
     private ChatService chatService;
 

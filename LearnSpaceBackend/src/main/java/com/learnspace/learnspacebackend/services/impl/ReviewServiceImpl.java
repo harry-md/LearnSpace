@@ -83,7 +83,7 @@ public class ReviewServiceImpl implements ReviewService {
         User currentUser = userRepository.getUserById(getLoggedInStudent().getId());
         Review review = reviewRepository.getReviewById(reviewId);
         if (!checkReviewOwner(review, currentUser))
-            throw new AccessDeniedException("Bạn không có quyền");
+            throw new AccessDeniedException("Bạn không có quyền sửa");
         return null;
     }
 
