@@ -1,16 +1,5 @@
 import { useContext, useRef, useEffect } from "react";
-import {
-  X,
-  Lock,
-  FileText,
-  Clock,
-  BookOpen,
-  ShieldCheck,
-  MessageSquare,
-  ThumbsUp,
-  MessageCircle,
-  VideoOff,
-} from "lucide-react";
+import { X, FileText, Clock, BookOpen, VideoOff } from "lucide-react";
 import { authApis, endpoints } from "@/configs/Apis";
 import { UserContext } from "@/configs/Context";
 
