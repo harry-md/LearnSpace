@@ -49,17 +49,16 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private void activatePayments(List<Payment> payments, String paymentIntentId) {
-        for (Payment payment : payments) {
-            if (payment.getStatus() == PaymentStatus.COMPLETED) {
-                continue;
-            }
-            payment.setStatus(PaymentStatus.COMPLETED);
-            payment.setStripePaymentIntentId(paymentIntentId);
-            paymentRepository.addOrUpdatePayment(payment);
-            Enrollment enrollment = payment.getEnrollment();
-            enrollment.setStatus(EnrollmentStatus.ACTIVE);
-            enrollmentRepository.addOrUpdateEnrollment(enrollment);
-        }
+        payments.stream()
+                .filter(payment -> payment.getStatus() != PaymentStatus.COMPLETED)
+                .forEach(payment -> {
+                    payment.setStatus(PaymentStatus.COMPLETED);
+                    payment.setStripePaymentIntentId(paymentIntentId);
+                    paymentRepository.addOrUpdatePayment(payment);
+                    Enrollment enrollment = payment.getEnrollment();
+                    enrollment.setStatus(EnrollmentStatus.ACTIVE);
+                    enrollmentRepository.addOrUpdateEnrollment(enrollment);
+                });
     }
 
     @Override
@@ -67,11 +66,10 @@ public class PaymentServiceImpl implements PaymentService {
         if (carts == null || carts.isEmpty()) {
             throw new RuntimeException("Giỏ hàng trống");
         }
-        CustomUserDetails principal = getLoggedInPrincipal();
-        User student = userRepository.getUserById(principal.getId());
+        User student = userRepository.getUserById(getLoggedInPrincipal().getId());
         BigDecimal totalAmount = BigDecimal.ZERO;
-
         List<Payment> payments = new ArrayList<>();
+
         for (CartDto c : carts) {
             Course course = courseRepository.getCourseById(c.courseId());
             if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
@@ -86,36 +84,35 @@ public class PaymentServiceImpl implements PaymentService {
                         || enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
                     throw new RuntimeException("Đã đăng ký khóa học " + course.getName() + " rồi");
                 }
-                enrollment.setStatus(EnrollmentStatus.PENDING);
-                enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
                 payment = paymentRepository.getPaymentByEnrollmentId(enrollment.getId());
             } else {
                 enrollment = new Enrollment();
                 enrollment.setStudent(student);
                 enrollment.setCourse(course);
-                enrollment.setStatus(EnrollmentStatus.PENDING);
-                enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
             }
+            enrollment.setStatus(EnrollmentStatus.PENDING);
+            enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
             if (payment == null) {
                 payment = new Payment();
                 payment.setEnrollment(enrollment);
             }
+
             payment.setAmount(course.getPrice());
             payment.setStatus(PaymentStatus.PENDING);
             totalAmount = totalAmount.add(course.getPrice());
             payments.add(payment);
         }
-        String description = "Thanh toán khóa học LearnSpace";
-        Session session = stripeService.createCheckoutSession(totalAmount, description);
+        Session session =
+                stripeService.createCheckoutSession(totalAmount, "Thanh toán khóa học LearnSpace");
         String sessionId = session.getId();
-        String checkoutUrl = session.getUrl();
-        List<PaymentDto> paymentDtos = new ArrayList<>();
-        for (Payment payment : payments) {
-            payment.setStripeSessionId(sessionId);
-            payment = paymentRepository.addOrUpdatePayment(payment);
-            paymentDtos.add(paymentMapper.toDto(payment));
-        }
-        return new CheckoutDto(sessionId, checkoutUrl, paymentDtos, totalAmount);
+
+        List<PaymentDto> paymentDtos = payments.stream()
+                .map(payment -> {
+                    payment.setStripeSessionId(sessionId);
+                    return paymentMapper.toDto(paymentRepository.addOrUpdatePayment(payment));
+                })
+                .toList();
+        return new CheckoutDto(sessionId, session.getUrl(), paymentDtos, totalAmount);
     }
 
     @Override

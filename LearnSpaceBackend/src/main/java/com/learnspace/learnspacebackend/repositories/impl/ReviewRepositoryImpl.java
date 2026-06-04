@@ -30,12 +30,6 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     private LocalSessionFactoryBean factory;
 
     @Override
-    public Review getReviewById(int reviewId) {
-        Session session = factory.getObject().getCurrentSession();
-        return session.get(Review.class, reviewId);
-    }
-
-    @Override
     public Double getAverageRatingByCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
@@ -77,7 +71,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     }
 
     @Override
-    public Long countReviewsByCourse(int courseId, Map<String, String> params) {
+    public Long countReviewsByCourse(int courseId) {
         Session session = factory.getObject().getCurrentSession();
         CriteriaBuilder b = session.getCriteriaBuilder();
         CriteriaQuery<Long> q = b.createQuery(Long.class);
@@ -94,15 +88,5 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                                 .get("status")
                                 .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
         return session.createQuery(q).getSingleResult();
-    }
-
-    @Override
-    public Review addOrUpdateReview(Review review) {
-        Session session = factory.getObject().getCurrentSession();
-        if (review.getId() == null) {
-            session.persist(review);
-            return review;
-        }
-        return session.merge(review);
     }
 }
