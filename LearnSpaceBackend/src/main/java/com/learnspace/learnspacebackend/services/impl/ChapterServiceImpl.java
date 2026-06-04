@@ -68,11 +68,9 @@ public class ChapterServiceImpl implements ChapterService {
     public ChapterDto updateChapter(int chapterId, ChapterPatchDto chapterDto) {
         Chapter chapter = chapterRepository.getChapterById(chapterId);
         checkCourseOwner(chapter.getCourse());
-
         chapterMapper.updateEntityFromDto(chapter, chapterDto);
 
         Chapter updatedChapter = chapterRepository.createOrUpdate(chapter);
-
         return chapterMapper.toDto(updatedChapter);
     }
 

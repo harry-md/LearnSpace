@@ -33,10 +33,10 @@
                     <select class="form-select" name="categoryId">
                         <option value="">Tất cả danh mục</option>
                         
-                        <option th:each="cat : ${categories}" 
-                                th:value="${cat.id}" 
-                                th:text="${cat.name}"
-                                th:selected="${param.categoryId != null and param.categoryId[0] == cat.id.toString()}">
+                        <option th:each="cate : ${categories}" 
+                                th:value="${cate.id}" 
+                                th:text="${cate.name}"
+                                th:selected="${param.categoryId != null and param.categoryId[0] == cate.id.toString()}">
                             Tên danh mục
                         </option>
                         

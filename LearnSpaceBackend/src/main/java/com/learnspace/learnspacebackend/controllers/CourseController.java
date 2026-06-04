@@ -37,7 +37,6 @@ public class CourseController {
         if (params != null && params.containsKey("page")) {
             currentPage = Integer.parseInt(params.get("page"));
         }
-
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("currentPage", currentPage);
         return "admin_courses";

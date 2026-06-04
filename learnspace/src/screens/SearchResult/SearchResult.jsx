@@ -162,7 +162,18 @@ const SearchResult = () => {
               Xóa tất cả
             </button>
           </div>
-
+          <div className="mb-8">
+            <div className="font-bold text-sm text-gray-800 mb-3">
+              Tên khóa học
+            </div>
+            <input
+              type="text"
+              placeholder="Tìm theo tên..."
+              value={teacherName}
+              onChange={(e) => setTeacherName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+            />
+          </div>
           <div className="mb-8">
             <div className="font-bold text-sm text-gray-800 mb-3">
               Tên giảng viên

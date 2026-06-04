@@ -139,7 +139,6 @@ public class LessonServiceImpl implements LessonService {
     public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         checkCourseOwner(lesson.getChapter().getCourse());
-
         lessonMapper.updateEntityFromDto(lesson, lessonDto);
 
         MultipartFile videoFile = lessonDto.videoFile();

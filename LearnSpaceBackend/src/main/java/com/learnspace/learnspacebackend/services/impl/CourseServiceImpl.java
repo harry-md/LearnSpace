@@ -172,7 +172,6 @@ public class CourseServiceImpl implements CourseService {
         Course existCourse = courseRepository.getCourseById(id);
         User teacher = getLoggedInTeacher();
         checkCourseOwner(existCourse, teacher);
-
         courseMapper.updateEntityFromDto(existCourse, courseDto);
 
         if (courseDto.categoryId() != null) {
