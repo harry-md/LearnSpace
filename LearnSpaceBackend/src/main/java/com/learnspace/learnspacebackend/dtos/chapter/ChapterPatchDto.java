@@ -7,7 +7,4 @@ public record ChapterPatchDto(
 
         @Size(max = 15000) String description,
 
-        Boolean free,
-
-        Integer frontChapterId,
-        Integer behindChapterId) {}
+        Boolean free) {}

@@ -87,12 +87,6 @@
                       </td>
                       <td class="text-end">
                         <div class="btn-group shadow-sm">
-                          <button class="btn btn-sm btn-light text-primary" data-bs-toggle="tooltip" title="Chi tiết">
-                            <i class="fa-solid fa-list-ol"></i>
-                          </button>
-                          <button class="btn btn-sm btn-light text-warning" data-bs-toggle="tooltip" title="Chỉnh sửa">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                          </button>
                           <a th:href="@{'/courses/delete/' + ${course.id}}"
                             class="btn btn-sm btn-light text-danger"
                             onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này?');"

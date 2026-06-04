@@ -11,6 +11,4 @@ public record LessonPatchDto(
 
         @Size(max = 255) String content,
 
-        @JsonIgnore MultipartFile videoFile,
-        Integer frontLessonId,
-        Integer behindLessonId) {}
+        @JsonIgnore MultipartFile videoFile) {}

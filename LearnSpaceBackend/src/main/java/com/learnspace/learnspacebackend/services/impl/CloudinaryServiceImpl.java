@@ -51,7 +51,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     @Override
     public void validateVideoFile(MultipartFile file) {
         if (file.getSize() > MAX_VIDEO_SIZE) {
-            throw new IllegalArgumentException("Video vượt quá 100MB");
+            throw new RuntimeException("Video vượt quá 100MB");
         }
         try {
             String mimeType = tika.detect(file.getInputStream());

@@ -98,9 +98,8 @@ public class LessonServiceImpl implements LessonService {
     public LessonDto createLesson(int chapterId, LessonDto lessonDto) {
         Chapter chapter = chapterRepository.getChapterById(chapterId);
         checkCourseOwner(chapter.getCourse());
-
         if (lessonDto.videoFile() == null || lessonDto.videoFile().isEmpty()) {
-            throw new RuntimeException();
+            throw new RuntimeException("Phải gửi video khi tạo bài học");
         }
 
         MultipartFile videoFile = lessonDto.videoFile();
@@ -118,8 +117,6 @@ public class LessonServiceImpl implements LessonService {
             lesson.setChapter(chapter);
             lesson.setVideo(videoUrl);
             lesson.setVideoLength(videoLength);
-            lesson.setOrder(lessonRepository.getMaxOrder(chapterId) + 1000);
-
             return lessonMapper.toDto(lessonRepository.addOrUpdateLesson(lesson));
 
         } catch (IOException ex) {
@@ -132,47 +129,12 @@ public class LessonServiceImpl implements LessonService {
         }
     }
 
-    private int calculateNewOrder(Integer frontLessonId, Integer behindLessonId) {
-        if (frontLessonId == null) {
-            return lessonRepository.getLessonById(behindLessonId).getOrder() / 2;
-        }
-        if (behindLessonId == null) {
-            return lessonRepository.getLessonById(frontLessonId).getOrder() + 1000;
-        }
-        Lesson frontLesson = lessonRepository.getLessonById(frontLessonId);
-        Lesson behindLesson = lessonRepository.getLessonById(behindLessonId);
-        return (frontLesson.getOrder() + behindLesson.getOrder()) / 2;
-    }
-
-    private void checkAndReorderLesson(int chapterId) {
-        List<Lesson> lessons = lessonRepository.getLessons(chapterId);
-        if (lessons.size() < 2) return;
-        boolean needRebalance = false;
-        for (int i = 1; i < lessons.size(); i++) {
-            int gap = lessons.get(i).getOrder() - lessons.get(i - 1).getOrder();
-            if (gap <= 1) {
-                needRebalance = true;
-                break;
-            }
-        }
-        if (needRebalance) {
-            for (int i = 0; i < lessons.size(); i++) {
-                lessons.get(i).setOrder((i + 1) * 1000);
-            }
-        }
-    }
-
     @Override
     public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         checkCourseOwner(lesson.getChapter().getCourse());
 
         lessonMapper.updateEntityFromDto(lesson, lessonDto);
-
-        if (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null) {
-            int newOrder = calculateNewOrder(lessonDto.frontLessonId(), lessonDto.behindLessonId());
-            lesson.setOrder(newOrder);
-        }
 
         MultipartFile videoFile = lessonDto.videoFile();
         if (videoFile != null && !videoFile.isEmpty()) {
@@ -204,14 +166,7 @@ public class LessonServiceImpl implements LessonService {
                 }
             }
         }
-
         Lesson updatedLesson = lessonRepository.addOrUpdateLesson(lesson);
-
-        if (lessonDto != null
-                && (lessonDto.frontLessonId() != null || lessonDto.behindLessonId() != null)) {
-            checkAndReorderLesson(lesson.getChapter().getId());
-        }
-
         return lessonMapper.toDto(updatedLesson);
     }
 
@@ -221,7 +176,6 @@ public class LessonServiceImpl implements LessonService {
         checkCourseOwner(lesson.getChapter().getCourse());
 
         r2Service.deleteVideo(lesson.getVideo());
-
         lessonRepository.deleteLesson(lessonId);
     }
 }

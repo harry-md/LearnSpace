@@ -88,10 +88,10 @@ const CreateCourseModal = ({ open, onClose, categories, onSuccess }) => {
 
   return (
     <Modal open={open} onClose={onClose} title="Tạo khóa học mới" wide>
-      <Field label="Tên khóa học" required hint="">
+      <Field label="Tên khóa học" required>
         <input
           className="input-cls"
-          placeholder=""
+          placeholder="Tên khóa học"
           value={courseForm.name}
           onChange={(e) =>
             setCourseForm({ ...courseForm, name: e.target.value })

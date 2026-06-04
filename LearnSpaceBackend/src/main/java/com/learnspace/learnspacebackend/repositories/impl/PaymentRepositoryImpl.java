@@ -49,27 +49,12 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public Payment getPaymentById(int id) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Payment> q = b.createQuery(Payment.class);
-        Root<Payment> root = q.from(Payment.class);
-
-        Fetch<Payment, Enrollment> fetchEnrollment = root.fetch("enrollment");
-        fetchEnrollment.fetch("student");
-        fetchEnrollment.fetch("course");
-        q.select(root).where(b.equal(root.get("id"), id));
-        return session.createQuery(q).getSingleResult();
-    }
-
-    @Override
     public Payment addOrUpdatePayment(Payment payment) {
         Session session = factory.getObject().getCurrentSession();
         if (payment.getId() == null) {
             session.persist(payment);
             return payment;
         }
-        Payment merged = session.merge(payment);
-        return getPaymentByEnrollmentId(merged.getId());
+        return session.merge(payment);
     }
 }

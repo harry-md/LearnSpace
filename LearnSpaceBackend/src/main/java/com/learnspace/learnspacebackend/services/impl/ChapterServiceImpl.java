@@ -61,43 +61,7 @@ public class ChapterServiceImpl implements ChapterService {
 
         Chapter chapter = chapterMapper.toEntity(chapterDto);
         chapter.setCourse(course);
-        chapter.setOrder(chapterRepository.getMaxOrder(courseId) + 1000);
-
         return chapterMapper.toDto(chapterRepository.createOrUpdate(chapter));
-    }
-
-    private int calNewOrder(Integer frontChapterId, Integer behindChapterId) {
-        if (frontChapterId == null) {
-            return chapterRepository.getChapterById(behindChapterId).getOrder() / 2;
-        }
-        if (behindChapterId == null) {
-            return chapterRepository.getChapterById(frontChapterId).getOrder() + 1000;
-        }
-        Chapter frontChapter = chapterRepository.getChapterById(frontChapterId);
-        Chapter behindChapter = chapterRepository.getChapterById(behindChapterId);
-        return (frontChapter.getOrder() + behindChapter.getOrder()) / 2;
-    }
-
-    private void checkAndReorderChapter(int courseId) {
-        List<Chapter> chapters = chapterRepository.getChaptersByCourse(courseId);
-        if (chapters.size() < 2) {
-            return;
-        }
-
-        boolean needRebalance = false;
-        for (int i = 1; i < chapters.size(); i++) {
-            int gap = chapters.get(i).getOrder() - chapters.get(i - 1).getOrder();
-            if (gap <= 1) {
-                needRebalance = true;
-                break;
-            }
-        }
-
-        if (needRebalance) {
-            for (int i = 0; i < chapters.size(); i++) {
-                chapters.get(i).setOrder((i + 1) * 1000);
-            }
-        }
     }
 
     @Override
@@ -106,16 +70,9 @@ public class ChapterServiceImpl implements ChapterService {
         checkCourseOwner(chapter.getCourse());
 
         chapterMapper.updateEntityFromDto(chapter, chapterDto);
-        if (chapterDto.frontChapterId() != null || chapterDto.behindChapterId() != null) {
-            int newOrder = calNewOrder(chapterDto.frontChapterId(), chapterDto.behindChapterId());
-            chapter.setOrder(newOrder);
-        }
 
         Chapter updatedChapter = chapterRepository.createOrUpdate(chapter);
 
-        if (chapterDto.frontChapterId() != null || chapterDto.behindChapterId() != null) {
-            checkAndReorderChapter(chapter.getCourse().getId());
-        }
         return chapterMapper.toDto(updatedChapter);
     }
 

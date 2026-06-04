@@ -58,11 +58,7 @@ public class AdminController {
     @PostMapping("/users/update")
     public String updateUser(@Valid @ModelAttribute("userDto") AdminUserUpdateDto dto)
             throws IOException {
-        try {
-            userService.updateByAdmin(dto);
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-        }
+        userService.updateByAdmin(dto);
         return "redirect:/users";
     }
 
@@ -74,7 +70,6 @@ public class AdminController {
         int pageSize = env.getProperty("course.page_size", Integer.class);
         long totalCourse = courseService.countCourses(params);
         int totalPages = (int) Math.ceil((double) totalCourse / pageSize);
-
         int currentPage = 1;
         if (params != null && params.containsKey("page")) {
             currentPage = Integer.parseInt(params.get("page"));
@@ -83,16 +78,5 @@ public class AdminController {
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("currentPage", currentPage);
         return "admin_courses";
-    }
-
-    @GetMapping("/enrollments")
-    public String enrollment(Model model) {
-        model.addAttribute("enrollments", courseService.getEnrolledCourses());
-        return "admin_enrollments";
-    }
-
-    @GetMapping("/payments")
-    public String payment() {
-        return "admin_payments";
     }
 }

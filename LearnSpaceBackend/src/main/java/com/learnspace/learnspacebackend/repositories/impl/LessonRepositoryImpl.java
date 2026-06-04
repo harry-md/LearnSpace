@@ -110,16 +110,4 @@ public class LessonRepositoryImpl implements LessonRepository {
         q.select(root.get("video")).where(b.equal(chapterJoin.get("course").get("id"), courseId));
         return session.createQuery(q).getResultList();
     }
-
-    @Override
-    public Integer getMaxOrder(int chapterId) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Integer> q = b.createQuery(Integer.class);
-        Root<Lesson> root = q.from(Lesson.class);
-
-        q.select(b.coalesce(b.max(root.get("order")), 0))
-                .where(b.equal(root.get("chapter").get("id"), chapterId));
-        return session.createQuery(q).getSingleResult();
-    }
 }
