@@ -6,6 +6,4 @@ public interface LessonProgressRepository {
     LessonProgress addOrUpdateLessonProgress(LessonProgress lessonProgress);
 
     LessonProgress getLessonProgressByStudentAndLesson(int studentId, int lessonId);
-
-    LessonProgress getLessonProgressByStudentAndCourse(int studentId, int courseId);
 }

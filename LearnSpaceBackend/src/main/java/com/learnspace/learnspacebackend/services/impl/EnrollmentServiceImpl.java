@@ -13,7 +13,6 @@ import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.EnrollmentService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -36,17 +35,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private CustomUserDetails getLoggedInPrincipal() {
         return (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
-
-    @Override
-    public EnrollmentDto getEnrollment(int enrollmentId) {
-        CustomUserDetails principal = getLoggedInPrincipal();
-        Enrollment enrollment = enrollmentRepository.getEnrollmentById(enrollmentId);
-        User student = enrollment.getStudent();
-        if (!student.getId().equals(principal.getId())) {
-            throw new AccessDeniedException("Bạn không có quyền truy cập");
-        }
-        return enrollmentMapper.toDto(enrollment);
     }
 
     @Override

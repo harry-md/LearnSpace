@@ -25,16 +25,6 @@ public class LessonRepositoryImpl implements LessonRepository {
     private LocalSessionFactoryBean factory;
 
     @Override
-    public List<Lesson> getLessons(int chapterId) {
-        Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "FROM Lesson l WHERE l.chapter.id = :chapterId ORDER BY l.order",
-                        Lesson.class)
-                .setParameter("chapterId", chapterId)
-                .getResultList();
-    }
-
-    @Override
     public Lesson addOrUpdateLesson(Lesson lesson) {
         Session session = factory.getObject().getCurrentSession();
         if (lesson.getId() == null) {

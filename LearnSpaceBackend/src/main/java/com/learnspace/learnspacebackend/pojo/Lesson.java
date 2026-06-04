@@ -26,7 +26,7 @@ public class Lesson {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Chapter chapter;
 
-    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
     private Set<LessonProgress> progresses;
 
     @Size(max = 255)

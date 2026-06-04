@@ -40,7 +40,7 @@ public class R2ServiceImpl implements R2Service {
     public void validateMp4File(File file) throws IOException, RuntimeException {
         String mime = tika.detect(file);
         if (!mime.equals("video/mp4")) {
-            throw new RuntimeException();
+            throw new RuntimeException("File không phải là mp4");
         }
     }
 
