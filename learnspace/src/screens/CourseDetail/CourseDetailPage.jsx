@@ -30,6 +30,7 @@ const CourseDetailPage = () => {
   const [notFound, setNotFound] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState(null);
+  const [selectedLessonData, setSelectedLessonData] = useState(null);
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [, uiDispatch] = useContext(UIContext);
   const [cart, cartDispatch] = useContext(CartContext);
@@ -39,6 +40,41 @@ const CourseDetailPage = () => {
 
   const addToCart = (course) => {
     cartDispatch({ type: "ADD_COURSE", payload: course });
+  };
+
+  const handleContinueLearning = () => {
+    console.log("Clicked!");
+  };
+
+  const fetchAndShowLesson = async (lessonId) => {
+    uiDispatch({ type: "SHOW_LOADING" });
+    try {
+      let res;
+      if (user && user.token) {
+        res = await authApis(user.token).get(
+          `${endpoints.lessons}/${lessonId}`,
+        );
+      } else {
+        res = await Apis.get(`${endpoints.lessons}/${lessonId}`);
+      }
+      setSelectedLessonData(res.data);
+      setSelectedLessonId(lessonId);
+      setShowLessonModal(true);
+    } catch (err) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          show: true,
+          title: "Thông báo",
+          message:
+            err.response?.data?.message ||
+            "Bạn cần đăng ký khóa học để xem nội dung này",
+          type: "warning",
+        },
+      });
+    } finally {
+      uiDispatch({ type: "HIDE_LOADING" });
+    }
   };
 
   const enrollFreeCourse = async () => {
@@ -226,6 +262,18 @@ const CourseDetailPage = () => {
                 {courseDetails.updatedAt}
               </span>
             </div>
+
+            {isEnrolled && courseDetails?.latestProgress && (
+              <div className="flex justify-end w-full mt-6">
+                <button
+                  onClick={handleContinueLearning}
+                  className="px-8 py-3 bg-[#5624d0] hover:bg-[#4712c4] text-white text-base font-bold rounded-lg shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                >
+                  Học tiếp
+                  <Play size={18} fill="currentColor" />
+                </button>
+              </div>
+            )}
           </div>
 
           {!isEnrolled && <div className="hidden lg:block" />}
@@ -281,6 +329,11 @@ const CourseDetailPage = () => {
                       <span className="font-bold text-[#1c1d1f] text-[15px] truncate">
                         {chapter.name}
                       </span>
+                      {chapter.free && (
+                        <span className="text-[11px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded border border-green-300 shrink-0">
+                          Học thử
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-gray-500 shrink-0 text-right">
                       {chapter.lessons?.length || 0} bài giảng
@@ -295,21 +348,7 @@ const CourseDetailPage = () => {
                         <div
                           key={lesson.id}
                           onClick={() => {
-                            if (isEnrolled) {
-                              setSelectedLessonId(lesson.id);
-                              setShowLessonModal(true);
-                            } else {
-                              uiDispatch({
-                                type: "SHOW_DIALOG",
-                                payload: {
-                                  show: true,
-                                  title: "Thông báo",
-                                  message:
-                                    "Bạn cần phải đăng ký khoá học để xem nội dung chi tiết của khoá học",
-                                  type: "warning",
-                                },
-                              });
-                            }
+                            fetchAndShowLesson(lesson.id);
                           }}
                           className="flex items-center gap-3 px-5 py-3 hover:bg-gray-100 transition-colors cursor-pointer group/lesson"
                         >
@@ -499,9 +538,11 @@ const CourseDetailPage = () => {
 
       <ProtectLessonDisplay
         isShow={showLessonModal}
+        lesson={selectedLessonData}
         lessonId={selectedLessonId}
         onClose={() => {
           setShowLessonModal(false);
+          setSelectedLessonData(null);
           loadCourseDetails();
         }}
       />

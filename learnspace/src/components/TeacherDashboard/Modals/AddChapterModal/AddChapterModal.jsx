@@ -9,11 +9,12 @@ const AddChapterModal = ({ open, onClose, onSubmit, course }) => {
   const [chapterForm, setChapterForm] = useState({
     title: "",
     description: "",
+    free: false,
   });
 
   useEffect(() => {
     if (open) {
-      setChapterForm({ title: "", description: "" });
+      setChapterForm({ title: "", description: "", free: false });
     }
   }, [open]);
 
@@ -22,6 +23,7 @@ const AddChapterModal = ({ open, onClose, onSubmit, course }) => {
     onSubmit({
       title: chapterForm.title,
       description: chapterForm.description,
+      free: chapterForm.free,
     });
   };
 
@@ -55,6 +57,22 @@ const AddChapterModal = ({ open, onClose, onSubmit, course }) => {
           onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
         />
       </Field>
+      <div className="flex items-center gap-3 mt-2 mb-4">
+        <span className="text-[14px] font-medium text-gray-700">
+          Cho phép học thử (Miễn phí)
+        </span>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="sr-only peer"
+            checked={chapterForm.free}
+            onChange={(e) =>
+              setChapterForm({ ...chapterForm, free: e.target.checked })
+            }
+          />
+          <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+        </label>
+      </div>
       <div className="add-chapter-modal-footer">
         <button onClick={onClose} className="add-chapter-modal-btn-cancel">
           Hủy bỏ

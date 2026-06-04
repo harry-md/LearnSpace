@@ -36,8 +36,18 @@ const ChatMenu = ({ onClose }) => {
   };
 
   useEffect(() => {
-    if (user) loadContacts();
-    if (user) listenRealtimeConversation();
+    if (user) {
+      loadContacts();
+    }
+    
+    let cleanup = null;
+    if (user) {
+      cleanup = listenRealtimeConversation();
+    }
+
+    return () => {
+      if (cleanup) cleanup();
+    };
   }, [user]);
 
   const mergedChats = contacts
@@ -115,7 +125,7 @@ const ChatMenu = ({ onClose }) => {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-2 scrollbar-hide bg-white">
+          <div className="flex-1 overflow-y-auto p-2 bg-white">
             {mergedChats.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-[15px]">
                 Chưa có người liên hệ nào.
@@ -137,17 +147,14 @@ const ChatMenu = ({ onClose }) => {
                   }}
                   className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors relative"
                 >
-                  <div className="relative shrink-0">
-                    <img
-                      src={
-                        chat.avatar ||
-                        "https://placehold.co/100x100/4f46e5/ffffff?text=User"
-                      }
-                      alt={chat.fullName}
-                      className="w-14 h-14 rounded-full object-cover"
-                    />
-                    <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
-                  </div>
+                  <img
+                    src={
+                      chat.avatar ||
+                      "https://placehold.co/100x100/4f46e5/ffffff?text=User"
+                    }
+                    alt={chat.fullName}
+                    className="w-14 h-14 rounded-full object-cover shrink-0"
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline mb-0.5">
                       <div
@@ -176,23 +183,8 @@ const ChatMenu = ({ onClose }) => {
               ))
             )}
           </div>
-
-          <div className="p-2 border-t border-gray-100 bg-white text-center shrink-0">
-            <button className="text-[15px] font-semibold text-purple-600 hover:bg-gray-50 w-full py-1.5 rounded-lg transition-colors">
-              Xem tất cả trong Messenger
-            </button>
-          </div>
         </>
       )}
-
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      `,
-        }}
-      />
     </div>
   );
 };

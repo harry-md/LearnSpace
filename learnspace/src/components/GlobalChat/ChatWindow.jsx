@@ -99,14 +99,11 @@ const ChatWindow = ({ chatData }) => {
         className="w-[300px] h-12 bg-white rounded-t-xl shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border border-gray-200 border-b-0 flex items-center justify-between px-3 cursor-pointer hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center gap-2 overflow-hidden">
-          <div className="relative">
-            <img
-              src={chatData.avatar || "https://placehold.co/100x100"}
-              alt="avatar"
-              className="w-8 h-8 rounded-full object-cover shrink-0"
-            />
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border border-white rounded-full"></div>
-          </div>
+          <img
+            src={chatData.avatar || "https://placehold.co/100x100"}
+            alt="avatar"
+            className="w-8 h-8 rounded-full object-cover shrink-0"
+          />
           <div className="font-semibold text-sm text-gray-800 truncate">
             {chatData.teacherName}
           </div>
@@ -131,20 +128,14 @@ const ChatWindow = ({ chatData }) => {
           className="flex items-center gap-2 cursor-pointer w-full overflow-hidden"
           onClick={handleMinimize}
         >
-          <div className="relative shrink-0">
-            <img
-              src={chatData.avatar || "https://placehold.co/100"}
-              alt="avatar"
-              className="w-9 h-9 rounded-full object-cover"
-            />
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border border-white rounded-full"></div>
-          </div>
+          <img
+            src={chatData.avatar || "https://placehold.co/100"}
+            alt="avatar"
+            className="w-9 h-9 rounded-full object-cover shrink-0"
+          />
           <div className="flex flex-col min-w-0">
             <span className="font-bold text-[14px] text-gray-900 leading-tight truncate">
               {chatData.teacherName}
-            </span>
-            <span className="text-[11px] text-gray-500 leading-tight">
-              Đang hoạt động
             </span>
           </div>
         </div>
@@ -164,7 +155,7 @@ const ChatWindow = ({ chatData }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 bg-white scrollbar-hide">
+      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 bg-white">
         <div className="flex justify-center my-4">
           <div className="flex flex-col items-center gap-1">
             <img
@@ -235,15 +226,6 @@ const ChatWindow = ({ chatData }) => {
           </button>
         </div>
       </div>
-
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-      `,
-        }}
-      />
     </div>
   );
 };

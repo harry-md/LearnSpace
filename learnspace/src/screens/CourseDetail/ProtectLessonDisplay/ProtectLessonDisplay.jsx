@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext } from "react";
+import { useEffect, useRef } from "react";
 import {
   X,
   Lock,
@@ -11,16 +11,9 @@ import {
   MessageCircle,
   VideoOff,
 } from "lucide-react";
-import Apis, { authApis, endpoints } from "@/configs/Apis";
-import { UserContext, UIContext } from "@/configs/Context";
 import useLessonProcess from "@/hooks/useLessonProcess";
 
-const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
-  const [user] = useContext(UserContext);
-  const [_, uiDispatch] = useContext(UIContext);
-  const [lesson, setLesson] = useState(null);
-  const [error, setError] = useState("");
-
+const ProtectLessonDisplay = ({ isShow, lesson, lessonId, onClose }) => {
   const { lessonProgress, getLessonProgress, updateLessonProgress } =
     useLessonProcess();
 
@@ -56,36 +49,6 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
       hasSeeked.current = true;
     }
   };
-
-  useEffect(() => {
-    if (!isShow || !lessonId) return;
-
-    const fetchLesson = async () => {
-      uiDispatch({ type: "SHOW_LOADING" });
-      setError("");
-      setLesson(null);
-      try {
-        let res;
-        if (user && user.token) {
-          res = await authApis(user.token).get(
-            `${endpoints.lessons}/${lessonId}`,
-          );
-        } else {
-          res = await Apis.get(`${endpoints.lessons}/${lessonId}`);
-        }
-        setLesson(res.data);
-      } catch (err) {
-        console.error("Lỗi khi tải chi tiết bài học!");
-        setError(
-          "Không thể tải thông tin bài học hoặc bạn không có quyền truy cập.",
-        );
-      } finally {
-        uiDispatch({ type: "HIDE_LOADING" });
-      }
-    };
-
-    fetchLesson();
-  }, [isShow, lessonId, user]);
 
   useEffect(() => {
     if (!isShow) return;
@@ -171,25 +134,7 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {error && (
-            <div className="aspect-video w-full flex flex-col items-center justify-center bg-gray-50 text-center p-6">
-              <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                <Lock size={24} className="text-red-500" />
-              </div>
-              <p className="text-sm font-bold text-[#1c1d1f] mb-1">
-                Không thể truy cập
-              </p>
-              <p className="text-xs text-gray-500 max-w-xs mb-5">{error}</p>
-              <button
-                onClick={onClose}
-                className="px-5 py-2 bg-[#5624d0] hover:bg-[#4712c4] text-white rounded-lg text-xs font-bold transition-colors"
-              >
-                Đóng
-              </button>
-            </div>
-          )}
-
-          {lesson && !error && (
+          {lesson && (
             <>
               <div className="relative bg-[#1c1d1f]">
                 {lesson.video ? (
