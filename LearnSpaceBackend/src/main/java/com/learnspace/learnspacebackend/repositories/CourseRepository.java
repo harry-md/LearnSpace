@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface CourseRepository {
-    List<Course> getAllCourses(Map<String, String> params);
+    List<Object[]> getAllCourses(Map<String, String> params);
 
     Long countCourses(Map<String, String> params);
 
@@ -16,5 +16,5 @@ public interface CourseRepository {
 
     void deleteCourse(int courseId);
 
-    List<Course> getEnrolledCoursesByStudent(int studentId);
+    List<Object[]> getEnrolledCoursesByStudent(int studentId);
 }

@@ -1,6 +1,5 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
-import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.EnrollmentStatus;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
@@ -15,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -107,24 +104,5 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
                         b.equal(root.get("course").get("id"), courseId),
                         root.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
         return session.createQuery(q).getSingleResult();
-    }
-
-    @Override
-    public Map<Integer, Long> getEnrollmentCounts(List<Integer> courseIds) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
-        Root<Enrollment> root = q.from(Enrollment.class);
-
-        Join<Enrollment, Course> courseJoin = root.join("course");
-        q.multiselect(courseJoin.get("id"), b.count(root))
-                .where(
-                        courseJoin.get("id").in(courseIds),
-                        root.get("status").in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED))
-                .groupBy(courseJoin);
-
-        List<Object[]> results = session.createQuery(q).getResultList();
-        return results.stream()
-                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
     }
 }

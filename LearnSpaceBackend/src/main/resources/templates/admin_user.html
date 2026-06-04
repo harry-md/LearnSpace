@@ -66,7 +66,7 @@
                       <td class="text-muted fw-bold" th:text="${'#' + user.id}">#1</td>
                       <td>
                         <div class="d-flex align-items-center">
-                          <img th:src="${user.avatar != null ? user.avatar : 'https://ui-avatars.com/api/?name=' + user.firstName + '+' + user.lastName}"
+                          <img th:src="${user.avatar != null ? user.avatar : 'https://ui-avatars.com/api/?name=' + user.fullName}"
                             alt="Avatar" class="rounded-circle me-3 border" width="40" height="40">
                           <div class="fw-bold" th:text="${user.username}">username123</div>
                         </div>
@@ -86,8 +86,7 @@
                             th:data-id="${user.id}"
                             th:data-username="${user.username}"
                             th:data-email="${user.email}"
-                            th:data-firstname="${user.firstName}"
-                            th:data-lastname="${user.lastName}"
+                            th:data-fullName="${user.fullName}"
                             th:data-role="${user.role}"
                             th:data-active="${user.active}"
                             th:data-verified="${user.verified}">
@@ -142,12 +141,8 @@
 
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Họ</label>
-                  <input type="text" class="form-control" id="firstName" name="firstName">
-                </div>
-                <div class="col-md-6">
                   <label class="form-label fw-semibold">Tên</label>
-                  <input type="text" class="form-control" id="lastName" name="lastName">
+                  <input type="text" class="form-control" id="fullName" name="fullName">
                 </div>
               </div>
 
@@ -195,8 +190,5 @@
     <th:block th:replace="~{base :: global_toast}"></th:block>
 
     <script th:src="@{/js/AdminUser.js}"></script>
-
-    <th:block th:insert="~{:: page_scripts} ?: ~{}"></th:block>
-
   </body>
 </html>

@@ -1,7 +1,6 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
-import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 import com.learnspace.learnspacebackend.pojo.LessonProgress;
 import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
@@ -17,10 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -71,28 +66,5 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
                         b.equal(chapterJoin.get("course").get("id"), courseId))
                 .orderBy(b.desc(root.get("updatedAt")), b.desc(root.get("id")));
         return session.createQuery(q).setMaxResults(1).getSingleResult();
-    }
-
-    @Override
-    public Map<Integer, Long> countCompletedLessons(int studentId, List<Integer> courseIds) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
-
-        Root<LessonProgress> root = q.from(LessonProgress.class);
-        Join<LessonProgress, Lesson> lessonJoin = root.join("lesson");
-        Join<Lesson, Chapter> chapterJoin = lessonJoin.join("chapter");
-        Join<Chapter, Course> courseJoin = chapterJoin.join("course");
-
-        q.multiselect(courseJoin.get("id"), b.count(root))
-                .where(
-                        b.equal(root.get("student").get("id"), studentId),
-                        courseJoin.get("id").in(courseIds),
-                        b.equal(root.get("completed"), true))
-                .groupBy(courseJoin.get("id"));
-
-        List<Object[]> results = session.createQuery(q).getResultList();
-        return results.stream()
-                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
     }
 }

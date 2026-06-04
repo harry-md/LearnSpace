@@ -8,11 +8,14 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Controller
 public class UserController {
@@ -33,6 +36,12 @@ public class UserController {
     public String adminRegister(@Valid @ModelAttribute UserRegisterDto userDto) {
         userService.registerAdmin(userDto);
         return "login";
+    }
+
+    @GetMapping("/users")
+    public String user(Model model, @RequestParam Map<String, String> params) {
+        model.addAttribute("users", userService.getAllUsers(params));
+        return "admin_user";
     }
 
     @PostMapping("/users/update")

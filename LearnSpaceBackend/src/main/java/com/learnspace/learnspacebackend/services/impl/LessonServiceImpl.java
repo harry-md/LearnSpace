@@ -76,7 +76,7 @@ public class LessonServiceImpl implements LessonService {
         }
 
         if (!enrollmentRepository.checkValidEnrollment(principal.getId(), course.getId())) {
-            throw new RuntimeException();
+            throw new RuntimeException("Không có enrollment");
         }
     }
 

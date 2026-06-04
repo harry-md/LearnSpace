@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LessonProgressServiceImpl implements LessonProgressService {
@@ -38,6 +39,7 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     }
 
     @Override
+    @Transactional
     public LessonProgressDto saveLessonProgress(int lessonId, LessonProgressDto lessonProgressDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         Course course = lesson.getChapter().getCourse();

@@ -9,11 +9,15 @@ import com.learnspace.learnspacebackend.dtos.user.UserUpdateDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 public interface UserService extends UserDetailsService {
     UserProfileDto getUserByUsername(String username);
 
     int countAllUsers();
+
+    List<UserProfileDto> getAllUsers(Map<String, String> params);
 
     UserProfileDto register(UserRegisterDto dto);
 

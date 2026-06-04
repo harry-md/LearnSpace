@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 @Transactional
@@ -95,23 +94,6 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                                 .get("status")
                                 .in(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
         return session.createQuery(q).getSingleResult();
-    }
-
-    @Override
-    public Map<Integer, Double> avgRatings(List<Integer> courseIds) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder b = session.getCriteriaBuilder();
-        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
-        Root<Review> root = q.from(Review.class);
-
-        Join<Review, Course> courseJoin = root.join("course");
-        q.multiselect(courseJoin.get("id"), b.avg(root.get("rating")))
-                .where(courseJoin.get("id").in(courseIds))
-                .groupBy(courseJoin);
-
-        List<Object[]> results = session.createQuery(q).getResultList();
-        return results.stream()
-                .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Double) row[1]));
     }
 
     @Override

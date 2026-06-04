@@ -10,8 +10,6 @@ public interface ReviewRepository {
 
     List<Review> getReviewsByCourse(int courseId, Map<String, String> params);
 
-    Map<Integer, Double> avgRatings(List<Integer> courseIds);
-
     Long countReviewsByCourse(int courseId, Map<String, String> params);
 
     Review addOrUpdateReview(Review review);
