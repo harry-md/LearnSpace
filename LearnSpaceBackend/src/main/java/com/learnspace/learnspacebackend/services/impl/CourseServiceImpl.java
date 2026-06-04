@@ -11,6 +11,7 @@ import com.learnspace.learnspacebackend.mappers.PaginatedResponseMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.User;
+import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
@@ -133,7 +134,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     private void checkCourseOwner(Course course, User teacher) {
-        if (!course.getTeacher().getId().equals(teacher.getId())) {
+        if (!course.getTeacher().getId().equals(teacher.getId())
+                && teacher.getRole() != UserRole.ADMIN) {
             throw new AccessDeniedException("Bạn không phải chủ sở hữu khóa học");
         }
     }

@@ -138,7 +138,6 @@ public class UserServiceImpl implements UserService {
         user.setFullName(dto.fullName());
         user.setEmail(dto.email());
         user.setRole(dto.role());
-        user.setActive(dto.active() != null ? dto.active() : false);
 
         if (dto.role() == UserRole.TEACHER) {
             user.setVerified(dto.verified() != null ? dto.verified() : false);
@@ -172,5 +171,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.getAllUsers(params).stream()
                 .map(userMapper::toProfileDto)
                 .toList();
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        userRepository.deleteUser(id);
     }
 }

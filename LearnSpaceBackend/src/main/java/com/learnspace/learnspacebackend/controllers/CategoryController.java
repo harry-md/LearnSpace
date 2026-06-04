@@ -30,7 +30,7 @@ public class CategoryController {
         return "redirect:/categories";
     }
 
-    @DeleteMapping("/{id}")
+    @GetMapping("/delete/{id}")
     public String delete(@PathVariable(value = "id") int id) {
         categoryService.deleteCate(id);
         return "redirect:/categories";

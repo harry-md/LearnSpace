@@ -36,7 +36,7 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         String kw = params.get("kw");
         if (kw != null && !kw.isBlank()) {
-            predicates.add(b.like(b.lower(root.get("name")), String.format("%%%s%%", kw.trim())));
+            predicates.add(b.like(root.get("name"), String.format("%%%s%%", kw)));
         }
 
         String fromPrice = params.get("fromPrice");
@@ -53,8 +53,8 @@ public class CourseRepositoryImpl implements CourseRepository {
 
         String teacherName = params.get("teacherName");
         if (teacherName != null && !teacherName.isBlank()) {
-            predicates.add(b.or(b.like(
-                    root.get("teacher").get("fullName"), String.format("%%%s%%", teacherName))));
+            predicates.add(b.like(
+                    root.get("teacher").get("fullName"), String.format("%%%s%%", teacherName)));
         }
 
         String categoryId = params.get("categoryId");

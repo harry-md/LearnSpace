@@ -77,11 +77,6 @@ document.addEventListener("DOMContentLoaded", function () {
           roleSelect.value = this.getAttribute("data-role");
         }
 
-        const activeCheckbox = document.getElementById("active");
-        if (activeCheckbox) {
-          activeCheckbox.checked = this.getAttribute("data-active") === "true";
-        }
-
         if (verifiedCheckbox) {
           verifiedCheckbox.checked =
             this.getAttribute("data-verified") === "true";

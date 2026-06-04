@@ -34,7 +34,6 @@ public class ChatServiceImpl implements ChatService {
                 .get(0);
 
         role = role.replace("ROLE_", "").toLowerCase();
-
         UserRole userRole = role.equals("verified_teacher") ? UserRole.TEACHER : UserRole.STUDENT;
 
         return userRepository.getContactsEnrolled(userId, userRole).stream()

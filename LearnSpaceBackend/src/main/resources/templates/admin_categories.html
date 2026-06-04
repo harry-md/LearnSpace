@@ -58,15 +58,12 @@
                             th:data-name="${cat.name}">
                             <i class="fa-solid fa-pen-to-square"></i>
                           </button>
-                          <button class="btn btn-sm btn-light text-danger btn-delete"
-                            th:data-id="${cat.id}"
-                            th:data-name="${cat.name}"
-                            type="submit"
-                            th:data-url="@{'/categories/' + ${cat.id}}"
-                          >
-
+                          <a th:href="@{'/categories/delete/' + ${cat.id}}"
+                            class="btn btn-sm btn-light text-danger"
+                            onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');"
+                            data-bs-toggle="tooltip" title="Xóa">
                             <i class="fa-solid fa-trash-can"></i>
-                          </button>
+                          </a>
                         </div>
                       </td>
                     </tr>

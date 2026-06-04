@@ -12,7 +12,6 @@ public record UserProfileDto(
         String fullName,
         String email,
         String avatar,
-        boolean active,
         boolean verified,
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
