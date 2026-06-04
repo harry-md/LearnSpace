@@ -19,6 +19,7 @@ export const endpoints = {
   lessonProgress: (lessonId) => `/lessons/${lessonId}/lesson-progress`,
   checkout: "/payments/checkout",
   chatContacts: "/chat/contacts",
+  chatToken: "/chat/token",
   reviewCourse: (courseId) => `/courses/${courseId}/reviews`,
 };
 

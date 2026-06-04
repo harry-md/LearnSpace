@@ -1,26 +1,23 @@
-import { useEffect, useRef } from "react";
-import {
-  X,
-  Lock,
-  FileText,
-  Clock,
-  BookOpen,
-  ShieldCheck,
-  MessageSquare,
-  ThumbsUp,
-  MessageCircle,
-  VideoOff,
-} from "lucide-react";
-import useLessonProcess from "@/hooks/useLessonProcess";
+import { useContext, useRef, useEffect } from "react";
+import { X, FileText, Clock, BookOpen, VideoOff } from "lucide-react";
+import { authApis, endpoints } from "@/configs/Apis";
+import { UserContext } from "@/configs/Context";
 
 const ProtectLessonDisplay = ({ isShow, lesson, lessonId, onClose }) => {
-  const { lessonProgress, getLessonProgress, updateLessonProgress } =
-    useLessonProcess();
-
   const videoRef = useRef(null);
   const lastTriggeredTime = useRef(0);
   const hasSeeked = useRef(false);
+  const [user] = useContext(UserContext);
 
+  const createOrUpdateLessonProgress = async (watchedSec) => {
+    try {
+      await authApis(user.token).post(endpoints.lessonProgress(lessonId), {
+        watchedSec,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
   const handleTimeUpdate = (e) => {
     const currentTime = Math.floor(e.target.currentTime);
     if (
@@ -29,66 +26,30 @@ const ProtectLessonDisplay = ({ isShow, lesson, lessonId, onClose }) => {
       currentTime !== lastTriggeredTime.current
     ) {
       lastTriggeredTime.current = currentTime;
-      updateLessonProgress(lessonId, currentTime);
+      createOrUpdateLessonProgress(currentTime);
     }
   };
 
   const handleSeeked = async (e) => {
-    const currentTime = e.target.currentTime;
-    await updateLessonProgress(lessonId, currentTime);
+    const currentTime = Math.floor(e.target.currentTime);
+    await createOrUpdateLessonProgress(currentTime);
   };
 
   const handlePause = async () => {
-    const currentTime = videoRef.current.currentTime;
-    await updateLessonProgress(lessonId, currentTime);
+    const currentTime = Math.floor(videoRef.current.currentTime);
+    await createOrUpdateLessonProgress(currentTime);
   };
 
   const handleLoadedMetadata = (e) => {
-    if (lessonProgress && lessonProgress.watchedSec && !hasSeeked.current) {
-      e.target.currentTime = lessonProgress.watchedSec;
+    if (lesson?.progress?.watchedSec && !hasSeeked.current) {
+      e.target.currentTime = lesson.progress.watchedSec;
       hasSeeked.current = true;
     }
   };
-
-  useEffect(() => {
-    if (!isShow) return;
-
-    const handleKeyDown = (e) => {
-      if (e.key === "PrintScreen") {
-        e.preventDefault();
-      }
-      if (
-        (e.ctrlKey && (e.key === "s" || e.key === "p" || e.key === "u")) ||
-        (e.ctrlKey && e.shiftKey && e.key === "I") ||
-        e.key === "F12"
-      ) {
-        e.preventDefault();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isShow]);
-
-  useEffect(() => {
-    if (isShow && lessonId) getLessonProgress(lessonId);
-  }, [isShow, lessonId]);
 
   useEffect(() => {
     hasSeeked.current = false;
   }, [lessonId, isShow]);
-
-  useEffect(() => {
-    if (
-      videoRef.current &&
-      lessonProgress &&
-      lessonProgress.watchedSec &&
-      !hasSeeked.current
-    ) {
-      videoRef.current.currentTime = lessonProgress.watchedSec;
-      hasSeeked.current = true;
-    }
-  }, [lessonProgress, lesson]);
 
   if (!isShow) return null;
 
@@ -102,7 +63,6 @@ const ProtectLessonDisplay = ({ isShow, lesson, lessonId, onClose }) => {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 md:p-8 animate-[fadeIn_0.2s_ease-out]"
-      onContextMenu={(e) => e.preventDefault()}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           if (videoRef.current) videoRef.current.pause();
@@ -145,11 +105,9 @@ const ProtectLessonDisplay = ({ isShow, lesson, lessonId, onClose }) => {
                     onSeeked={handleSeeked}
                     onLoadedMetadata={handleLoadedMetadata}
                     controls
-                    controlsList="nodownload"
                     onTimeUpdate={handleTimeUpdate}
                     disablePictureInPicture
                     className="w-full aspect-video object-contain transition-all duration-300"
-                    onContextMenu={(e) => e.preventDefault()}
                   />
                 ) : (
                   <div className="w-full aspect-video flex flex-col items-center justify-center bg-[#151515] border-b border-gray-800">

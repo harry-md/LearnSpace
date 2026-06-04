@@ -250,9 +250,9 @@ public class CourseServiceImpl implements CourseService {
         return courses.stream()
                 .map(row -> {
                     Course c = (Course) row[0];
-                    Long chapterCount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
-                    Long lessonCount = row[2] != null ? ((Number) row[2]).longValue() : 0L;
-                    Long completedCount = row[3] != null ? ((Number) row[3]).longValue() : 0L;
+                    Long chapterCount = (Long) row[1];
+                    Long lessonCount = (Long) row[2];
+                    Long completedCount = (Long) row[3];
                     CourseListDto course = courseMapper.toListDto(c);
                     return new MyCourseListDto(
                             course.id(),

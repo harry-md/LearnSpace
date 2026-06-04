@@ -5,14 +5,9 @@ import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonPatchDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.mappers.LessonMapper;
-import com.learnspace.learnspacebackend.pojo.Chapter;
-import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.Lesson;
-import com.learnspace.learnspacebackend.pojo.User;
-import com.learnspace.learnspacebackend.repositories.ChapterRepository;
-import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
-import com.learnspace.learnspacebackend.repositories.LessonRepository;
-import com.learnspace.learnspacebackend.repositories.UserRepository;
+import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
+import com.learnspace.learnspacebackend.pojo.*;
+import com.learnspace.learnspacebackend.repositories.*;
 import com.learnspace.learnspacebackend.services.LessonService;
 import com.learnspace.learnspacebackend.services.R2Service;
 
@@ -36,6 +31,12 @@ public class LessonServiceImpl implements LessonService {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private LessonProgressRepository lessonProgressRepository;
+
+    @Autowired
+    private LessonProgressMapper lessonProgressMapper;
 
     @Autowired
     private UserRepository userRepository;
@@ -91,7 +92,21 @@ public class LessonServiceImpl implements LessonService {
     public LessonDto getLesson(int lessonId) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         checkLessonAccess(lesson);
-        return lessonMapper.toDto(lesson);
+        CustomUserDetails principal = getLoggedInPrincipal();
+        LessonProgress lessonProgress =
+                lessonProgressRepository.getLessonProgressByStudentAndLesson(
+                        principal.getId(), lessonId);
+        return new LessonDto(
+                lesson.getId(),
+                lesson.getTitle(),
+                lesson.getContent(),
+                lesson.getVideo(),
+                lesson.getVideoLength(),
+                lesson.getOrder(),
+                lessonProgressMapper.toDto(lessonProgress),
+                lesson.getCreatedAt(),
+                lesson.getUpdatedAt(),
+                null);
     }
 
     @Override
