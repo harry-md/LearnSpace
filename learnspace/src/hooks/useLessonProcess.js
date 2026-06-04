@@ -40,7 +40,7 @@ const useLessonProcess = () => {
 
   const updateLessonProgress = async (lessonId, sec) => {
     try {
-      await authApis(user.token).patch(endpoints.lessonProgress(lessonId), {
+      await authApis(user.token).post(endpoints.lessonProgress(lessonId), {
         watchedSec: sec,
       });
       setLessonProgress((prev) =>
