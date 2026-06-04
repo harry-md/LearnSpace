@@ -52,7 +52,7 @@ public class LessonProgressRepositoryImpl implements LessonProgressRepository {
                 .where(
                         b.equal(root.get("student").get("id"), studentId),
                         b.equal(root.get("lesson").get("id"), lessonId));
-        return session.createQuery(q).getSingleResult();
+        return session.createQuery(q).getSingleResultOrNull();
     }
 
     @Override

@@ -38,64 +38,34 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     }
 
     @Override
-    public LessonProgressDto addLessonProgress(int lessonId, LessonProgressDto lessonProgressDto) {
+    public LessonProgressDto saveLessonProgress(int lessonId, LessonProgressDto lessonProgressDto) {
         Lesson lesson = lessonRepository.getLessonById(lessonId);
         Course course = lesson.getChapter().getCourse();
         int userId = getLoggedInPrincipal().getId();
+
         Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
                 userId, course.getId(), EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED);
-
         if (enrollment == null) {
             throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
         }
-        LessonProgress p =
+
+        LessonProgress progress =
                 lessonProgressRepository.getLessonProgressByStudentAndLesson(userId, lessonId);
+        LessonProgress saveProgress;
+        if (progress != null) {
+            saveProgress = progress;
+        } else {
+            saveProgress = lessonProgressMapper.toEntity(lessonProgressDto);
+            saveProgress.setLesson(lesson);
+            saveProgress.setStudent(enrollment.getStudent());
+        }
+        saveProgress.setWatchedSec(lessonProgressDto.watchedSec());
 
-        if (p != null) {
-            p.setWatchedSec(lessonProgressDto.watchedSec());
-            return lessonProgressMapper.toDto(
-                    lessonProgressRepository.addOrUpdateLessonProgress(p));
+        if (saveProgress.getWatchedSec() >= lesson.getVideoLength()) {
+            saveProgress.setCompleted(true);
         }
 
-        LessonProgress progress = lessonProgressMapper.toEntity(lessonProgressDto);
-        progress.setLesson(lesson);
-        progress.setStudent(enrollment.getStudent());
         return lessonProgressMapper.toDto(
-                lessonProgressRepository.addOrUpdateLessonProgress(progress));
-    }
-
-    @Override
-    public LessonProgressDto updateLessonProgress(
-            int lessonId, LessonProgressDto lessonProgressDto) {
-        Lesson lesson = lessonRepository.getLessonById(lessonId);
-        Course course = lesson.getChapter().getCourse();
-        int userId = getLoggedInPrincipal().getId();
-        Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
-                userId, course.getId(), EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED);
-
-        if (enrollment == null) {
-            throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
-        }
-        LessonProgress existing =
-                lessonProgressRepository.getLessonProgressByStudentAndLesson(userId, lessonId);
-
-        if (existing != null) {
-            existing.setWatchedSec(lessonProgressDto.watchedSec());
-            if (existing.getWatchedSec() >= lesson.getVideoLength()) {
-                existing.setCompleted(true);
-            }
-            return lessonProgressMapper.toDto(
-                    lessonProgressRepository.addOrUpdateLessonProgress(existing));
-        }
-
-        LessonProgress progress = lessonProgressMapper.toEntity(lessonProgressDto);
-        progress.setWatchedSec(lessonProgressDto.watchedSec());
-        progress.setLesson(lesson);
-
-        if (progress.getWatchedSec() >= lesson.getVideoLength()) {
-            progress.setCompleted(true);
-        }
-        return lessonProgressMapper.toDto(
-                lessonProgressRepository.addOrUpdateLessonProgress(progress));
+                lessonProgressRepository.addOrUpdateLessonProgress(saveProgress));
     }
 }
