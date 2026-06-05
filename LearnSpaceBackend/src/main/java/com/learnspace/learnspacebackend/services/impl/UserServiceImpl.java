@@ -113,14 +113,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public UserProfileDto registerAdmin(UserRegisterDto dto) {
-        User user = userMapper.toEntity(dto);
-        user.setPassword(passwordEncoder.encode(dto.password()));
-        user.setRole(UserRole.ADMIN);
-        return userMapper.toProfileDto(userRepository.register(user));
-    }
-
     private void handleAvatarUpdate(User u, MultipartFile newAvatar) throws IOException {
         if (newAvatar != null && !newAvatar.isEmpty()) {
             if (u.getAvatar() != null) {

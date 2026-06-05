@@ -1,7 +1,6 @@
 package com.learnspace.learnspacebackend.controllers;
 
 import com.learnspace.learnspacebackend.dtos.user.AdminUserUpdateDto;
-import com.learnspace.learnspacebackend.dtos.user.UserRegisterDto;
 import com.learnspace.learnspacebackend.services.UserService;
 
 import jakarta.validation.Valid;
@@ -25,17 +24,6 @@ public class UserController {
 
     @GetMapping("/login")
     public String login() {
-        return "login";
-    }
-
-    @GetMapping("/register")
-    public String register() {
-        return "register";
-    }
-
-    @PostMapping("/register")
-    public String adminRegister(@Valid @ModelAttribute UserRegisterDto userDto) {
-        userService.registerAdmin(userDto);
         return "login";
     }
 

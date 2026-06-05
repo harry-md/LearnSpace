@@ -27,8 +27,6 @@ public interface UserService extends UserDetailsService {
 
     String login(UserLoginDto user);
 
-    UserProfileDto registerAdmin(UserRegisterDto user);
-
     void updateByAdmin(AdminUserUpdateDto dto) throws IOException;
 
     void deleteUser(int id);
