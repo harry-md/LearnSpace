@@ -32,8 +32,8 @@ public class LessonRepositoryImpl implements LessonRepository {
             session.persist(lesson);
             return lesson;
         }
-        Lesson merged = session.merge(lesson);
-        return getLessonById(merged.getId());
+        session.merge(lesson);
+        return lesson;
     }
 
     @Override

@@ -169,8 +169,8 @@ public class CourseRepositoryImpl implements CourseRepository {
             session.persist(course);
             return course;
         }
-        Course merged = session.merge(course);
-        return getCourseById(merged.getId());
+        session.merge(course);
+        return course;
     }
 
     @Override
