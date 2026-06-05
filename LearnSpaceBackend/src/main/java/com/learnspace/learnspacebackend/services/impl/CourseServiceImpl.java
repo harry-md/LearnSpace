@@ -6,8 +6,10 @@ import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
+import com.learnspace.learnspacebackend.mappers.CategoryMapper;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
 import com.learnspace.learnspacebackend.mappers.PaginatedResponseMapper;
+import com.learnspace.learnspacebackend.mappers.UserMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.UserRole;
@@ -44,6 +46,12 @@ public class CourseServiceImpl implements CourseService {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private CategoryMapper categoryMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
     private CourseMapper courseMapper;
 
     @Autowired
@@ -69,23 +77,17 @@ public class CourseServiceImpl implements CourseService {
         List<CourseListDto> results = courseRepository.getAllCourses(params).stream()
                 .map(row -> {
                     Course c = (Course) row[0];
-                    Double avgRating = (Double) row[1];
-                    Long enrollmentCount = (Long) row[2];
-                    Long chapterCount = (Long) row[3];
-                    Long lessonCount = (Long) row[4];
-                    CourseListDto course = courseMapper.toListDto(c);
-
                     return new CourseListDto(
-                            course.id(),
-                            course.name(),
-                            course.image(),
-                            course.price(),
-                            course.category(),
-                            course.teacher(),
-                            avgRating,
-                            enrollmentCount,
-                            chapterCount,
-                            lessonCount);
+                            c.getId(),
+                            c.getName(),
+                            c.getImage(),
+                            c.getPrice(),
+                            categoryMapper.toDto(c.getCategory()),
+                            userMapper.toSimpleUserDto(c.getTeacher()),
+                            (Double) row[1],
+                            (Long) row[2],
+                            (Long) row[3],
+                            (Long) row[4]);
                 })
                 .toList();
         return PaginatedResponseMapper.toPaginatedResponseDto(
