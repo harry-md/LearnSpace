@@ -46,7 +46,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         Root<Review> root = q.from(Review.class);
         root.fetch("student");
 
-        q.select(root).distinct(true).where(b.equal(root.get("course").get("id"), courseId));
+        q.select(root).where(b.equal(root.get("course").get("id"), courseId));
         Query query = session.createQuery(q);
         if (params != null) {
             int page = Integer.parseInt(params.getOrDefault("page", "1"));
