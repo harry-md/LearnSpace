@@ -200,7 +200,7 @@ const ProfilePage = () => {
                   {displayFullName}
                 </h3>
                 <p className="text-sm text-gray-500 mt-1 font-medium">
-                  @{user.username}
+                  {user.username}
                 </p>
               </div>
 
@@ -254,7 +254,7 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-[11px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">
-                      Tên đăng nhập (Cố định)
+                      Tên đăng nhập
                     </label>
                     <input
                       type="text"
@@ -266,7 +266,7 @@ const ProfilePage = () => {
 
                   <div>
                     <label className="block text-[11px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">
-                      Vai trò hệ thống (Cố định)
+                      Vai trò
                     </label>
                     <input
                       type="text"

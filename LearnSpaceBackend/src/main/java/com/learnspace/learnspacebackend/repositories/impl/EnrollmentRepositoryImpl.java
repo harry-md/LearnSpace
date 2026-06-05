@@ -54,11 +54,7 @@ public class EnrollmentRepositoryImpl implements EnrollmentRepository {
         predicates.add(b.equal(root.get("course").get("id"), courseId));
 
         if (status != null && status.length > 0) {
-            CriteriaBuilder.In<EnrollmentStatus> statusBuilder = b.in(root.get("status"));
-            for (EnrollmentStatus s : status) {
-                statusBuilder.value(s);
-            }
-            predicates.add(statusBuilder);
+            predicates.add(root.get("status").in(status));
         }
 
         q.select(root).where(predicates.toArray(Predicate[]::new));
