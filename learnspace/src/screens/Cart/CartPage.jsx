@@ -6,9 +6,11 @@ import {
   PlayCircle,
   BookOpen,
   MessageCircle,
+  Phone,
 } from "lucide-react";
 import { CartContext, UIContext, UserContext } from "../../configs/Context";
 import { authApis, endpoints } from "@/configs/Apis";
+import { useNavigate } from "react-router-dom";
 
 const CartPage = () => {
   const [cart, cartDispatch] = useContext(CartContext);
@@ -16,7 +18,7 @@ const CartPage = () => {
   const [user] = useContext(UserContext);
   const cartItems = cart?.carts || [];
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
-
+  const nav = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const removeCourseFromCart = (courseId) => {
@@ -24,19 +26,33 @@ const CartPage = () => {
   };
 
   const handleCheckout = async () => {
+    if (!user) {
+      uiDispatch({
+        type: "SHOW_DIALOG",
+        payload: {
+          title: "Thông báo",
+          message: "Vui lòng đăng nhập để thanh toán",
+          type: "info",
+          onConfirm: () => {
+            uiDispatch({ type: "HIDE_DIALOG" });
+            nav("/login");
+          },
+        },
+      });
+      return;
+    }
     if (cartItems.length === 0) {
       return;
     }
 
     setIsProcessing(true);
     try {
-      // Map to format [{ courseId: 100 }, ...]
       const payload = cartItems.map((item) => ({ courseId: item.id }));
 
       const res = await authApis(user.token).post(endpoints.checkout, payload);
 
-      if (res.data && res.data.approvalUrl) {
-        window.location.href = res.data.approvalUrl;
+      if (res.data && res.data.checkoutUrl) {
+        window.location.href = res.data.checkoutUrl;
       } else {
         setIsProcessing(false);
         alert("Không nhận được đường dẫn thanh toán từ máy chủ.");
@@ -68,7 +84,6 @@ const CartPage = () => {
 
   return (
     <div className="bg-slate-50 font-sans text-gray-900 h-[calc(100vh-110px)] flex flex-col overflow-hidden">
-      {/* Header section of Cart Page */}
       <div className="shrink-0 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2 sm:pt-8 sm:pb-3">
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-1 sm:mb-1.5">
           Giỏ hàng của bạn
@@ -82,10 +97,7 @@ const CartPage = () => {
         </p>
       </div>
 
-      {/* Main Content Area */}
-      {/* Mobile: scroll entire main. Desktop (lg): hide main scroll, scroll left column only */}
       <main className="flex-1 overflow-y-auto lg:overflow-hidden max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 w-full flex flex-col lg:flex-row gap-5">
-        {/* Left Column: Cart Items Wrapper */}
         <div className="flex-1 flex flex-col bg-white rounded-xl border border-gray-100 shadow-lg shadow-purple-900/5 p-4 sm:p-5 overflow-hidden h-fit lg:max-h-full mb-6 lg:mb-0">
           <div className="flex justify-between items-center mb-2 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-100 shrink-0">
             <h2 className="text-base font-bold text-gray-900">
@@ -102,7 +114,6 @@ const CartPage = () => {
                 key={item.id}
                 className="flex flex-col sm:flex-row gap-4 py-3 sm:py-4 border-b border-gray-100 last:border-0 last:pb-0 hover:bg-slate-50/50 transition-colors rounded-lg px-2 -mx-2"
               >
-                {/* Image */}
                 <div className="w-full sm:w-[150px] lg:w-[160px] shrink-0 relative rounded-lg overflow-hidden bg-gray-100 aspect-video sm:h-[90px]">
                   <img
                     src={item.image}
@@ -116,7 +127,6 @@ const CartPage = () => {
                   )}
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 flex flex-col min-w-0">
                   <h3 className="!text-sm !sm:text-base font-bold text-gray-900 mb-1 leading-tight truncate">
                     {item.name}
@@ -151,7 +161,6 @@ const CartPage = () => {
                   </div>
                 </div>
 
-                {/* Price & Action */}
                 <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 sm:pl-4 sm:border-l border-gray-100 shrink-0 sm:min-w-[160px]">
                   <div className="text-base font-black text-slate-900">
                     {item.price === 0
@@ -203,35 +212,9 @@ const CartPage = () => {
             {isProcessing ? "Đang xử lý..." : "Thanh toán ngay"}
             {!isProcessing && <ShoppingBag size={16} />}
           </button>
-
-          {/* Chat Support Button */}
-          <button
-            onClick={() => {
-              uiDispatch({
-                type: "SHOW_DIALOG",
-                payload: {
-                  title: "Chat Hỗ Trợ",
-                  message:
-                    "Tính năng trò chuyện trực tuyến đang được phát triển. Vui lòng quay lại sau!",
-                  type: "info",
-                  onConfirm: () => uiDispatch({ type: "HIDE_DIALOG" }),
-                },
-              });
-            }}
-            className="w-full mt-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-purple-600 hover:border-purple-200 font-bold text-sm py-2.5 px-4 rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-          >
-            Cần hỗ trợ? Trò chuyện
-            <MessageCircle size={16} />
-          </button>
-
-          <p className="text-center text-[9px] sm:text-[10px] text-gray-500 mt-3 font-medium leading-relaxed">
-            Bằng việc tiến hành thanh toán, bạn đồng ý với Điều khoản dịch vụ và
-            Chính sách bảo mật của chúng tôi.
-          </p>
         </div>
       </main>
 
-      {/* Hide scrollbar styles */}
       <style
         dangerouslySetInnerHTML={{
           __html: `

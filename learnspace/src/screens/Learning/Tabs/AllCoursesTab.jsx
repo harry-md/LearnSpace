@@ -1,20 +1,25 @@
 import React, { useContext, useEffect, useState } from "react";
-import { ShoppingCart, BookOpen } from "lucide-react";
-import Apis, { authApis, endpoints } from "@/configs/Apis";
-import { useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Apis, { endpoints } from "@/configs/Apis";
 import { UIContext } from "@/configs/Context";
+import CourseCard from "@/components/CourseCard/CourseCard";
+import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 
 const AllCoursesTab = () => {
   const [course, setCourse] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [, uiDispatch] = useContext(UIContext);
-  const navigate = useNavigate();
 
-  const loadAllCourse = async () => {
-    uiDispatch({ type: "SHOW_LOADING" });
+  const loadAllCourse = async (page = 1) => {
+    setLoading(true);
     try {
-      const res = await Apis.get(endpoints.courses);
+      const res = await Apis.get(`${endpoints.courses}?page=${page}`);
       if (res.status === 200) {
-        setCourse(res.data);
+        setCourse(res.data.results);
+        setTotalCount(res.data.count);
+        setCurrentPage(page);
       }
     } catch (err) {
       uiDispatch({
@@ -23,7 +28,7 @@ const AllCoursesTab = () => {
         type: "error",
       });
     } finally {
-      uiDispatch({ type: "HIDE_LOADING" });
+      setLoading(false);
     }
   };
 
@@ -31,55 +36,68 @@ const AllCoursesTab = () => {
     loadAllCourse();
   }, []);
 
+  const handlePageChange = (page) => {
+    loadAllCourse(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const totalPages = Math.ceil(totalCount / 20);
+
   return (
     <div className="animate-[fadeIn_0.4s_ease-out]">
       <h3 className="text-lg font-bold text-[#1c1d1f] mb-6">Tất cả khóa học</h3>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {course.map((item) => (
-          <div className="bg-white border border-[#d1d7dc] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group">
-            <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
-              <img
-                src={
-                  item.image
-                    ? item.image
-                    : `https://placehold.co/400x225/f97316/ffffff?text=${item.name}`
-                }
-                alt="AWS"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <SkeletonCard numberCards={8} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {course.length === 0 ? (
+            <div className="col-span-full text-center py-10 text-gray-500 font-medium">
+              Chưa có khóa học nào
             </div>
-            <div className="p-4 flex-1 flex flex-col">
-              <h4 className="font-bold text-sm text-[#1c1d1f] line-clamp-2 leading-snug group-hover:text-[#5624d0] transition-colors mb-1">
-                {item.name}
-              </h4>
+          ) : (
+            course.map((item) => (
+              <CourseCard key={item.id} course={item} className="w-full" />
+            ))
+          )}
+        </div>
+      )}
 
-              <div className="mt-auto space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-extrabold text-base text-[#1c1d1f]">
-                    {item.price} VNĐ
-                  </span>
-                  <button
-                    className="p-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors cursor-pointer"
-                    title="Thêm vào giỏ hàng"
-                  >
-                    <ShoppingCart size={15} />
-                  </button>
-                </div>
-                <button
-                  onClick={() => {
-                    navigate(`/course/${item.id}`);
-                  }}
-                  className="w-full px-3 py-1.5 border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 text-xs font-bold rounded transition-colors cursor-pointer"
-                >
-                  Xem chi tiết
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-        {/* Course Card 2 */}
-      </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-10">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold bg-white border border-gray-200 text-gray-600 hover:border-purple-300 hover:text-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold ${
+                currentPage === page
+                  ? "bg-purple-500 text-white"
+                  : "bg-white border border-gray-200 text-gray-600 hover:border-purple-300 hover:text-purple-600"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="w-9 h-9 flex items-center justify-center rounded-full text-sm font-bold bg-white border border-gray-200 text-gray-600 hover:border-purple-300 hover:text-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

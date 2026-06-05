@@ -15,13 +15,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/courses")
 public class ApiCourseController {
-
     @Autowired
     private CourseService courseService;
 
@@ -41,9 +41,9 @@ public class ApiCourseController {
                 MediaType.MULTIPART_FORM_DATA_VALUE,
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
-    public ResponseEntity<CourseDto> create(@Valid @ModelAttribute CourseDto courseDto) {
-        CourseDto saved = courseService.createCourse(courseDto);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    public ResponseEntity<CourseDto> create(@Valid @ModelAttribute CourseDto courseDto)
+            throws IOException {
+        return new ResponseEntity<>(courseService.createCourse(courseDto), HttpStatus.CREATED);
     }
 
     @PatchMapping(
@@ -53,14 +53,13 @@ public class ApiCourseController {
                 MediaType.APPLICATION_OCTET_STREAM_VALUE
             })
     public ResponseEntity<CourseDto> update(
-            @PathVariable("courseId") int courseId,
-            @Valid @ModelAttribute CoursePatchDto courseDto) {
-        CourseDto updated = courseService.updateCourse(courseId, courseDto);
-        return ResponseEntity.ok(updated);
+            @PathVariable("courseId") int courseId, @Valid @ModelAttribute CoursePatchDto courseDto)
+            throws IOException {
+        return ResponseEntity.ok(courseService.updateCourse(courseId, courseDto));
     }
 
     @DeleteMapping("/{courseId}")
-    public ResponseEntity<Void> delete(@PathVariable(value = "courseId") int courseId) {
+    public ResponseEntity<Void> delete(@PathVariable("courseId") int courseId) throws IOException {
         courseService.deleteCourse(courseId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

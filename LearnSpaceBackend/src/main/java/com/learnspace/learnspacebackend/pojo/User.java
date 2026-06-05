@@ -14,7 +14,6 @@ import java.util.Set;
 @Entity
 @Table(name = "user")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -38,13 +37,8 @@ public class User {
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "first_name", nullable = false)
-    private String firstName;
-
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "last_name", nullable = false)
-    private String lastName;
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
 
     @Size(max = 255)
     @NotNull
@@ -58,11 +52,7 @@ public class User {
     private String avatar =
             "https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png";
 
-    @ColumnDefault("1")
-    @Column(name = "active")
-    private Boolean active = true;
-
-    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     Set<Enrollment> enrollments;
 
     @ColumnDefault("0")
@@ -85,6 +75,14 @@ public class User {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getUsername() {
@@ -111,22 +109,6 @@ public class User {
         this.role = role;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -141,14 +123,6 @@ public class User {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
     }
 
     public Boolean getVerified() {
@@ -173,10 +147,6 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getFullName() {
-        return this.firstName + " " + this.lastName;
     }
 
     public Set<Enrollment> getEnrollments() {

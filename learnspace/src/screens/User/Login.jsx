@@ -5,49 +5,14 @@ import { Button, Col, Form, Placeholder } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Apis, { endpoints, authApis } from "../../configs/Apis";
 import { UserContext } from "@/configs/Context";
-
-const FloatingField = ({
-  id,
-  label,
-  type,
-  value,
-  onChange,
-  disabled,
-  error,
-  lg,
-  colSm,
-  colMd,
-}) => {
-  return (
-    <Col sm={colSm || 12} md={colMd} className="mb-3">
-      <Form.Group
-        className="floating-input-group position-relative"
-        controlId={id}
-      >
-        <Form.Control
-          size={lg ? "lg" : ""}
-          type={type}
-          className={`floating-input ${lg ? "form-control-lg" : ""}`}
-          placeholder=" "
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-        />
-        <Form.Label className="floating-label fw-normal">{label}</Form.Label>
-        {error && (
-          <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>
-        )}
-      </Form.Group>
-    </Col>
-  );
-};
+import FloatField from "../../components/User/FloatField";
 
 const Login = () => {
   const [user, setUser] = useState({ username: "", password: "" });
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
 
-  const [userContext, dispatchUser] = useContext(UserContext);
+  const [, dispatchUser] = useContext(UserContext);
 
   const nav = useNavigate();
 
@@ -59,7 +24,7 @@ const Login = () => {
   const validateData = () => {
     for (let u of userInfo) {
       if (!user[u.field] || user[u.field].trim() === "") {
-        setError(`Vui lòng nhập ${u.title.toLowerCase()}`);
+        setError(`Vui lòng nhập ${u.title}`);
         return false;
       }
     }
@@ -96,7 +61,7 @@ const Login = () => {
       const res = await authApis(token).get(endpoints.currentUser);
       return res.data;
     } catch (err) {
-      console.log(err);
+      console.log("Đã có lỗi xảy ra!");
     }
   };
 
@@ -131,7 +96,6 @@ const Login = () => {
             >
               Đăng nhập
             </h2>
-            <p className="mb-4">Chào mừng bạn quay lại với Learn Space</p>
 
             {error && (
               <div
@@ -171,7 +135,7 @@ const Login = () => {
 
             <Form onSubmit={login}>
               {userInfo.map((u) => (
-                <FloatingField
+                <FloatField
                   lg
                   key={u.field}
                   id={u.field}

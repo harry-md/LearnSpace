@@ -5,6 +5,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.mp4.Mp4Directory;
 import com.learnspace.learnspacebackend.services.R2Service;
 
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,17 +18,12 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class R2ServiceImpl implements R2Service {
-
     @Autowired
     private S3Client r2Client;
 
@@ -37,27 +33,14 @@ public class R2ServiceImpl implements R2Service {
     @Value("${r2.public_url}")
     private String publicUrl;
 
+    @Autowired
+    private Tika tika;
+
     @Override
-    public void validateMp4File(File file) {
-        if (file.length() < 8) {
-            throw new RuntimeException("File quá nhỏ");
-        }
-
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            byte[] header = new byte[8];
-            if (fileInputStream.read(header) < 8) {
-                throw new IllegalArgumentException("Không thể đọc header file");
-            }
-
-            boolean isMp4 =
-                    header[4] == 'f' && header[5] == 't' && header[6] == 'y' && header[7] == 'p';
-
-            if (!isMp4) {
-                throw new IllegalArgumentException("Chỉ chấp nhận upload file mp4");
-            }
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-            throw new RuntimeException("Lỗi khi đọc file video");
+    public void validateMp4File(File file) throws IOException, RuntimeException {
+        String mime = tika.detect(file);
+        if (!mime.equals("video/mp4")) {
+            throw new RuntimeException("File không phải là mp4");
         }
     }
 
@@ -65,7 +48,7 @@ public class R2ServiceImpl implements R2Service {
     public String uploadVideo(File video, String contentType, String folder) {
         String originFileName = video.getName();
         String extension = "";
-        if (originFileName != null && originFileName.contains(".")) {
+        if (originFileName.contains(".")) {
             extension = originFileName.substring(originFileName.lastIndexOf("."));
         }
         String key = folder + "/" + UUID.randomUUID() + extension;
@@ -82,7 +65,6 @@ public class R2ServiceImpl implements R2Service {
 
             return publicUrl + "/" + key;
         } catch (Exception ex) {
-            System.err.println(ex.getMessage());
             throw new RuntimeException("Lỗi khi upload file");
         }
     }
@@ -97,8 +79,7 @@ public class R2ServiceImpl implements R2Service {
                 return directory.getInt(Mp4Directory.TAG_DURATION_SECONDS);
             }
         } catch (Exception ex) {
-            System.err.println(ex.getMessage());
-            throw new RuntimeException("Lỗi khi đọc độ dài video");
+            throw new RuntimeException(ex.getMessage());
         }
         return 0;
     }
@@ -112,15 +93,13 @@ public class R2ServiceImpl implements R2Service {
                     DeleteObjectRequest.builder().bucket(bucketName).key(key).build();
             r2Client.deleteObject(delRequest);
         } catch (Exception ex) {
-            System.err.println(ex.getMessage());
-            throw new RuntimeException("Có lỗi khi xóa video");
+            throw new RuntimeException(ex.getMessage());
         }
     }
 
     @Override
     public void deleteVideos(List<String> videoUrls) {
         List<ObjectIdentifier> keys = videoUrls.stream()
-                .filter(url -> !url.isBlank())
                 .map(url -> ObjectIdentifier.builder()
                         .key(url.replace(publicUrl + "/", ""))
                         .build())
@@ -129,7 +108,6 @@ public class R2ServiceImpl implements R2Service {
         if (keys.isEmpty()) {
             return;
         }
-
         try {
             DeleteObjectsRequest delRequest = DeleteObjectsRequest.builder()
                     .bucket(bucketName)
@@ -137,9 +115,8 @@ public class R2ServiceImpl implements R2Service {
                     .build();
 
             r2Client.deleteObjects(delRequest);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            throw new RuntimeException("Có lỗi khi xóa video");
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
         }
     }
 }

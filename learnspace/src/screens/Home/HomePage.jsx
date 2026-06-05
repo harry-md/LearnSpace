@@ -20,7 +20,7 @@ const HomePage = () => {
     try {
       uiDispatch({ type: "SHOW_LOADING" });
       const res = await Apis.get(`${endpoints.courses}?page=1`);
-      setCourses(res.data);
+      setCourses(res.data.results);
     } catch (err) {
       uiDispatch({
         type: "SHOW_DIALOG",
@@ -54,19 +54,18 @@ const HomePage = () => {
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />
-              ) : user?.firstName ? (
-                user?.firstName.charAt(0).toUpperCase()
+              ) : user?.fullName ? (
+                user?.fullName.charAt(0).toUpperCase()
               ) : (
                 "U"
               )}
             </div>
             <div>
               <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
-                Chào mừng {user?.firstName} {user?.lastName}!
+                Chào mừng {user?.fullName || "bạn"}!
               </h2>
               <p className="text-sm text-gray-500 mt-1 font-medium">
-                Chúc bạn một ngày học tập hiệu quả! Tiếp tục chinh phục kiến
-                thức mới hôm nay nhé.
+                Chúc bạn một ngày học tập hiệu quả!
               </p>
             </div>
           </div>
@@ -86,11 +85,13 @@ const HomePage = () => {
                       : "text-amber-600 bg-amber-50 border-amber-100"
                 }`}
               >
-                {user?.role === "STUDENT"
-                  ? "Học viên"
-                  : user?.role === "TEACHER"
-                    ? "Giảng viên"
-                    : "Quản trị"}
+                {user
+                  ? user?.role === "STUDENT"
+                    ? "Học viên"
+                    : user?.role === "TEACHER"
+                      ? "Giảng viên"
+                      : "Quản trị"
+                  : "Khách"}
               </span>
             </div>
             <div className="text-xs font-bold text-gray-750 mb-0.5">
@@ -98,8 +99,7 @@ const HomePage = () => {
             </div>
             {user?.createdAt && (
               <div className="text-[11px] text-gray-400 font-semibold">
-                Thành viên từ:{" "}
-                {(() => {
+                Thành viên từ: {(() => {
                   const date = new Date(user?.createdAt);
                   return `${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
                 })()}
@@ -127,7 +127,7 @@ const HomePage = () => {
               ref={scrollRef}
               className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x"
             >
-              {courses.map((course) => (
+              {courses?.map((course) => (
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
@@ -146,19 +146,6 @@ const HomePage = () => {
             </button>
           </div>
         </section>
-
-        <SectionContainer className="flex-col">
-          <h3 className="text-2xl font-extrabold mb-6 text-gray-900">
-            Các khóa học hàng đầu về Phát triển
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5  gap-6">
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-            <div className="h-[280px] w-56 bg-gray-50 animate-pulse rounded-2xl border border-gray-100"></div>
-          </div>
-        </SectionContainer>
       </main>
 
       <style

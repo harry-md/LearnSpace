@@ -15,9 +15,7 @@ public record LessonProgressDto(
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         String lessonTitle,
 
-        @NotNull(message = "Số giây đã xem không được để trống")
-        @PositiveOrZero(message = "Số giây đã xem không hợp lệ")
-        Integer watchedSec,
+        @NotNull @PositiveOrZero Integer watchedSec,
 
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         Boolean completed,

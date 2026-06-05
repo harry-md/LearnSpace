@@ -1,34 +1,23 @@
-import { useState, useEffect, useRef, useContext } from "react";
-import {
-  X,
-  Lock,
-  FileText,
-  Clock,
-  BookOpen,
-  ShieldCheck,
-  MessageSquare,
-  ThumbsUp,
-  MessageCircle,
-  VideoOff,
-} from "lucide-react";
-import Apis, { authApis, endpoints } from "@/configs/Apis";
-import { UserContext, UIContext } from "@/configs/Context";
-import Comments from "./Comments/Comments";
-import useLessonProcess from "@/hooks/useLessonProcess";
+import { useContext, useRef, useEffect } from "react";
+import { X, FileText, Clock, BookOpen, VideoOff } from "lucide-react";
+import { authApis, endpoints } from "@/configs/Apis";
+import { UserContext } from "@/configs/Context";
 
-const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
-  const [user] = useContext(UserContext);
-  const [_, uiDispatch] = useContext(UIContext);
-  const [lesson, setLesson] = useState(null);
-  const [error, setError] = useState("");
-
-  const { lessonProgress, getLessonProgress, updateLessonProgress } =
-    useLessonProcess();
-
+const ProtectLessonDisplay = ({ isShow, lesson, lessonId, onClose }) => {
   const videoRef = useRef(null);
   const lastTriggeredTime = useRef(0);
   const hasSeeked = useRef(false);
+  const [user] = useContext(UserContext);
 
+  const createOrUpdateLessonProgress = async (watchedSec) => {
+    try {
+      await authApis(user.token).post(endpoints.lessonProgress(lessonId), {
+        watchedSec,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
   const handleTimeUpdate = (e) => {
     const currentTime = Math.floor(e.target.currentTime);
     if (
@@ -37,100 +26,30 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
       currentTime !== lastTriggeredTime.current
     ) {
       lastTriggeredTime.current = currentTime;
-      updateLessonProgress(lessonId, currentTime);
+      createOrUpdateLessonProgress(currentTime);
     }
   };
 
   const handleSeeked = async (e) => {
-    const currentTime = e.target.currentTime;
-    await updateLessonProgress(lessonId, currentTime);
+    const currentTime = Math.floor(e.target.currentTime);
+    await createOrUpdateLessonProgress(currentTime);
   };
 
   const handlePause = async () => {
-    const currentTime = videoRef.current.currentTime;
-    await updateLessonProgress(lessonId, currentTime);
+    const currentTime = Math.floor(videoRef.current.currentTime);
+    await createOrUpdateLessonProgress(currentTime);
   };
 
   const handleLoadedMetadata = (e) => {
-    if (
-      lessonProgress &&
-      lessonProgress.watchedSec &&
-      !hasSeeked.current
-    ) {
-      e.target.currentTime = lessonProgress.watchedSec;
+    if (lesson?.progress?.watchedSec && !hasSeeked.current) {
+      e.target.currentTime = lesson.progress.watchedSec;
       hasSeeked.current = true;
     }
   };
-
-  useEffect(() => {
-    if (!isShow || !lessonId) return;
-
-    const fetchLesson = async () => {
-      uiDispatch({ type: "SHOW_LOADING" });
-      setError("");
-      setLesson(null);
-      try {
-        let res;
-        if (user && user.token) {
-          res = await authApis(user.token).get(
-            `${endpoints.lessons}/${lessonId}`,
-          );
-        } else {
-          res = await Apis.get(`${endpoints.lessons}/${lessonId}`);
-        }
-        setLesson(res.data);
-      } catch (err) {
-        console.error("Lỗi khi tải chi tiết bài học:", err);
-        setError(
-          "Không thể tải thông tin bài học hoặc bạn không có quyền truy cập.",
-        );
-      } finally {
-        uiDispatch({ type: "HIDE_LOADING" });
-      }
-    };
-
-    fetchLesson();
-  }, [isShow, lessonId, user]);
-
-  useEffect(() => {
-    if (!isShow) return;
-
-    const handleKeyDown = (e) => {
-      if (e.key === "PrintScreen") {
-        e.preventDefault();
-      }
-      if (
-        (e.ctrlKey && (e.key === "s" || e.key === "p" || e.key === "u")) ||
-        (e.ctrlKey && e.shiftKey && e.key === "I") ||
-        e.key === "F12"
-      ) {
-        e.preventDefault();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isShow]);
-
-  useEffect(() => {
-    if (isShow && lessonId) getLessonProgress(lessonId);
-  }, [isShow, lessonId]);
 
   useEffect(() => {
     hasSeeked.current = false;
   }, [lessonId, isShow]);
-
-  useEffect(() => {
-    if (
-      videoRef.current &&
-      lessonProgress &&
-      lessonProgress.watchedSec &&
-      !hasSeeked.current
-    ) {
-      videoRef.current.currentTime = lessonProgress.watchedSec;
-      hasSeeked.current = true;
-    }
-  }, [lessonProgress, lesson]);
 
   if (!isShow) return null;
 
@@ -144,7 +63,6 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 md:p-8 animate-[fadeIn_0.2s_ease-out]"
-      onContextMenu={(e) => e.preventDefault()}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           if (videoRef.current) videoRef.current.pause();
@@ -153,7 +71,6 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
       }}
     >
       <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col relative max-h-[92vh] animate-[slideUp_0.25s_ease-out]">
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-[#5624d0] flex items-center justify-center shrink-0">
@@ -176,31 +93,9 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto">
-          {/* Error state */}
-          {error && (
-            <div className="aspect-video w-full flex flex-col items-center justify-center bg-gray-50 text-center p-6">
-              <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                <Lock size={24} className="text-red-500" />
-              </div>
-              <p className="text-sm font-bold text-[#1c1d1f] mb-1">
-                Không thể truy cập
-              </p>
-              <p className="text-xs text-gray-500 max-w-xs mb-5">{error}</p>
-              <button
-                onClick={onClose}
-                className="px-5 py-2 bg-[#5624d0] hover:bg-[#4712c4] text-white rounded-lg text-xs font-bold transition-colors"
-              >
-                Đóng
-              </button>
-            </div>
-          )}
-
-          {/* Lesson content */}
-          {lesson && !error && (
+          {lesson && (
             <>
-              {/* Video container */}
               <div className="relative bg-[#1c1d1f]">
                 {lesson.video ? (
                   <video
@@ -210,11 +105,9 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                     onSeeked={handleSeeked}
                     onLoadedMetadata={handleLoadedMetadata}
                     controls
-                    controlsList="nodownload"
                     onTimeUpdate={handleTimeUpdate}
                     disablePictureInPicture
                     className="w-full aspect-video object-contain transition-all duration-300"
-                    onContextMenu={(e) => e.preventDefault()}
                   />
                 ) : (
                   <div className="w-full aspect-video flex flex-col items-center justify-center bg-[#151515] border-b border-gray-800">
@@ -231,10 +124,8 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                 )}
               </div>
 
-              {/* Lesson info bar */}
               <div className="px-5 py-4 border-t border-gray-200">
                 <div className="flex flex-wrap items-start gap-6">
-                  {/* Left: Description */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <FileText size={15} className="text-[#5624d0] shrink-0" />
@@ -247,7 +138,6 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                     </p>
                   </div>
 
-                  {/* Right: Metadata chips */}
                   <div className="shrink-0 flex flex-col gap-2">
                     {lesson.videoLength != null && (
                       <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 rounded-lg px-3 py-2">
@@ -257,16 +147,9 @@ const ProtectLessonDisplay = ({ isShow, lessonId, onClose }) => {
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 rounded-lg px-3 py-2">
-                      <ShieldCheck size={14} className="text-emerald-500" />
-                      <span className="font-semibold">Bản quyền bảo vệ</span>
-                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Comment Section Mockup */}
-              <Comments />
             </>
           )}
         </div>

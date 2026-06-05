@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import {
   Search,
   ShoppingCart,
@@ -9,41 +9,25 @@ import {
 } from "lucide-react";
 import { Chip } from "@heroui/react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
-
-const cartItems = [
-  {
-    id: 1,
-    title: "Lập Trình Python Từ Cơ Bản Đến Nâng Cao Trong 30 Ngày",
-    author: "AI Coding",
-    price: "269.000 ₫",
-    originalPrice: "1.059.000 ₫",
-    image: "https://placehold.co/120x68/1e3a8a/ffffff?text=Python",
-  },
-  {
-    id: 2,
-    title: "AWS Cloud for beginner (Vietnamese)",
-    author: "Linh Nguyen",
-    price: "269.000 ₫",
-    originalPrice: "1.829.000 ₫",
-    image: "https://placehold.co/120x68/f97316/ffffff?text=AWS",
-  },
-];
-
 import AvatarMenu from "../AvatarMenu/AvatarMenu";
 import ChatMenu from "./ChatArea/ChatMenu";
-import { UIContext, UserContext, CartContext } from "@/configs/Context";
+import {
+  UIContext,
+  UserContext,
+  CartContext,
+  ChatContext,
+} from "@/configs/Context";
 import Apis, { endpoints } from "@/configs/Apis";
+import { onValue, ref } from "firebase/database";
+import { db, auth } from "@/configs/Firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const Header = () => {
   const nav = useNavigate();
   const [user] = useContext(UserContext);
   const [, uiDispatch] = useContext(UIContext);
   const [cart, cartDispatch] = useContext(CartContext);
+  const [, chatDispatch] = useContext(ChatContext);
   const [openAvatarMenu, setOpenAvatarMenu] = useState(false);
   const [openChat, setOpenChat] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -51,12 +35,15 @@ const Header = () => {
   const [searchData, setSearchData] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
 
+  const [totalUnread, setTotalUnread] = useState(0);
+  const prevConversations = useRef({});
+
   const loadSearchResults = async (keyword) => {
     try {
       const res = await Apis.get(`${endpoints.courses}?kw=${keyword}`);
-      setSearchData(res.data);
+      setSearchData(res.data.results);
     } catch (err) {
-      console.log(err);
+      console.log("Đã có lỗi xảy ra!");
     }
   };
 
@@ -92,12 +79,61 @@ const Header = () => {
   };
 
   useEffect(() => {
+    if (!user) {
+      setTotalUnread(0);
+      return;
+    }
+    let unsubscribeDb = null;
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser && firebaseUser.uid === String(user.id)) {
+        const conversationsRef = ref(db, `userConversations/${user.id}`);
+
+        unsubscribeDb = onValue(conversationsRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            let total = 0;
+            Object.keys(data).forEach((otherId) => {
+              const conv = data[otherId];
+              if (conv.unread && conv.unread > 0) {
+                total += conv.unread;
+                const prevConv = prevConversations.current[otherId];
+                if (prevConv && conv.timestamp > prevConv.timestamp) {
+                  chatDispatch({
+                    type: "OPEN_CHAT",
+                    payload: {
+                      id: otherId,
+                      teacherName: conv.senderName || "Có tin nhắn mới",
+                      avatar: conv.senderAvatar || "https://placehold.co/100",
+                    },
+                  });
+                }
+              }
+            });
+            setTotalUnread(total);
+            prevConversations.current = data;
+          } else {
+            setTotalUnread(0);
+          }
+        });
+      } else {
+        if (unsubscribeDb) {
+          unsubscribeDb();
+          unsubscribeDb = null;
+        }
+      }
+    });
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeDb) unsubscribeDb();
+    };
+  }, [user]);
+
+  useEffect(() => {
     loadCategories();
   }, []);
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm w-full">
       <div className="flex items-center justify-between px-6 h-16 gap-4">
-        {/* Logo & Mobile Menu */}
         <div className="flex items-center gap-4">
           <Menu className="lg:hidden cursor-pointer" />
           <Link
@@ -108,7 +144,6 @@ const Header = () => {
           </Link>
         </div>
 
-        {/* Search Bar */}
         <div className="flex-1 flex gap-4 min-w-0">
           <div className="flex items-center min-w-0 flex-1">
             <nav className="flex items-center gap-1 ms-2">
@@ -172,7 +207,7 @@ const Header = () => {
                 </div>
                 {!searchKeyword.trim() ? (
                   <div className="text-sm text-gray-500 text-center py-4">
-                    Nhập từ khóa để tìm kiếm khóa học...
+                    Nhập từ khóa để tìm kiếm khóa học
                   </div>
                 ) : !searchData || searchData.length === 0 ? (
                   <div className="text-sm text-gray-500 text-center py-4">
@@ -205,7 +240,7 @@ const Header = () => {
                         <div className="text-right shrink-0">
                           <div className="text-sm font-bold text-[#1c1d1f]">
                             {course.price
-                              ? `${Number(course.price).toLocaleString("vi-VN")} ₫`
+                              ? `${Number(course.price).toLocaleString("vi-VN")} VNĐ`
                               : "Miễn phí"}
                           </div>
                           {course.avgRating && (
@@ -231,7 +266,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Action Icons */}
         <div className="flex items-center gap-4 lg:gap-6">
           <Link
             to="/cart"
@@ -249,9 +283,11 @@ const Header = () => {
               className="relative cursor-pointer py-2 px-1 text-gray-700 hover:text-purple-600 transition-colors flex items-center"
             >
               <MessageCircle color="#0d6efd" size={22} />
-              <span className="absolute -top-0.5 -right-1.5 w-4 h-4 bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
-                1
-              </span>
+              {totalUnread > 0 && (
+                <span className="absolute -top-0.5 -right-1.5 w-4 h-4 bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
+                  {totalUnread > 99 ? "99+" : totalUnread}
+                </span>
+              )}
             </button>
             {openChat && <ChatMenu onClose={() => setOpenChat(false)} />}
           </div>
@@ -267,11 +303,7 @@ const Header = () => {
                   />
                 ) : (
                   <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-500 hover:ring-offset-2 transition-all">
-                    {(
-                      (user.firstName && user.firstName[0]) ||
-                      (user.username && user.username[0]) ||
-                      "U"
-                    ).toUpperCase()}
+                    {(user.fullName || "U").toUpperCase()}
                   </div>
                 )}
               </div>

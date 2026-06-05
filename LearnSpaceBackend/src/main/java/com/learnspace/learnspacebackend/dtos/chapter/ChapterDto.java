@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.learnspace.learnspacebackend.dtos.lesson.LessonListDto;
-import com.learnspace.learnspacebackend.utils.NotHtml;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
@@ -17,17 +15,13 @@ public record ChapterDto(
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         Integer id,
 
-        @NotBlank(message = "Tên chương không được để trống")
-        @Pattern(regexp = "^[^<>]*$", message = "Tên chương không hợp lệ")
-        @Size(max = 255, message = "Tên chương vượt quá độ dài cho phép")
-        String name,
+        @NotBlank @Size(max = 255) String name,
 
-        @Size(max = 15000, message = "Mô tả chương vượt quá độ dài cho phép") @NotHtml
-        String description,
+        @Size(max = 15000) String description,
 
         Boolean free,
 
-        @JsonProperty(access = Access.READ_ONLY) Integer order,
+        Integer order,
 
         @JsonProperty(access = Access.READ_ONLY) List<LessonListDto> lessons,
 

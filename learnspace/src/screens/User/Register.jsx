@@ -4,42 +4,7 @@ import "./Style.css";
 import { Button, Col, Form, Placeholder, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Apis, { endpoints } from "../../configs/Apis";
-
-const FloatingField = ({
-  id,
-  label,
-  type,
-  value,
-  onChange,
-  disabled,
-  error,
-  lg,
-  colSm,
-  colMd,
-}) => {
-  return (
-    <Col sm={colSm || 12} md={colMd} className="mb-3">
-      <Form.Group
-        className="floating-input-group position-relative"
-        controlId={id}
-      >
-        <Form.Control
-          size={lg ? "lg" : ""}
-          type={type}
-          className={`floating-input ${lg ? "form-control-lg" : ""}`}
-          placeholder=" "
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-        />
-        <Form.Label className="floating-label fw-normal">{label}</Form.Label>
-        {error && (
-          <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>
-        )}
-      </Form.Group>
-    </Col>
-  );
-};
+import FloatField from "../../components/User/FloatField";
 
 const Register = () => {
   const [user, setUser] = useState({});
@@ -49,8 +14,7 @@ const Register = () => {
   const nav = useNavigate();
 
   const userInfo = [
-    { field: "lastName", title: "Họ và tên lót", type: "text" },
-    { field: "firstName", title: "Tên", type: "text" },
+    { field: "fullName", title: "Họ và tên", type: "text" },
     { field: "username", title: "Tên đăng nhập", type: "text" },
     { field: "email", title: "Email", type: "email" },
     { field: "password", title: "Mật khẩu", type: "password" },
@@ -60,16 +24,8 @@ const Register = () => {
   const validateData = () => {
     for (let u of userInfo) {
       if (!user[u.field] || user[u.field].trim() === "") {
-        setError(`Vui lòng điền đủ thông tin ${u.title}`);
+        setError(`Vui lòng điền đủ ${u.title}`);
         return false;
-      }
-
-      if (["firstName", "lastName"].includes(u.field)) {
-        const nameRegex = /^[\p{L}\s]+$/u;
-        if (!nameRegex.test(user[u.field])) {
-          setError(`${u.title} không được chứa ký tự đặc biệt`);
-          return false;
-        }
       }
 
       if (u.field === "username") {
@@ -83,7 +39,7 @@ const Register = () => {
       if (u.field === "email") {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(user[u.field])) {
-          setError("Vui lòng nhập địa chỉ email hợp lệ");
+          setError("Email không hợp lệ");
           return false;
         }
       }
@@ -105,14 +61,12 @@ const Register = () => {
 
       const { confirm, ...registerData } = user;
 
-      const jsonBlob = new Blob([JSON.stringify(registerData)], {
-        type: "application/json",
-      });
-
-      form.append("data", jsonBlob);
+      for (let key in registerData) {
+        form.append(key, registerData[key]);
+      }
 
       if (avatar.current.files.length > 0) {
-        form.append("avatar", avatar.current.files[0]);
+        form.append("avatarFile", avatar.current.files[0]);
       }
 
       try {
@@ -164,13 +118,9 @@ const Register = () => {
           className="form-column d-flex flex-column p-5 justify-content-center bg-white"
         >
           <div className="registration-form-content">
-            <h2
-              className="fw-bold mb-1"
-              style={{ color: "#000", fontSize: "3rem" }}
-            >
+            <h2 className="fw-bold mb-1" style={{ fontSize: "2rem" }}>
               Đăng ký tài khoản
             </h2>
-            <p className="mb-2">Đăng ký để bắt đầu học tập tại Learn Space</p>
 
             {error && (
               <div
@@ -209,35 +159,8 @@ const Register = () => {
             )}
 
             <Form onSubmit={register}>
-              <Row className="gx-2">
-                <FloatingField
-                  lg
-                  colSm={6}
-                  id={userInfo[0].field}
-                  label={userInfo[0].title}
-                  type={userInfo[0].type}
-                  value={user[userInfo[0].field] || ""}
-                  onChange={(e) =>
-                    setUser({ ...user, [userInfo[0].field]: e.target.value })
-                  }
-                  disabled={loading}
-                />
-                <FloatingField
-                  lg
-                  colSm={6}
-                  id={userInfo[1].field}
-                  label={userInfo[1].title}
-                  type={userInfo[1].type}
-                  value={user[userInfo[1].field] || ""}
-                  onChange={(e) =>
-                    setUser({ ...user, [userInfo[1].field]: e.target.value })
-                  }
-                  disabled={loading}
-                />
-              </Row>
-
-              {userInfo.slice(2).map((u) => (
-                <FloatingField
+              {userInfo.map((u) => (
+                <FloatField
                   lg
                   key={u.field}
                   id={u.field}
@@ -255,6 +178,7 @@ const Register = () => {
                 <Form.Label
                   className="fw-bold small"
                   style={{ color: "#1c1d1f" }}
+                  disabled={loading}
                 >
                   Ảnh đại diện
                 </Form.Label>
@@ -262,7 +186,6 @@ const Register = () => {
                   size="lg"
                   type="file"
                   ref={avatar}
-                  disabled={loading}
                   style={{
                     fontSize: "1rem",
                   }}

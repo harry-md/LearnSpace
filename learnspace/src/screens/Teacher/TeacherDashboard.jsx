@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import Sidebar from "./components/Sidebar/Sidebar";
-import Header from "./components/Header";
-import OverviewTab from "./components/OverviewTab/OverviewTab";
-import CoursesTab from "./components/CoursesTab/CoursesTab";
-import ManageCourseTab from "./components/ManageCourseTab/ManageCourseTab";
+import Sidebar from "@/components/TeacherDashboard/Sidebar/Sidebar";
+import Header from "@/components/TeacherDashboard/Header";
+import OverviewTab from "@/components/TeacherDashboard/OverviewTab/OverviewTab";
+import CoursesTab from "@/components/TeacherDashboard/CoursesTab/CoursesTab";
+import ManageCourseTab from "@/components/TeacherDashboard/ManageCourseTab/ManageCourseTab";
 
 const TeacherDashboard = () => {
   const [view, setView] = useState("overview");
@@ -20,25 +20,10 @@ const TeacherDashboard = () => {
   };
 
   return (
-    <div
-      className="font-sans"
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        background: "#f7f9fa",
-        color: "#1c1d1f",
-      }}
-    >
+    <div className="font-sans min-h-screen flex bg-[#f7f9fa] text-[#1c1d1f]">
       <Sidebar view={view} setView={setView} />
 
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <div className="flex-1 min-w-0 flex flex-col">
         <Header
           view={view}
           selectedCourse={selectedCourse}

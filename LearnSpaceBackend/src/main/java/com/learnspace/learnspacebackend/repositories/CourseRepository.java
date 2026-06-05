@@ -6,16 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 public interface CourseRepository {
-
     List<Object[]> getAllCourses(Map<String, String> params);
 
     Long countCourses(Map<String, String> params);
 
     Course getCourseById(int courseId);
 
-    boolean existCourse(int courseId);
-
-    Course createOrUpdate(Course course);
+    Course addOrUpdateCourse(Course course);
 
     void deleteCourse(int courseId);
 

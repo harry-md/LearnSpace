@@ -1,13 +1,14 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
 import com.learnspace.learnspacebackend.pojo.Chapter;
+import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Lesson;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Fetch;
-import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
@@ -21,19 +22,8 @@ import java.util.List;
 @Repository
 @Transactional
 public class LessonRepositoryImpl implements LessonRepository {
-
     @Autowired
     private LocalSessionFactoryBean factory;
-
-    @Override
-    public List<Lesson> getLessons(int chapterId) {
-        Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "FROM Lesson l WHERE l.chapter.id = :chapterId ORDER BY l.order",
-                        Lesson.class)
-                .setParameter("chapterId", chapterId)
-                .getResultList();
-    }
 
     @Override
     public Lesson addOrUpdateLesson(Lesson lesson) {
@@ -42,22 +32,23 @@ public class LessonRepositoryImpl implements LessonRepository {
             session.persist(lesson);
             return lesson;
         }
-        return session.merge(lesson);
+        session.merge(lesson);
+        return lesson;
     }
 
     @Override
     public Lesson getLessonById(int lessonId) {
         Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Lesson> q = builder.createQuery(Lesson.class);
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Lesson> q = b.createQuery(Lesson.class);
         Root<Lesson> root = q.from(Lesson.class);
 
-        Fetch<Lesson, Chapter> chapterFetch = root.fetch("chapter", JoinType.INNER);
-        chapterFetch.fetch("course", JoinType.INNER);
+        Fetch<Lesson, Chapter> chapterFetch = root.fetch("chapter");
+        Fetch<Chapter, Course> courseFetch = chapterFetch.fetch("course");
+        courseFetch.fetch("teacher");
 
-        q.select(root).where(builder.equal(root.get("id"), lessonId));
-
-        return session.createQuery(q).getSingleResultOrNull();
+        q.select(root).where(b.equal(root.get("id"), lessonId));
+        return session.createQuery(q).getSingleResult();
     }
 
     @Override
@@ -72,46 +63,23 @@ public class LessonRepositoryImpl implements LessonRepository {
     @Override
     public List<String> getVideoUrlsByChapterId(int chapterId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "SELECT l.video FROM Lesson l WHERE l.chapter.id = :chapterId",
-                        String.class)
-                .setParameter("chapterId", chapterId)
-                .getResultList();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<String> q = b.createQuery(String.class);
+        Root<Lesson> root = q.from(Lesson.class);
+
+        q.select(root.get("video")).where(b.equal(root.get("chapter").get("id"), chapterId));
+        return session.createQuery(q).getResultList();
     }
 
     @Override
     public List<String> getVideoUrlsByCourseId(int courseId) {
         Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "SELECT l.video FROM Lesson l JOIN l.chapter c WHERE c.course.id ="
-                                + " :courseId",
-                        String.class)
-                .setParameter("courseId", courseId)
-                .getResultList();
-    }
-
-    @Override
-    public Integer getMaxOrder(int chapterId) {
-        Session session = factory.getObject().getCurrentSession();
-        return session.createQuery(
-                        "SELECT COALESCE(MAX(l.order), 0) FROM Lesson l WHERE l.chapter.id ="
-                                + " :chapterId",
-                        Integer.class)
-                .setParameter("chapterId", chapterId)
-                .getSingleResult();
-    }
-
-    @Override
-    public int countLessonsByCourseId(int courseId) {
-        Session session = factory.getObject().getCurrentSession();
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Long> q = builder.createQuery(Long.class);
-
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<String> q = b.createQuery(String.class);
         Root<Lesson> root = q.from(Lesson.class);
-        q.select(builder.count(root))
-                .where(builder.equal(root.get("chapter").get("course").get("id"), courseId));
+        Join<Lesson, Chapter> chapterJoin = root.join("chapter");
 
-        Long result = session.createQuery(q).getSingleResult();
-        return result == null ? 0 : result.intValue();
+        q.select(root.get("video")).where(b.equal(chapterJoin.get("course").get("id"), courseId));
+        return session.createQuery(q).getResultList();
     }
 }

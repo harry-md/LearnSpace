@@ -3,6 +3,7 @@ import axios from "axios";
 export const endpoints = {
   categories: "/categories",
   courses: "/courses",
+  courseDetails: (courseId) => `/courses/${courseId}`,
   chapters: "/chapters",
   addChapter: (courseId) => `/courses/${courseId}/chapters`,
   chapterLesson: (chapterId) => `/chapters/${chapterId}/lessons`,
@@ -17,7 +18,9 @@ export const endpoints = {
   courseProgress: (courseId) => `/courses/${courseId}/progress`,
   lessonProgress: (lessonId) => `/lessons/${lessonId}/lesson-progress`,
   checkout: "/payments/checkout",
-  capturePayment: (token) => `/payments/${token}/capture`,
+  chatContacts: "/chat/contacts",
+  chatToken: "/chat/token",
+  reviewCourse: (courseId) => `/courses/${courseId}/reviews`,
 };
 
 export const authApis = (token) => {

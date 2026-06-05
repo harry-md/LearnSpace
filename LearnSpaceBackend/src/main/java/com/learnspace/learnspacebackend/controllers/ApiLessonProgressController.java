@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 public class ApiLessonProgressController {
-
     @Autowired
     private LessonProgressService lessonProgressService;
 
@@ -20,16 +19,7 @@ public class ApiLessonProgressController {
             @PathVariable("lessonId") int lessonId,
             @RequestBody LessonProgressDto lessonProgressDto) {
         return new ResponseEntity<>(
-                lessonProgressService.addLessonProgress(lessonId, lessonProgressDto),
+                lessonProgressService.saveLessonProgress(lessonId, lessonProgressDto),
                 HttpStatus.CREATED);
-    }
-
-    @PatchMapping("/lessons/{lessonId}/lesson-progress")
-    public ResponseEntity<LessonProgressDto> update(
-            @PathVariable("lessonId") int lessonId,
-            @RequestBody LessonProgressDto lessonProgressDto) {
-        return new ResponseEntity<>(
-                lessonProgressService.updateLessonProgress(lessonId, lessonProgressDto),
-                HttpStatus.OK);
     }
 }

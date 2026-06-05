@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/categories")
 public class CategoryController {
-
     @Autowired
     private CategoryService categoryService;
 
@@ -31,7 +30,7 @@ public class CategoryController {
         return "redirect:/categories";
     }
 
-    @DeleteMapping("/{id}")
+    @GetMapping("/delete/{id}")
     public String delete(@PathVariable(value = "id") int id) {
         categoryService.deleteCate(id);
         return "redirect:/categories";

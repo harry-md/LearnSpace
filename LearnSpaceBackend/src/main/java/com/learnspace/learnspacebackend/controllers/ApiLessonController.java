@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 public class ApiLessonController {
-
     @Autowired
     private LessonService lessonService;
 
@@ -32,8 +31,8 @@ public class ApiLessonController {
             })
     public ResponseEntity<LessonDto> create(
             @PathVariable("chapterId") int chapterId, @Valid @ModelAttribute LessonDto lessonDto) {
-        LessonDto created = lessonService.createLesson(chapterId, lessonDto);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                lessonService.createLesson(chapterId, lessonDto), HttpStatus.CREATED);
     }
 
     @PatchMapping(

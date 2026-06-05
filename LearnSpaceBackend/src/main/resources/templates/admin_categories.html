@@ -16,7 +16,7 @@
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
 
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3 mb-4 border-bottom">
-            <h1 class="h3 fw-bold text-dark">Danh sách Danh mục Khóa học</h1>
+            <h1 class="h3 fw-bold text-dark">DANH MỤC KHÓA HỌC</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
               <button id="btnAddCategory" class="btn btn-primary shadow-sm">
                 <i class="fa-solid fa-plus me-1"></i> Thêm danh mục
@@ -58,19 +58,12 @@
                             th:data-name="${cat.name}">
                             <i class="fa-solid fa-pen-to-square"></i>
                           </button>
-
-
-                          <button class="btn btn-sm btn-light text-danger btn-delete"
-                            th:data-id="${cat.id}"
-                            th:data-name="${cat.name}"
-                            type="submit"
-                            th:data-url="@{'/categories/' + ${cat.id}}"
-                          >
-
+                          <a th:href="@{'/categories/delete/' + ${cat.id}}"
+                            class="btn btn-sm btn-light text-danger"
+                            onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');"
+                            data-bs-toggle="tooltip" title="Xóa">
                             <i class="fa-solid fa-trash-can"></i>
-                          </button>
-
-
+                          </a>
                         </div>
                       </td>
                     </tr>

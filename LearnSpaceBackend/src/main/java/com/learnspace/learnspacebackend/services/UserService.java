@@ -8,22 +8,26 @@ import com.learnspace.learnspacebackend.dtos.user.UserUpdateDto;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public interface UserService extends UserDetailsService {
-
     UserProfileDto getUserByUsername(String username);
 
-    UserProfileDto register(UserRegisterDto dto);
-
-    UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto);
-
-    String login(UserLoginDto user);
-
-    UserProfileDto registerAdmin(UserRegisterDto user);
+    int countAllUsers();
 
     List<UserProfileDto> getAllUsers(Map<String, String> params);
 
-    void updateByAdmin(AdminUserUpdateDto dto);
+    UserProfileDto register(UserRegisterDto dto);
+
+    UserProfileDto getCurrentUser();
+
+    UserProfileDto updateUser(UserUpdateDto dto) throws IOException;
+
+    String login(UserLoginDto user);
+
+    void updateByAdmin(AdminUserUpdateDto dto) throws IOException;
+
+    void deleteUser(int id);
 }

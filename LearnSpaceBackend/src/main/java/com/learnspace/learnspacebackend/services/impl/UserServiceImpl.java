@@ -6,9 +6,6 @@ import com.learnspace.learnspacebackend.dtos.user.UserLoginDto;
 import com.learnspace.learnspacebackend.dtos.user.UserProfileDto;
 import com.learnspace.learnspacebackend.dtos.user.UserRegisterDto;
 import com.learnspace.learnspacebackend.dtos.user.UserUpdateDto;
-import com.learnspace.learnspacebackend.exceptions.DuplicateResourceException;
-import com.learnspace.learnspacebackend.exceptions.InvalidLoginException;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.UserMapper;
 import com.learnspace.learnspacebackend.pojo.User;
 import com.learnspace.learnspacebackend.pojo.UserRole;
@@ -18,19 +15,17 @@ import com.learnspace.learnspacebackend.services.UserService;
 import com.learnspace.learnspacebackend.utils.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +33,6 @@ import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
-
     @Autowired
     private UserRepository userRepository;
 
@@ -49,12 +43,7 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Autowired
-    @Lazy
     private BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    @Lazy
-    private AuthenticationManager authenticationManager;
 
     @Autowired
     private CloudinaryService cloudinaryService;
@@ -63,7 +52,7 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.getUserByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException("Không tìm thấy người dùng với username");
+            throw new UsernameNotFoundException("Username không thấy");
         }
 
         Set<GrantedAuthority> authorities = new HashSet<>();
@@ -79,26 +68,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserProfileDto getUserByUsername(String username) {
-        User user = userRepository.getUserByUsername(username);
-        if (user == null) {
-            throw new ResourceNotFoundException("Không tìm thấy người dùng với username");
-        }
-        return userMapper.toProfileDto(user);
+        return userMapper.toProfileDto(userRepository.getUserByUsername(username));
     }
 
     @Override
     public UserProfileDto register(UserRegisterDto dto) {
         if (userRepository.checkUsernameExist(dto.username())) {
-            throw new DuplicateResourceException("Username đã tồn tại");
+            throw new RuntimeException("Username đã tồn tại");
         }
-
         User user = userMapper.toEntity(dto);
 
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setRole(UserRole.STUDENT);
 
         if (dto.avatarFile() != null && !dto.avatarFile().isEmpty()) {
-            user.setAvatar(cloudinaryService.uploadImage(dto.avatarFile()));
+            try {
+                user.setAvatar(cloudinaryService.uploadImage(dto.avatarFile()));
+            } catch (IOException ex) {
+                System.err.println(ex.getMessage());
+            }
         }
 
         return userMapper.toProfileDto(userRepository.register(user));
@@ -106,47 +94,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(UserLoginDto user) {
+        if (!userRepository.authenticate(user.username(), user.password())) {
+            throw new AccessDeniedException("Thông tin đăng nhập sai");
+        }
+        CustomUserDetails principal = (CustomUserDetails) loadUserByUsername(user.username());
+
+        String authority = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("ROLE_STUTDENT")
+                .replace("ROLE_", "");
         try {
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(user.username(), user.password());
-
-            Authentication authenticatedToken = authenticationManager.authenticate(authentication);
-
-            CustomUserDetails principal = (CustomUserDetails) authenticatedToken.getPrincipal();
-
-            String authority = principal.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .findFirst()
-                    .orElse("ROLE_STUDENT")
-                    .replace("ROLE_", "");
-
             return jwtUtils.generateToken(
                     principal.getId(), principal.getUsername(), UserRole.valueOf(authority));
-        } catch (AuthenticationException ex) {
-            System.err.println(ex.getMessage());
-            throw new InvalidLoginException();
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
-            throw new RuntimeException("Có lỗi khi tạo token");
+            throw new RuntimeException("Lỗi đăng nhập");
         }
     }
 
-    @Override
-    public UserProfileDto registerAdmin(UserRegisterDto dto) {
-        User user = userMapper.toEntity(dto);
-        user.setPassword(passwordEncoder.encode(dto.password()));
-        user.setRole(UserRole.ADMIN);
-        return userMapper.toProfileDto(userRepository.register(user));
-    }
-
-    @Override
-    public List<UserProfileDto> getAllUsers(Map<String, String> params) {
-        return userRepository.getAllUsers(params).stream()
-                .map(userMapper::toProfileDto)
-                .toList();
-    }
-
-    private void handleAvatarUpdate(User u, MultipartFile newAvatar) {
+    private void handleAvatarUpdate(User u, MultipartFile newAvatar) throws IOException {
         if (newAvatar != null && !newAvatar.isEmpty()) {
             if (u.getAvatar() != null) {
                 cloudinaryService.deleteImage(u.getAvatar());
@@ -156,17 +123,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateByAdmin(AdminUserUpdateDto dto) {
+    public void updateByAdmin(AdminUserUpdateDto dto) throws IOException {
         User user = userRepository.getUserById(dto.id());
-        if (user == null) {
-            throw new ResourceNotFoundException("Không tìm thấy user");
-        }
-
-        user.setFirstName(dto.firstName());
-        user.setLastName(dto.lastName());
+        user.setFullName(dto.fullName());
         user.setEmail(dto.email());
         user.setRole(dto.role());
-        user.setActive(dto.active() != null ? dto.active() : false);
 
         if (dto.role() == UserRole.TEACHER) {
             user.setVerified(dto.verified() != null ? dto.verified() : false);
@@ -178,20 +139,43 @@ public class UserServiceImpl implements UserService {
         userRepository.update(user);
     }
 
-    @Override
-    public UserProfileDto updateUser(Integer currentUserId, UserUpdateDto dto) {
-        User user = userRepository.getUserById(currentUserId);
-        if (user == null) {
-            throw new ResourceNotFoundException("Không tìm thấy user");
-        }
+    private CustomUserDetails getPrincipal() {
+        return (CustomUserDetails)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
 
-        user.setFirstName(dto.firstName());
-        user.setLastName(dto.lastName());
+    @Override
+    public UserProfileDto getCurrentUser() {
+        return userMapper.toProfileDto(
+                userRepository.getUserByUsername(getPrincipal().getUsername()));
+    }
+
+    @Override
+    public UserProfileDto updateUser(UserUpdateDto dto) throws IOException {
+        User user = userRepository.getUserById(getPrincipal().getId());
+        user.setFullName(dto.fullName());
         user.setEmail(dto.email());
 
         handleAvatarUpdate(user, dto.avatar());
 
         userRepository.update(user);
         return userMapper.toProfileDto(user);
+    }
+
+    @Override
+    public int countAllUsers() {
+        return userRepository.countAllUser();
+    }
+
+    @Override
+    public List<UserProfileDto> getAllUsers(Map<String, String> params) {
+        return userRepository.getAllUsers(params).stream()
+                .map(userMapper::toProfileDto)
+                .toList();
+    }
+
+    @Override
+    public void deleteUser(int id) {
+        userRepository.deleteUser(id);
     }
 }

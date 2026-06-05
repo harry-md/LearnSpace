@@ -70,18 +70,11 @@ document.addEventListener("DOMContentLoaded", function () {
           this.getAttribute("data-username");
         document.getElementById("email").value =
           this.getAttribute("data-email");
-        document.getElementById("firstName").value =
-          this.getAttribute("data-firstname");
-        document.getElementById("lastName").value =
-          this.getAttribute("data-lastname");
+        document.getElementById("fullName").value =
+          this.getAttribute("data-fullname");
 
         if (roleSelect) {
           roleSelect.value = this.getAttribute("data-role");
-        }
-
-        const activeCheckbox = document.getElementById("active");
-        if (activeCheckbox) {
-          activeCheckbox.checked = this.getAttribute("data-active") === "true";
         }
 
         if (verifiedCheckbox) {

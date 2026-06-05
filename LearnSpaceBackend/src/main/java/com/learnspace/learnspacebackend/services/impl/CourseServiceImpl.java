@@ -5,20 +5,17 @@ import com.learnspace.learnspacebackend.dtos.course.CourseListDto;
 import com.learnspace.learnspacebackend.dtos.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dtos.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.dtos.pagination.PaginatedResponseDto;
-import com.learnspace.learnspacebackend.dtos.progress.LessonProgressDto;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
+import com.learnspace.learnspacebackend.mappers.CategoryMapper;
 import com.learnspace.learnspacebackend.mappers.CourseMapper;
-import com.learnspace.learnspacebackend.mappers.LessonProgressMapper;
 import com.learnspace.learnspacebackend.mappers.PaginatedResponseMapper;
+import com.learnspace.learnspacebackend.mappers.UserMapper;
 import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
-import com.learnspace.learnspacebackend.pojo.LessonProgress;
-import com.learnspace.learnspacebackend.pojo.User;
+import com.learnspace.learnspacebackend.pojo.UserRole;
 import com.learnspace.learnspacebackend.repositories.CategoryRepository;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
 import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
-import com.learnspace.learnspacebackend.repositories.LessonProgressRepository;
 import com.learnspace.learnspacebackend.repositories.LessonRepository;
 import com.learnspace.learnspacebackend.repositories.ReviewRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
@@ -29,19 +26,16 @@ import com.learnspace.learnspacebackend.services.R2Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 @Service
-@Transactional
 public class CourseServiceImpl implements CourseService {
-
     @Autowired
     private CourseRepository courseRepository;
 
@@ -52,16 +46,16 @@ public class CourseServiceImpl implements CourseService {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private CategoryMapper categoryMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
     private CourseMapper courseMapper;
 
     @Autowired
     private LessonRepository lessonRepository;
-
-    @Autowired
-    private LessonProgressRepository progressRepository;
-
-    @Autowired
-    private LessonProgressMapper progressMapper;
 
     @Autowired
     private UserRepository userRepository;
@@ -82,30 +76,23 @@ public class CourseServiceImpl implements CourseService {
     public PaginatedResponseDto<CourseListDto> getCourses(Map<String, String> params) {
         List<CourseListDto> results = courseRepository.getAllCourses(params).stream()
                 .map(row -> {
-                    Course course = (Course) row[0];
-                    Double avgRating = (Double) row[1];
-                    Long enrollmentCount = (Long) row[2];
-                    Long chapterCount = (Long) row[3];
-                    Long lessonCount = (Long) row[4];
-                    CourseListDto base = courseMapper.toListDto(course);
-
+                    Course c = (Course) row[0];
                     return new CourseListDto(
-                            base.id(),
-                            base.name(),
-                            base.image(),
-                            base.price(),
-                            base.category(),
-                            base.teacher(),
-                            avgRating,
-                            enrollmentCount,
-                            chapterCount,
-                            lessonCount);
+                            c.getId(),
+                            c.getName(),
+                            c.getImage(),
+                            c.getPrice(),
+                            categoryMapper.toDto(c.getCategory()),
+                            userMapper.toSimpleUserDto(c.getTeacher()),
+                            (Double) row[1],
+                            (Long) row[2],
+                            (Long) row[3],
+                            (Long) row[4]);
                 })
                 .toList();
-
         return PaginatedResponseMapper.toPaginatedResponseDto(
                 courseRepository.countCourses(params),
-                Integer.parseInt(params.get("page")),
+                Integer.parseInt(params.getOrDefault("page", "1")),
                 COURSE_PAGE_SIZE,
                 results);
     }
@@ -113,26 +100,9 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseDto getCourse(int courseId) {
         Course course = courseRepository.getCourseById(courseId);
-        if (course == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học");
-        }
-
         CourseDto dto = courseMapper.toDto(course);
-        Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
-        Long enrollCount = enrollmentRepository.countEnrollmentsByCourse(courseId);
-        LessonProgressDto latestProgress = null;
-
-        Object p = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        CustomUserDetails principal = p.equals("anonymousUser") ? null : (CustomUserDetails) p;
-
-        if (principal != null) {
-            LessonProgress l = progressRepository.getLessonProgressByStudentAndCourse(
-                    principal.getId(), courseId);
-
-            if (latestProgress == null) {
-                latestProgress = progressMapper.toDto(l);
-            }
-        }
+        Double avgRating = reviewRepository.getAverageRatingByCourse(courseId);
+        Long enrollCount = enrollmentRepository.countEnrollments(courseId);
 
         return new CourseDto(
                 dto.id(),
@@ -147,7 +117,6 @@ public class CourseServiceImpl implements CourseService {
                 dto.chapters(),
                 dto.category(),
                 dto.teacher(),
-                latestProgress,
                 dto.createdAt(),
                 dto.updatedAt(),
                 dto.imageFile(),
@@ -159,39 +128,32 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.countCourses(params);
     }
 
-    private User getLoggedInTeacher() {
-        CustomUserDetails principal = (CustomUserDetails)
+    private CustomUserDetails getPrincipal() {
+        return (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userRepository.getUserById(principal.getId());
     }
 
-    private void verifyCourseOwner(Course course, User teacher) {
-        if (!course.getTeacher().getId().equals(teacher.getId())) {
-            throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này");
+    private void checkCourseOwner(Course course) {
+        CustomUserDetails principal = getPrincipal();
+        boolean isAdmin = principal.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_" + UserRole.ADMIN.name()));
+
+        if (!course.getTeacher().getId().equals(principal.getId()) && !isAdmin) {
+            throw new AccessDeniedException("Không có quyền sửa khóa học");
         }
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public CourseDto createCourse(CourseDto courseDto) {
+    public CourseDto createCourse(CourseDto courseDto) throws IOException {
         Course course = courseMapper.toEntity(courseDto);
-
-        if (courseDto.categoryId() != null) {
-            Category category = categoryRepository.getCateById(courseDto.categoryId());
-            if (category == null) {
-                throw new ResourceNotFoundException(
-                        "Không tìm thấy danh mục " + courseDto.categoryId());
-            }
-            course.setCategory(category);
-        }
-
-        course.setTeacher(getLoggedInTeacher());
+        Category category = categoryRepository.getCateById(courseDto.categoryId());
+        course.setCategory(category);
+        course.setTeacher(userRepository.getUserById(getPrincipal().getId()));
 
         MultipartFile imageFile = courseDto.imageFile();
         if (imageFile != null && !imageFile.isEmpty()) {
             cloudinaryService.validateImageFile(imageFile);
         }
-
         MultipartFile introVideoFile = courseDto.introVideoFile();
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             cloudinaryService.validateVideoFile(introVideoFile);
@@ -200,35 +162,23 @@ public class CourseServiceImpl implements CourseService {
         if (imageFile != null && !imageFile.isEmpty()) {
             course.setImage(cloudinaryService.uploadImage(imageFile));
         }
-
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             course.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
 
-        Course savedCourse = courseRepository.createOrUpdate(course);
+        Course savedCourse = courseRepository.addOrUpdateCourse(course);
         return courseMapper.toDto(savedCourse);
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public CourseDto updateCourse(int id, CoursePatchDto courseDto) {
-        Course existCourse = courseRepository.getCourseById(id);
-        if (existCourse == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học cần cập nhật");
-        }
-
-        User teacher = getLoggedInTeacher();
-        verifyCourseOwner(existCourse, teacher);
-
-        courseMapper.updateEntityFromDto(existCourse, courseDto);
+    public CourseDto updateCourse(int id, CoursePatchDto courseDto) throws IOException {
+        Course course = courseRepository.getCourseById(id);
+        checkCourseOwner(course);
+        courseMapper.updateEntityFromDto(course, courseDto);
 
         if (courseDto.categoryId() != null) {
             Category category = categoryRepository.getCateById(courseDto.categoryId());
-            if (category == null) {
-                throw new ResourceNotFoundException(
-                        "Không tìm thấy danh mục " + courseDto.categoryId());
-            }
-            existCourse.setCategory(category);
+            course.setCategory(category);
         }
 
         MultipartFile imageFile = courseDto.imageFile();
@@ -242,38 +192,35 @@ public class CourseServiceImpl implements CourseService {
         }
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            cloudinaryService.deleteImage(existCourse.getImage());
-            existCourse.setImage(cloudinaryService.uploadImage(imageFile));
+            cloudinaryService.deleteImage(course.getImage());
+            course.setImage(cloudinaryService.uploadImage(imageFile));
         }
 
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
-            cloudinaryService.deleteVideo(existCourse.getIntroVideo());
-            existCourse.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
+            cloudinaryService.deleteVideo(course.getIntroVideo());
+            course.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
 
-        return courseMapper.toDto(courseRepository.createOrUpdate(existCourse));
+        return courseMapper.toDto(courseRepository.addOrUpdateCourse(course));
     }
 
     @Override
-    @PreAuthorize("hasRole('VERIFIED_TEACHER')")
-    public void deleteCourse(int id) {
-        Course existCourse = courseRepository.getCourseById(id);
-        if (existCourse == null) {
-            throw new ResourceNotFoundException("Không tìm thấy khóa học để xóa");
+    public void deleteCourse(int id) throws IOException {
+        Course course = courseRepository.getCourseById(id);
+        if (course == null) {
+            throw new IllegalArgumentException("Không tìm thấy khóa học");
         }
-
-        User teacher = getLoggedInTeacher();
-        verifyCourseOwner(existCourse, teacher);
+        checkCourseOwner(course);
 
         List<String> lessonVideoUrls = lessonRepository.getVideoUrlsByCourseId(id);
         r2Service.deleteVideos(lessonVideoUrls);
 
-        if (existCourse.getImage() != null) {
-            cloudinaryService.deleteImage(existCourse.getImage());
+        if (course.getImage() != null) {
+            cloudinaryService.deleteImage(course.getImage());
         }
 
-        if (existCourse.getIntroVideo() != null) {
-            cloudinaryService.deleteVideo(existCourse.getIntroVideo());
+        if (course.getIntroVideo() != null) {
+            cloudinaryService.deleteVideo(course.getIntroVideo());
         }
 
         courseRepository.deleteCourse(id);
@@ -283,22 +230,21 @@ public class CourseServiceImpl implements CourseService {
     public List<MyCourseListDto> getEnrolledCourses() {
         CustomUserDetails principal = (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        return courseRepository.getEnrolledCoursesByStudent(principal.getId()).stream()
+        List<Object[]> courses = courseRepository.getEnrolledCoursesByStudent(principal.getId());
+        return courses.stream()
                 .map(row -> {
-                    Course course = (Course) row[0];
+                    Course c = (Course) row[0];
                     Long chapterCount = (Long) row[1];
                     Long lessonCount = (Long) row[2];
                     Long completedCount = (Long) row[3];
-                    CourseListDto base = courseMapper.toListDto(course);
-
+                    CourseListDto course = courseMapper.toListDto(c);
                     return new MyCourseListDto(
-                            base.id(),
-                            base.name(),
-                            base.image(),
-                            base.price(),
-                            base.category(),
-                            base.teacher(),
+                            course.id(),
+                            course.name(),
+                            course.image(),
+                            course.price(),
+                            course.category(),
+                            course.teacher(),
                             chapterCount,
                             lessonCount,
                             completedCount);

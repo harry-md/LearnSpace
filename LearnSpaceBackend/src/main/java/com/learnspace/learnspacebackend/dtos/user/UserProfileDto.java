@@ -9,11 +9,9 @@ public record UserProfileDto(
         Integer id,
         String username,
         UserRole role,
-        String firstName,
-        String lastName,
+        String fullName,
         String email,
         String avatar,
-        boolean active,
         boolean verified,
 
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")

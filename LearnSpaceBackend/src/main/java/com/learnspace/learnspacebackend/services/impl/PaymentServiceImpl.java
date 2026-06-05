@@ -2,7 +2,6 @@ package com.learnspace.learnspacebackend.services.impl;
 
 import com.learnspace.learnspacebackend.dtos.payment.*;
 import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.exceptions.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mappers.PaymentMapper;
 import com.learnspace.learnspacebackend.pojo.*;
 import com.learnspace.learnspacebackend.repositories.CourseRepository;
@@ -10,24 +9,22 @@ import com.learnspace.learnspacebackend.repositories.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repositories.PaymentRepository;
 import com.learnspace.learnspacebackend.repositories.UserRepository;
 import com.learnspace.learnspacebackend.services.PaymentService;
-import com.learnspace.learnspacebackend.services.PaypalService;
+import com.learnspace.learnspacebackend.services.StripeService;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.checkout.Session;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class PaymentServiceImpl implements PaymentService {
-
     @Autowired
     private PaymentRepository paymentRepository;
 
@@ -41,191 +38,95 @@ public class PaymentServiceImpl implements PaymentService {
     private UserRepository userRepository;
 
     @Autowired
-    private PaypalService paypalService;
+    private StripeService stripeService;
 
     @Autowired
     private PaymentMapper paymentMapper;
 
-    private CustomUserDetails getLoggedInPrincipal() {
+    private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    private void activatePayments(List<Payment> payments, String paymentIntentId) {
+        payments.stream()
+                .filter(payment -> payment.getStatus() != PaymentStatus.COMPLETED)
+                .forEach(payment -> {
+                    payment.setStatus(PaymentStatus.COMPLETED);
+                    payment.setStripePaymentIntentId(paymentIntentId);
+                    paymentRepository.addOrUpdatePayment(payment);
+                    Enrollment enrollment = payment.getEnrollment();
+                    enrollment.setStatus(EnrollmentStatus.ACTIVE);
+                    enrollmentRepository.addOrUpdateEnrollment(enrollment);
+                });
+    }
+
     @Override
-    public CheckoutResponseDto checkout(List<CartDto> carts) {
+    public CheckoutDto checkout(List<CartDto> carts) throws StripeException {
         if (carts == null || carts.isEmpty()) {
-            throw new IllegalArgumentException("Giỏ hàng trống");
+            throw new RuntimeException("Giỏ hàng trống");
         }
-
-        CustomUserDetails principal = getLoggedInPrincipal();
-        User student = userRepository.getUserById(principal.getId());
-
-        BigDecimal totalVnd = BigDecimal.ZERO;
+        User student = userRepository.getUserById(getPrincipal().getId());
+        BigDecimal totalAmount = BigDecimal.ZERO;
         List<Payment> payments = new ArrayList<>();
 
         for (CartDto c : carts) {
             Course course = courseRepository.getCourseById(c.courseId());
-            if (course == null) {
-                throw new ResourceNotFoundException("Không tìm thấy khóa học #" + c.courseId());
-            }
-
             if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
-                throw new IllegalArgumentException(
-                        "Khóa học " + course.getName() + " miễn phí, không cần thanh toán");
+                throw new RuntimeException("Khóa học miễn phí");
             }
 
             Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
                     student.getId(), course.getId());
-
             Payment payment = null;
-
             if (enrollment != null) {
                 if (enrollment.getStatus() == EnrollmentStatus.ACTIVE
                         || enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
-                    throw new IllegalArgumentException(
-                            "Bạn đã đăng ký khóa học " + course.getName() + " rồi");
+                    throw new RuntimeException("Đã đăng ký khóa học " + course.getName() + " rồi");
                 }
-
-                enrollment.setStatus(EnrollmentStatus.PENDING);
-                enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
-
                 payment = paymentRepository.getPaymentByEnrollmentId(enrollment.getId());
             } else {
                 enrollment = new Enrollment();
                 enrollment.setStudent(student);
                 enrollment.setCourse(course);
-                enrollment.setStatus(EnrollmentStatus.PENDING);
-                enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
             }
-
+            enrollment.setStatus(EnrollmentStatus.PENDING);
+            enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
             if (payment == null) {
                 payment = new Payment();
                 payment.setEnrollment(enrollment);
             }
 
-            payment.setVndAmount(course.getPrice());
+            payment.setAmount(course.getPrice());
             payment.setStatus(PaymentStatus.PENDING);
-
-            totalVnd = totalVnd.add(course.getPrice());
+            totalAmount = totalAmount.add(course.getPrice());
             payments.add(payment);
         }
+        Session session =
+                stripeService.createCheckoutSession(totalAmount, "Thanh toán khóa học LearnSpace");
+        String sessionId = session.getId();
 
-        BigDecimal totalUsd = paypalService.convertVndToUsd(totalVnd);
-        if (totalUsd.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Số tiền khóa học quá nhỏ");
-        }
-
-        for (Payment payment : payments) {
-            BigDecimal ratio =
-                    payment.getVndAmount().divide(totalVnd, 10, java.math.RoundingMode.HALF_UP);
-            BigDecimal usdForThis =
-                    totalUsd.multiply(ratio).setScale(2, java.math.RoundingMode.HALF_UP);
-            payment.setUsdAmount(usdForThis);
-        }
-
-        String description = "Thanh toán " + carts.size() + " khóa học trên LearnSpace";
-        Map<String, String> orderResponse = paypalService.createOrder(totalUsd, description);
-        String orderId = orderResponse.get("orderId");
-        String approvalUrl = orderResponse.get("approvalUrl");
-
-        List<PaymentDto> paymentDtos = new ArrayList<>();
-        for (Payment payment : payments) {
-            payment.setPaypalOrderId(orderId);
-            payment = paymentRepository.addOrUpdatePayment(payment);
-            PaymentDto dto = paymentMapper.toDto(payment);
-            paymentDtos.add(dto);
-        }
-
-        return new CheckoutResponseDto(orderId, approvalUrl, paymentDtos, totalVnd, totalUsd);
-    }
-
-    private void activatePayments(List<Payment> payments, String captureId) {
-        for (Payment payment : payments) {
-            if (payment.getStatus() == PaymentStatus.COMPLETED) {
-                continue;
-            }
-            payment.setStatus(PaymentStatus.COMPLETED);
-            payment.setPaypalCaptureId(captureId);
-            paymentRepository.addOrUpdatePayment(payment);
-
-            Enrollment enrollment = payment.getEnrollment();
-            enrollment.setStatus(EnrollmentStatus.ACTIVE);
-            enrollmentRepository.addOrUpdateEnrollment(enrollment);
-        }
+        List<PaymentDto> paymentDtos = payments.stream()
+                .map(payment -> {
+                    payment.setStripeSessionId(sessionId);
+                    return paymentMapper.toDto(paymentRepository.addOrUpdatePayment(payment));
+                })
+                .toList();
+        return new CheckoutDto(sessionId, session.getUrl(), paymentDtos, totalAmount);
     }
 
     @Override
-    public CaptureResponseDto capturePayment(String paypalOrderId) {
-        List<Payment> payments = paymentRepository.getPaymentsByPaypalOrderId(paypalOrderId);
-        if (payments.isEmpty()) {
-            throw new ResourceNotFoundException(
-                    "Không tìm thấy payment cho PayPal order: " + paypalOrderId);
-        }
-
-        CustomUserDetails principal = getLoggedInPrincipal();
-        for (Payment payment : payments) {
-            if (!payment.getEnrollment().getStudent().getId().equals(principal.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
-                        "Payment này không thuộc về bạn");
-            }
-        }
-
-        boolean allCompleted =
-                payments.stream().allMatch(p -> p.getStatus() == PaymentStatus.COMPLETED);
-        if (allCompleted) {
-            throw new IllegalArgumentException("Đơn hàng này đã được thanh toán rồi");
-        }
-
-        Map<String, String> captureResponse = paypalService.captureOrder(paypalOrderId);
-        String captureId = captureResponse.get("captureId");
-        String status = captureResponse.get("status");
-
-        if (status.equals("COMPLETED")) {
-            activatePayments(payments, captureId);
-        }
-
-        List<PaymentDto> paymentDtos =
-                payments.stream().map(paymentMapper::toDto).collect(Collectors.toList());
-
-        return new CaptureResponseDto(paypalOrderId, captureId, status, paymentDtos);
-    }
-
-    @Override
-    public void handleWebhookEvent(String payload, Map<String, String> headers) {
-        Map<String, String> lowerCaseHeader = new HashMap<>();
-        headers.forEach((k, v) -> lowerCaseHeader.put(k.toLowerCase(), v.toLowerCase()));
-
-        if (!paypalService.verifyPaypalWebhook(payload, lowerCaseHeader)) {
-            System.err.println("Không xác thực được webhook từ PayPal");
-            return;
-        }
-
-        Map<String, String> event = paypalService.parseWebhookEvent(payload);
-        String eventType = event.get("eventType");
-        String orderId = event.get("orderId");
-
-        if (orderId == null) {
-            return;
-        }
-
-        List<Payment> payments = paymentRepository.getPaymentsByPaypalOrderId(orderId);
-        if (payments.isEmpty()) {
-            return;
-        }
-
-        switch (eventType) {
-            case "PAYMENT.CAPTURE.COMPLETED" -> {
-                String captureId = event.get("captureId");
-                activatePayments(payments, captureId);
-            }
-            case "PAYMENT.CAPTURE.DENIED", "PAYMENT.CAPTURE.REFUNDED" -> {
-                for (Payment payment : payments) {
-                    payment.setStatus(PaymentStatus.CANCELLED);
-                    paymentRepository.addOrUpdatePayment(payment);
-
-                    Enrollment enrollment = payment.getEnrollment();
-                    enrollment.setStatus(EnrollmentStatus.DISABLED);
-                    enrollmentRepository.addOrUpdateEnrollment(enrollment);
+    public void handleWebhookEvent(String payload, String sigHeader)
+            throws SignatureVerificationException {
+        Event event = stripeService.parseWebhookEvent(payload, sigHeader);
+        if (event.getType().equals("checkout.session.completed")) {
+            Session session =
+                    (Session) event.getDataObjectDeserializer().getObject().orElse(null);
+            if (session != null && session.getPaymentStatus().equals("paid")) {
+                List<Payment> payments =
+                        paymentRepository.getPaymentsByStripeSessionId(session.getId());
+                if (!payments.isEmpty()) {
+                    activatePayments(payments, session.getPaymentIntent());
                 }
             }
         }

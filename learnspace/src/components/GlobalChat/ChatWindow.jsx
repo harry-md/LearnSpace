@@ -1,10 +1,56 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { X, Minus, Send } from "lucide-react";
-import { ChatContext } from "@/configs/Context";
+import { ChatContext, UserContext } from "@/configs/Context";
+import { db } from "@/configs/Firebase";
+import { ref, onValue, push, set, serverTimestamp } from "firebase/database";
 
 const ChatWindow = ({ chatData }) => {
   const [, chatDispatch] = useContext(ChatContext);
+  const [currentUser] = useContext(UserContext);
   const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const messagesEndRef = useRef(null);
+
+  const conversationId = [currentUser?.id, chatData?.id]
+    .sort((a, b) => a - b)
+    .join("_");
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const messagesRef = ref(db, `messages/${conversationId}`);
+    const unsubscribe = onValue(messagesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const msgList = Object.keys(data)
+          .map((key) => ({
+            id: key,
+            ...data[key],
+          }))
+          .sort((a, b) => a.timestamp - b.timestamp);
+
+        setMessages(msgList);
+      } else {
+        setMessages([]);
+      }
+    });
+
+    const myConversationRef = ref(
+      db,
+      `userConversations/${currentUser.id}/${chatData.id}/unread`,
+    );
+    set(myConversationRef, 0);
+
+    return () => unsubscribe();
+  }, [conversationId, currentUser, chatData.id]);
 
   const handleClose = () => {
     chatDispatch({ type: "CLOSE_CHAT", payload: chatData.id });
@@ -14,10 +60,36 @@ const ChatWindow = ({ chatData }) => {
     chatDispatch({ type: "TOGGLE_MINIMIZE", payload: chatData.id });
   };
 
-  const handleSend = () => {
-    if (!message.trim()) return;
-    // Mock send logic
+  const handleSend = async () => {
+    if (!message.trim() || !currentUser) return;
+
+    const textToSend = message.trim();
     setMessage("");
+
+    try {
+      const messagesRef = ref(db, `messages/${conversationId}`);
+      await push(messagesRef, {
+        text: textToSend,
+        senderId: currentUser.id,
+        timestamp: serverTimestamp(),
+      });
+
+      await set(ref(db, `userConversations/${currentUser.id}/${chatData.id}`), {
+        lastMessage: textToSend,
+        timestamp: serverTimestamp(),
+        unread: 0,
+      });
+
+      await set(ref(db, `userConversations/${chatData.id}/${currentUser.id}`), {
+        lastMessage: textToSend,
+        timestamp: serverTimestamp(),
+        unread: 1,
+        senderName: currentUser.fullName,
+        senderAvatar: currentUser.avatar || "https://placehold.co/100",
+      });
+    } catch (error) {
+      console.error("Lỗi khi gửi tin nhắn");
+    }
   };
 
   if (chatData.isMinimized) {
@@ -27,14 +99,11 @@ const ChatWindow = ({ chatData }) => {
         className="w-[300px] h-12 bg-white rounded-t-xl shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border border-gray-200 border-b-0 flex items-center justify-between px-3 cursor-pointer hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center gap-2 overflow-hidden">
-          <div className="relative">
-            <img
-              src={chatData.avatar}
-              alt="avatar"
-              className="w-8 h-8 rounded-full object-cover shrink-0"
-            />
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border border-white rounded-full"></div>
-          </div>
+          <img
+            src={chatData.avatar || "https://placehold.co/100x100"}
+            alt="avatar"
+            className="w-8 h-8 rounded-full object-cover shrink-0"
+          />
           <div className="font-semibold text-sm text-gray-800 truncate">
             {chatData.teacherName}
           </div>
@@ -54,26 +123,19 @@ const ChatWindow = ({ chatData }) => {
 
   return (
     <div className="w-[330px] h-[450px] bg-white rounded-t-xl shadow-[0_-5px_25px_rgba(0,0,0,0.15)] border border-gray-200 border-b-0 flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
-      {/* Header */}
       <div className="h-14 border-b border-gray-100 flex items-center justify-between px-3 bg-white shrink-0 shadow-sm z-10">
         <div
           className="flex items-center gap-2 cursor-pointer w-full overflow-hidden"
           onClick={handleMinimize}
         >
-          <div className="relative shrink-0">
-            <img
-              src={chatData.avatar}
-              alt="avatar"
-              className="w-9 h-9 rounded-full object-cover"
-            />
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border border-white rounded-full"></div>
-          </div>
+          <img
+            src={chatData.avatar || "https://placehold.co/100"}
+            alt="avatar"
+            className="w-9 h-9 rounded-full object-cover shrink-0"
+          />
           <div className="flex flex-col min-w-0">
             <span className="font-bold text-[14px] text-gray-900 leading-tight truncate">
               {chatData.teacherName}
-            </span>
-            <span className="text-[11px] text-gray-500 leading-tight">
-              Đang hoạt động
             </span>
           </div>
         </div>
@@ -93,43 +155,59 @@ const ChatWindow = ({ chatData }) => {
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 bg-white scrollbar-hide">
+      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 bg-white">
         <div className="flex justify-center my-4">
           <div className="flex flex-col items-center gap-1">
             <img
-              src={chatData.avatar}
+              src={chatData.avatar || "https://placehold.co/100"}
               className="w-16 h-16 rounded-full object-cover shadow-sm"
               alt="avatar"
             />
             <div className="font-bold text-gray-900 mt-1">
               {chatData.teacherName}
             </div>
-            <div className="text-xs text-gray-500">{chatData.courseName}</div>
+            <div className="text-xs text-gray-500">
+              Giáo viên / Học viên trên LearnSpace
+            </div>
           </div>
         </div>
 
-        {/* Dummy initial message */}
-        <div className="flex gap-2">
-          <img
-            src={chatData.avatar}
-            className="w-7 h-7 rounded-full shrink-0 object-cover mt-auto"
-            alt="avatar"
-          />
-          <div className="bg-gray-100 text-gray-800 text-[14px] p-2.5 rounded-2xl rounded-bl-none max-w-[75%] leading-relaxed">
-            {chatData.lastMessage}
-          </div>
-        </div>
+        {messages.map((msg, index) => {
+          const isMine = msg.senderId === currentUser.id;
+          return (
+            <div
+              key={msg.id || index}
+              className={`flex gap-2 ${isMine ? "justify-end" : ""}`}
+            >
+              {!isMine && (
+                <img
+                  src={chatData.avatar || "https://placehold.co/100"}
+                  className="w-7 h-7 rounded-full shrink-0 object-cover mt-auto"
+                  alt="avatar"
+                />
+              )}
+              <div
+                className={`${
+                  isMine
+                    ? "bg-purple-600 text-white rounded-2xl rounded-br-none"
+                    : "bg-gray-100 text-gray-800 rounded-2xl rounded-bl-none"
+                } text-[14px] p-2.5 max-w-[75%] leading-relaxed break-words`}
+              >
+                {msg.text}
+              </div>
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="p-3 border-t border-gray-100 bg-white">
         <div className="flex items-end gap-2">
           <div className="flex-1 relative bg-gray-100 rounded-2xl">
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Aa"
+              placeholder="Nhắn tin..."
               className="w-full bg-transparent border-none focus:outline-none resize-none py-2 px-3 text-[14px] text-gray-800 max-h-[80px] min-h-[36px]"
               rows={1}
               onKeyDown={(e) => {
@@ -148,20 +226,6 @@ const ChatWindow = ({ chatData }) => {
           </button>
         </div>
       </div>
-
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `,
-        }}
-      />
     </div>
   );
 };

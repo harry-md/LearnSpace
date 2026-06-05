@@ -2,7 +2,6 @@ package com.learnspace.learnspacebackend.configs;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -15,13 +14,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -54,12 +49,8 @@ import java.util.List;
             "com.learnspace.learnspacebackend.utils",
         })
 public class SpringSecurityConfigs {
-
     @Autowired
     private Environment env;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -69,14 +60,6 @@ public class SpringSecurityConfigs {
     @Bean
     public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
         return new HandlerMappingIntrospector();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider =
-                new DaoAuthenticationProvider(userDetailsService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        return authenticationProvider;
     }
 
     @Bean
@@ -93,11 +76,6 @@ public class SpringSecurityConfigs {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager() {
-        return new ProviderManager(authenticationProvider());
-    }
-
-    @Bean
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(webCorsConfigurationSource()))
                 .authorizeHttpRequests(
@@ -105,12 +83,8 @@ public class SpringSecurityConfigs {
                                 .permitAll()
                                 .requestMatchers("/login")
                                 .permitAll()
-                                .requestMatchers("/register")
-                                .hasRole(UserRole.ADMIN.name())
-                                .requestMatchers("/")
-                                .hasRole(UserRole.ADMIN.name())
                                 .anyRequest()
-                                .authenticated())
+                                .hasRole(UserRole.ADMIN.name()))
                 .formLogin(form -> form.loginPage("/login")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
@@ -164,10 +138,5 @@ public class SpringSecurityConfigs {
                 .serviceConfiguration(
                         S3Configuration.builder().chunkedEncodingEnabled(false).build())
                 .build();
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
     }
 }

@@ -19,20 +19,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
       try {
         const decoded = jwtDecode(user.token);
-        const userRoles = decoded.role;
-        const rolesArray =
-          typeof userRoles === "string"
-            ? [userRoles]
-            : Array.isArray(userRoles)
-              ? userRoles
-              : [];
-        const hasRequiredRole = allowedRoles.some((role) =>
-          rolesArray.includes(role),
-        );
+        const userRole = decoded.role;
+        const hasRequiredRole = allowedRoles.includes(userRole);
 
         setIsAuthorized(hasRequiredRole);
       } catch (error) {
-        console.error("Lỗi giải mã token:", error);
+        console.error("Lỗi giải mã token!");
         setIsAuthorized(false);
       }
     };

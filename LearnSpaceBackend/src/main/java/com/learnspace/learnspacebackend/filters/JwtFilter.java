@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class JwtFilter implements Filter {
-
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -35,15 +34,11 @@ public class JwtFilter implements Filter {
 
             try {
                 JWTClaimsSet claims = jwtUtils.validateTokenAndGetClaims(token);
-
                 if (claims != null) {
                     Integer userId = claims.getIntegerClaim("userId");
                     String username = claims.getSubject();
-
                     httpRequest.setAttribute("username", username);
-
                     String role = claims.getClaim("role").toString();
-
                     List<SimpleGrantedAuthority> authorities =
                             List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
@@ -60,7 +55,6 @@ public class JwtFilter implements Filter {
                 System.err.println(ex.getMessage());
             }
         }
-
         chain.doFilter(request, response);
     }
 }

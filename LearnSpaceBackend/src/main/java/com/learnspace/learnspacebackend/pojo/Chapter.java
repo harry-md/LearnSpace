@@ -16,7 +16,6 @@ import java.util.Set;
 @Entity
 @Table(name = "chapter")
 public class Chapter {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -30,9 +29,8 @@ public class Chapter {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "chapter", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL)
     @OrderBy("order ASC")
-    @Column(name = "lessons")
     private Set<Lesson> lessons;
 
     @NotNull
