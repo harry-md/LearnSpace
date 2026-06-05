@@ -212,19 +212,6 @@ const CartPage = () => {
             {isProcessing ? "Đang xử lý..." : "Thanh toán ngay"}
             {!isProcessing && <ShoppingBag size={16} />}
           </button>
-
-          <a
-            href="tel:0123456789"
-            className="w-full mt-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-purple-600 hover:border-purple-200 font-bold text-sm py-2.5 px-4 rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 !no-underline"
-          >
-            <Phone size={16} />
-            Liên hệ hỗ trợ: 0123456789
-          </a>
-
-          <p className="text-center text-[9px] sm:text-[10px] text-gray-500 mt-3 font-medium leading-relaxed">
-            Bằng việc tiến hành thanh toán, bạn đồng ý với Điều khoản dịch vụ và
-            Chính sách bảo mật của chúng tôi.
-          </p>
         </div>
       </main>
 

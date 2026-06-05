@@ -32,7 +32,6 @@ const Sidebar = ({ view, setView }) => {
             <span className="logo-title">
               Teach<span className="text-[#a78bfa]">Space</span>
             </span>
-            <div className="logo-subtitle">Instructor</div>
           </div>
         </div>
       </div>

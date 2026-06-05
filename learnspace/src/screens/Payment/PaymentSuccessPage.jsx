@@ -24,7 +24,7 @@ const PaymentSuccessPage = () => {
             to="/learning"
             className="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-600/25"
           >
-            Vào không gian học tập
+            Bắt đầu học
             <ArrowRight size={18} />
           </Link>
         </div>
