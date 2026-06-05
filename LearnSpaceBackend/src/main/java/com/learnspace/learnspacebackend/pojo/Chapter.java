@@ -31,7 +31,6 @@ public class Chapter {
 
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL)
     @OrderBy("order ASC")
-    @Column(name = "lessons")
     private Set<Lesson> lessons;
 
     @NotNull
