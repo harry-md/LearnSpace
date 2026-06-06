@@ -1,7 +1,7 @@
 package com.learnspace.learnspacebackend.filters;
 
-import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.utils.JwtUtils;
+import com.learnspace.learnspacebackend.dto.security.CustomUserDetails;
+import com.learnspace.learnspacebackend.util.JwtUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 
 import jakarta.servlet.Filter;

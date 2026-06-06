@@ -1,0 +1,24 @@
+package com.learnspace.learnspacebackend.repository;
+
+import com.learnspace.learnspacebackend.entity.User;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface UserRepository
+        extends JpaRepository<User, Integer>, JpaSpecificationExecutor<User> {
+    Optional<User> findByUsername(String username);
+
+    boolean existsByUsername(String username);
+
+    @Query("SELECT e.student FROM Enrollment e WHERE e.course.teacher.id = :teacherId")
+    List<User> findStudentsByTeacherId(@Param("teacherId") int teacherId);
+
+    @Query("SELECT e.course.teacher FROM Enrollment e WHERE e.course.student.id = :studentId")
+    List<User> findTeachersByStudentId(@Param("studentId") int studentId);
+}

@@ -1,0 +1,50 @@
+package com.learnspace.learnspacebackend.mapper;
+
+import com.learnspace.learnspacebackend.dto.course.CourseDto;
+import com.learnspace.learnspacebackend.dto.course.CourseListDto;
+import com.learnspace.learnspacebackend.dto.course.CoursePatchDto;
+import com.learnspace.learnspacebackend.entity.Course;
+
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+
+@Mapper(componentModel = "spring")
+public interface CourseMapper {
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "teacher", source = "teacher")
+    @Mapping(target = "avgRating", ignore = true)
+    @Mapping(target = "enrollmentCount", ignore = true)
+    CourseListDto toListDto(Course course);
+
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "teacher", source = "teacher")
+    @Mapping(target = "image", source = "image")
+    @Mapping(target = "imageFile", ignore = true)
+    @Mapping(target = "introVideo", source = "introVideo")
+    @Mapping(target = "introVideoFile", ignore = true)
+    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "avgRating", ignore = true)
+    @Mapping(target = "enrollmentCount", ignore = true)
+    @Mapping(target = "chapters", source = "chapters")
+    CourseDto toDto(Course course);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "teacher", ignore = true)
+    @Mapping(target = "image", ignore = true)
+    @Mapping(target = "introVideo", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    Course toEntity(CourseDto dto);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "teacher", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(@MappingTarget Course course, CoursePatchDto dto);
+}

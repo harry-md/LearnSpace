@@ -14,14 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
-SET @@SESSION.SQL_LOG_BIN= 0;
+-- SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+-- SET @@SESSION.SQL_LOG_BIN= 0;
 
 --
 -- GTID state at the beginning of the backup 
 --
 
-SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '00546850-b2fe-11f0-8147-f26f4349a4ff:1-12024';
+-- SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '00546850-b2fe-11f0-8147-f26f4349a4ff:1-12024';
 
 --
 -- Table structure for table `category`
@@ -314,7 +314,7 @@ LOCK TABLES `user` WRITE;
 INSERT INTO `user` VALUES (1,'teacher01','hashed_pass_1','TEACHER','Nguyễn Văn A1231231231321321','nguyenvana@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',1,'2026-04-04 14:07:01','2026-06-04 17:55:01'),(2,'teacher02','hashed_pass_2','TEACHER','Trần Thị B','tranthib@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',1,'2026-04-04 14:07:01','2026-06-02 15:49:19'),(3,'teacher03','hashed_pass_3','TEACHER','Nguyễn Văn C','levanc@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',1,'2026-04-04 14:07:01','2026-06-02 15:49:19'),(4,'student01','hashed_pass_4','STUDENT','Trần Thị D','phamthid@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',1,'2026-04-04 14:07:01','2026-06-02 15:49:19'),(5,'student02','hashed_pass_5','STUDENT','Trần Văn E','hoangvane@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',1,'2026-04-04 14:07:01','2026-06-02 15:49:19'),(6,'student03','hashed_pass_6','STUDENT','Nguyễn Thị F','dangthif@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',0,'2026-04-04 14:07:01','2026-06-02 15:49:19'),(7,'student04','hashed_pass_7','STUDENT','Trần Văn G','buivang@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',1,'2026-04-04 14:07:01','2026-06-02 15:49:19'),(8,'student05','hashed_pass_8','STUDENT','Nguyễn Thị H','dothih@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',1,'2026-04-04 14:07:01','2026-06-02 15:49:19'),(9,'student06','hashed_pass_9','STUDENT','Trần Văn I','hovani@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',1,'2026-04-04 14:07:01','2026-06-02 15:49:19'),(10,'student07','hashed_pass_10','STUDENT','Nguyễn Thị K','ngothik@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',1,'2026-04-04 14:07:01','2026-06-02 15:49:19'),(11,'admin','$2a$10$XGBatnXuYS3iMMuoio/4/eoF.YxmrfKuAlm.0MDNS5bAyNDBci4he','ADMIN','Hai','hai@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',0,'2026-04-12 09:37:32','2026-04-12 09:37:32'),(12,'hau','$2a$10$2wiDlUlT3I7Hovmt4r6SZekD3/VsYNmNDkwuL74ohPm0DfBlTFzBS','STUDENT','Phạm Hậu','hau@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',0,'2026-05-18 18:56:42','2026-06-02 16:22:09'),(14,'hau1','$2a$10$ZWvhJKGdt7WO8evjsUT.oe5B9YBaTsLjSkuf3gitm/CcMhV7WoHsa','STUDENT','Phạm Hậu','hau@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',0,'2026-05-19 15:21:56','2026-06-02 16:22:09'),(15,'hai','$2a$10$VRIxlSZHbZoV7UbMV2K14OAhHSRfrSbjrMV1EjbJYqalWrULWKWEC','TEACHER','Đức Hải','hai@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779184726/wuofsdu9prnevwq1lpuc.webp',1,'2026-05-19 16:58:47','2026-06-02 15:49:19'),(16,'hai1','$2a$10$A5ZlCEWbpmUmaEu8Q7QuE.8R3mLCor0Dg1kr.hueP1EFt67kQRMMu','STUDENT','Hai','hai@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',0,'2026-05-19 17:16:42','2026-05-19 17:16:42'),(17,'hau2','$2a$10$/vdGtYSZy7Rd1MyEKOQN3ujlmr6xxkQYac97wyRAIWqBOCKNHJMda','STUDENT','Pham','hau@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',0,'2026-05-21 15:03:31','2026-05-21 15:03:31'),(18,'test','$2a$10$LaNnv.02x7L3MeV8AWet7eZg3R8zs/Ffgv2oPz48tzA9Ylcz9sgKe','STUDENT','Test','aaaaaa@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779015408/user_c0b6wf.png',0,'2026-05-21 15:22:11','2026-05-21 15:22:11'),(19,'hau3','$2a$10$vAlttQTH9ExgHWpBTRvfZ.2tl/sGCXDbKu4fn4kacKGeznci5Sl4e','STUDENT','Phạm Hậu','hau@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1779700454/eaggrjtkk65x1el2evf7.webp',0,'2026-05-25 16:14:15','2026-06-02 16:22:09'),(23,'hau4','$2a$10$1r8RQRkfCAMvD56OL4HlwO4eAWrVD6186/7AZjOSlTZl16krGiFZe','TEACHER','Phạm Hậu','hau@gmail.com','https://res.cloudinary.com/dsc8rzpbg/image/upload/v1780025700/t7pk6pq0dw9r98dkawan.webp',1,'2026-05-29 10:35:01','2026-06-03 06:58:57');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
-SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
+-- SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
