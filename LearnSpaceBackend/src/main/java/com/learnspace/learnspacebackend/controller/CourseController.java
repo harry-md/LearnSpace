@@ -3,7 +3,8 @@ package com.learnspace.learnspacebackend.controller;
 import com.learnspace.learnspacebackend.service.CategoryService;
 import com.learnspace.learnspacebackend.service.CourseService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,20 +15,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.IOException;
 import java.util.Map;
 
+@RequiredArgsConstructor
 @Controller
 public class CourseController {
-    @Autowired
-    private Environment env;
-
-    @Autowired
-    private CourseService courseService;
-
-    @Autowired
-    private CategoryService categoryService;
+    private final Environment env;
+    private final CourseService courseService;
+    private final CategoryService categoryService;
 
     @GetMapping("/courses")
     public String course(Model model, @RequestParam Map<String, String> params) {
-        model.addAttribute("categories", categoryService.getCategories());
+        model.addAttribute("categories", categoryService.getAll());
         model.addAttribute("courses", courseService.getCourses(params));
 
         int pageSize = env.getProperty("course.page_size", Integer.class);

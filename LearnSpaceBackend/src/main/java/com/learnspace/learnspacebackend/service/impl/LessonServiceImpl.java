@@ -10,7 +10,8 @@ import com.learnspace.learnspacebackend.repository.*;
 import com.learnspace.learnspacebackend.service.LessonService;
 import com.learnspace.learnspacebackend.service.R2Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,28 +20,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 
+@RequiredArgsConstructor
 @Service
 public class LessonServiceImpl implements LessonService {
-    @Autowired
-    private LessonRepository lessonRepository;
-
-    @Autowired
-    private ChapterRepository chapterRepository;
-
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private LessonProgressRepository lessonProgressRepository;
-
-    @Autowired
-    private LessonProgressMapper lessonProgressMapper;
-
-    @Autowired
-    private LessonMapper lessonMapper;
-
-    @Autowired
-    private R2Service r2Service;
+    private final LessonRepository lessonRepository;
+    private final ChapterRepository chapterRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final LessonProgressRepository lessonProgressRepository;
+    private final LessonProgressMapper lessonProgressMapper;
+    private final LessonMapper lessonMapper;
+    private final R2Service r2Service;
 
     private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)

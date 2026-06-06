@@ -5,9 +5,9 @@ import com.learnspace.learnspacebackend.dto.category.CategoryDto;
 import java.util.List;
 
 public interface CategoryService {
-    List<CategoryDto> getCategories();
+    List<CategoryDto> getAll();
 
     CategoryDto createOrUpdate(CategoryDto category);
 
-    void deleteCate(int cateId);
+    void delete(int cateId);
 }

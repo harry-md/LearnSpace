@@ -1,43 +1,32 @@
 package com.learnspace.learnspacebackend.service.impl;
 
-import com.learnspace.learnspacebackend.dto.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.dto.review.ReviewDto;
-import com.learnspace.learnspacebackend.mapper.PaginatedResponseMapper;
+import com.learnspace.learnspacebackend.entity.Review;
 import com.learnspace.learnspacebackend.mapper.ReviewMapper;
 import com.learnspace.learnspacebackend.repository.ReviewRepository;
 import com.learnspace.learnspacebackend.service.ReviewService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-
+@RequiredArgsConstructor
 @Service
 public class ReviewServiceImpl implements ReviewService {
-
-    @Autowired
-    private ReviewRepository reviewRepository;
+    private final ReviewRepository reviewRepository;
+    private final ReviewMapper reviewMapper;
 
     @Value("${review.page_size}")
     private int REVIEW_PAGE_SIZE;
 
-    @Autowired
-    private ReviewMapper reviewMapper;
-
     @Override
-    public PaginatedResponseDto<ReviewDto> getReviewsByCourse(
-            int courseId, Map<String, String> params) {
-
-        List<ReviewDto> results = reviewRepository.getReviewsByCourse(courseId, params).stream()
-                .map(reviewMapper::toDto)
-                .toList();
-
-        return PaginatedResponseMapper.toPaginatedResponseDto(
-                reviewRepository.countReviewsByCourse(courseId),
-                Integer.parseInt(params.getOrDefault("page", "1")),
-                REVIEW_PAGE_SIZE,
-                results);
+    public Page<ReviewDto> getReviewsByCourseId(int courseId, int page) {
+        Pageable pageable = PageRequest.of(page - 1, REVIEW_PAGE_SIZE);
+        Page<Review> reviewPage = reviewRepository.findByCourseId(courseId, pageable);
+        return reviewPage.map(reviewMapper::toDto);
     }
 }

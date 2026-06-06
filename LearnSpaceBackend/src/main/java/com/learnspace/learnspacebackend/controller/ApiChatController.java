@@ -6,7 +6,8 @@ import com.learnspace.learnspacebackend.dto.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.dto.user.SimpleUserDto;
 import com.learnspace.learnspacebackend.service.ChatService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,11 +19,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/chat")
 public class ApiChatController {
-    @Autowired
-    private ChatService chatService;
+    private final ChatService chatService;
 
     @GetMapping("/token")
     public ResponseEntity<?> getFirebaseToken(

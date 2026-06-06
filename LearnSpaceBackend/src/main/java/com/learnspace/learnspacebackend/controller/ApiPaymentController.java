@@ -8,18 +8,19 @@ import com.stripe.exception.StripeException;
 
 import jakarta.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api")
 public class ApiPaymentController {
-    @Autowired
-    private PaymentService paymentService;
+    private final PaymentService paymentService;
 
     @PostMapping("/payments/checkout")
     public ResponseEntity<CheckoutDto> checkout(@RequestBody @Valid List<CartDto> cartItems)

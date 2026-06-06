@@ -3,6 +3,7 @@ package com.learnspace.learnspacebackend.service.impl;
 import com.learnspace.learnspacebackend.dto.payment.*;
 import com.learnspace.learnspacebackend.dto.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.entity.*;
+import com.learnspace.learnspacebackend.exception.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mapper.PaymentMapper;
 import com.learnspace.learnspacebackend.repository.CourseRepository;
 import com.learnspace.learnspacebackend.repository.EnrollmentRepository;
@@ -15,7 +16,8 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -23,25 +25,15 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class PaymentServiceImpl implements PaymentService {
-    @Autowired
-    private PaymentRepository paymentRepository;
-
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private CourseRepository courseRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private StripeService stripeService;
-
-    @Autowired
-    private PaymentMapper paymentMapper;
+    private final PaymentRepository paymentRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final CourseRepository courseRepository;
+    private final UserRepository userRepository;
+    private final StripeService stripeService;
+    private final PaymentMapper paymentMapper;
 
     private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)
@@ -54,7 +46,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .forEach(payment -> {
                     payment.setStatus(PaymentStatus.COMPLETED);
                     payment.setStripePaymentIntentId(paymentIntentId);
-                    paymentRepository.addOrUpdatePayment(payment);
+                    paymentRepository.save(payment);
                     Enrollment enrollment = payment.getEnrollment();
                     enrollment.setStatus(EnrollmentStatus.ACTIVE);
                     enrollmentRepository.addOrUpdateEnrollment(enrollment);
@@ -84,7 +76,9 @@ public class PaymentServiceImpl implements PaymentService {
                         || enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
                     throw new RuntimeException("Đã đăng ký khóa học " + course.getName() + " rồi");
                 }
-                payment = paymentRepository.getPaymentByEnrollmentId(enrollment.getId());
+                payment = paymentRepository
+                        .findByEnrollmentId(enrollment.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy payment"));
             } else {
                 enrollment = new Enrollment();
                 enrollment.setStudent(student);
@@ -109,7 +103,7 @@ public class PaymentServiceImpl implements PaymentService {
         List<PaymentDto> paymentDtos = payments.stream()
                 .map(payment -> {
                     payment.setStripeSessionId(sessionId);
-                    return paymentMapper.toDto(paymentRepository.addOrUpdatePayment(payment));
+                    return paymentMapper.toDto(paymentRepository.save(payment));
                 })
                 .toList();
         return new CheckoutDto(sessionId, session.getUrl(), paymentDtos, totalAmount);
@@ -123,8 +117,7 @@ public class PaymentServiceImpl implements PaymentService {
             Session session =
                     (Session) event.getDataObjectDeserializer().getObject().orElse(null);
             if (session != null && session.getPaymentStatus().equals("paid")) {
-                List<Payment> payments =
-                        paymentRepository.getPaymentsByStripeSessionId(session.getId());
+                List<Payment> payments = paymentRepository.findByStripeSessionId(session.getId());
                 if (!payments.isEmpty()) {
                     activatePayments(payments, session.getPaymentIntent());
                 }

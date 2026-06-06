@@ -1,10 +1,11 @@
 package com.learnspace.learnspacebackend.controller;
 
-import com.learnspace.learnspacebackend.dto.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.dto.review.ReviewDto;
 import com.learnspace.learnspacebackend.service.ReviewService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,17 +13,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api")
 public class ApiReviewController {
-    @Autowired
-    private ReviewService reviewService;
+    private final ReviewService reviewService;
 
     @GetMapping("/courses/{courseId}/reviews")
-    public ResponseEntity<PaginatedResponseDto<ReviewDto>> list(
-            @PathVariable("courseId") int courseId, @RequestParam Map<String, String> params) {
-        return ResponseEntity.ok(reviewService.getReviewsByCourse(courseId, params));
+    public ResponseEntity<Page<ReviewDto>> list(
+            @PathVariable("courseId") int courseId,
+            @RequestParam(name = "page", defaultValue = "1") int page) {
+        return ResponseEntity.ok(reviewService.getReviewsByCourseId(courseId, page));
     }
 }

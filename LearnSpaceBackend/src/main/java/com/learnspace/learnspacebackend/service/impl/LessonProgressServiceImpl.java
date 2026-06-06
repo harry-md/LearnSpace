@@ -13,25 +13,20 @@ import com.learnspace.learnspacebackend.repository.LessonProgressRepository;
 import com.learnspace.learnspacebackend.repository.LessonRepository;
 import com.learnspace.learnspacebackend.service.LessonProgressService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@RequiredArgsConstructor
 @Service
 public class LessonProgressServiceImpl implements LessonProgressService {
-    @Autowired
-    private LessonProgressRepository lessonProgressRepository;
-
-    @Autowired
-    private LessonProgressMapper lessonProgressMapper;
-
-    @Autowired
-    private LessonRepository lessonRepository;
-
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
+    private final LessonProgressRepository lessonProgressRepository;
+    private final LessonProgressMapper lessonProgressMapper;
+    private final LessonRepository lessonRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)

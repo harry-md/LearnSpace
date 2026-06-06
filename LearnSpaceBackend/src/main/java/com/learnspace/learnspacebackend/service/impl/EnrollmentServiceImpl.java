@@ -12,25 +12,20 @@ import com.learnspace.learnspacebackend.repository.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repository.UserRepository;
 import com.learnspace.learnspacebackend.service.EnrollmentService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+@RequiredArgsConstructor
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private CourseRepository courseRepository;
-
-    @Autowired
-    private EnrollmentMapper enrollmentMapper;
+    private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final CourseRepository courseRepository;
+    private final EnrollmentMapper enrollmentMapper;
 
     private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)

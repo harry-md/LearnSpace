@@ -23,7 +23,8 @@ import com.learnspace.learnspacebackend.service.CloudinaryService;
 import com.learnspace.learnspacebackend.service.CourseService;
 import com.learnspace.learnspacebackend.service.R2Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,43 +35,23 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+@RequiredArgsConstructor
 @Service
 public class CourseServiceImpl implements CourseService {
-    @Autowired
-    private CourseRepository courseRepository;
+    private final CourseRepository courseRepository;
+    private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
+    private final UserMapper userMapper;
+    private final CourseMapper courseMapper;
+    private final LessonRepository lessonRepository;
+    private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final ReviewRepository reviewRepository;
+    private final CloudinaryService cloudinaryService;
+    private final R2Service r2Service;
 
     @Value("${course.page_size}")
     private int COURSE_PAGE_SIZE;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private CategoryMapper categoryMapper;
-
-    @Autowired
-    private UserMapper userMapper;
-
-    @Autowired
-    private CourseMapper courseMapper;
-
-    @Autowired
-    private LessonRepository lessonRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private ReviewRepository reviewRepository;
-
-    @Autowired
-    private CloudinaryService cloudinaryService;
-
-    @Autowired
-    private R2Service r2Service;
 
     @Override
     public PaginatedResponseDto<CourseListDto> getCourses(Map<String, String> params) {

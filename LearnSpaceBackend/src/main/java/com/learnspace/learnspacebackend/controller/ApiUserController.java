@@ -8,7 +8,8 @@ import com.learnspace.learnspacebackend.service.UserService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +25,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api")
 public class ApiUserController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping(
             path = "/users",

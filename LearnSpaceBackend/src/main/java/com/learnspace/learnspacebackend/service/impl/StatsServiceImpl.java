@@ -3,18 +3,18 @@ package com.learnspace.learnspacebackend.service.impl;
 import com.learnspace.learnspacebackend.repository.StatsRepository;
 import com.learnspace.learnspacebackend.service.StatsService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class StatsServiceImpl implements StatsService {
-
-    @Autowired
-    private StatsRepository statsRepository;
+    private final StatsRepository statsRepository;
 
     @Override
     public BigDecimal getTotalIncome() {

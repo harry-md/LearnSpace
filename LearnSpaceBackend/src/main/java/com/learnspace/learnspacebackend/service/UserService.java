@@ -15,7 +15,7 @@ import java.util.Map;
 public interface UserService extends UserDetailsService {
     UserProfileDto getUserByUsername(String username);
 
-    int countAllUsers();
+    long count();
 
     List<UserProfileDto> getAllUsers(Map<String, String> params);
 
@@ -29,5 +29,5 @@ public interface UserService extends UserDetailsService {
 
     void updateByAdmin(AdminUserUpdateDto dto) throws IOException;
 
-    void deleteUser(int id);
+    void delete(int userId);
 }

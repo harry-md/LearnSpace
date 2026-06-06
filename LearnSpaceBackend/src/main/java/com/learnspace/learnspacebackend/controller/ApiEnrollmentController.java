@@ -3,7 +3,8 @@ package com.learnspace.learnspacebackend.controller;
 import com.learnspace.learnspacebackend.dto.enrollment.EnrollmentDto;
 import com.learnspace.learnspacebackend.service.EnrollmentService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api")
 public class ApiEnrollmentController {
-    @Autowired
-    private EnrollmentService enrollmentService;
+    private final EnrollmentService enrollmentService;
 
     @PostMapping("/courses/{courseId}/enrollments")
     public ResponseEntity<EnrollmentDto> create(@PathVariable("courseId") int courseId) {

@@ -5,8 +5,9 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.mp4.Mp4Directory;
 import com.learnspace.learnspacebackend.service.R2Service;
 
+import lombok.RequiredArgsConstructor;
+
 import org.apache.tika.Tika;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,19 +23,17 @@ import java.io.*;
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @Service
 public class R2ServiceImpl implements R2Service {
-    @Autowired
-    private S3Client r2Client;
+    private final S3Client r2Client;
+    private final Tika tika;
 
     @Value("${r2.bucket_name}")
     private String bucketName;
 
     @Value("${r2.public_url}")
     private String publicUrl;
-
-    @Autowired
-    private Tika tika;
 
     @Override
     public void validateMp4File(File file) throws IOException, RuntimeException {

@@ -6,20 +6,21 @@ import com.learnspace.learnspacebackend.service.CategoryService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @Controller
 @RequestMapping("/categories")
 public class CategoryController {
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
 
     @GetMapping
     public String view(Model model) {
-        model.addAttribute("categories", categoryService.getCategories());
+        model.addAttribute("categories", categoryService.getAll());
         model.addAttribute("category", new Category());
         return "admin_categories";
     }
@@ -32,7 +33,7 @@ public class CategoryController {
 
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable(value = "id") int id) {
-        categoryService.deleteCate(id);
+        categoryService.delete(id);
         return "redirect:/categories";
     }
 }

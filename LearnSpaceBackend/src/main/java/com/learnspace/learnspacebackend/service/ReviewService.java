@@ -1,10 +1,9 @@
 package com.learnspace.learnspacebackend.service;
 
-import com.learnspace.learnspacebackend.dto.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.dto.review.ReviewDto;
 
-import java.util.Map;
+import org.springframework.data.domain.Page;
 
 public interface ReviewService {
-    PaginatedResponseDto<ReviewDto> getReviewsByCourse(int courseId, Map<String, String> params);
+    Page<ReviewDto> getReviewsByCourseId(int courseId, int page);
 }

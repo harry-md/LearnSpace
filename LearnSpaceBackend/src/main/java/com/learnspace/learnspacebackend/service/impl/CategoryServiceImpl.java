@@ -5,32 +5,30 @@ import com.learnspace.learnspacebackend.mapper.CategoryMapper;
 import com.learnspace.learnspacebackend.repository.CategoryRepository;
 import com.learnspace.learnspacebackend.service.CategoryService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class CategoryServiceImpl implements CategoryService {
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private CategoryMapper categoryMapper;
+    private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
-    public List<CategoryDto> getCategories() {
-        return categoryRepository.getCates().stream().map(categoryMapper::toDto).toList();
+    public List<CategoryDto> getAll() {
+        return categoryRepository.findAll().stream().map(categoryMapper::toDto).toList();
     }
 
     @Override
     public CategoryDto createOrUpdate(CategoryDto categoryDto) {
-        return categoryMapper.toDto(
-                categoryRepository.addOrUpdateCate(categoryMapper.toEntity(categoryDto)));
+        return categoryMapper.toDto(categoryRepository.save(categoryMapper.toEntity(categoryDto)));
     }
 
     @Override
-    public void deleteCate(int cateId) {
-        categoryRepository.deleteCate(cateId);
+    public void delete(int cateId) {
+        categoryRepository.deleteById(cateId);
     }
 }

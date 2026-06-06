@@ -2,30 +2,25 @@ package com.learnspace.learnspacebackend.controller;
 
 import com.learnspace.learnspacebackend.service.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.Year;
 
+@RequiredArgsConstructor
 @Controller
-@RequestMapping
 public class AdminController {
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private CourseService courseService;
-
-    @Autowired
-    private StatsService statsService;
+    private final UserService userService;
+    private final CourseService courseService;
+    private final StatsService statsService;
 
     @GetMapping()
     public String admin(Model model, @RequestParam(value = "year", required = false) Integer year) {
-        model.addAttribute("totalUsers", userService.countAllUsers());
+        model.addAttribute("totalUsers", userService.count());
         model.addAttribute("totalCourses", courseService.countCourses(null));
         model.addAttribute("totalIncome", statsService.getTotalIncome());
 

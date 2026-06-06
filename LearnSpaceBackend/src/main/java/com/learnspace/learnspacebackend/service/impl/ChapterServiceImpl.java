@@ -12,29 +12,22 @@ import com.learnspace.learnspacebackend.repository.LessonRepository;
 import com.learnspace.learnspacebackend.service.ChapterService;
 import com.learnspace.learnspacebackend.service.R2Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class ChapterServiceImpl implements ChapterService {
-    @Autowired
-    private ChapterRepository chapterRepository;
-
-    @Autowired
-    private CourseRepository courseRepository;
-
-    @Autowired
-    private ChapterMapper chapterMapper;
-
-    @Autowired
-    private LessonRepository lessonRepository;
-
-    @Autowired
-    private R2Service r2Service;
+    private final ChapterRepository chapterRepository;
+    private final CourseRepository courseRepository;
+    private final ChapterMapper chapterMapper;
+    private final LessonRepository lessonRepository;
+    private final R2Service r2Service;
 
     private CustomUserDetails getPrincipal() {
         return (CustomUserDetails)

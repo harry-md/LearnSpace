@@ -6,16 +6,17 @@ import com.learnspace.learnspacebackend.service.ChapterService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api")
 public class ApiChapterController {
-    @Autowired
-    private ChapterService chapterService;
+    private final ChapterService chapterService;
 
     @PostMapping("/courses/{courseId}/chapters")
     public ResponseEntity<ChapterDto> create(

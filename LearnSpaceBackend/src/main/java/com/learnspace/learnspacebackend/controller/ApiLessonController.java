@@ -6,17 +6,18 @@ import com.learnspace.learnspacebackend.service.LessonService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api")
 public class ApiLessonController {
-    @Autowired
-    private LessonService lessonService;
+    private final LessonService lessonService;
 
     @GetMapping("/lessons/{id}")
     public ResponseEntity<LessonDto> retrieve(@PathVariable("id") int lessonId) {

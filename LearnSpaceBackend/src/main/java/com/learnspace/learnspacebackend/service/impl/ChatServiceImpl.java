@@ -7,7 +7,8 @@ import com.learnspace.learnspacebackend.mapper.UserMapper;
 import com.learnspace.learnspacebackend.repository.UserRepository;
 import com.learnspace.learnspacebackend.service.ChatService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,13 +16,11 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class ChatServiceImpl implements ChatService {
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private UserMapper userMapper;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     public List<SimpleUserDto> getContactsEnrolled(int userId) {

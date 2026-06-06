@@ -3,6 +3,8 @@ package com.learnspace.learnspacebackend.config;
 import com.learnspace.learnspacebackend.entity.UserRole;
 import com.learnspace.learnspacebackend.filters.JwtFilter;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -17,11 +19,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Configuration
 @Order(1)
 public class ApiSecurityConfigs {
+    private final JwtFilter jwtFilter;
+
     @Bean
-    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) {
         http.securityMatcher("/api/**")
                 .cors(cors -> cors.configurationSource(apiCorsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
@@ -67,8 +72,7 @@ public class ApiSecurityConfigs {
                         .hasRole(UserRole.VERIFIED_TEACHER.name())
                         .anyRequest()
                         .authenticated())
-                .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
-
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -85,10 +89,5 @@ public class ApiSecurityConfigs {
         source.registerCorsConfiguration("/**", config);
 
         return source;
-    }
-
-    @Bean
-    public JwtFilter jwtFilter() {
-        return new JwtFilter();
     }
 }
