@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -12,27 +16,26 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Table(name = "course")
+@Getter
+@Setter
+@NoArgsConstructor
+@Table(name = "courses")
 @Entity
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Size(max = 255)
     @NotNull
-    @Column(name = "name", nullable = false)
+    @Size(max = 255)
     private String name;
 
     @Size(max = 255)
-    @Column(name = "description")
     private String description;
 
     @Size(max = 255)
     @ColumnDefault(
             "'https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg'")
-    @Column(name = "image")
     private String image =
             "https://res.cloudinary.com/dsc8rzpbg/image/upload/v1774930142/10033487_w4ifgq.jpg";
 
@@ -44,8 +47,8 @@ public class Course {
             "https://res.cloudinary.com/dsc8rzpbg/video/upload/v1774930352/0_Teacher_Flowers_3840x2160_azcsmo.mp4";
 
     @NotNull
-    @ColumnDefault("0.00")
-    @Column(name = "price", nullable = false, precision = 19, scale = 2)
+    @ColumnDefault("0")
+    @Column(nullable = false, precision = 19, scale = 0)
     private BigDecimal price;
 
     @NotNull
@@ -59,7 +62,7 @@ public class Course {
     private User teacher;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    @OrderBy("order ASC")
+    @OrderBy("displayOrder ASC")
     private Set<Chapter> chapters;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
@@ -75,110 +78,4 @@ public class Course {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    public Course() {}
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getIntroVideo() {
-        return introVideo;
-    }
-
-    public void setIntroVideo(String introVideo) {
-        this.introVideo = introVideo;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public User getTeacher() {
-        return teacher;
-    }
-
-    public void setTeacher(User teacher) {
-        this.teacher = teacher;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Set<Chapter> getChapters() {
-        return chapters;
-    }
-
-    public void setChapters(Set<Chapter> chapters) {
-        this.chapters = chapters;
-    }
-
-    public Set<Enrollment> getEnrollments() {
-        return enrollments;
-    }
-
-    public void setEnrollments(Set<Enrollment> enrollments) {
-        this.enrollments = enrollments;
-    }
-
-    public Set<Review> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(Set<Review> reviews) {
-        this.reviews = reviews;
-    }
 }

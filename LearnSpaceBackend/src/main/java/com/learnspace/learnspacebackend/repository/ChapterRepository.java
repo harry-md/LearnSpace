@@ -2,10 +2,8 @@ package com.learnspace.learnspacebackend.repository;
 
 import com.learnspace.learnspacebackend.entity.Chapter;
 
-public interface ChapterRepository {
-    Chapter getChapterById(int chapterId);
+import org.springframework.data.jpa.repository.JpaRepository;
 
-    Chapter createOrUpdate(Chapter chapter);
-
-    void deleteChapter(int chapterId);
+public interface ChapterRepository extends JpaRepository<Chapter, Integer> {
+    boolean existsByIdAndCourseTeacherId(int chapterId, int teacherId);
 }

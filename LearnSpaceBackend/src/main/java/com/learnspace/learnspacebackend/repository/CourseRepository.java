@@ -2,19 +2,27 @@ package com.learnspace.learnspacebackend.repository;
 
 import com.learnspace.learnspacebackend.entity.Course;
 
-import java.util.List;
-import java.util.Map;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface CourseRepository {
-    List<Object[]> getAllCourses(Map<String, String> params);
+import java.util.Optional;
 
-    Long countCourses(Map<String, String> params);
+public interface CourseRepository
+        extends JpaRepository<Course, Integer>,
+                JpaSpecificationExecutor<Course>,
+                CourseRepositoryCustom {
+    boolean existsByIdAndTeacherId(int courseId, int teacherId);
 
-    Course getCourseById(int courseId);
-
-    Course addOrUpdateCourse(Course course);
-
-    void deleteCourse(int courseId);
-
-    List<Object[]> getEnrolledCoursesByStudent(int studentId);
+    @Query("""
+        SELECT c
+        FROM Course c
+        JOIN FETCH c.category
+        JOIN FETCH c.teacher
+        LEFT JOIN FETCH c.chapters ch
+        LEFT JOIN FETCH ch.lessons
+        WHERE c.id = :courseId
+        """)
+    Optional<Course> findWithDetailsByCourseId(@Param("courseId") int courseId);
 }

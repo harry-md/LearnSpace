@@ -4,14 +4,13 @@ import com.learnspace.learnspacebackend.dto.course.CourseDto;
 import com.learnspace.learnspacebackend.dto.course.CourseListDto;
 import com.learnspace.learnspacebackend.dto.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dto.course.MyCourseListDto;
-import com.learnspace.learnspacebackend.dto.pagination.PaginatedResponseDto;
 import com.learnspace.learnspacebackend.dto.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.entity.Category;
 import com.learnspace.learnspacebackend.entity.Course;
 import com.learnspace.learnspacebackend.entity.UserRole;
+import com.learnspace.learnspacebackend.exception.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mapper.CategoryMapper;
 import com.learnspace.learnspacebackend.mapper.CourseMapper;
-import com.learnspace.learnspacebackend.mapper.PaginatedResponseMapper;
 import com.learnspace.learnspacebackend.mapper.UserMapper;
 import com.learnspace.learnspacebackend.repository.CategoryRepository;
 import com.learnspace.learnspacebackend.repository.CourseRepository;
@@ -19,6 +18,7 @@ import com.learnspace.learnspacebackend.repository.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repository.LessonRepository;
 import com.learnspace.learnspacebackend.repository.ReviewRepository;
 import com.learnspace.learnspacebackend.repository.UserRepository;
+import com.learnspace.learnspacebackend.repository.specifications.CourseSpecification;
 import com.learnspace.learnspacebackend.service.CloudinaryService;
 import com.learnspace.learnspacebackend.service.CourseService;
 import com.learnspace.learnspacebackend.service.R2Service;
@@ -26,9 +26,14 @@ import com.learnspace.learnspacebackend.service.R2Service;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -37,6 +42,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final CategoryRepository categoryRepository;
@@ -54,35 +60,43 @@ public class CourseServiceImpl implements CourseService {
     private int COURSE_PAGE_SIZE;
 
     @Override
-    public PaginatedResponseDto<CourseListDto> getCourses(Map<String, String> params) {
-        List<CourseListDto> results = courseRepository.getAllCourses(params).stream()
-                .map(row -> {
-                    Course c = (Course) row[0];
-                    return new CourseListDto(
-                            c.getId(),
-                            c.getName(),
-                            c.getImage(),
-                            c.getPrice(),
-                            categoryMapper.toDto(c.getCategory()),
-                            userMapper.toSimpleUserDto(c.getTeacher()),
-                            (Double) row[1],
-                            (Long) row[2],
-                            (Long) row[3],
-                            (Long) row[4]);
-                })
-                .toList();
-        return PaginatedResponseMapper.toPaginatedResponseDto(
-                courseRepository.countCourses(params),
-                Integer.parseInt(params.getOrDefault("page", "1")),
-                COURSE_PAGE_SIZE,
-                results);
+    @Transactional(readOnly = true)
+    public Page<CourseListDto> getCourses(Map<String, String> params) {
+        int page = Integer.parseInt(params.getOrDefault("page", "1")) - 1;
+        page = Math.max(0, page);
+
+        Pageable pageable = PageRequest.of(page, COURSE_PAGE_SIZE);
+        long totalElements = courseRepository.count(CourseSpecification.filterCourses(params));
+        List<CourseListDto> results =
+                courseRepository.getCoursesWithStats(params, pageable).stream()
+                        .map(row -> {
+                            Course c = (Course) row[0];
+                            return new CourseListDto(
+                                    c.getId(),
+                                    c.getName(),
+                                    c.getImage(),
+                                    c.getPrice(),
+                                    categoryMapper.toDto(c.getCategory()),
+                                    userMapper.toSimpleUserDto(c.getTeacher()),
+                                    (Double) row[1],
+                                    (Long) row[2],
+                                    (Long) row[3],
+                                    (Long) row[4]);
+                        })
+                        .toList();
+
+        return new PageImpl<>(results, pageable, totalElements);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CourseDto getCourse(int courseId) {
-        Course course = courseRepository.getCourseById(courseId);
+        Course course = courseRepository
+                .findWithDetailsByCourseId(courseId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy khóa học"));
         CourseDto dto = courseMapper.toDto(course);
-        Double avgRating = reviewRepository.getAverageRatingByCourse(courseId);
+        Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
         Long enrollCount = enrollmentRepository.countEnrollments(courseId);
 
         return new CourseDto(
@@ -105,8 +119,9 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Long countCourses(Map<String, String> params) {
-        return courseRepository.countCourses(params);
+        return courseRepository.count(CourseSpecification.filterCourses(params));
     }
 
     private CustomUserDetails getPrincipal() {
@@ -114,28 +129,36 @@ public class CourseServiceImpl implements CourseService {
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    private void checkCourseOwner(Course course) {
+    private void isCourseOwner(int courseId) {
         CustomUserDetails principal = getPrincipal();
         boolean isAdmin = principal.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_" + UserRole.ADMIN.name()));
 
-        if (!course.getTeacher().getId().equals(principal.getId()) && !isAdmin) {
-            throw new AccessDeniedException("Không có quyền sửa khóa học");
+        if (!isAdmin) {
+            boolean isOwner = courseRepository.existsByIdAndTeacherId(courseId, principal.getId());
+            if (!isOwner) {
+                throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này!");
+            }
         }
     }
 
     @Override
-    public CourseDto createCourse(CourseDto courseDto) throws IOException {
-        Course course = courseMapper.toEntity(courseDto);
-        Category category = categoryRepository.getCateById(courseDto.categoryId());
-        course.setCategory(category);
-        course.setTeacher(userRepository.getUserById(getPrincipal().getId()));
+    public CourseDto createCourse(CourseDto dto) throws IOException {
+        if (!categoryRepository.existsById(dto.categoryId())) {
+            throw new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy danh mục");
+        }
 
-        MultipartFile imageFile = courseDto.imageFile();
+        Course course = courseMapper.toEntity(dto);
+        Category category = categoryRepository.getReferenceById(dto.categoryId());
+
+        course.setCategory(category);
+        course.setTeacher(userRepository.getReferenceById(getPrincipal().getId()));
+
+        MultipartFile imageFile = dto.imageFile();
         if (imageFile != null && !imageFile.isEmpty()) {
             cloudinaryService.validateImageFile(imageFile);
         }
-        MultipartFile introVideoFile = courseDto.introVideoFile();
+        MultipartFile introVideoFile = dto.introVideoFile();
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             cloudinaryService.validateVideoFile(introVideoFile);
         }
@@ -147,27 +170,34 @@ public class CourseServiceImpl implements CourseService {
             course.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
 
-        Course savedCourse = courseRepository.addOrUpdateCourse(course);
+        Course savedCourse = courseRepository.save(course);
         return courseMapper.toDto(savedCourse);
     }
 
     @Override
-    public CourseDto updateCourse(int id, CoursePatchDto courseDto) throws IOException {
-        Course course = courseRepository.getCourseById(id);
-        checkCourseOwner(course);
-        courseMapper.updateEntityFromDto(course, courseDto);
+    public CourseDto updateCourse(int id, CoursePatchDto dto) throws IOException {
+        isCourseOwner(id);
 
-        if (courseDto.categoryId() != null) {
-            Category category = categoryRepository.getCateById(courseDto.categoryId());
-            course.setCategory(category);
+        Course course = courseRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy khóa học"));
+
+        courseMapper.updateEntityFromDto(course, dto);
+
+        if (dto.categoryId() != null) {
+            if (!categoryRepository.existsById(dto.categoryId())) {
+                throw new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy danh mục");
+            }
+            course.setCategory(categoryRepository.getReferenceById(dto.categoryId()));
         }
 
-        MultipartFile imageFile = courseDto.imageFile();
+        MultipartFile imageFile = dto.imageFile();
         if (imageFile != null && !imageFile.isEmpty()) {
             cloudinaryService.validateImageFile(imageFile);
         }
 
-        MultipartFile introVideoFile = courseDto.introVideoFile();
+        MultipartFile introVideoFile = dto.introVideoFile();
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             cloudinaryService.validateVideoFile(introVideoFile);
         }
@@ -182,16 +212,17 @@ public class CourseServiceImpl implements CourseService {
             course.setIntroVideo(cloudinaryService.uploadVideo(introVideoFile));
         }
 
-        return courseMapper.toDto(courseRepository.addOrUpdateCourse(course));
+        return courseMapper.toDto(courseRepository.save(course));
     }
 
     @Override
     public void deleteCourse(int id) throws IOException {
-        Course course = courseRepository.getCourseById(id);
-        if (course == null) {
-            throw new IllegalArgumentException("Không tìm thấy khóa học");
-        }
-        checkCourseOwner(course);
+        isCourseOwner(id);
+
+        Course course = courseRepository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy khóa học"));
 
         List<String> lessonVideoUrls = lessonRepository.getVideoUrlsByCourseId(id);
         r2Service.deleteVideos(lessonVideoUrls);
@@ -204,14 +235,15 @@ public class CourseServiceImpl implements CourseService {
             cloudinaryService.deleteVideo(course.getIntroVideo());
         }
 
-        courseRepository.deleteCourse(id);
+        courseRepository.deleteById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MyCourseListDto> getEnrolledCourses() {
         CustomUserDetails principal = (CustomUserDetails)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<Object[]> courses = courseRepository.getEnrolledCoursesByStudent(principal.getId());
+        List<Object[]> courses = courseRepository.getEnrolledCoursesByStudentId(principal.getId());
         return courses.stream()
                 .map(row -> {
                     Course c = (Course) row[0];

@@ -4,6 +4,7 @@ import com.learnspace.learnspacebackend.dto.lesson.LessonDto;
 import com.learnspace.learnspacebackend.dto.lesson.LessonPatchDto;
 import com.learnspace.learnspacebackend.dto.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.entity.*;
+import com.learnspace.learnspacebackend.exception.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mapper.LessonMapper;
 import com.learnspace.learnspacebackend.mapper.LessonProgressMapper;
 import com.learnspace.learnspacebackend.repository.*;
@@ -11,18 +12,23 @@ import com.learnspace.learnspacebackend.service.LessonService;
 import com.learnspace.learnspacebackend.service.R2Service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class LessonServiceImpl implements LessonService {
+    private final TransactionTemplate transactionTemplate;
     private final LessonRepository lessonRepository;
     private final ChapterRepository chapterRepository;
     private final EnrollmentRepository enrollmentRepository;
@@ -36,9 +42,29 @@ public class LessonServiceImpl implements LessonService {
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    private void checkCourseOwner(Course course) {
-        if (!course.getTeacher().getId().equals(getPrincipal().getId())) {
-            throw new AccessDeniedException("Không có quyền");
+    private void isChapterOwner(int chapterId) {
+        CustomUserDetails principal = getPrincipal();
+        boolean isAdmin = principal.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+        if (!isAdmin) {
+            boolean isOwner =
+                    chapterRepository.existsByIdAndCourseTeacherId(chapterId, principal.getId());
+            if (!isOwner) {
+                throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này!");
+            }
+        }
+    }
+
+    private void isLessonOwner(int lessonId) {
+        CustomUserDetails principal = getPrincipal();
+        boolean isAdmin = principal.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+        if (!isAdmin) {
+            boolean isOwner = lessonRepository.existsByIdAndChapterCourseTeacherId(
+                    lessonId, principal.getId());
+            if (!isOwner) {
+                throw new AccessDeniedException("Bạn không có quyền thực hiện thao tác này!");
+            }
         }
     }
 
@@ -46,22 +72,31 @@ public class LessonServiceImpl implements LessonService {
         Chapter chapter = lesson.getChapter();
         Course course = chapter.getCourse();
         CustomUserDetails principal = getPrincipal();
+        boolean isAdmin = principal.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+        boolean isOwner = course.getTeacher().getId().equals(principal.getId());
 
-        if (course.getTeacher().getId().equals(principal.getId())) {
+        if (isAdmin || isOwner) {
             return;
         }
         if (chapter.isFree()) {
             return;
         }
         if (!enrollmentRepository.checkValidEnrollment(principal.getId(), course.getId())) {
-            throw new RuntimeException("Không có đăng ký học");
+            throw new AccessDeniedException("Cần đăng ký khóa học để xem bài học");
         }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LessonDto getLesson(int lessonId) {
-        Lesson lesson = lessonRepository.getLessonById(lessonId);
+        Lesson lesson = lessonRepository
+                .findWithChapterAndCourseById(lessonId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy bài học"));
+
         checkLessonAccess(lesson);
+
         CustomUserDetails principal = getPrincipal();
         LessonProgress lessonProgress =
                 lessonProgressRepository.getLessonProgressByStudentAndLesson(
@@ -72,7 +107,7 @@ public class LessonServiceImpl implements LessonService {
                 lesson.getContent(),
                 lesson.getVideo(),
                 lesson.getVideoLength(),
-                lesson.getOrder(),
+                lesson.getDisplayOrder(),
                 lessonProgressMapper.toDto(lessonProgress),
                 lesson.getCreatedAt(),
                 lesson.getUpdatedAt(),
@@ -81,10 +116,10 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public LessonDto createLesson(int chapterId, LessonDto lessonDto) {
-        Chapter chapter = chapterRepository.getChapterById(chapterId);
-        checkCourseOwner(chapter.getCourse());
+        isChapterOwner(chapterId);
+
         if (lessonDto.videoFile() == null || lessonDto.videoFile().isEmpty()) {
-            throw new RuntimeException("Phải gửi video khi tạo bài học");
+            throw new IllegalArgumentException("Phải gửi video khi tạo bài học");
         }
 
         MultipartFile videoFile = lessonDto.videoFile();
@@ -99,25 +134,28 @@ public class LessonServiceImpl implements LessonService {
             int videoLength = r2Service.getVideoLength(tmpFile);
 
             Lesson lesson = lessonMapper.toEntity(lessonDto);
-            lesson.setChapter(chapter);
+            lesson.setChapter(chapterRepository.getReferenceById(chapterId));
             lesson.setVideo(videoUrl);
             lesson.setVideoLength(videoLength);
-            return lessonMapper.toDto(lessonRepository.addOrUpdateLesson(lesson));
+            return lessonMapper.toDto(lessonRepository.save(lesson));
 
         } catch (IOException ex) {
-            System.err.println(ex.getMessage());
+            log.error("Lỗi khi xử lý video", ex);
             throw new RuntimeException("Lỗi khi xử lý video");
         } finally {
-            if (tmpFile != null && tmpFile.exists()) {
-                tmpFile.delete();
-            }
+            if (tmpFile != null && tmpFile.exists()) tmpFile.delete();
         }
     }
 
     @Override
     public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
-        Lesson lesson = lessonRepository.getLessonById(lessonId);
-        checkCourseOwner(lesson.getChapter().getCourse());
+        isLessonOwner(lessonId);
+
+        Lesson lesson = lessonRepository
+                .findById(lessonId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy bài học"));
+
         lessonMapper.updateEntityFromDto(lesson, lessonDto);
 
         MultipartFile videoFile = lessonDto.videoFile();
@@ -142,24 +180,25 @@ public class LessonServiceImpl implements LessonService {
                 lesson.setVideoLength(videoLength);
 
             } catch (Exception ex) {
-                System.err.println(ex.getMessage());
+                log.error("Lỗi xử lý update video", ex);
                 throw new RuntimeException("Lỗi khi xử lý video");
             } finally {
-                if (tmpFile != null && tmpFile.exists()) {
-                    tmpFile.delete();
-                }
+                if (tmpFile != null && tmpFile.exists()) tmpFile.delete();
             }
         }
-        Lesson updatedLesson = lessonRepository.addOrUpdateLesson(lesson);
-        return lessonMapper.toDto(updatedLesson);
+        return lessonMapper.toDto(lessonRepository.save(lesson));
     }
 
     @Override
     public void deleteLesson(int lessonId) {
-        Lesson lesson = lessonRepository.getLessonById(lessonId);
-        checkCourseOwner(lesson.getChapter().getCourse());
+        isLessonOwner(lessonId);
+
+        Lesson lesson = lessonRepository
+                .findById(lessonId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy bài học"));
 
         r2Service.deleteVideo(lesson.getVideo());
-        lessonRepository.deleteLesson(lessonId);
+        lessonRepository.deleteById(lessonId);
     }
 }

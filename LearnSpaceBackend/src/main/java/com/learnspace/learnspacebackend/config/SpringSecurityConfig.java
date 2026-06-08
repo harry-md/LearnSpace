@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -24,9 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Configuration
 @EnableMethodSecurity
+@PropertySource("classpath:env.properties")
 public class SpringSecurityConfig {
-    private final Environment env;
-
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -34,7 +34,7 @@ public class SpringSecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider(
-            UserDetailsService userDetailsService, BCryptPasswordEncoder passwordEncoder) {
+            @Lazy UserDetailsService userDetailsService, BCryptPasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;

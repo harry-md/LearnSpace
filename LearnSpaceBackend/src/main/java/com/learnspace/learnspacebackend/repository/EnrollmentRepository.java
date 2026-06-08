@@ -3,13 +3,11 @@ package com.learnspace.learnspacebackend.repository;
 import com.learnspace.learnspacebackend.entity.Enrollment;
 import com.learnspace.learnspacebackend.entity.EnrollmentStatus;
 
-public interface EnrollmentRepository {
-    boolean checkValidEnrollment(int studentId, int courseId);
+import org.springframework.data.jpa.repository.JpaRepository;
 
-    Enrollment addOrUpdateEnrollment(Enrollment enrollment);
+public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
+    boolean checkValidEnrollment(int studentId, int courseId);
 
     Enrollment getEnrollmentByStudentAndCourse(
             int studentId, int courseId, EnrollmentStatus... status);
-
-    Long countEnrollments(int courseId);
 }

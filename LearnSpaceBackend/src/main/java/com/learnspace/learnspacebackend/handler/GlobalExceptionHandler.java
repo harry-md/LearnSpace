@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException ex, HttpServletRequest request) {
         ErrorResponse err = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
-                "Resource not found",
+                ex.getError(),
                 ex.getMessage(),
                 request.getRequestURI());
         return new ResponseEntity<>(err, HttpStatus.NOT_FOUND);
@@ -28,21 +28,31 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCloudinaryException(
             CloudinaryException ex, HttpServletRequest request) {
         ErrorResponse err = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(), "Cloudinary exception", ex.getMessage());
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getError(),
+                ex.getMessage(),
+                request.getRequestURI());
         return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(
             BadCredentialsException ex, HttpServletRequest request) {
-        ErrorResponse err = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "BAD_CREDENTIALS",
+                ex.getMessage(),
+                request.getRequestURI());
         return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(
             RuntimeException ex, HttpServletRequest request) {
-        ErrorResponse err =
-                new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Có lỗi xảy ra");
+        ErrorResponse err = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "INTERNAL_SERVER_ERROR",
+                "Có lỗi xảy ra",
+                request.getRequestURI());
         return new ResponseEntity<>(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -4,14 +4,15 @@ import com.learnspace.learnspacebackend.dto.course.CourseDto;
 import com.learnspace.learnspacebackend.dto.course.CourseListDto;
 import com.learnspace.learnspacebackend.dto.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dto.course.MyCourseListDto;
-import com.learnspace.learnspacebackend.dto.pagination.PaginatedResponseDto;
+
+import org.springframework.data.domain.Page;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public interface CourseService {
-    PaginatedResponseDto<CourseListDto> getCourses(Map<String, String> params);
+    Page<CourseListDto> getCourses(Map<String, String> params);
 
     Long countCourses(Map<String, String> params);
 
