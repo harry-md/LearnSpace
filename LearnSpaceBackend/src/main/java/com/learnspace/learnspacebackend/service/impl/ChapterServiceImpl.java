@@ -4,7 +4,6 @@ import com.learnspace.learnspacebackend.dto.chapter.ChapterDto;
 import com.learnspace.learnspacebackend.dto.chapter.ChapterPatchDto;
 import com.learnspace.learnspacebackend.dto.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.entity.Chapter;
-import com.learnspace.learnspacebackend.entity.Course;
 import com.learnspace.learnspacebackend.exception.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mapper.ChapterMapper;
 import com.learnspace.learnspacebackend.repository.ChapterRepository;
@@ -67,9 +66,7 @@ public class ChapterServiceImpl implements ChapterService {
         isCourseOwner(courseId);
 
         Chapter chapter = chapterMapper.toEntity(chapterDto);
-
-        Course courseProxy = courseRepository.getReferenceById(courseId);
-        chapter.setCourse(courseProxy);
+        chapter.setCourse(courseRepository.getReferenceById(courseId));
 
         return chapterMapper.toDto(chapterRepository.save(chapter));
     }

@@ -5,8 +5,8 @@ import com.learnspace.learnspacebackend.dto.course.CourseListDto;
 import com.learnspace.learnspacebackend.dto.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dto.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.dto.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.entity.Category;
 import com.learnspace.learnspacebackend.entity.Course;
+import com.learnspace.learnspacebackend.entity.EnrollmentStatus;
 import com.learnspace.learnspacebackend.entity.UserRole;
 import com.learnspace.learnspacebackend.exception.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mapper.CategoryMapper;
@@ -88,16 +88,21 @@ public class CourseServiceImpl implements CourseService {
         return new PageImpl<>(results, pageable, totalElements);
     }
 
+    private Course getCourseOrThrow(int courseId) {
+        return courseRepository
+                .findById(courseId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy khóa học"));
+    }
+
     @Override
     @Transactional(readOnly = true)
     public CourseDto getCourse(int courseId) {
-        Course course = courseRepository
-                .findWithDetailsByCourseId(courseId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy khóa học"));
+        Course course = getCourseOrThrow(courseId);
         CourseDto dto = courseMapper.toDto(course);
         Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
-        Long enrollCount = enrollmentRepository.countEnrollments(courseId);
+        Long enrollCount = enrollmentRepository.countByCourseIdAndStatusIn(
+                courseId, List.of(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
 
         return new CourseDto(
                 dto.id(),
@@ -143,22 +148,20 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDto createCourse(CourseDto dto) throws IOException {
-        if (!categoryRepository.existsById(dto.categoryId())) {
+    public CourseDto createCourse(CourseDto courseDto) throws IOException {
+        if (!categoryRepository.existsById(courseDto.categoryId())) {
             throw new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy danh mục");
         }
 
-        Course course = courseMapper.toEntity(dto);
-        Category category = categoryRepository.getReferenceById(dto.categoryId());
-
-        course.setCategory(category);
+        Course course = courseMapper.toEntity(courseDto);
+        course.setCategory(categoryRepository.getReferenceById(courseDto.categoryId()));
         course.setTeacher(userRepository.getReferenceById(getPrincipal().getId()));
 
-        MultipartFile imageFile = dto.imageFile();
+        MultipartFile imageFile = courseDto.imageFile();
         if (imageFile != null && !imageFile.isEmpty()) {
             cloudinaryService.validateImageFile(imageFile);
         }
-        MultipartFile introVideoFile = dto.introVideoFile();
+        MultipartFile introVideoFile = courseDto.introVideoFile();
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             cloudinaryService.validateVideoFile(introVideoFile);
         }
@@ -175,29 +178,25 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDto updateCourse(int id, CoursePatchDto dto) throws IOException {
-        isCourseOwner(id);
+    public CourseDto updateCourse(int courseId, CoursePatchDto courseDto) {
+        isCourseOwner(courseId);
 
-        Course course = courseRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy khóa học"));
+        Course course = getCourseOrThrow(courseId);
+        courseMapper.updateEntityFromDto(course, courseDto);
 
-        courseMapper.updateEntityFromDto(course, dto);
-
-        if (dto.categoryId() != null) {
-            if (!categoryRepository.existsById(dto.categoryId())) {
+        if (courseDto.categoryId() != null) {
+            if (!categoryRepository.existsById(courseDto.categoryId())) {
                 throw new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy danh mục");
             }
-            course.setCategory(categoryRepository.getReferenceById(dto.categoryId()));
+            course.setCategory(categoryRepository.getReferenceById(courseDto.categoryId()));
         }
 
-        MultipartFile imageFile = dto.imageFile();
+        MultipartFile imageFile = courseDto.imageFile();
         if (imageFile != null && !imageFile.isEmpty()) {
             cloudinaryService.validateImageFile(imageFile);
         }
 
-        MultipartFile introVideoFile = dto.introVideoFile();
+        MultipartFile introVideoFile = courseDto.introVideoFile();
         if (introVideoFile != null && !introVideoFile.isEmpty()) {
             cloudinaryService.validateVideoFile(introVideoFile);
         }
@@ -216,15 +215,12 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public void deleteCourse(int id) throws IOException {
-        isCourseOwner(id);
+    public void deleteCourse(int courseId) {
+        isCourseOwner(courseId);
 
-        Course course = courseRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy khóa học"));
+        Course course = getCourseOrThrow(courseId);
 
-        List<String> lessonVideoUrls = lessonRepository.getVideoUrlsByCourseId(id);
+        List<String> lessonVideoUrls = lessonRepository.getVideoUrlsByCourseId(courseId);
         r2Service.deleteVideos(lessonVideoUrls);
 
         if (course.getImage() != null) {
@@ -235,7 +231,7 @@ public class CourseServiceImpl implements CourseService {
             cloudinaryService.deleteVideo(course.getIntroVideo());
         }
 
-        courseRepository.deleteById(id);
+        courseRepository.deleteById(courseId);
     }
 
     @Override

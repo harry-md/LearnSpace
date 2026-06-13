@@ -7,6 +7,7 @@ import com.learnspace.learnspacebackend.entity.Enrollment;
 import com.learnspace.learnspacebackend.entity.EnrollmentStatus;
 import com.learnspace.learnspacebackend.entity.Lesson;
 import com.learnspace.learnspacebackend.entity.LessonProgress;
+import com.learnspace.learnspacebackend.exception.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mapper.LessonProgressMapper;
 import com.learnspace.learnspacebackend.repository.EnrollmentRepository;
 import com.learnspace.learnspacebackend.repository.LessonProgressRepository;
@@ -20,8 +21,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class LessonProgressServiceImpl implements LessonProgressService {
     private final LessonProgressRepository lessonProgressRepository;
     private final LessonProgressMapper lessonProgressMapper;
@@ -34,21 +38,25 @@ public class LessonProgressServiceImpl implements LessonProgressService {
     }
 
     @Override
-    @Transactional
     public LessonProgressDto saveLessonProgress(int lessonId, LessonProgressDto lessonProgressDto) {
-        Lesson lesson = lessonRepository.getLessonById(lessonId);
         int userId = getPrincipal().getId();
-        LessonProgress progress =
-                lessonProgressRepository.getLessonProgressByStudentAndLesson(userId, lessonId);
+        Lesson lesson = lessonRepository
+                .findWithChapterAndCourseById(lessonId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy bài học"));
+
+        LessonProgress progress = lessonProgressRepository
+                .findByLessonAndStudentId(lessonId, userId)
+                .orElse(null);
 
         if (progress == null) {
             Course course = lesson.getChapter().getCourse();
-            Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
-                    userId, course.getId(), EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED);
-
-            if (enrollment == null) {
-                throw new AccessDeniedException("Bạn chưa đăng ký khóa học này");
-            }
+            Enrollment enrollment = enrollmentRepository
+                    .findByStudentIdAndCourseIdAndStatusIn(
+                            userId,
+                            course.getId(),
+                            List.of(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED))
+                    .orElseThrow(() -> new AccessDeniedException("Bạn chưa đăng ký khóa học này"));
             progress = lessonProgressMapper.toEntity(lessonProgressDto);
             progress.setLesson(lesson);
             progress.setStudent(enrollment.getStudent());
@@ -58,7 +66,6 @@ public class LessonProgressServiceImpl implements LessonProgressService {
             progress.setCompleted(true);
         }
 
-        return lessonProgressMapper.toDto(
-                lessonProgressRepository.addOrUpdateLessonProgress(progress));
+        return lessonProgressMapper.toDto(lessonProgressRepository.save(progress));
     }
 }

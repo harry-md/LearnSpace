@@ -5,9 +5,12 @@ import com.learnspace.learnspacebackend.entity.EnrollmentStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
-    boolean checkValidEnrollment(int studentId, int courseId);
+import java.util.Collection;
+import java.util.Optional;
 
-    Enrollment getEnrollmentByStudentAndCourse(
-            int studentId, int courseId, EnrollmentStatus... status);
+public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
+    Long countByCourseIdAndStatusIn(int courseId, Collection<EnrollmentStatus> statuses);
+
+    Optional<Enrollment> findByStudentIdAndCourseIdAndStatusIn(
+            int studentId, int courseId, Collection<EnrollmentStatus> statuses);
 }

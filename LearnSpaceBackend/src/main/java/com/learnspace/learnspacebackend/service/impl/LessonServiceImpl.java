@@ -22,7 +22,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -82,25 +81,29 @@ public class LessonServiceImpl implements LessonService {
         if (chapter.isFree()) {
             return;
         }
-        if (!enrollmentRepository.checkValidEnrollment(principal.getId(), course.getId())) {
+        if (!enrollmentRepository.existsByCourseAndStudentId(course.getId(), principal.getId())) {
             throw new AccessDeniedException("Cần đăng ký khóa học để xem bài học");
         }
+    }
+
+    private Lesson getLessonOrThrow(int lessonId) {
+        return lessonRepository
+                .findById(lessonId)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy bài học"));
     }
 
     @Override
     @Transactional(readOnly = true)
     public LessonDto getLesson(int lessonId) {
-        Lesson lesson = lessonRepository
-                .findWithChapterAndCourseById(lessonId)
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy bài học"));
+        Lesson lesson = getLessonOrThrow(lessonId);
 
         checkLessonAccess(lesson);
 
         CustomUserDetails principal = getPrincipal();
-        LessonProgress lessonProgress =
-                lessonProgressRepository.getLessonProgressByStudentAndLesson(
-                        principal.getId(), lessonId);
+        LessonProgress lessonProgress = lessonProgressRepository
+                .findByLessonAndStudentId(lessonId, principal.getId())
+                .orElse(null);
         return new LessonDto(
                 lesson.getId(),
                 lesson.getTitle(),
@@ -124,24 +127,47 @@ public class LessonServiceImpl implements LessonService {
 
         MultipartFile videoFile = lessonDto.videoFile();
         File tmpFile = null;
+        String rollbackVideoUrl = null;
         try {
             tmpFile = File.createTempFile("video-", ".mp4");
             videoFile.transferTo(tmpFile);
 
             r2Service.validateMp4File(tmpFile);
 
-            String videoUrl = r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");
-            int videoLength = r2Service.getVideoLength(tmpFile);
+            final String videoUrl =
+                    r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");
+            rollbackVideoUrl = videoUrl;
+            final int videoLength = r2Service.getVideoLength(tmpFile);
 
-            Lesson lesson = lessonMapper.toEntity(lessonDto);
-            lesson.setChapter(chapterRepository.getReferenceById(chapterId));
-            lesson.setVideo(videoUrl);
-            lesson.setVideoLength(videoLength);
-            return lessonMapper.toDto(lessonRepository.save(lesson));
-
-        } catch (IOException ex) {
-            log.error("Lỗi khi xử lý video", ex);
-            throw new RuntimeException("Lỗi khi xử lý video");
+            return transactionTemplate.execute(status -> {
+                try {
+                    Lesson lesson = lessonMapper.toEntity(lessonDto);
+                    lesson.setChapter(chapterRepository.getReferenceById(chapterId));
+                    lesson.setVideo(videoUrl);
+                    lesson.setVideoLength(videoLength);
+                    return lessonMapper.toDto(lessonRepository.save(lesson));
+                } catch (Exception dbEx) {
+                    status.setRollbackOnly();
+                    throw dbEx;
+                }
+            });
+        } catch (Exception ex) {
+            log.error("Lỗi xử lý tạo bài học", ex);
+            if (rollbackVideoUrl != null) {
+                try {
+                    log.info(
+                            "Tiến hành rollback xóa video trên R2 do lỗi hệ thống",
+                            rollbackVideoUrl,
+                            ex);
+                    r2Service.deleteVideo(rollbackVideoUrl);
+                } catch (Exception deleteEx) {
+                    log.error(
+                            "Có lỗi trong quá trình rollback. Không xóa được video: {}",
+                            rollbackVideoUrl,
+                            deleteEx);
+                }
+            }
+            throw new RuntimeException("Có lỗi khi tạo bài học");
         } finally {
             if (tmpFile != null && tmpFile.exists()) tmpFile.delete();
         }
@@ -151,11 +177,7 @@ public class LessonServiceImpl implements LessonService {
     public LessonDto updateLesson(int lessonId, LessonPatchDto lessonDto) {
         isLessonOwner(lessonId);
 
-        Lesson lesson = lessonRepository
-                .findById(lessonId)
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy bài học"));
-
+        Lesson lesson = getLessonOrThrow(lessonId);
         lessonMapper.updateEntityFromDto(lesson, lessonDto);
 
         MultipartFile videoFile = lessonDto.videoFile();
@@ -166,37 +188,60 @@ public class LessonServiceImpl implements LessonService {
             }
 
             File tmpFile = null;
+            String rollbackVideoUrl = null;
             try {
                 tmpFile = File.createTempFile("video-", ".mp4");
                 videoFile.transferTo(tmpFile);
 
                 r2Service.validateMp4File(tmpFile);
 
-                String videoUrl =
+                final String videoUrl =
                         r2Service.uploadVideo(tmpFile, videoFile.getContentType(), "lessons");
-                int videoLength = r2Service.getVideoLength(tmpFile);
+                rollbackVideoUrl = videoUrl;
+                final int videoLength = r2Service.getVideoLength(tmpFile);
 
-                lesson.setVideo(videoUrl);
-                lesson.setVideoLength(videoLength);
+                return transactionTemplate.execute(status -> {
+                    try {
 
+                        lesson.setVideo(videoUrl);
+                        lesson.setVideoLength(videoLength);
+                        return lessonMapper.toDto(lessonRepository.save(lesson));
+                    } catch (Exception dbEx) {
+                        status.setRollbackOnly();
+                        throw dbEx;
+                    }
+                });
             } catch (Exception ex) {
-                log.error("Lỗi xử lý update video", ex);
+                log.error("Lỗi xử lý cập nhật bài học", ex);
+                if (rollbackVideoUrl != null) {
+                    try {
+                        log.info(
+                                "Tiến hành rollback xóa video trên R2 do lỗi hệ thống",
+                                rollbackVideoUrl,
+                                ex);
+                        r2Service.deleteVideo(rollbackVideoUrl);
+                    } catch (Exception deleteEx) {
+                        log.error(
+                                "Có lỗi trong quá trình rollback. Không xóa được video: {}",
+                                rollbackVideoUrl,
+                                deleteEx);
+                    }
+                }
                 throw new RuntimeException("Lỗi khi xử lý video");
             } finally {
                 if (tmpFile != null && tmpFile.exists()) tmpFile.delete();
             }
         }
-        return lessonMapper.toDto(lessonRepository.save(lesson));
+        return transactionTemplate.execute(status -> {
+            return lessonMapper.toDto(lessonRepository.save(lesson));
+        });
     }
 
     @Override
     public void deleteLesson(int lessonId) {
         isLessonOwner(lessonId);
 
-        Lesson lesson = lessonRepository
-                .findById(lessonId)
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy bài học"));
+        Lesson lesson = getLessonOrThrow(lessonId);
 
         r2Service.deleteVideo(lesson.getVideo());
         lessonRepository.deleteById(lessonId);

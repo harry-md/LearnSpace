@@ -2,11 +2,12 @@ package com.learnspace.learnspacebackend.repository;
 
 import com.learnspace.learnspacebackend.entity.LessonProgress;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public interface LessonProgressRepository {
-    LessonProgress addOrUpdateLessonProgress(LessonProgress lessonProgress);
+import java.util.Optional;
 
-    LessonProgress getLessonProgressByStudentAndLesson(int studentId, int lessonId);
+public interface LessonProgressRepository extends JpaRepository<LessonProgress, Integer> {
+    boolean existsByLessonIdAndStudentId(int lessonId, int studentId);
+
+    Optional<LessonProgress> findByLessonIdAndStudentId(int lessonId, int studentId);
 }

@@ -6,6 +6,7 @@ import com.learnspace.learnspacebackend.entity.Course;
 import com.learnspace.learnspacebackend.entity.Enrollment;
 import com.learnspace.learnspacebackend.entity.EnrollmentStatus;
 import com.learnspace.learnspacebackend.entity.User;
+import com.learnspace.learnspacebackend.exception.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mapper.EnrollmentMapper;
 import com.learnspace.learnspacebackend.repository.CourseRepository;
 import com.learnspace.learnspacebackend.repository.EnrollmentRepository;
@@ -35,20 +36,24 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public EnrollmentDto createEnrollment(int courseId) {
         CustomUserDetails principal = getPrincipal();
-        User student = userRepository.getUserById(principal.getId());
-        Course course = courseRepository.getCourseById(courseId);
-        if (enrollmentRepository.checkValidEnrollment(student.getId(), courseId)) {
-            throw new RuntimeException("Bạn đã đăng ký khóa học này rồi");
+        if (enrollmentRepository.existsByCourseAndStudentId(principal.getId(), courseId)) {
+            throw new IllegalArgumentException("Bạn đã đăng ký khóa học này rồi");
         }
+
+        User student = userRepository.getReferenceById(principal.getId());
+        Course course = courseRepository
+                .findById(courseId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy khóa học"));
 
         Enrollment enrollment = new Enrollment();
         if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
             enrollment.setStatus(EnrollmentStatus.ACTIVE);
         } else {
-            throw new RuntimeException("Khóa học có phí");
+            throw new IllegalArgumentException("Khóa học có phí, cần tiến hành thanh toán");
         }
         enrollment.setStudent(student);
         enrollment.setCourse(course);
-        return enrollmentMapper.toDto(enrollmentRepository.addOrUpdateEnrollment(enrollment));
+        return enrollmentMapper.toDto(enrollmentRepository.save(enrollment));
     }
 }
