@@ -36,7 +36,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public EnrollmentDto createEnrollment(int courseId) {
         CustomUserDetails principal = getPrincipal();
-        if (enrollmentRepository.existsByCourseAndStudentId(principal.getId(), courseId)) {
+        if (enrollmentRepository.existsByCourseIdAndStudentId(courseId, principal.getId())) {
             throw new IllegalArgumentException("Bạn đã đăng ký khóa học này rồi");
         }
 

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -49,7 +50,7 @@ public class PaymentServiceImpl implements PaymentService {
                     paymentRepository.save(payment);
                     Enrollment enrollment = payment.getEnrollment();
                     enrollment.setStatus(EnrollmentStatus.ACTIVE);
-                    enrollmentRepository.addOrUpdateEnrollment(enrollment);
+                    enrollmentRepository.save(enrollment);
                 });
     }
 
@@ -58,34 +59,43 @@ public class PaymentServiceImpl implements PaymentService {
         if (carts == null || carts.isEmpty()) {
             throw new RuntimeException("Giỏ hàng trống");
         }
-        User student = userRepository.getUserById(getPrincipal().getId());
+        User student = userRepository
+                .findById(getPrincipal().getId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy user"));
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<Payment> payments = new ArrayList<>();
 
         for (CartDto c : carts) {
-            Course course = courseRepository.getCourseById(c.courseId());
+            Course course = courseRepository
+                    .findById(c.courseId())
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy khóa học"));
             if (course.getPrice().compareTo(BigDecimal.ZERO) == 0) {
                 throw new RuntimeException("Khóa học miễn phí");
             }
 
-            Enrollment enrollment = enrollmentRepository.getEnrollmentByStudentAndCourse(
+            Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(
                     student.getId(), course.getId());
+            Enrollment enrollment = null;
             Payment payment = null;
-            if (enrollment != null) {
+            if (enrollmentOpt.isPresent()) {
+                enrollment = enrollmentOpt.get();
                 if (enrollment.getStatus() == EnrollmentStatus.ACTIVE
                         || enrollment.getStatus() == EnrollmentStatus.COMPLETED) {
                     throw new RuntimeException("Đã đăng ký khóa học " + course.getName() + " rồi");
                 }
                 payment = paymentRepository
                         .findByEnrollmentId(enrollment.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy payment"));
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "NOT_FOUND", "Không tìm thấy payment"));
             } else {
                 enrollment = new Enrollment();
                 enrollment.setStudent(student);
                 enrollment.setCourse(course);
             }
             enrollment.setStatus(EnrollmentStatus.PENDING);
-            enrollment = enrollmentRepository.addOrUpdateEnrollment(enrollment);
+            enrollment = enrollmentRepository.save(enrollment);
             if (payment == null) {
                 payment = new Payment();
                 payment.setEnrollment(enrollment);

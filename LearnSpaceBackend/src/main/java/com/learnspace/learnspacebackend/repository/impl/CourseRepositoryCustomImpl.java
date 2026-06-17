@@ -65,11 +65,7 @@ public class CourseRepositoryCustomImpl implements CourseRepositoryCustom {
                 .where(builder.equal(lessonRoot.get("chapter").get("course"), root));
 
         query.multiselect(
-                root,
-                avgRatingQuery.getSelection(),
-                countEnrollmentQuery.getSelection(),
-                countChapterQuery.getSelection(),
-                countLessonQuery.getSelection());
+                root, avgRatingQuery, countEnrollmentQuery, countChapterQuery, countLessonQuery);
 
         Specification<Course> spec = CourseSpecification.filterCourses(params);
         Predicate predicate = spec.toPredicate(root, query, builder);
@@ -77,9 +73,7 @@ public class CourseRepositoryCustomImpl implements CourseRepositoryCustom {
             query.where(predicate);
         }
 
-        query.orderBy(
-                builder.desc(avgRatingQuery.getSelection()),
-                builder.desc(countEnrollmentQuery.getSelection()));
+        query.orderBy(builder.desc(avgRatingQuery), builder.desc(countEnrollmentQuery));
 
         TypedQuery<Object[]> q = entityManager.createQuery(query);
 
@@ -118,11 +112,7 @@ public class CourseRepositoryCustomImpl implements CourseRepositoryCustom {
                 builder.equal(progressRoot.get("student").get("id"), studentId),
                 builder.equal(progressRoot.get("completed"), true));
 
-        query.multiselect(
-                        root,
-                        countChapterQuery.getSelection(),
-                        countLessonQuery.getSelection(),
-                        countCompletedQuery.getSelection())
+        query.multiselect(root, countChapterQuery, countLessonQuery, countCompletedQuery)
                 .where(builder.equal(enrollmentJoin.get("student").get("id"), studentId));
 
         query.orderBy(builder.desc(enrollmentJoin.get("createdAt")));

@@ -25,7 +25,7 @@ export const endpoints = {
 
 export const authApis = (token) => {
   return axios.create({
-    baseURL: "http://localhost:8080/LearnSpaceBackend/api/",
+    baseURL: "http://localhost:8080/api/",
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -33,5 +33,5 @@ export const authApis = (token) => {
 };
 
 export default axios.create({
-  baseURL: "http://localhost:8080/LearnSpaceBackend/api/",
+  baseURL: "http://localhost:8080/api/",
 });

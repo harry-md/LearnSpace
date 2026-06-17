@@ -26,8 +26,8 @@ public class StatsServiceImpl implements StatsService {
         BigDecimal[] data = new BigDecimal[12];
         Arrays.fill(data, BigDecimal.ZERO);
 
-        for (Object[] row : statsRepository.statsRevenueByTime("MONTH", year)) {
-            data[(Integer) row[0] - 1] = (BigDecimal) row[1];
+        for (Object[] row : statsRepository.statsRevenueByMonth(year)) {
+            data[((Number) row[0]).intValue() - 1] = (BigDecimal) row[1];
         }
         return Arrays.asList(data);
     }
@@ -37,8 +37,8 @@ public class StatsServiceImpl implements StatsService {
         BigDecimal[] data = new BigDecimal[4];
         Arrays.fill(data, BigDecimal.ZERO);
 
-        for (Object[] row : statsRepository.statsRevenueByTime("QUARTER", year)) {
-            data[(Integer) row[0] - 1] = (BigDecimal) row[1];
+        for (Object[] row : statsRepository.statsRevenueByQuarter(year)) {
+            data[((Number) row[0]).intValue() - 1] = (BigDecimal) row[1];
         }
         return Arrays.asList(data);
     }

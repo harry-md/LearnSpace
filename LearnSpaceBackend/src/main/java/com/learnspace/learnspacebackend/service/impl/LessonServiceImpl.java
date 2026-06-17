@@ -81,7 +81,7 @@ public class LessonServiceImpl implements LessonService {
         if (chapter.isFree()) {
             return;
         }
-        if (!enrollmentRepository.existsByCourseAndStudentId(course.getId(), principal.getId())) {
+        if (!enrollmentRepository.existsByCourseIdAndStudentId(course.getId(), principal.getId())) {
             throw new AccessDeniedException("Cần đăng ký khóa học để xem bài học");
         }
     }
@@ -102,7 +102,7 @@ public class LessonServiceImpl implements LessonService {
 
         CustomUserDetails principal = getPrincipal();
         LessonProgress lessonProgress = lessonProgressRepository
-                .findByLessonAndStudentId(lessonId, principal.getId())
+                .findByLessonIdAndStudentId(lessonId, principal.getId())
                 .orElse(null);
         return new LessonDto(
                 lesson.getId(),

@@ -17,3 +17,7 @@ spring:
       max-file-size: 1024MB
       max-request-size: 1024MB
       file-size-threshold: 0MB
+course:
+  page_size: 20
+review:
+  page_size: 2

@@ -15,7 +15,7 @@ public interface StatsRepository extends JpaRepository<Payment, Integer> {
     @Query("""
         SELECT e.course.name, COUNT(e)
         FROM Enrollment e
-        GROUP BY e.course.id
+        GROUP BY e.course.id, e.course.name
         ORDER BY COUNT(e) DESC
         LIMIT 10
         """)
@@ -25,10 +25,18 @@ public interface StatsRepository extends JpaRepository<Payment, Integer> {
     BigDecimal getTotalIncome();
 
     @Query(value = """
-        SELECT EXTRACT(:timeunit from created_at) AS time_period, SUM(amount) AS total_revenue
+        SELECT EXTRACT(MONTH from created_at) AS time_period, SUM(amount) AS total_revenue
         FROM payments WHERE status = 'COMPLETED' AND EXTRACT(YEAR FROM created_at) = :year
-        GROUP BY EXTRACT(:timeunit FROM created_at)
+        GROUP BY EXTRACT(MONTH FROM created_at)
         ORDER BY time_period
         """, nativeQuery = true)
-    List<Object[]> statsRevenueByTime(@Param("timeUnit") String timeUnit, @Param("year") int year);
+    List<Object[]> statsRevenueByMonth(@Param("year") int year);
+
+    @Query(value = """
+        SELECT EXTRACT(QUARTER from created_at) AS time_period, SUM(amount) AS total_revenue
+        FROM payments WHERE status = 'COMPLETED' AND EXTRACT(YEAR FROM created_at) = :year
+        GROUP BY EXTRACT(QUARTER FROM created_at)
+        ORDER BY time_period
+        """, nativeQuery = true)
+    List<Object[]> statsRevenueByQuarter(@Param("year") int year);
 }

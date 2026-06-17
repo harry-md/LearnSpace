@@ -46,7 +46,7 @@ public class LessonProgressServiceImpl implements LessonProgressService {
                         () -> new ResourceNotFoundException("NOT_FOUND", "Không tìm thấy bài học"));
 
         LessonProgress progress = lessonProgressRepository
-                .findByLessonAndStudentId(lessonId, userId)
+                .findByLessonIdAndStudentId(lessonId, userId)
                 .orElse(null);
 
         if (progress == null) {
