@@ -60,7 +60,8 @@
 
         <div class="px-3 mt-auto mb-3">
             <hr class="text-secondary opacity-25">
-            <a th:href="@{/logout}" class="btn btn-outline-danger w-100 text-start">
+            <form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;"></form>
+            <a href="javascript:void(0);" onclick="document.getElementById('logoutForm').submit();" class="btn btn-outline-danger w-100 text-start">
                 <i class="fa-solid fa-right-from-bracket fa-fw me-2 text-center"></i> Đăng xuất
             </a>
         </div>
