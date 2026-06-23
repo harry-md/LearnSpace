@@ -97,7 +97,9 @@ public class SpringSecurityConfigs {
     @Bean
     public CorsConfigurationSource webCorsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("https://dreaded-chain-securely.ngrok-free.dev"));
+        config.setAllowedOriginPatterns(List.of(
+                "https://dreaded-chain-securely.ngrok-free.dev",
+                "https://learnspace-app.icydesert-d50d1a9e.southeastasia.azurecontainerapps.io/"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

@@ -25,7 +25,8 @@ export const endpoints = {
 
 export const authApis = (token) => {
   return axios.create({
-    baseURL: "http://localhost:8080/LearnSpaceBackend/api/",
+    baseURL:
+      "https://learnspace-app.icydesert-d50d1a9e.southeastasia.azurecontainerapps.io/api/",
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -33,5 +34,6 @@ export const authApis = (token) => {
 };
 
 export default axios.create({
-  baseURL: "http://localhost:8080/LearnSpaceBackend/api/",
+  baseURL:
+    "https://learnspace-app.icydesert-d50d1a9e.southeastasia.azurecontainerapps.io/api/",
 });
