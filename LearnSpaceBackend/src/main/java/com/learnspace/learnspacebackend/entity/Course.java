@@ -71,6 +71,22 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private Set<Review> reviews;
 
+    @Column(name = "avg_rating", precision = 3, scale = 2, nullable = true)
+    @ColumnDefault("0")
+    private BigDecimal avgRating = BigDecimal.ZERO;
+
+    @Column(name = "enrollment_count", nullable = false)
+    @ColumnDefault("0")
+    private Long enrollmentCount = 0L;
+
+    @Column(name = "chapter_count", nullable = false)
+    @ColumnDefault("0")
+    private Long chapterCount = 0L;
+
+    @Column(name = "lesson_count", nullable = false)
+    @ColumnDefault("0")
+    private Long lessonCount = 0L;
+
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;

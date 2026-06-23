@@ -7,7 +7,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update 
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -17,6 +17,9 @@ spring:
       max-file-size: 1024MB
       max-request-size: 1024MB
       file-size-threshold: 0MB
+  threads:
+    virtual:
+      enabled: true
 course:
   page_size: 20
 review:

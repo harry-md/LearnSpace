@@ -6,7 +6,6 @@ import com.learnspace.learnspacebackend.dto.course.CoursePatchDto;
 import com.learnspace.learnspacebackend.dto.course.MyCourseListDto;
 import com.learnspace.learnspacebackend.dto.security.CustomUserDetails;
 import com.learnspace.learnspacebackend.entity.Course;
-import com.learnspace.learnspacebackend.entity.EnrollmentStatus;
 import com.learnspace.learnspacebackend.entity.UserRole;
 import com.learnspace.learnspacebackend.exception.ResourceNotFoundException;
 import com.learnspace.learnspacebackend.mapper.CategoryMapper;
@@ -37,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -64,8 +64,8 @@ public class CourseServiceImpl implements CourseService {
     public Page<CourseListDto> getCourses(Map<String, String> params) {
         int page = Integer.parseInt(params.getOrDefault("page", "1")) - 1;
         page = Math.max(0, page);
-
         Pageable pageable = PageRequest.of(page, COURSE_PAGE_SIZE);
+
         long totalElements = courseRepository.count(CourseSpecification.filterCourses(params));
         List<CourseListDto> results =
                 courseRepository.getCoursesWithStats(params, pageable).stream()
@@ -78,7 +78,7 @@ public class CourseServiceImpl implements CourseService {
                                     c.getPrice(),
                                     categoryMapper.toDto(c.getCategory()),
                                     userMapper.toSimpleUserDto(c.getTeacher()),
-                                    (Double) row[1],
+                                    ((BigDecimal) row[1]).doubleValue(),
                                     (Long) row[2],
                                     (Long) row[3],
                                     (Long) row[4]);
@@ -100,10 +100,6 @@ public class CourseServiceImpl implements CourseService {
     public CourseDto getCourse(int courseId) {
         Course course = getCourseOrThrow(courseId);
         CourseDto dto = courseMapper.toDto(course);
-        Double avgRating = reviewRepository.getAverageRatingByCourseId(courseId);
-        Long enrollCount = enrollmentRepository.countByCourseIdAndStatusIn(
-                courseId, List.of(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED));
-
         return new CourseDto(
                 dto.id(),
                 dto.name(),
@@ -112,8 +108,8 @@ public class CourseServiceImpl implements CourseService {
                 dto.introVideo(),
                 dto.price(),
                 dto.categoryId(),
-                avgRating,
-                enrollCount,
+                course.getAvgRating().doubleValue(),
+                course.getEnrollmentCount(),
                 dto.chapters(),
                 dto.category(),
                 dto.teacher(),
@@ -247,6 +243,7 @@ public class CourseServiceImpl implements CourseService {
                     Long lessonCount = (Long) row[2];
                     Long completedCount = (Long) row[3];
                     CourseListDto course = courseMapper.toListDto(c);
+
                     return new MyCourseListDto(
                             course.id(),
                             course.name(),

@@ -5,7 +5,6 @@ import com.learnspace.learnspacebackend.entity.Course;
 import com.learnspace.learnspacebackend.entity.Enrollment;
 import com.learnspace.learnspacebackend.entity.Lesson;
 import com.learnspace.learnspacebackend.entity.LessonProgress;
-import com.learnspace.learnspacebackend.entity.Review;
 import com.learnspace.learnspacebackend.repository.CourseRepositoryCustom;
 import com.learnspace.learnspacebackend.repository.specifications.CourseSpecification;
 
@@ -35,48 +34,27 @@ public class CourseRepositoryCustomImpl implements CourseRepositoryCustom {
     public List<Object[]> getCoursesWithStats(Map<String, String> params, Pageable pageable) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
-        Root<Course> root = query.from(Course.class);
 
+        Root<Course> root = query.from(Course.class);
         root.fetch("teacher");
         root.fetch("category");
 
-        Subquery<Double> avgRatingQuery = query.subquery(Double.class);
-        Root<Review> reviewRoot = avgRatingQuery.from(Review.class);
-        avgRatingQuery
-                .select(builder.avg(reviewRoot.get("rating")))
-                .where(builder.equal(reviewRoot.get("course"), root));
-
-        Subquery<Long> countEnrollmentQuery = query.subquery(Long.class);
-        Root<Enrollment> enrollmentRoot = countEnrollmentQuery.from(Enrollment.class);
-        countEnrollmentQuery
-                .select(builder.count(enrollmentRoot))
-                .where(builder.equal(enrollmentRoot.get("course"), root));
-
-        Subquery<Long> countChapterQuery = query.subquery(Long.class);
-        Root<Chapter> chapterRoot = countChapterQuery.from(Chapter.class);
-        countChapterQuery
-                .select(builder.count(chapterRoot))
-                .where(builder.equal(chapterRoot.get("course"), root));
-
-        Subquery<Long> countLessonQuery = query.subquery(Long.class);
-        Root<Lesson> lessonRoot = countLessonQuery.from(Lesson.class);
-        countLessonQuery
-                .select(builder.count(lessonRoot))
-                .where(builder.equal(lessonRoot.get("chapter").get("course"), root));
-
         query.multiselect(
-                root, avgRatingQuery, countEnrollmentQuery, countChapterQuery, countLessonQuery);
+                root,
+                root.get("avgRating"),
+                root.get("enrollmentCount"),
+                root.get("chapterCount"),
+                root.get("lessonCount"));
 
         Specification<Course> spec = CourseSpecification.filterCourses(params);
         Predicate predicate = spec.toPredicate(root, query, builder);
         if (predicate != null) {
             query.where(predicate);
         }
-
-        query.orderBy(builder.desc(avgRatingQuery), builder.desc(countEnrollmentQuery));
+        query.orderBy(
+                builder.desc(root.get("avgRating")), builder.desc(root.get("enrollmentCount")));
 
         TypedQuery<Object[]> q = entityManager.createQuery(query);
-
         q.setFirstResult((int) pageable.getOffset());
         q.setMaxResults(pageable.getPageSize());
         return q.getResultList();

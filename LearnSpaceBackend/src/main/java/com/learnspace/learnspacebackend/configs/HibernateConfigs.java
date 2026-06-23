@@ -1,0 +1,68 @@
+package com.learnspace.learnspacebackend.configs;
+
+import static org.hibernate.cfg.JdbcSettings.DIALECT;
+import static org.hibernate.cfg.JdbcSettings.SHOW_SQL;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+
+import java.util.Properties;
+
+import javax.sql.DataSource;
+
+@Configuration
+@PropertySource("classpath:database.properties")
+@PropertySource("classpath:configs.properties")
+@PropertySource("classpath:env.properties")
+public class HibernateConfigs {
+    @Autowired
+    private Environment env;
+
+    @Bean
+    public LocalSessionFactoryBean getSessionFactory() {
+        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+        sessionFactory.setPackagesToScan(new String[] {"com.learnspace.learnspacebackend.pojo"});
+        sessionFactory.setDataSource(dataSource());
+        sessionFactory.setHibernateProperties(hibernateProperties());
+        return sessionFactory;
+    }
+
+    @Bean
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(env.getProperty("hibernate.connection.driverClass"));
+        String dbUrl = System.getenv("DB_URL") != null
+                ? System.getenv("DB_URL")
+                : env.getProperty("hibernate.connection.url");
+        String dbUser = System.getenv("DB_USERNAME") != null
+                ? System.getenv("DB_USERNAME")
+                : env.getProperty("hibernate.connection.username");
+        String dbPass = System.getenv("DB_PASSWORD") != null
+                ? System.getenv("DB_PASSWORD")
+                : env.getProperty("hibernate.connection.password");
+        dataSource.setUrl(dbUrl);
+        dataSource.setUsername(dbUser);
+        dataSource.setPassword(dbPass);
+        return dataSource;
+    }
+
+    private Properties hibernateProperties() {
+        Properties props = new Properties();
+        props.put(DIALECT, env.getProperty("hibernate.dialect"));
+        props.put(SHOW_SQL, env.getProperty("hibernate.showSql"));
+        return props;
+    }
+
+    @Bean
+    public HibernateTransactionManager transactionManager() {
+        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
+        transactionManager.setSessionFactory(getSessionFactory().getObject());
+        return transactionManager;
+    }
+}

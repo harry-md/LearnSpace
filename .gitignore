@@ -35,3 +35,4 @@ env.properties
 deploy.sh
 firebase-service-account.json
 learnspace/.env
+aca.yaml
