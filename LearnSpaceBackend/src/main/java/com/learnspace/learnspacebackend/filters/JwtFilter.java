@@ -1,7 +1,7 @@
 package com.learnspace.learnspacebackend.filters;
 
-import com.learnspace.learnspacebackend.dtos.security.CustomUserDetails;
-import com.learnspace.learnspacebackend.utils.JwtUtils;
+import com.learnspace.learnspacebackend.dto.security.CustomUserDetails;
+import com.learnspace.learnspacebackend.util.JwtUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 
 import jakarta.servlet.Filter;
@@ -11,17 +11,20 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
 
+@RequiredArgsConstructor
+@Component
 public class JwtFilter implements Filter {
-    @Autowired
-    private JwtUtils jwtUtils;
+    private final JwtUtils jwtUtils;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
