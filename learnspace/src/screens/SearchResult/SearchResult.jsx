@@ -140,6 +140,20 @@ const SearchResult = () => {
 
   const totalPages = Math.ceil(totalCount / 20);
 
+  const maxPagesToShow = 5;
+  let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+  let endPage = startPage + maxPagesToShow - 1;
+
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+  }
+
+  const pages = [];
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(i);
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-gray-900 text-white py-10 px-6">
@@ -343,7 +357,7 @@ const SearchResult = () => {
                 <ChevronLeft size={16} />
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              {pages.map(
                 (page) => (
                   <button
                     key={page}

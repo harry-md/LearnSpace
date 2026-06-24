@@ -11,4 +11,8 @@ public interface StatsService {
     List<BigDecimal> getIncomeByAllQuarter(int year);
 
     List<Object[]> statsEnrollmentByCourse();
+
+    List<Object[]> statsRevenueByCategory();
+
+    List<Object[]> getTopRatedCourses(int limit);
 }
