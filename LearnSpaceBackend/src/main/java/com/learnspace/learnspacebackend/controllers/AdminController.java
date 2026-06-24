@@ -37,6 +37,8 @@ public class AdminController {
         model.addAttribute("selectedYear", targetYear);
 
         model.addAttribute("enrollmentStats", statsService.statsEnrollmentByCourse());
+        model.addAttribute("revenueByCategory", statsService.statsRevenueByCategory());
+        model.addAttribute("topRatedCourses", statsService.getTopRatedCourses(10));
         return "admin";
     }
 }

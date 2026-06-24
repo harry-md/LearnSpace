@@ -1,8 +1,11 @@
 package com.learnspace.learnspacebackend.repositories.impl;
 
+import com.learnspace.learnspacebackend.pojo.Category;
 import com.learnspace.learnspacebackend.pojo.Course;
 import com.learnspace.learnspacebackend.pojo.Enrollment;
 import com.learnspace.learnspacebackend.pojo.Payment;
+import com.learnspace.learnspacebackend.pojo.PaymentStatus;
+import com.learnspace.learnspacebackend.pojo.Review;
 import com.learnspace.learnspacebackend.repositories.StatsRepository;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -11,6 +14,7 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
@@ -69,5 +73,39 @@ public class StatsRepositoryImpl implements StatsRepository {
         q.groupBy(b.function(time, Integer.class, root.get("createdAt")));
 
         return session.createQuery(q).getResultList();
+    }
+
+    @Override
+    public List<Object[]> statsRevenueByCategory() {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
+
+        Root<Payment> root = q.from(Payment.class);
+        Join<Payment, Enrollment> enrollmentJoin = root.join("enrollment");
+        Join<Enrollment, Course> courseJoin = enrollmentJoin.join("course");
+        Join<Course, Category> cateJoin = courseJoin.join("category");
+
+        q.multiselect(cateJoin.get("name"), b.sum(root.get("amount")))
+                .where(b.equal(root.get("status"), PaymentStatus.COMPLETED))
+                .groupBy(cateJoin.get("id"))
+                .orderBy(b.desc(b.sum(root.get("amount"))));
+        return session.createQuery(q).getResultList();
+    }
+
+    @Override
+    public List<Object[]> getTopRatedCourses(int limit) {
+        Session session = factory.getObject().getCurrentSession();
+        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> q = b.createQuery(Object[].class);
+
+        Root<Course> root = q.from(Course.class);
+        Join<Course, Review> reviewJoin = root.join("reviews");
+        q.multiselect(root.get("name"), b.avg(reviewJoin.get("rating")))
+                .groupBy(root.get("id"))
+                .orderBy(b.desc(b.avg(reviewJoin.get("rating"))));
+        Query<Object[]> query = session.createQuery(q);
+        query.setMaxResults(limit);
+        return query.getResultList();
     }
 }

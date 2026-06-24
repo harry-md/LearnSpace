@@ -47,4 +47,14 @@ public class StatsServiceImpl implements StatsService {
     public List<Object[]> statsEnrollmentByCourse() {
         return statsRepository.statsEnrollmentByCourse();
     }
+
+    @Override
+    public List<Object[]> statsRevenueByCategory() {
+        return statsRepository.statsRevenueByCategory();
+    }
+
+    @Override
+    public List<Object[]> getTopRatedCourses(int limit) {
+        return statsRepository.getTopRatedCourses(limit);
+    }
 }

@@ -125,6 +125,44 @@
               <canvas id="enrollmentChart" style="max-height: 400px"></canvas>
             </div>
           </div>
+          <div class="row g-4 mb-4">
+            <div class="col-md-6">
+              <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Doanh thu theo danh mục</h5>
+                  <canvas id="revenueCategoryChart" style="max-height: 400px"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">Top 10 khóa học được đánh giá cao nhất</h5>
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                      <thead class="table-light">
+                        <tr>
+                          <th>#</th>
+                          <th>Tên khóa học</th>
+                          <th>Đánh giá trung bình</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr th:each="course, iterStat : ${topRatedCourses}">
+                          <td th:text="${iterStat.count}">1</td>
+                          <td th:text="${course[0]}">Tên khóa học</td>
+                          <td>
+                            <span class="text-warning me-1"><i class="fas fa-star"></i></span>
+                            <span th:text="${course[1] != null ? #numbers.formatDecimal(course[1], 1, 1) : '0.0'}">5.0</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
@@ -185,6 +223,29 @@
                   borderColor: 'rgba(75, 192, 192, 1)',
                   borderWidth: 1,
                   borderRadius: 4
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false
+          }
+      });
+
+      const revenueCategoryStats = [[${revenueByCategory}]];
+      const revenueCategoryLabels = revenueCategoryStats.map(item => item[0]);
+      const revenueCategoryData = revenueCategoryStats.map(item => item[1]);
+
+      const ctxRevenueCategory = document.getElementById('revenueCategoryChart').getContext('2d');
+      new Chart(ctxRevenueCategory, {
+          type: 'doughnut',
+          data: {
+              labels: revenueCategoryLabels,
+              datasets: [{
+                  data: revenueCategoryData,
+                  backgroundColor: [
+                      '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40', '#e83e8c', '#6f42c1', '#20c997', '#fd7e14'
+                  ],
+                  borderWidth: 1
               }]
           },
           options: {
