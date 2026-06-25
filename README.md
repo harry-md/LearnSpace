@@ -1,3 +1,25 @@
+<p align="center">
+  <h1 align="center">📚 LearnSpace</h1>
+  <p align="center">Nền tảng học trực tuyến E-Learning Fullstack</p>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white" alt="Java 17" />
+  <img src="https://img.shields.io/badge/Spring_MVC-6.2-6DB33F?logo=spring&logoColor=white" alt="Spring MVC" />
+  <img src="https://img.shields.io/badge/Hibernate-6.6-59666C?logo=hibernate&logoColor=white" alt="Hibernate" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React 19" />
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite 8" />
+  <img src="https://img.shields.io/badge/TailwindCSS-4-06B6D4?logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
+  <img src="https://img.shields.io/badge/MySQL-9.5-4479A1?logo=mysql&logoColor=white" alt="MySQL" />
+  <img src="https://img.shields.io/badge/Stripe-Payment-635BFF?logo=stripe&logoColor=white" alt="Stripe" />
+  <img src="https://img.shields.io/badge/Firebase-Chat-DD2C00?logo=firebase&logoColor=white" alt="Firebase" />
+  <img src="https://img.shields.io/badge/Docker-Container-2496ED?logo=docker&logoColor=white" alt="Docker" />
+</p>
+
+---
+
+## 📄 Đề tài
+
 # ĐỀ TÀI 1: KHOÁ HỌC TRỰC TUYẾN
 
 Hệ thống được xây dựng nhằm hỗ trợ việc đăng ký, quản lý và tham gia các khóa học trực
@@ -34,3 +56,507 @@ thể mở rộng và tùy biến báo cáo để phục vụ quản lý chiến
 
 [Mở rộng] * Sinh viên và giảng viên có thể trao đổi trực tiếp thông qua tính năng chat thời
 gian thực được tích hợp từ Firebase Realtime Database. 
+
+---
+
+## 📋 Tổng quan dự án
+
+**LearnSpace** là nền tảng học trực tuyến fullstack cho phép giảng viên tạo và quản lý khóa học, sinh viên tìm kiếm – mua – học khóa học (xem video bài giảng), và quản trị viên giám sát toàn bộ hệ thống qua admin dashboard.
+
+Hệ thống phân quyền theo **3 vai trò chính**:
+
+| Vai trò | Mô tả |
+|---------|-------|
+| **🎓 Sinh viên (Student)** | Tìm kiếm, mua khóa học, xem video bài giảng, theo dõi tiến độ, đánh giá, chat với giảng viên |
+| **👨‍🏫 Giảng viên (Verified Teacher)** | Tạo/quản lý khóa học & bài giảng, xem thống kê doanh thu, chat với sinh viên |
+| **🔧 Quản trị viên (Admin)** | Dashboard quản lý hệ thống, duyệt giảng viên, quản lý khóa học/người dùng/danh mục |
+
+**Điểm nổi bật:**
+- 🎥 Video streaming bài giảng từ **Cloudflare R2**
+- 💳 Thanh toán trực tuyến qua **Stripe Checkout**
+- 💬 Chat thời gian thực với **Firebase Realtime Database**
+- 📊 Admin dashboard với biểu đồ **Chart.js** (Thymeleaf SSR)
+- 🔐 Dual security: **JWT** (API) + **Session-based** (Admin web)
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Công nghệ |
+|-------|-----------|
+| **Backend** | Java 17, Spring MVC 6 (programmatic config, không dùng Spring Boot), Hibernate ORM 6, Spring Security (JWT + Session), MapStruct |
+| **Admin Dashboard** | Thymeleaf, Bootstrap, Chart.js |
+| **Frontend** | React 19, Vite 8, TailwindCSS 4, shadcn/ui, React Bootstrap, React Router v6 |
+| **State Management** | React Context + useReducer (UserContext, CartContext, UIContext, ChatContext) |
+| **Database** | MySQL 9.5 |
+| **Cloud & Storage** | Cloudinary (ảnh, intro video), Cloudflare R2 via AWS S3 SDK (video bài giảng) |
+| **Payment** | Stripe (Checkout Sessions + Webhook) |
+| **Realtime** | Firebase Realtime Database + Firebase Auth (custom token) |
+| **DevOps** | Docker (multi-stage build), Tomcat 10.1, Azure Container Apps, Azure Container Registry |
+| **Khác** | Nimbus JOSE JWT (HS256), Apache Tika (file validation), Axios, react-cookies, jwt-decode |
+
+---
+
+## 🏗️ Kiến trúc hệ thống
+
+```mermaid
+graph TB
+    subgraph Client["🖥️ Client"]
+        React["React 19 SPA<br/>(Vite + TailwindCSS)"]
+    end
+    
+    subgraph Server["⚙️ Backend - Spring MVC 6"]
+        API["REST API Controllers<br/>(JSON, Stateless JWT)"]
+        Admin["Admin Web Controllers<br/>(Thymeleaf, Session-based)"]
+        Security["Spring Security<br/>(Dual Filter Chain)"]
+        Service["Service Layer"]
+        Repo["Repository Layer<br/>(Hibernate Session)"]
+    end
+    
+    subgraph Database["🗄️ Database"]
+        MySQL["MySQL 9.5"]
+    end
+    
+    subgraph External["☁️ External Services"]
+        Cloudinary["Cloudinary<br/>(Ảnh + Intro Video)"]
+        R2["Cloudflare R2<br/>(Video bài giảng)"]
+        Stripe["Stripe<br/>(Thanh toán)"]
+        Firebase["Firebase<br/>(Chat Realtime)"]
+    end
+
+    React -- "REST API (JWT Bearer)" --> API
+    Admin -- "Thymeleaf SSR (Session)" --> MySQL
+    API --> Security --> Service --> Repo --> MySQL
+    Service --> Cloudinary
+    Service --> R2
+    Service --> Stripe
+    Service --> Firebase
+    React -- "Firebase SDK" --> Firebase
+```
+
+### Dual Security Architecture
+
+| Layer | Phạm vi | Xác thực | Session |
+|-------|---------|----------|---------|
+| **API Security** (Order 1) | `/api/**` | JWT Bearer Token (HS256, 24h TTL) | Stateless |
+| **Web Security** (Default) | `/**` (Admin) | Form Login + Session | Stateful |
+
+---
+
+## 🗃️ Database Design
+
+```mermaid
+erDiagram
+    USER {
+        int id PK
+        varchar username UK
+        varchar password
+        enum role "ADMIN, STUDENT, TEACHER"
+        varchar full_name
+        varchar email
+        varchar avatar
+        boolean verified
+        datetime created_at
+        datetime updated_at
+    }
+    
+    CATEGORY {
+        int id PK
+        varchar name UK
+    }
+    
+    COURSE {
+        int id PK
+        varchar name
+        varchar description
+        varchar image
+        varchar intro_video
+        decimal price
+        int category_id FK
+        int teacher_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    
+    CHAPTER {
+        int id PK
+        varchar name
+        int order
+        boolean free
+        text description
+        int course_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    
+    LESSON {
+        int id PK
+        varchar title
+        int order
+        text content
+        varchar video
+        int video_length
+        int chapter_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    
+    ENROLLMENT {
+        int id PK
+        int student_id FK
+        int course_id FK
+        enum status "PENDING, ACTIVE, COMPLETED, DISABLED"
+        datetime created_at
+        datetime updated_at
+    }
+    
+    PAYMENT {
+        int id PK
+        int enrollment_id FK
+        decimal amount
+        varchar status
+        varchar stripe_session_id
+        varchar stripe_payment_intent_id
+        datetime created_at
+        datetime updated_at
+    }
+    
+    REVIEW {
+        int id PK
+        int student_id FK
+        int course_id FK
+        int rating
+        varchar comment
+        datetime created_at
+    }
+    
+    LESSON_PROGRESS {
+        int id PK
+        int student_id FK
+        int lesson_id FK
+        int watched_sec
+        boolean completed
+        datetime created_at
+        datetime updated_at
+    }
+    
+    USER ||--o{ COURSE : "teaches"
+    USER ||--o{ ENROLLMENT : "enrolls"
+    USER ||--o{ REVIEW : "writes"
+    USER ||--o{ LESSON_PROGRESS : "tracks"
+    CATEGORY ||--o{ COURSE : "contains"
+    COURSE ||--o{ CHAPTER : "has"
+    COURSE ||--o{ ENROLLMENT : "has"
+    COURSE ||--o{ REVIEW : "receives"
+    CHAPTER ||--o{ LESSON : "contains"
+    ENROLLMENT ||--|| PAYMENT : "has"
+    LESSON ||--o{ LESSON_PROGRESS : "tracked_by"
+```
+
+<!-- 
+📸 Thêm screenshot DB design thực tế tại đây:
+![DB Design](docs/screenshots/db-design.png) 
+-->
+
+---
+
+## ✨ Tính năng chính
+
+### 🎓 Sinh viên (Student)
+
+- **Đăng ký / Đăng nhập** — JWT authentication, upload avatar lên Cloudinary
+- **Tìm kiếm khóa học** — Lọc theo tên, giảng viên, danh mục, khoảng giá; sắp xếp; phân trang (20 items/trang)
+- **Chi tiết khóa học** — Xem mô tả, intro video, danh sách chapter/lesson, đánh giá
+- **Giỏ hàng & Thanh toán** — Thêm nhiều khóa vào giỏ, thanh toán qua Stripe Checkout
+- **Học bài** — Xem video bài giảng (streaming từ Cloudflare R2), theo dõi tiến độ (watched seconds, completion status)
+- **Đánh giá khóa học** — Rating (1-5 sao) kèm comment
+- **Chat thời gian thực** — Nhắn tin trực tiếp với giảng viên qua Firebase, hỗ trợ nhiều cửa sổ chat đồng thời
+- **Profile** — Xem/chỉnh sửa thông tin cá nhân
+
+### 👨‍🏫 Giảng viên (Verified Teacher)
+
+- **Đăng ký giảng viên** → Chờ Admin duyệt → Trở thành Verified Teacher
+- **Tạo / Sửa / Xóa khóa học** — Upload thumbnail lên Cloudinary, intro video lên Cloudinary
+- **Quản lý Chapter & Lesson** — Tổ chức nội dung theo chapter, upload video bài giảng lên Cloudflare R2
+- **Teacher Dashboard** — Giao diện quản lý riêng biệt với sidebar navigation
+  - **Overview tab**: Thống kê tổng quan (tổng khóa học, sinh viên, doanh thu) + bảng performance
+  - **Courses tab**: Danh sách khóa học với phân trang
+  - **Manage Course**: Quản lý chi tiết chapter/lesson với 6 modal (Create/Edit Course, Add/Edit Chapter, Add/Edit Lesson)
+- **Chat với sinh viên** — Dựa trên danh sách enrollment
+
+### 🔧 Quản trị viên (Admin Dashboard — Thymeleaf SSR)
+
+- **Dashboard tổng quan** — Thẻ thống kê: tổng users, courses, doanh thu
+- **Biểu đồ Chart.js**:
+  - 📊 Bar chart: Doanh thu theo tháng / quý
+  - 📊 Bar chart: Số lượng enrollment theo khóa học
+  - 🍩 Doughnut chart: Doanh thu theo danh mục
+  - 🏆 Top 10 khóa học đánh giá cao nhất
+- **Quản lý giảng viên** — Duyệt / từ chối / xác minh tài khoản giảng viên
+- **Quản lý khóa học** — Xem danh sách, xóa khóa học (phân trang)
+- **Quản lý danh mục** — CRUD danh mục khóa học
+- **Quản lý người dùng** — Xem, cập nhật role/verified, xóa user
+
+---
+
+## 📸 Screenshots
+
+> ⚠️ Thêm screenshots vào thư mục `docs/screenshots/` và uncomment các dòng bên dưới.
+
+<!--
+### Trang chủ
+![Trang chủ](docs/screenshots/home.png)
+
+### Danh sách khóa học & Tìm kiếm
+![Danh sách khóa học](docs/screenshots/courses.png)
+
+### Chi tiết khóa học
+![Chi tiết khóa học](docs/screenshots/course-detail.png)
+
+### Trang học bài (Video Player)
+![Trang học bài](docs/screenshots/lesson-viewer.png)
+
+### Giỏ hàng & Thanh toán
+![Giỏ hàng](docs/screenshots/cart.png)
+
+### Chat thời gian thực
+![Chat](docs/screenshots/chat.png)
+
+### Teacher Dashboard
+![Teacher Dashboard](docs/screenshots/teacher-dashboard.png)
+
+### Admin Dashboard
+![Admin Dashboard](docs/screenshots/admin-dashboard.png)
+
+### Database Design
+![DB Design](docs/screenshots/db-design.png)
+-->
+
+---
+
+## 🔌 API Endpoints
+
+### Authentication & User
+
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|--------|
+| `POST` | `/api/users` | Public | Đăng ký tài khoản (multipart form) |
+| `POST` | `/api/login` | Public | Đăng nhập → trả về JWT token |
+| `GET` | `/api/current-user` | 🔒 Auth | Lấy thông tin user hiện tại |
+| `PATCH` | `/api/current-user` | 🔒 Auth | Cập nhật profile |
+
+### Courses
+
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|--------|
+| `GET` | `/api/courses` | Public | Danh sách khóa học (lọc, sắp xếp, phân trang) |
+| `GET` | `/api/courses/{id}` | Public | Chi tiết khóa học |
+| `POST` | `/api/courses` | 🔒 Verified Teacher | Tạo khóa học (multipart) |
+| `PATCH` | `/api/courses/{id}` | 🔒 Verified Teacher | Cập nhật khóa học |
+| `DELETE` | `/api/courses/{id}` | 🔒 Verified Teacher | Xóa khóa học |
+| `GET` | `/api/courses/my-courses` | 🔒 Auth | Khóa học đã đăng ký |
+
+### Chapters & Lessons
+
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|--------|
+| `POST` | `/api/courses/{courseId}/chapters` | 🔒 Verified Teacher | Tạo chapter |
+| `PATCH` | `/api/chapters/{id}` | 🔒 Verified Teacher | Cập nhật chapter |
+| `DELETE` | `/api/chapters/{id}` | 🔒 Verified Teacher | Xóa chapter |
+| `GET` | `/api/lessons/{id}` | 🔒 Auth | Chi tiết lesson |
+| `POST` | `/api/chapters/{chapterId}/lessons` | 🔒 Verified Teacher | Tạo lesson (multipart + video) |
+| `PATCH` | `/api/lessons/{id}` | 🔒 Verified Teacher | Cập nhật lesson |
+| `DELETE` | `/api/lessons/{id}` | 🔒 Verified Teacher | Xóa lesson |
+
+### Enrollment & Payment
+
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|--------|
+| `POST` | `/api/courses/{courseId}/enrollments` | 🔒 Auth | Đăng ký khóa học |
+| `POST` | `/api/payments/checkout` | 🔒 Auth | Tạo Stripe Checkout Session |
+| `POST` | `/api/payments/webhook` | Public | Stripe Webhook xác nhận thanh toán |
+
+### Reviews & Progress
+
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|--------|
+| `GET` | `/api/courses/{courseId}/reviews` | Public | Danh sách đánh giá (phân trang) |
+| `POST` | `/api/lessons/{lessonId}/lesson-progress` | 🔒 Auth | Lưu tiến độ học (watched seconds) |
+
+### Chat & Categories
+
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|--------|
+| `GET` | `/api/categories` | Public | Danh sách danh mục |
+| `GET` | `/api/chat/token` | 🔒 Auth | Lấy Firebase custom token |
+| `GET` | `/api/chat/contacts` | 🔒 Auth | Danh sách liên hệ chat (dựa trên enrollment) |
+
+---
+
+## 📁 Cấu trúc thư mục
+
+```
+LearnSpace/
+├── LearnSpaceBackend/                    # Backend - Spring MVC
+│   ├── src/main/java/com/learnspace/learnspacebackend/
+│   │   ├── configs/                      # Cấu hình Spring (Security, Hibernate, Thymeleaf, CORS, Web)
+│   │   ├── controllers/                  # 10 API Controllers + 4 Admin Web Controllers
+│   │   ├── dtos/                         # Data Transfer Objects (11 packages)
+│   │   ├── filters/                      # JwtFilter - xác thực JWT cho API
+│   │   ├── mappers/                      # MapStruct mappers (entity ↔ DTO)
+│   │   ├── pojo/                         # 9 JPA Entities + 3 Enums
+│   │   ├── repositories/                 # Repository interfaces + implementations (Hibernate Session)
+│   │   ├── services/                     # 14 Service interfaces + implementations
+│   │   └── utils/                        # JwtUtils (generate/validate token)
+│   ├── src/main/resources/
+│   │   ├── templates/                    # Thymeleaf templates (admin dashboard)
+│   │   ├── static/js/                    # Admin client-side JS
+│   │   └── env.properties                # Cấu hình (DB, JWT, Cloudinary, R2, Stripe, Firebase)
+│   ├── Dockerfile                        # Multi-stage build (Maven → Tomcat)
+│   ├── learnspacedb.sql                  # MySQL database dump
+│   └── pom.xml                           # Maven dependencies
+│
+├── learnspace/                           # Frontend - React
+│   ├── src/
+│   │   ├── components/                   # UI components
+│   │   │   ├── Header/                   # Navigation bar + Search + ChatMenu
+│   │   │   ├── Footer/                   # Site footer
+│   │   │   ├── Layout/                   # MainLayout (Header + Outlet + Footer)
+│   │   │   ├── CourseCard/               # Course card với hover detail
+│   │   │   ├── GlobalChat/               # Floating chat windows (Firebase)
+│   │   │   ├── GlobalLoading/            # Full-screen loading overlay
+│   │   │   ├── GlobalDialog/             # Modal dialog (info/success/error/warning)
+│   │   │   ├── ProtectedRoute/           # Auth guard (role-based)
+│   │   │   ├── TeacherDashboard/         # Teacher dashboard components
+│   │   │   │   ├── OverviewTab/          # Stats + Performance table
+│   │   │   │   ├── CoursesTab/           # Course list
+│   │   │   │   ├── ManageCourseTab/      # Chapter/Lesson management
+│   │   │   │   └── Modals/               # 6 modals (Create/Edit Course, Add/Edit Chapter, Add/Edit Lesson)
+│   │   │   └── ui/                       # shadcn/ui components
+│   │   ├── screens/                      # Pages
+│   │   │   ├── Home/                     # Trang chủ
+│   │   │   ├── SearchResult/             # Tìm kiếm & lọc khóa học
+│   │   │   ├── CourseDetail/             # Chi tiết khóa học
+│   │   │   ├── Learning/                 # Trang học bài
+│   │   │   ├── Cart/                     # Giỏ hàng
+│   │   │   ├── Payment/                  # Thanh toán thành công
+│   │   │   ├── Teacher/                  # Teacher Dashboard
+│   │   │   ├── Profile/                  # Hồ sơ cá nhân
+│   │   │   ├── User/                     # Login & Register
+│   │   │   └── Error/                    # Error 403 & Required Login
+│   │   ├── configs/                      # Axios instances, Context, Firebase config
+│   │   ├── reducers/                     # UserReducer, CartReducer, UIReducer, ChatReducer
+│   │   ├── hooks/                        # useTeacherDashBoard (CRUD hook)
+│   │   ├── services/                     # API service layer
+│   │   └── App.jsx                       # Routing & Context providers
+│   ├── package.json
+│   └── vite.config.js
+│
+├── docs/screenshots/                     # Screenshots (thêm ảnh tại đây)
+└── README.md
+```
+
+---
+
+## 🚀 Cài đặt & Chạy project
+
+### Yêu cầu
+
+- Java 17+
+- Maven 3.9+
+- Node.js 18+ (hoặc Bun)
+- MySQL 8.x / 9.x
+- Tomcat 10.1 (hoặc Docker)
+
+### 1. Database
+
+```bash
+# Tạo database
+mysql -u root -p -e "CREATE DATABASE learnspacedb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Import schema & sample data
+mysql -u root -p learnspacedb < LearnSpaceBackend/learnspacedb.sql
+```
+
+### 2. Backend
+
+```bash
+cd LearnSpaceBackend
+
+# Cấu hình file src/main/resources/env.properties:
+# - DB_URL, DB_USERNAME, DB_PASSWORD
+# - jwt.secret
+# - cloudinary.cloud_name, cloudinary.api_key, cloudinary.api_secret
+# - r2.account_id, r2.access_key, r2.secret_key, r2.bucket_name, r2.public_url
+# - stripe.secret_key, stripe.public_key, stripe.webhook_secret, stripe.success_url, stripe.cancel_url
+# - Firebase service account JSON file trong classpath
+
+# Build WAR
+mvn clean package -DskipTests
+
+# Deploy lên Tomcat 10.1
+cp target/LearnSpaceBackend-1.0-SNAPSHOT.war $TOMCAT_HOME/webapps/ROOT.war
+
+# Hoặc chạy trực tiếp với Docker (xem bên dưới)
+```
+
+### 3. Frontend
+
+```bash
+cd learnspace
+
+# Cấu hình file .env:
+# VITE_FIREBASE_API_KEY=...
+# VITE_FIREBASE_AUTH_DOMAIN=...
+# VITE_FIREBASE_DATABASE_URL=...
+# VITE_FIREBASE_PROJECT_ID=...
+# (và các biến Firebase khác)
+
+# Cài dependencies
+bun install
+# hoặc: npm install
+
+# Chạy dev server
+bun run dev
+# hoặc: npm run dev
+
+# Frontend chạy tại http://localhost:5173
+```
+
+### 4. Docker (Backend)
+
+```bash
+cd LearnSpaceBackend
+
+# Build image
+docker build -t learnspace-backend .
+
+# Chạy container
+docker run -p 8080:8080 \
+  -e DB_URL="jdbc:mysql://host.docker.internal:3306/learnspacedb" \
+  -e DB_USERNAME="root" \
+  -e DB_PASSWORD="your_password" \
+  learnspace-backend
+```
+
+---
+
+## ☁️ Deployment
+
+| Service | Mục đích |
+|---------|----------|
+| **Azure Container Apps** | Host backend container (Southeast Asia region) |
+| **Azure Container Registry** | Lưu trữ Docker image |
+| **Azure Database for MySQL** | Managed MySQL database |
+
+```bash
+# Build & push image
+docker build -t learnspaceregistry.azurecr.io/learnspace-app:latest .
+docker push learnspaceregistry.azurecr.io/learnspace-app:latest
+```
+
+---
+
+## 📄 License
+
+Project này được phát triển cho mục đích học tập.
