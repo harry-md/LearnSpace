@@ -75,7 +75,8 @@ public class ApiSecurityConfigs {
     @Bean
     public CorsConfigurationSource apiCorsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(
+                List.of("http://localhost:5173", "https://learn-space-three.vercel.app/"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization"));
