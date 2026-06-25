@@ -1,6 +1,6 @@
 <p align="center">
   <h1 align="center">📚 LearnSpace</h1>
-  <p align="center">Nền tảng học trực tuyến E-Learning Fullstack</p>
+  <p align="center">Nền tảng học trực tuyến E-Learning</p>
 </p>
 
 
@@ -239,68 +239,3 @@ Hệ thống phân quyền theo **3 vai trò chính**:
 | `GET` | `/api/categories` | Public | Danh sách danh mục |
 | `GET` | `/api/chat/token` | Auth | Lấy Firebase custom token |
 | `GET` | `/api/chat/contacts` | Auth | Danh sách liên hệ chat (dựa trên enrollment) |
-
----
-
-## Cấu trúc thư mục
-
-```
-LearnSpace/
-├── LearnSpaceBackend/                    # Backend - Spring MVC
-│   ├── src/main/java/com/learnspace/learnspacebackend/
-│   │   ├── configs/                      # Cấu hình Spring (Security, Hibernate, Thymeleaf, CORS, Web)
-│   │   ├── controllers/                  # 10 API Controllers + 4 Admin Web Controllers
-│   │   ├── dtos/                         # Data Transfer Objects (11 packages)
-│   │   ├── filters/                      # JwtFilter - xác thực JWT cho API
-│   │   ├── mappers/                      # MapStruct mappers (entity ↔ DTO)
-│   │   ├── pojo/                         # 9 JPA Entities + 3 Enums
-│   │   ├── repositories/                 # Repository interfaces + implementations (Hibernate Session)
-│   │   ├── services/                     # 14 Service interfaces + implementations
-│   │   └── utils/                        # JwtUtils (generate/validate token)
-│   ├── src/main/resources/
-│   │   ├── templates/                    # Thymeleaf templates (admin dashboard)
-│   │   ├── static/js/                    # Admin client-side JS
-│   │   └── env.properties                # Cấu hình (DB, JWT, Cloudinary, R2, Stripe, Firebase)
-│   ├── Dockerfile                        # Multi-stage build (Maven -> Tomcat)
-│   ├── learnspacedb.sql                  # MySQL database dump
-│   └── pom.xml                           # Maven dependencies
-│
-├── learnspace/                           # Frontend - React
-│   ├── src/
-│   │   ├── components/                   # UI components
-│   │   │   ├── Header/                   # Navigation bar + Search + ChatMenu
-│   │   │   ├── Footer/                   # Site footer
-│   │   │   ├── Layout/                   # MainLayout (Header + Outlet + Footer)
-│   │   │   ├── CourseCard/               # Course card với hover detail
-│   │   │   ├── GlobalChat/               # Floating chat windows (Firebase)
-│   │   │   ├── GlobalLoading/            # Full-screen loading overlay
-│   │   │   ├── GlobalDialog/             # Modal dialog (info/success/error/warning)
-│   │   │   ├── ProtectedRoute/           # Auth guard (role-based)
-│   │   │   ├── TeacherDashboard/         # Teacher dashboard components
-│   │   │   │   ├── OverviewTab/          # Stats + Performance table
-│   │   │   │   ├── CoursesTab/           # Course list
-│   │   │   │   ├── ManageCourseTab/      # Chapter/Lesson management
-│   │   │   │   └── Modals/               # 6 modals (Create/Edit Course, Add/Edit Chapter, Add/Edit Lesson)
-│   │   │   └── ui/                       # shadcn/ui components
-│   │   ├── screens/                      # Pages
-│   │   │   ├── Home/                     # Trang chủ
-│   │   │   ├── SearchResult/             # Tìm kiếm & lọc khóa học
-│   │   │   ├── CourseDetail/             # Chi tiết khóa học
-│   │   │   ├── Learning/                 # Trang học bài
-│   │   │   ├── Cart/                     # Giỏ hàng
-│   │   │   ├── Payment/                  # Thanh toán thành công
-│   │   │   ├── Teacher/                  # Teacher Dashboard
-│   │   │   ├── Profile/                  # Hồ sơ cá nhân
-│   │   │   ├── User/                     # Login & Register
-│   │   │   └── Error/                    # Error 403 & Required Login
-│   │   ├── configs/                      # Axios instances, Context, Firebase config
-│   │   ├── reducers/                     # UserReducer, CartReducer, UIReducer, ChatReducer
-│   │   ├── hooks/                        # useTeacherDashBoard (CRUD hook)
-│   │   ├── services/                     # API service layer
-│   │   └── App.jsx                       # Routing & Context providers
-│   ├── package.json
-│   └── vite.config.js
-│
-├── docs/screenshots/                     # Screenshots (thêm ảnh tại đây)
-└── README.md
-```
