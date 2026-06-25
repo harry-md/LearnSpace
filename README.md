@@ -1,4 +1,12 @@
-# ĐỀ TÀI 1: KHOÁ HỌC TRỰC TUYẾN
+<p align="center">
+  <h1 align="center">📚 LearnSpace</h1>
+  <p align="center">Nền tảng học trực tuyến E-Learning</p>
+</p>
+
+
+# Đề tài
+
+### ĐỀ TÀI 1: KHOÁ HỌC TRỰC TUYẾN
 
 Hệ thống được xây dựng nhằm hỗ trợ việc đăng ký, quản lý và tham gia các khóa học trực
 tuyến. Người dùng hệ thống gồm ba vai trò chính: quản trị viên, giảng viên và sinh viên.
@@ -18,7 +26,8 @@ giảng viên phụ trách hoặc mức học phí. Hệ thống hỗ trợ sắ
 hoặc chi phí, đồng thời hiển thị kết quả dưới dạng phân trang với tối đa 20 khóa học mỗi
 trang.
 
-[Mở rộng] * Đối với các khóa học có học phí, sinh viên có thể lựa chọn nhiều phương thức
+[Mở rộng] 
+* Đối với các khóa học có học phí, sinh viên có thể lựa chọn nhiều phương thức
 thanh toán khác nhau như tiền mặt trực tiếp, hoặc thanh toán trực tuyến thông qua PayPal,
 Stripe, MoMo, ZaloPay. Mọi khoản giao dịch cần được ghi nhận và lưu trữ trong hệ thống
 nhằm phục vụ công tác kiểm tra, quản lý và minh bạch tài chính.
@@ -32,5 +41,201 @@ giảng dạy. Quản trị viên được phép xem báo cáo tổng quan về 
 số lượng khóa học được mở, tần suất đăng ký, doanh thu chung của trường, đồng thời có
 thể mở rộng và tùy biến báo cáo để phục vụ quản lý chiến lược.
 
-[Mở rộng] * Sinh viên và giảng viên có thể trao đổi trực tiếp thông qua tính năng chat thời
+[Mở rộng] 
+* Sinh viên và giảng viên có thể trao đổi trực tiếp thông qua tính năng chat thời
 gian thực được tích hợp từ Firebase Realtime Database. 
+
+---
+
+## Tổng quan
+
+**LearnSpace** là nền tảng học trực tuyến cho phép giảng viên tạo và quản lý khóa học, sinh viên tìm kiếm - mua và học khóa học (xem video bài giảng), và quản trị viên giám sát hệ thống qua admin dashboard.
+
+Hệ thống phân quyền theo **3 vai trò chính**:
+
+| Vai trò | Mô tả |
+|---------|-------|
+| **Sinh viên (Student)** | Tìm kiếm, mua khóa học, xem video bài giảng, theo dõi tiến độ, đánh giá, chat với giảng viên |
+| **Giảng viên (Verified Teacher)** | Tạo/quản lý khóa học & bài giảng, xem thống kê doanh thu, chat với sinh viên |
+| **Quản trị viên (Admin)** | Dashboard quản lý hệ thống, duyệt giảng viên, quản lý khóa học/người dùng/danh mục |
+
+**Điểm nổi bật:**
+- Video streaming bài giảng từ **Cloudflare R2**
+- Thanh toán trực tuyến qua **Stripe Checkout**
+- Chat thời gian thực với **Firebase Realtime Database**
+- Admin dashboard với biểu đồ **Chart.js** (Thymeleaf SSR)
+- Dual security: **JWT** (API) + **Session-based** (Admin web)
+
+---
+
+## Demo
+
+> Lưu ý: Khi vào lần đầu có thể load hơi lâu do Backend host trên Azure Container đang sleep
+
+- Frontend: https://learn-space-three.vercel.app/
+  - Username: hau | Password: 1 (Tài khoản học viên)
+  - Username: hai | Password: 1 (Tài khoản giảng viên)
+- Backend (Admin Dashboard): https://learnspace-app.icydesert-d50d1a9e.southeastasia.azurecontainerapps.io/
+  - Username: admin | Password: 1 (Tài khoản admin)
+
+---
+
+## Tech Stack
+
+| Layer | Công nghệ |
+|-------|-----------|
+| **Backend** | Java 17, Spring MVC 6 (không dùng Spring Boot do giảng viên yêu cầu), Hibernate ORM 6, Spring Security (JWT + Session), MapStruct |
+| **Admin Dashboard** | Thymeleaf, Bootstrap, Chart.js |
+| **Frontend** | React 19, Vite 8, TailwindCSS 4, shadcn/ui, React Bootstrap, React Router v6 |
+| **Database** | MySQL 9.5 |
+| **Cloud & Storage** | Cloudinary (ảnh, intro video), Cloudflare R2 (video bài giảng) |
+| **Payment** | Stripe (Checkout Sessions + Webhook) |
+| **Realtime** | Firebase Realtime Database + Firebase Auth (custom token) |
+| **Deployment** | Docker (multi-stage build), Azure Container Apps, Azure Container Registry |
+
+---
+
+## Kiến trúc hệ thống
+
+### Dual Security Architecture
+
+| Layer | Phạm vi | Xác thực | Session |
+|-------|---------|----------|---------|
+| **API Security** (Order 1) | `/api/**` | JWT Bearer Token (HS256, 24h TTL) | Stateless |
+| **Web Security** (Default) | `/**` (Admin) | Form Login + Session | Stateful |
+
+---
+
+## Database Design
+
+![Database Schema](docs/screenshots/learnspace-schema.png)
+
+---
+
+## Tính năng chính
+
+### Sinh viên (Student)
+
+- **Đăng ký / Đăng nhập** - JWT authentication, upload avatar lên Cloudinary
+- **Tìm kiếm khóa học** - Lọc theo tên, giảng viên, danh mục, khoảng giá; sắp xếp; phân trang
+- **Chi tiết khóa học** - Xem mô tả, intro video, danh sách chapter/lesson, đánh giá
+- **Giỏ hàng & Thanh toán** - Thêm nhiều khóa vào giỏ, thanh toán qua Stripe Checkout
+- **Học bài** - Xem video bài giảng (streaming từ Cloudflare R2), theo dõi tiến độ (watched seconds, completion status)
+- **Đánh giá khóa học** - Rating (1-5 sao) kèm comment
+- **Chat thời gian thực** - Nhắn tin trực tiếp với giảng viên qua Firebase, hỗ trợ nhiều cửa sổ chat đồng thời
+- **Profile** - Xem/chỉnh sửa thông tin cá nhân
+
+### Giảng viên (Verified Teacher)
+
+- **Đăng ký giảng viên** -> Chờ Admin duyệt -> Trở thành Verified Teacher
+- **Tạo / Sửa / Xóa khóa học** - Upload thumbnail lên Cloudinary, intro video lên Cloudinary
+- **Quản lý Chapter & Lesson** - Tổ chức nội dung theo chapter, upload video bài giảng lên Cloudflare R2
+- **Teacher Dashboard** - Giao diện quản lý riêng biệt với sidebar navigation
+  - **Overview tab**: Xem thống kê tổng quan (tổng khóa học, sinh viên, doanh thu) + bảng performance
+  - **Courses tab**: Danh sách khóa học với phân trang
+  - **Manage Course**: Quản lý chi tiết chapter/lesson
+- **Chat với sinh viên** - Dựa trên danh sách enrollment
+
+### Quản trị viên (Admin Dashboard - Thymeleaf SSR)
+
+- **Dashboard tổng quan** - Thẻ thống kê: tổng users, courses, doanh thu
+- **Biểu đồ Chart.js**:
+  - Doanh thu theo tháng / quý
+  - Số lượng enrollment theo khóa học
+  - Doanh thu theo danh mục
+  - Top 10 khóa học đánh giá cao nhất
+- **Quản lý giảng viên** - Duyệt / từ chối / xác minh tài khoản giảng viên
+- **Quản lý khóa học** - Xem danh sách, xóa khóa học (phân trang)
+- **Quản lý danh mục** - CRUD danh mục khóa học
+- **Quản lý người dùng** - Xem, cập nhật thông tin role/verified, xóa user
+
+---
+
+## Screenshots
+
+### Trang chủ
+![Trang chủ](docs/screenshots/home.png)
+
+### Danh sách khóa học & Tìm kiếm
+![Danh sách khóa học](docs/screenshots/courses.png)
+
+### Chi tiết khóa học
+![Chi tiết khóa học](docs/screenshots/course_detail.png)
+
+### Trang học bài (Video Player)
+![Trang học bài](docs/screenshots/lesson.png)
+
+### Giỏ hàng & Thanh toán
+![Giỏ hàng](docs/screenshots/cart.png)
+
+### Chat thời gian thực
+![Chat](docs/screenshots/chat.png)
+
+### Teacher Dashboard
+![Teacher Dashboard](docs/screenshots/teacher_dashboard.png)
+
+### Giảng viên thêm Chapter/Lesson
+![Teacher Add Chapter](docs/screenshots/teacher_add_chapter.png)
+![Teacher Add Lesson](docs/screenshots/teacher_add_lesson.png)
+
+### Admin Dashboard
+![Admin Dashboard](docs/screenshots/admin_dashboard.png)
+
+---
+
+## API Endpoints
+
+### Authentication & User
+
+| Method | Endpoint | Truy cập | Mô tả |
+|--------|----------|------|--------|
+| `POST` | `/api/users` | Public | Đăng ký tài khoản (multipart form) |
+| `POST` | `/api/login` | Public | Đăng nhập -> trả về JWT token |
+| `GET` | `/api/current-user` | Auth | Lấy thông tin user hiện tại |
+| `PATCH` | `/api/current-user` | Auth | Cập nhật profile |
+
+### Courses
+
+| Method | Endpoint | Truy cập | Mô tả |
+|--------|----------|------|--------|
+| `GET` | `/api/courses` | Public | Danh sách khóa học (lọc, sắp xếp, phân trang) |
+| `GET` | `/api/courses/{id}` | Public | Chi tiết khóa học |
+| `POST` | `/api/courses` | Verified Teacher | Tạo khóa học (multipart) |
+| `PATCH` | `/api/courses/{id}` | Verified Teacher | Cập nhật khóa học |
+| `DELETE` | `/api/courses/{id}` | Verified Teacher | Xóa khóa học |
+| `GET` | `/api/courses/my-courses` | Auth | Khóa học đã đăng ký |
+
+### Chapters & Lessons
+
+| Method | Endpoint | Truy cập | Mô tả |
+|--------|----------|------|--------|
+| `POST` | `/api/courses/{courseId}/chapters` | Verified Teacher | Tạo chapter |
+| `PATCH` | `/api/chapters/{id}` | Verified Teacher | Cập nhật chapter |
+| `DELETE` | `/api/chapters/{id}` | Verified Teacher | Xóa chapter |
+| `GET` | `/api/lessons/{id}` | Auth | Chi tiết lesson |
+| `POST` | `/api/chapters/{chapterId}/lessons` | Verified Teacher | Tạo lesson |
+| `PATCH` | `/api/lessons/{id}` | Verified Teacher | Cập nhật lesson |
+| `DELETE` | `/api/lessons/{id}` | Verified Teacher | Xóa lesson |
+
+### Enrollment & Payment
+
+| Method | Endpoint | Truy cập | Mô tả |
+|--------|----------|------|--------|
+| `POST` | `/api/courses/{courseId}/enrollments` | Auth | Đăng ký khóa học |
+| `POST` | `/api/payments/checkout` | Auth | Tạo Stripe Checkout Session |
+| `POST` | `/api/payments/webhook` | Public | Stripe Webhook xác nhận thanh toán |
+
+### Reviews & Progress
+
+| Method | Endpoint | Truy cập | Mô tả |
+|--------|----------|------|--------|
+| `GET` | `/api/courses/{courseId}/reviews` | Public | Danh sách đánh giá (phân trang) |
+| `POST` | `/api/lessons/{lessonId}/lesson-progress` | Auth | Lưu tiến độ học (watched seconds) |
+
+### Chat & Categories
+
+| Method | Endpoint | Auth | Mô tả |
+|--------|----------|------|--------|
+| `GET` | `/api/categories` | Public | Danh sách danh mục |
+| `GET` | `/api/chat/token` | Auth | Lấy Firebase custom token |
+| `GET` | `/api/chat/contacts` | Auth | Danh sách liên hệ chat (dựa trên enrollment) |
