@@ -3,24 +3,10 @@
   <p align="center">Nền tảng học trực tuyến E-Learning Fullstack</p>
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white" alt="Java 17" />
-  <img src="https://img.shields.io/badge/Spring_MVC-6.2-6DB33F?logo=spring&logoColor=white" alt="Spring MVC" />
-  <img src="https://img.shields.io/badge/Hibernate-6.6-59666C?logo=hibernate&logoColor=white" alt="Hibernate" />
-  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" alt="React 19" />
-  <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite 8" />
-  <img src="https://img.shields.io/badge/TailwindCSS-4-06B6D4?logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
-  <img src="https://img.shields.io/badge/MySQL-9.5-4479A1?logo=mysql&logoColor=white" alt="MySQL" />
-  <img src="https://img.shields.io/badge/Stripe-Payment-635BFF?logo=stripe&logoColor=white" alt="Stripe" />
-  <img src="https://img.shields.io/badge/Firebase-Chat-DD2C00?logo=firebase&logoColor=white" alt="Firebase" />
-  <img src="https://img.shields.io/badge/Docker-Container-2496ED?logo=docker&logoColor=white" alt="Docker" />
-</p>
 
----
+# Đề tài
 
-## 📄 Đề tài
-
-# ĐỀ TÀI 1: KHOÁ HỌC TRỰC TUYẾN
+### ĐỀ TÀI 1: KHOÁ HỌC TRỰC TUYẾN
 
 Hệ thống được xây dựng nhằm hỗ trợ việc đăng ký, quản lý và tham gia các khóa học trực
 tuyến. Người dùng hệ thống gồm ba vai trò chính: quản trị viên, giảng viên và sinh viên.
@@ -40,7 +26,8 @@ giảng viên phụ trách hoặc mức học phí. Hệ thống hỗ trợ sắ
 hoặc chi phí, đồng thời hiển thị kết quả dưới dạng phân trang với tối đa 20 khóa học mỗi
 trang.
 
-[Mở rộng] * Đối với các khóa học có học phí, sinh viên có thể lựa chọn nhiều phương thức
+[Mở rộng] 
+* Đối với các khóa học có học phí, sinh viên có thể lựa chọn nhiều phương thức
 thanh toán khác nhau như tiền mặt trực tiếp, hoặc thanh toán trực tuyến thông qua PayPal,
 Stripe, MoMo, ZaloPay. Mọi khoản giao dịch cần được ghi nhận và lưu trữ trong hệ thống
 nhằm phục vụ công tác kiểm tra, quản lý và minh bạch tài chính.
@@ -54,85 +41,51 @@ giảng dạy. Quản trị viên được phép xem báo cáo tổng quan về 
 số lượng khóa học được mở, tần suất đăng ký, doanh thu chung của trường, đồng thời có
 thể mở rộng và tùy biến báo cáo để phục vụ quản lý chiến lược.
 
-[Mở rộng] * Sinh viên và giảng viên có thể trao đổi trực tiếp thông qua tính năng chat thời
+[Mở rộng] 
+* Sinh viên và giảng viên có thể trao đổi trực tiếp thông qua tính năng chat thời
 gian thực được tích hợp từ Firebase Realtime Database. 
 
 ---
 
-## 📋 Tổng quan dự án
+## Tổng quan
 
-**LearnSpace** là nền tảng học trực tuyến fullstack cho phép giảng viên tạo và quản lý khóa học, sinh viên tìm kiếm – mua – học khóa học (xem video bài giảng), và quản trị viên giám sát toàn bộ hệ thống qua admin dashboard.
+**LearnSpace** là nền tảng học trực tuyến cho phép giảng viên tạo và quản lý khóa học, sinh viên tìm kiếm - mua và học khóa học (xem video bài giảng), và quản trị viên giám sát hệ thống qua admin dashboard.
 
 Hệ thống phân quyền theo **3 vai trò chính**:
 
 | Vai trò | Mô tả |
 |---------|-------|
-| **🎓 Sinh viên (Student)** | Tìm kiếm, mua khóa học, xem video bài giảng, theo dõi tiến độ, đánh giá, chat với giảng viên |
-| **👨‍🏫 Giảng viên (Verified Teacher)** | Tạo/quản lý khóa học & bài giảng, xem thống kê doanh thu, chat với sinh viên |
-| **🔧 Quản trị viên (Admin)** | Dashboard quản lý hệ thống, duyệt giảng viên, quản lý khóa học/người dùng/danh mục |
+| **Sinh viên (Student)** | Tìm kiếm, mua khóa học, xem video bài giảng, theo dõi tiến độ, đánh giá, chat với giảng viên |
+| **Giảng viên (Verified Teacher)** | Tạo/quản lý khóa học & bài giảng, xem thống kê doanh thu, chat với sinh viên |
+| **Quản trị viên (Admin)** | Dashboard quản lý hệ thống, duyệt giảng viên, quản lý khóa học/người dùng/danh mục |
 
 **Điểm nổi bật:**
-- 🎥 Video streaming bài giảng từ **Cloudflare R2**
-- 💳 Thanh toán trực tuyến qua **Stripe Checkout**
-- 💬 Chat thời gian thực với **Firebase Realtime Database**
-- 📊 Admin dashboard với biểu đồ **Chart.js** (Thymeleaf SSR)
-- 🔐 Dual security: **JWT** (API) + **Session-based** (Admin web)
+- Video streaming bài giảng từ **Cloudflare R2**
+- Thanh toán trực tuyến qua **Stripe Checkout**
+- Chat thời gian thực với **Firebase Realtime Database**
+- Admin dashboard với biểu đồ **Chart.js** (Thymeleaf SSR)
+- Dual security: **JWT** (API) + **Session-based** (Admin web)
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Công nghệ |
 |-------|-----------|
-| **Backend** | Java 17, Spring MVC 6 (programmatic config, không dùng Spring Boot), Hibernate ORM 6, Spring Security (JWT + Session), MapStruct |
+| **Backend** | Java 17, Spring MVC 6 (không dùng Spring Boot do giảng viên yêu cầu), Hibernate ORM 6, Spring Security (JWT + Session), MapStruct |
 | **Admin Dashboard** | Thymeleaf, Bootstrap, Chart.js |
 | **Frontend** | React 19, Vite 8, TailwindCSS 4, shadcn/ui, React Bootstrap, React Router v6 |
 | **State Management** | React Context + useReducer (UserContext, CartContext, UIContext, ChatContext) |
 | **Database** | MySQL 9.5 |
-| **Cloud & Storage** | Cloudinary (ảnh, intro video), Cloudflare R2 via AWS S3 SDK (video bài giảng) |
+| **Cloud & Storage** | Cloudinary (ảnh, intro video), Cloudflare R2 (video bài giảng) |
 | **Payment** | Stripe (Checkout Sessions + Webhook) |
 | **Realtime** | Firebase Realtime Database + Firebase Auth (custom token) |
-| **DevOps** | Docker (multi-stage build), Tomcat 10.1, Azure Container Apps, Azure Container Registry |
+| **DevOps** | Docker (multi-stage build), Azure Container Apps, Azure Container Registry |
 | **Khác** | Nimbus JOSE JWT (HS256), Apache Tika (file validation), Axios, react-cookies, jwt-decode |
 
 ---
 
-## 🏗️ Kiến trúc hệ thống
-
-```mermaid
-graph TB
-    subgraph Client["🖥️ Client"]
-        React["React 19 SPA<br/>(Vite + TailwindCSS)"]
-    end
-    
-    subgraph Server["⚙️ Backend - Spring MVC 6"]
-        API["REST API Controllers<br/>(JSON, Stateless JWT)"]
-        Admin["Admin Web Controllers<br/>(Thymeleaf, Session-based)"]
-        Security["Spring Security<br/>(Dual Filter Chain)"]
-        Service["Service Layer"]
-        Repo["Repository Layer<br/>(Hibernate Session)"]
-    end
-    
-    subgraph Database["🗄️ Database"]
-        MySQL["MySQL 9.5"]
-    end
-    
-    subgraph External["☁️ External Services"]
-        Cloudinary["Cloudinary<br/>(Ảnh + Intro Video)"]
-        R2["Cloudflare R2<br/>(Video bài giảng)"]
-        Stripe["Stripe<br/>(Thanh toán)"]
-        Firebase["Firebase<br/>(Chat Realtime)"]
-    end
-
-    React -- "REST API (JWT Bearer)" --> API
-    Admin -- "Thymeleaf SSR (Session)" --> MySQL
-    API --> Security --> Service --> Repo --> MySQL
-    Service --> Cloudinary
-    Service --> R2
-    Service --> Stripe
-    Service --> Firebase
-    React -- "Firebase SDK" --> Firebase
-```
+## Kiến trúc hệ thống
 
 ### Dual Security Architecture
 
@@ -143,120 +96,8 @@ graph TB
 
 ---
 
-## 🗃️ Database Design
+## Database Design
 
-```mermaid
-erDiagram
-    USER {
-        int id PK
-        varchar username UK
-        varchar password
-        enum role "ADMIN, STUDENT, TEACHER"
-        varchar full_name
-        varchar email
-        varchar avatar
-        boolean verified
-        datetime created_at
-        datetime updated_at
-    }
-    
-    CATEGORY {
-        int id PK
-        varchar name UK
-    }
-    
-    COURSE {
-        int id PK
-        varchar name
-        varchar description
-        varchar image
-        varchar intro_video
-        decimal price
-        int category_id FK
-        int teacher_id FK
-        datetime created_at
-        datetime updated_at
-    }
-    
-    CHAPTER {
-        int id PK
-        varchar name
-        int order
-        boolean free
-        text description
-        int course_id FK
-        datetime created_at
-        datetime updated_at
-    }
-    
-    LESSON {
-        int id PK
-        varchar title
-        int order
-        text content
-        varchar video
-        int video_length
-        int chapter_id FK
-        datetime created_at
-        datetime updated_at
-    }
-    
-    ENROLLMENT {
-        int id PK
-        int student_id FK
-        int course_id FK
-        enum status "PENDING, ACTIVE, COMPLETED, DISABLED"
-        datetime created_at
-        datetime updated_at
-    }
-    
-    PAYMENT {
-        int id PK
-        int enrollment_id FK
-        decimal amount
-        varchar status
-        varchar stripe_session_id
-        varchar stripe_payment_intent_id
-        datetime created_at
-        datetime updated_at
-    }
-    
-    REVIEW {
-        int id PK
-        int student_id FK
-        int course_id FK
-        int rating
-        varchar comment
-        datetime created_at
-    }
-    
-    LESSON_PROGRESS {
-        int id PK
-        int student_id FK
-        int lesson_id FK
-        int watched_sec
-        boolean completed
-        datetime created_at
-        datetime updated_at
-    }
-    
-    USER ||--o{ COURSE : "teaches"
-    USER ||--o{ ENROLLMENT : "enrolls"
-    USER ||--o{ REVIEW : "writes"
-    USER ||--o{ LESSON_PROGRESS : "tracks"
-    CATEGORY ||--o{ COURSE : "contains"
-    COURSE ||--o{ CHAPTER : "has"
-    COURSE ||--o{ ENROLLMENT : "has"
-    COURSE ||--o{ REVIEW : "receives"
-    CHAPTER ||--o{ LESSON : "contains"
-    ENROLLMENT ||--|| PAYMENT : "has"
-    LESSON ||--o{ LESSON_PROGRESS : "tracked_by"
-```
-
-<!-- 
-📸 Thêm screenshot DB design thực tế tại đây:
-![DB Design](docs/screenshots/db-design.png) 
--->
 
 ---
 
