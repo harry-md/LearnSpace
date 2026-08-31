@@ -1,8 +1,6 @@
 <p align="center">
-  <h1 align="center">📚 LearnSpace</h1>
-  <p align="center">Nền tảng học trực tuyến E-Learning</p>
+  <h1 align="center">LearnSpace</h1>
 </p>
-
 
 # Đề tài
 
@@ -59,51 +57,6 @@ Hệ thống phân quyền theo **3 vai trò chính**:
 | **Giảng viên (Verified Teacher)** | Tạo/quản lý khóa học & bài giảng, xem thống kê doanh thu, chat với sinh viên |
 | **Quản trị viên (Admin)** | Dashboard quản lý hệ thống, duyệt giảng viên, quản lý khóa học/người dùng/danh mục |
 
-**Điểm nổi bật:**
-- Video streaming bài giảng từ **Cloudflare R2**
-- Thanh toán trực tuyến qua **Stripe Checkout**
-- Chat thời gian thực với **Firebase Realtime Database**
-- Admin dashboard với biểu đồ **Chart.js** (Thymeleaf SSR)
-- Dual security: **JWT** (API) + **Session-based** (Admin web)
-
----
-
-## Demo
-
-> Lưu ý: Khi vào lần đầu có thể load hơi lâu do Backend host trên Azure Container đang sleep
-
-- Frontend: https://learn-space-three.vercel.app/
-  - Username: hau | Password: 1 (Tài khoản học viên)
-  - Username: hai | Password: 1 (Tài khoản giảng viên)
-- Backend (Admin Dashboard): https://learnspace-app.icydesert-d50d1a9e.southeastasia.azurecontainerapps.io/
-  - Username: admin | Password: 1 (Tài khoản admin)
-
----
-
-## Tech Stack
-
-| Layer | Công nghệ |
-|-------|-----------|
-| **Backend** | Java 17, Spring MVC 6 (không dùng Spring Boot do giảng viên yêu cầu), Hibernate ORM 6, Spring Security (JWT + Session), MapStruct |
-| **Admin Dashboard** | Thymeleaf, Bootstrap, Chart.js |
-| **Frontend** | React 19, Vite 8, TailwindCSS 4, shadcn/ui, React Bootstrap, React Router v6 |
-| **Database** | MySQL 9.5 |
-| **Cloud & Storage** | Cloudinary (ảnh, intro video), Cloudflare R2 (video bài giảng) |
-| **Payment** | Stripe (Checkout Sessions + Webhook) |
-| **Realtime** | Firebase Realtime Database + Firebase Auth (custom token) |
-| **Deployment** | Docker (multi-stage build), Azure Container Apps, Azure Container Registry |
-
----
-
-## Kiến trúc hệ thống
-
-### Dual Security Architecture
-
-| Layer | Phạm vi | Xác thực | Session |
-|-------|---------|----------|---------|
-| **API Security** (Order 1) | `/api/**` | JWT Bearer Token (HS256, 24h TTL) | Stateless |
-| **Web Security** (Default) | `/**` (Admin) | Form Login + Session | Stateful |
-
 ---
 
 ## Database Design
@@ -114,7 +67,7 @@ Hệ thống phân quyền theo **3 vai trò chính**:
 
 ## Tính năng chính
 
-### Sinh viên (Student)
+### Student
 
 - **Đăng ký / Đăng nhập** - JWT authentication, upload avatar lên Cloudinary
 - **Tìm kiếm khóa học** - Lọc theo tên, giảng viên, danh mục, khoảng giá; sắp xếp; phân trang
@@ -125,7 +78,7 @@ Hệ thống phân quyền theo **3 vai trò chính**:
 - **Chat thời gian thực** - Nhắn tin trực tiếp với giảng viên qua Firebase, hỗ trợ nhiều cửa sổ chat đồng thời
 - **Profile** - Xem/chỉnh sửa thông tin cá nhân
 
-### Giảng viên (Verified Teacher)
+### Verified Teacher
 
 - **Đăng ký giảng viên** -> Chờ Admin duyệt -> Trở thành Verified Teacher
 - **Tạo / Sửa / Xóa khóa học** - Upload thumbnail lên Cloudinary, intro video lên Cloudinary
@@ -136,7 +89,7 @@ Hệ thống phân quyền theo **3 vai trò chính**:
   - **Manage Course**: Quản lý chi tiết chapter/lesson
 - **Chat với sinh viên** - Dựa trên danh sách enrollment
 
-### Quản trị viên (Admin Dashboard - Thymeleaf SSR)
+### Admin
 
 - **Dashboard tổng quan** - Thẻ thống kê: tổng users, courses, doanh thu
 - **Biểu đồ Chart.js**:
@@ -180,62 +133,3 @@ Hệ thống phân quyền theo **3 vai trò chính**:
 
 ### Admin Dashboard
 ![Admin Dashboard](docs/screenshots/admin_dashboard.png)
-
----
-
-## API Endpoints
-
-### Authentication & User
-
-| Method | Endpoint | Truy cập | Mô tả |
-|--------|----------|------|--------|
-| `POST` | `/api/users` | Public | Đăng ký tài khoản (multipart form) |
-| `POST` | `/api/login` | Public | Đăng nhập -> trả về JWT token |
-| `GET` | `/api/current-user` | Auth | Lấy thông tin user hiện tại |
-| `PATCH` | `/api/current-user` | Auth | Cập nhật profile |
-
-### Courses
-
-| Method | Endpoint | Truy cập | Mô tả |
-|--------|----------|------|--------|
-| `GET` | `/api/courses` | Public | Danh sách khóa học (lọc, sắp xếp, phân trang) |
-| `GET` | `/api/courses/{id}` | Public | Chi tiết khóa học |
-| `POST` | `/api/courses` | Verified Teacher | Tạo khóa học (multipart) |
-| `PATCH` | `/api/courses/{id}` | Verified Teacher | Cập nhật khóa học |
-| `DELETE` | `/api/courses/{id}` | Verified Teacher | Xóa khóa học |
-| `GET` | `/api/courses/my-courses` | Auth | Khóa học đã đăng ký |
-
-### Chapters & Lessons
-
-| Method | Endpoint | Truy cập | Mô tả |
-|--------|----------|------|--------|
-| `POST` | `/api/courses/{courseId}/chapters` | Verified Teacher | Tạo chapter |
-| `PATCH` | `/api/chapters/{id}` | Verified Teacher | Cập nhật chapter |
-| `DELETE` | `/api/chapters/{id}` | Verified Teacher | Xóa chapter |
-| `GET` | `/api/lessons/{id}` | Auth | Chi tiết lesson |
-| `POST` | `/api/chapters/{chapterId}/lessons` | Verified Teacher | Tạo lesson |
-| `PATCH` | `/api/lessons/{id}` | Verified Teacher | Cập nhật lesson |
-| `DELETE` | `/api/lessons/{id}` | Verified Teacher | Xóa lesson |
-
-### Enrollment & Payment
-
-| Method | Endpoint | Truy cập | Mô tả |
-|--------|----------|------|--------|
-| `POST` | `/api/courses/{courseId}/enrollments` | Auth | Đăng ký khóa học |
-| `POST` | `/api/payments/checkout` | Auth | Tạo Stripe Checkout Session |
-| `POST` | `/api/payments/webhook` | Public | Stripe Webhook xác nhận thanh toán |
-
-### Reviews & Progress
-
-| Method | Endpoint | Truy cập | Mô tả |
-|--------|----------|------|--------|
-| `GET` | `/api/courses/{courseId}/reviews` | Public | Danh sách đánh giá (phân trang) |
-| `POST` | `/api/lessons/{lessonId}/lesson-progress` | Auth | Lưu tiến độ học (watched seconds) |
-
-### Chat & Categories
-
-| Method | Endpoint | Auth | Mô tả |
-|--------|----------|------|--------|
-| `GET` | `/api/categories` | Public | Danh sách danh mục |
-| `GET` | `/api/chat/token` | Auth | Lấy Firebase custom token |
-| `GET` | `/api/chat/contacts` | Auth | Danh sách liên hệ chat (dựa trên enrollment) |
